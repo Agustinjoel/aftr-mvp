@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse
 import json
 import os
@@ -6,61 +6,57 @@ import requests
 
 app = FastAPI()
 
-PICKS_FILE = "daily_picks.json"
-MATCHES_FILE = "daily_matches.json"
-
-# ===== Premium settings =====
+# =========================
+# Config
+# =========================
 FREE_PICKS_LIMIT = 10
 PREMIUM_MESSAGE = "🔒 Premium: desbloqueá el resto de picks"
 
-# ===== football-data (escudos) =====
+LEAGUES = {
+    "PL": "Premier League",
+    "PD": "LaLiga",
+    "SA": "Serie A",
+    "BL1": "Bundesliga",
+    "FL1": "Ligue 1",
+    "LPF": "Argentina LPF",
+}
+DEFAULT_LEAGUE = "PL"
+
+# football-data (escudos)
 API_KEY = os.getenv("FOOTBALL_DATA_API_KEY", "")
 HEADERS = {"X-Auth-Token": API_KEY}
-COMP_CODE = "PL"
-TEAMS_URL = f"https://api.football-data.org/v4/competitions/{COMP_CODE}/teams"
+BASE = "https://api.football-data.org/v4"
 
 APP_LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/3/3b/Football_icon.svg"
 
-TEAM_CRESTS = {}
+# Telegram (ventas manual)
+TELEGRAM_USERNAME = "TUUSUARIO"  # <-- sin @
+TELEGRAM_MSG = (
+    "Hola! Quiero activar AFTR Premium.\n"
+    "Vengo desde la app y quiero pagar el plan mensual.\n"
+    "Pasame el link de pago y cómo obtengo el acceso."
+)
+
+# Cache escudos por liga
+TEAM_CRESTS_BY_LEAGUE = {}
 
 
 # =========================
 # Utils
 # =========================
+def picks_file(league: str) -> str:
+    return f"daily_picks_{league}.json"
+
+
+def matches_file(league: str) -> str:
+    return f"daily_matches_{league}.json"
+
+
 def read_json(path):
     if not os.path.exists(path):
         return []
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
-
-
-def load_team_crests():
-    global TEAM_CRESTS
-    if TEAM_CRESTS:
-        return
-    try:
-        r = requests.get(TEAMS_URL, headers=HEADERS, timeout=20)
-        r.raise_for_status()
-        data = r.json()
-        teams = data.get("teams", [])
-
-        mapping = {}
-        for t in teams:
-            name = t.get("name")
-            crest = t.get("crest") or t.get("crestUrl")
-            if name and crest:
-                mapping[name] = crest
-
-        TEAM_CRESTS = mapping
-    except Exception:
-        TEAM_CRESTS = {}
-
-
-def crest_img(team_name, size=22):
-    url = TEAM_CRESTS.get(team_name, "")
-    if not url:
-        return ""
-    return f'<img src="{url}" width="{size}" height="{size}" style="object-fit:contain;">'
 
 
 def _safe_float(x, default=0.0):
@@ -70,8 +66,47 @@ def _safe_float(x, default=0.0):
         return default
 
 
+def load_team_crests(league: str):
+    if league in TEAM_CRESTS_BY_LEAGUE:
+        return
+
+    # Si no hay API key, seguimos sin escudos
+    if not API_KEY:
+        TEAM_CRESTS_BY_LEAGUE[league] = {}
+        return
+
+    try:
+        url = f"{BASE}/competitions/{league}/teams"
+        r = requests.get(url, headers=HEADERS, timeout=20)
+        if r.status_code != 200:
+            TEAM_CRESTS_BY_LEAGUE[league] = {}
+            return
+
+        data = r.json()
+        teams = data.get("teams", [])
+        mapping = {}
+
+        for t in teams:
+            name = t.get("name")
+            crest = t.get("crest") or t.get("crestUrl")
+            if name and crest:
+                mapping[name] = crest
+
+        TEAM_CRESTS_BY_LEAGUE[league] = mapping
+    except Exception:
+        TEAM_CRESTS_BY_LEAGUE[league] = {}
+
+
+def crest_img(league: str, team_name: str, size=22):
+    mapping = TEAM_CRESTS_BY_LEAGUE.get(league, {})
+    url = mapping.get(team_name, "")
+    if not url:
+        return ""
+    return f'<img src="{url}" width="{size}" height="{size}" style="object-fit:contain;">'
+
+
 # =========================
-# Confidence (semáforo)
+# Confidence
 # =========================
 def confidence(prob: float):
     p = _safe_float(prob, 0.0)
@@ -84,7 +119,7 @@ def confidence(prob: float):
 
 
 # =========================
-# Model Drivers + Bet Rationale
+# Drivers + Rationale
 # =========================
 def model_drivers(match_item: dict):
     home = match_item.get("home", "Home")
@@ -105,7 +140,6 @@ def model_drivers(match_item: dict):
 
     drivers = []
 
-    # xG edge
     edge = xa - xh
     if abs(edge) >= 0.80:
         leader = away if edge > 0 else home
@@ -116,15 +150,13 @@ def model_drivers(match_item: dict):
     else:
         drivers.append(f"Partido parejo por xG ({xh:.2f} vs {xa:.2f}) → más volatilidad.")
 
-    # Game environment
     if xt <= 2.10:
         drivers.append(f"Ambiente cerrado: total xG **{xt:.2f}** (tendencia a pocos goles).")
     elif xt >= 2.80:
         drivers.append(f"Ambiente abierto: total xG **{xt:.2f}** (tendencia a goles).")
     else:
-        drivers.append(f"Ambiente medio: total xG **{xt:.2f}** (ni ultra under ni festival).")
+        drivers.append(f"Ambiente medio: total xG **{xt:.2f}** (equilibrado).")
 
-    # 1X2 favorite
     if ph or pd or pa:
         fav = max([(ph, home), (pd, "Draw"), (pa, away)], key=lambda t: t[0])
         if fav[1] != "Draw" and fav[0] >= 0.55:
@@ -132,27 +164,22 @@ def model_drivers(match_item: dict):
         elif fav[1] == "Draw" and fav[0] >= 0.33:
             drivers.append(f"Empate con peso (Draw {fav[0]:.3f}) → ojo con double chance.")
         else:
-            drivers.append("1X2 sin súper favorito → goles pueden ser más estables que ganador.")
+            drivers.append("1X2 sin súper favorito → mejor mirar mercados de goles.")
 
-    # Market signals
-    if p_under or p_over:
-        if p_under >= 0.62:
-            drivers.append(f"Señal Under fuerte: Under2.5 **{p_under:.3f}**.")
-        elif p_over >= 0.45 and xt >= 2.6:
-            drivers.append(f"Over con argumento: Over2.5 **{p_over:.3f}** + total xG alto.")
+    if p_under >= 0.62:
+        drivers.append(f"Señal Under fuerte: Under2.5 **{p_under:.3f}**.")
+    elif p_over >= 0.50 and xt >= 2.6:
+        drivers.append(f"Over con argumento: Over2.5 **{p_over:.3f}** + total xG alto.")
 
-    if p_btts_yes or p_btts_no:
-        if p_btts_no >= 0.62 and min(xh, xa) <= 0.9:
-            drivers.append(f"BTTS NO respaldado: BTTS No **{p_btts_no:.3f}** + ataque flojo esperado.")
-        elif p_btts_yes >= 0.50 and xt >= 2.6:
-            drivers.append(f"BTTS YES con argumento: BTTS Yes **{p_btts_yes:.3f}** + total xG alto.")
+    if p_btts_no >= 0.62 and min(xh, xa) <= 0.9:
+        drivers.append(f"BTTS NO respaldado: BTTS No **{p_btts_no:.3f}** + ataque flojo esperado.")
+    elif p_btts_yes >= 0.55 and xt >= 2.6:
+        drivers.append(f"BTTS YES con argumento: BTTS Yes **{p_btts_yes:.3f}** + total xG alto.")
 
     return drivers
 
 
 def bet_type_rationale(market: str, match_item: dict, prob: float):
-    home = match_item.get("home", "Home")
-    away = match_item.get("away", "Away")
     xh = _safe_float(match_item.get("xg_home"))
     xa = _safe_float(match_item.get("xg_away"))
     xt = _safe_float(match_item.get("xg_total"))
@@ -176,9 +203,7 @@ def bet_type_rationale(market: str, match_item: dict, prob: float):
             bits.append(f"Under2.5 prob {p_under:.3f}")
         if min(xh, xa) <= 0.9:
             bits.append(f"uno con ataque flojo (min xG {min(xh, xa):.2f})")
-        if not bits:
-            bits.append("perfil controlado")
-        return " + ".join(bits) + f" → Under tiene sentido (pick {pr:.3f})."
+        return " + ".join(bits) + f" → Under (pick {pr:.3f})."
 
     if "over" in m:
         bits = []
@@ -188,9 +213,7 @@ def bet_type_rationale(market: str, match_item: dict, prob: float):
             bits.append(f"Over2.5 prob {p_over:.3f}")
         if min(xh, xa) >= 1.1:
             bits.append(f"ambos generan (min xG {min(xh, xa):.2f})")
-        if not bits:
-            bits.append("perfil abierto")
-        return " + ".join(bits) + f" → Over tiene sentido (pick {pr:.3f})."
+        return " + ".join(bits) + f" → Over (pick {pr:.3f})."
 
     if "btts" in m and "yes" in m:
         bits = []
@@ -200,22 +223,15 @@ def bet_type_rationale(market: str, match_item: dict, prob: float):
             bits.append(f"ambos llegan (min xG {min(xh, xa):.2f})")
         if p_btts_yes:
             bits.append(f"BTTS Yes prob {p_btts_yes:.3f}")
-        if not bits:
-            bits.append("ambos con chances")
-        return " + ".join(bits) + f" → BTTS Yes coherente (pick {pr:.3f})."
+        return " + ".join(bits) + f" → BTTS Yes (pick {pr:.3f})."
 
     if "btts" in m and "no" in m:
         bits = []
         if min(xh, xa) <= 0.9:
             bits.append(f"uno con poca producción (min xG {min(xh, xa):.2f})")
-        if abs(xa - xh) >= 0.7:
-            leader = away if (xa - xh) > 0 else home
-            bits.append(f"dominio de {leader} (edge xG)")
         if p_btts_no:
             bits.append(f"BTTS No prob {p_btts_no:.3f}")
-        if not bits:
-            bits.append("riesgo de cero de un lado")
-        return " + ".join(bits) + f" → BTTS No con lógica (pick {pr:.3f})."
+        return " + ".join(bits) + f" → BTTS No (pick {pr:.3f})."
 
     if "home" in m and "win" in m:
         bits = []
@@ -223,9 +239,7 @@ def bet_type_rationale(market: str, match_item: dict, prob: float):
             bits.append(f"home xG arriba ({xh:.2f} vs {xa:.2f})")
         if ph:
             bits.append(f"Home prob {ph:.3f}")
-        if not bits:
-            bits.append("ventaja local en modelo")
-        return " + ".join(bits) + f" → Home Win coherente (pick {pr:.3f})."
+        return " + ".join(bits) + f" → Home Win (pick {pr:.3f})."
 
     if "away" in m and "win" in m:
         bits = []
@@ -233,11 +247,9 @@ def bet_type_rationale(market: str, match_item: dict, prob: float):
             bits.append(f"away xG arriba ({xa:.2f} vs {xh:.2f})")
         if pa:
             bits.append(f"Away prob {pa:.3f}")
-        if not bits:
-            bits.append("ventaja visitante en modelo")
-        return " + ".join(bits) + f" → Away Win coherente (pick {pr:.3f})."
+        return " + ".join(bits) + f" → Away Win (pick {pr:.3f})."
 
-    return f"Señal combinada de xG ({xh:.2f}/{xa:.2f}, total {xt:.2f}) + prob {pr:.3f}."
+    return f"xG ({xh:.2f}/{xa:.2f}, total {xt:.2f}) + prob {pr:.3f}."
 
 
 # =========================
@@ -247,7 +259,7 @@ def best_candidate_for_match(match_item):
     candidates = match_item.get("candidates") or []
     if not candidates:
         return None
-    return max(candidates, key=lambda c: (c.get("prob", 0), -_safe_float(c.get("fair"), 999)))
+    return max(candidates, key=lambda c: (_safe_float(c.get("prob", 0)), -_safe_float(c.get("fair"), 999)))
 
 
 def best_pick_overall(picks):
@@ -273,16 +285,24 @@ def ranked_candidates(picks):
                 "xg_total": p.get("xg_total", 0),
                 "market": c.get("market", ""),
                 "prob": c.get("prob", 0),
-                "fair": c.get("fair", None)
+                "fair": c.get("fair", None),
             })
     ranking.sort(key=lambda x: _safe_float(x["prob"]), reverse=True)
     return ranking
 
 
 # =========================
-# HTML shell
+# UI shell
 # =========================
-def page_shell(title, inner_html):
+def league_nav(league: str):
+    pills = []
+    for code, name in LEAGUES.items():
+        active = "pill-active" if code == league else ""
+        pills.append(f'<a class="pill {active}" href="/?league={code}">{name}</a>')
+    return '<div class="leaguebar">' + "".join(pills) + "</div>"
+
+
+def page_shell(title, inner_html, league: str):
     return f"""
     <html>
     <head>
@@ -290,10 +310,17 @@ def page_shell(title, inner_html):
         <title>{title}</title>
         <style>
             body {{ background:#0b1220; color:#e5e7eb; font-family: Arial; padding:24px; }}
-            .topbar {{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }}
+            .topbar {{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:12px; flex-wrap:wrap; }}
             .brand {{ font-weight:900; font-size:20px; letter-spacing:0.4px; display:flex; align-items:center; gap:10px; }}
             .brand img {{ width:26px; height:26px; }}
             .links a {{ color:#60a5fa; text-decoration:none; margin-left:12px; font-size:14px; }}
+
+            .leaguebar {{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 16px; }}
+            .pill {{
+                padding:8px 10px; border-radius:999px; font-size:12px; font-weight:800;
+                border:1px solid #223457; text-decoration:none; color:#cbd5e1; background:#0f172a;
+            }}
+            .pill-active {{ background:#0f2440; border-color:#38bdf8; color:#e5e7eb; }}
 
             .section-title {{ margin:18px 0 10px; font-size:16px; color:#cbd5e1; }}
             .grid {{ display:grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap:14px; }}
@@ -376,10 +403,6 @@ def page_shell(title, inner_html):
                 padding:14px;
                 border-radius:12px;
             }}
-            .blur {{
-                filter: blur(6px);
-                user-select:none;
-            }}
             .cta {{
                 margin-top:10px;
                 padding:10px 12px;
@@ -400,14 +423,16 @@ def page_shell(title, inner_html):
                 AFTR • AI Picks
             </div>
             <div class="links">
-                <a href="/" >Dashboard</a>
-                <a href="/picks" >Picks</a>
-                <a href="/matches" >Matches</a>
+                <a href="/?league={league}">Dashboard</a>
+                <a href="/picks?league={league}">Picks</a>
+                <a href="/matches?league={league}">Matches</a>
                 <a href="/premium">Premium</a>
-                <a href="/api/picks" target="_blank">JSON Picks</a>
-                <a href="/api/matches" target="_blank">JSON Matches</a>
+                <a href="/api/picks?league={league}" target="_blank">JSON Picks</a>
+                <a href="/api/matches?league={league}" target="_blank">JSON Matches</a>
             </div>
         </div>
+
+        {league_nav(league)}
 
         {inner_html}
     </body>
@@ -415,9 +440,9 @@ def page_shell(title, inner_html):
     """
 
 
-def render_cards(items, title_text, show_probs=True, premium_lock=False, show_candidates=True):
+def render_cards(items, title_text, league: str, show_probs=True, premium_lock=False, show_candidates=True):
     if not items:
-        return f'<div class="section-title">{title_text} (0)</div><div class="muted">No hay data. Corré team_strength.py</div>'
+        return f'<div class="section-title">{title_text} (0)</div><div class="muted">No hay data para esta liga. Corré team_strength.py</div>'
 
     html = f'<div class="section-title">{title_text} ({len(items)})</div>'
     html += '<div class="grid">'
@@ -433,8 +458,9 @@ def render_cards(items, title_text, show_probs=True, premium_lock=False, show_ca
         home = it.get("home", "")
         away = it.get("away", "")
 
-        home_crest = crest_img(home, 22)
-        away_crest = crest_img(away, 22)
+        load_team_crests(league)
+        home_crest = crest_img(league, home, 22)
+        away_crest = crest_img(league, away, 22)
 
         html += f"""
         <div class="card">
@@ -452,6 +478,7 @@ def render_cards(items, title_text, show_probs=True, premium_lock=False, show_ca
             <div class="muted">U2.5 {p.get('under_25')} • O2.5 {p.get('over_25')} • BTTS Yes {p.get('btts_yes')}</div>
             """
 
+        # Drivers
         drv = model_drivers(it)
         if drv:
             bullets = "".join([f"<li>{d}</li>" for d in drv[:4]])
@@ -462,6 +489,7 @@ def render_cards(items, title_text, show_probs=True, premium_lock=False, show_ca
             </div>
             """
 
+        # Candidates (solo en picks)
         if show_candidates and it.get("candidates"):
             for c in it["candidates"]:
                 prob_pct = round(_safe_float(c.get("prob")) * 100, 1)
@@ -480,9 +508,9 @@ def render_cards(items, title_text, show_probs=True, premium_lock=False, show_ca
 
         html += "</div>"
 
+    # Premium lock: BLOQUEADAS LIMPIAS (sin data sensible)
     if premium_lock and locked:
-        # Mostrar tarjetas bloqueadas "limpias" (sin data filtrable)
-        for it in locked[:6]:  # muestra 6 bloqueadas (podés subir/bajar)
+        for it in locked[:6]:
             home = it.get("home", "")
             away = it.get("away", "")
             html += f"""
@@ -496,7 +524,6 @@ def render_cards(items, title_text, show_probs=True, premium_lock=False, show_ca
                 <a href="/premium" class="cta">💎 Desbloquear Premium</a>
             </div>
             """
-
         remaining = max(0, len(locked) - 6)
         if remaining > 0:
             html += f"""
@@ -505,8 +532,8 @@ def render_cards(items, title_text, show_probs=True, premium_lock=False, show_ca
                 <div class="muted">Activá Premium para verlos todos.</div>
                 <a href="/premium" class="cta">💎 Desbloquear Premium</a>
             </div>
-        
             """
+
     html += "</div>"
     return html
 
@@ -515,28 +542,30 @@ def render_cards(items, title_text, show_probs=True, premium_lock=False, show_ca
 # JSON endpoints
 # =========================
 @app.get("/api/picks")
-def picks_json():
-    if not os.path.exists(PICKS_FILE):
-        return {"error": "No picks file found. Run team_strength.py first."}
-    return read_json(PICKS_FILE)
+def picks_json(league: str = Query(DEFAULT_LEAGUE)):
+    path = picks_file(league)
+    if not os.path.exists(path):
+        return {"error": f"No picks file found for {league}. Run team_strength.py."}
+    return read_json(path)
 
 
 @app.get("/api/matches")
-def matches_json():
-    if not os.path.exists(MATCHES_FILE):
-        return {"error": "No matches file found. Run team_strength.py first."}
-    return read_json(MATCHES_FILE)
+def matches_json(league: str = Query(DEFAULT_LEAGUE)):
+    path = matches_file(league)
+    if not os.path.exists(path):
+        return {"error": f"No matches file found for {league}. Run team_strength.py."}
+    return read_json(path)
 
 
 # =========================
 # Pages
 # =========================
 @app.get("/", response_class=HTMLResponse)
-def dashboard():
-    load_team_crests()
+def dashboard(league: str = Query(DEFAULT_LEAGUE)):
+    league = league if league in LEAGUES else DEFAULT_LEAGUE
 
-    picks = read_json(PICKS_FILE)
-    matches = read_json(MATCHES_FILE)
+    picks = read_json(picks_file(league))
+    matches = read_json(matches_file(league))
 
     top_pick, top_candidate = best_pick_overall(picks)
     ranking = ranked_candidates(picks)
@@ -547,8 +576,10 @@ def dashboard():
 
         home = top_pick.get("home", "")
         away = top_pick.get("away", "")
-        home_crest = crest_img(home, 26)
-        away_crest = crest_img(away, 26)
+
+        load_team_crests(league)
+        home_crest = crest_img(league, home, 26)
+        away_crest = crest_img(league, away, 26)
 
         rationale = bet_type_rationale(top_candidate.get("market", ""), top_pick, top_candidate.get("prob"))
         drv = model_drivers(top_pick)
@@ -556,7 +587,7 @@ def dashboard():
 
         hero = f"""
         <div class="hero">
-            <div class="hero-title">Top pick del día</div>
+            <div class="hero-title">Top pick del día • {LEAGUES.get(league)}</div>
             <div class="hero-match">
                 {home_crest} {home} <span class="muted">vs</span> {away} {away_crest}
                 <span class="conf-chip {cls}">{label}</span>
@@ -581,10 +612,10 @@ def dashboard():
         </div>
         """
     else:
-        hero = """
+        hero = f"""
         <div class="hero">
-            <div class="hero-title">Top pick del día</div>
-            <div class="muted">No hay picks todavía. Corré team_strength.py</div>
+            <div class="hero-title">Top pick del día • {LEAGUES.get(league)}</div>
+            <div class="muted">No hay picks todavía para esta liga. Corré team_strength.py</div>
         </div>
         """
 
@@ -598,8 +629,10 @@ def dashboard():
         for i, r in enumerate(ranking[:5], start=1):
             prob_pct = round(_safe_float(r.get("prob")) * 100, 1)
             label, cls = confidence(r.get("prob"))
-            home_crest = crest_img(r.get("home", ""), 20)
-            away_crest = crest_img(r.get("away", ""), 20)
+
+            load_team_crests(league)
+            home_crest = crest_img(league, r.get("home", ""), 20)
+            away_crest = crest_img(league, r.get("away", ""), 20)
 
             inner += f"""
             <div class="card">
@@ -622,10 +655,11 @@ def dashboard():
 
     inner += render_cards(
         picks,
-        "🔥 Picks detectados (Drivers + Rationale + FREE + 🔒)",
+        "🔥 Picks detectados (FREE + 🔒 Premium cerrado)",
+        league=league,
         show_probs=True,
-        premium_lock=False,
-        show_candidates=False
+        premium_lock=True,
+        show_candidates=True
     )
 
     inner += '<div class="divider"></div>'
@@ -633,70 +667,67 @@ def dashboard():
     inner += render_cards(
         matches,
         "📅 Próximos partidos (transparente, sin recomendaciones)",
+        league=league,
         show_probs=True,
         premium_lock=False,
         show_candidates=False
     )
 
-    return page_shell("AFTR Dashboard", inner)
+    return page_shell("AFTR Dashboard", inner, league)
 
 
 @app.get("/picks", response_class=HTMLResponse)
-def picks_page():
-    load_team_crests()
-    picks = read_json(PICKS_FILE)
+def picks_page(league: str = Query(DEFAULT_LEAGUE)):
+    league = league if league in LEAGUES else DEFAULT_LEAGUE
+    picks = read_json(picks_file(league))
     inner = render_cards(
         picks,
-        "🔥 Picks detectados (Drivers + Rationale + FREE + 🔒)",
+        "🔥 Picks detectados (FREE + 🔒 Premium cerrado)",
+        league=league,
         show_probs=True,
         premium_lock=True,
         show_candidates=True
     )
-    return page_shell("AFTR Picks", inner)
+    return page_shell("AFTR Picks", inner, league)
 
 
 @app.get("/matches", response_class=HTMLResponse)
-def matches_page():
-    load_team_crests()
-    matches = read_json(MATCHES_FILE)
+def matches_page(league: str = Query(DEFAULT_LEAGUE)):
+    league = league if league in LEAGUES else DEFAULT_LEAGUE
+    matches = read_json(matches_file(league))
     inner = render_cards(
         matches,
         "📅 Próximos partidos (transparente, sin recomendaciones)",
+        league=league,
         show_probs=True,
         premium_lock=False,
         show_candidates=False
     )
-    return page_shell("AFTR Matches", inner)
+    return page_shell("AFTR Matches", inner, league)
 
 
 @app.get("/premium", response_class=HTMLResponse)
 def premium_page():
-    # TU TELEGRAM
-    username = "AFTRPICK"  # sin @
-
-    msg = """Hola! Quiero activar AFTR Premium.
-Vengo desde la app y quiero pagar el plan mensual.
-Pasame el link de pago y cómo obtengo el acceso."""
-
-    contact_link = f"https://t.me/{username}?text={requests.utils.quote(msg)}"
+    # Link a tu chat con mensaje armado
+    contact_link = f"https://t.me/{AFTRPICK}?text={requests.utils.quote(TELEGRAM_MSG)}"
 
     inner = f"""
     <div class="hero">
         <div class="hero-title">AFTR Premium</div>
-        <div class="hero-match">Tomá decisiones con ventaja matemática.</div>
+        <div class="hero-match">Desbloqueá todos los picks.</div>
         <div class="muted">
-            Accedé a todos los picks del modelo con probabilidades reales, fair odds, drivers y explicación.
-            Sin humo. Solo data.
+            Premium desbloquea el resto de picks (más de {FREE_PICKS_LIMIT}),
+            con drivers y rationale completo.
         </div>
     </div>
 
     <div class="section-title">🔓 Qué desbloqueás</div>
     <div class="card">
-        <div>✅ Todos los picks diarios (no solo los primeros {FREE_PICKS_LIMIT})</div>
-        <div>✅ Ranking completo de confianza</div>
+        <div>✅ Todos los picks diarios</div>
+        <div>✅ Ranking completo</div>
         <div>✅ Model Drivers</div>
-        <div>✅ Bet type rationale</div>
-        <div>✅ Actualizaciones del modelo</div>
+        <div>✅ Bet rationale</div>
+        <div class="muted" style="margin-top:8px;">Sin spam, sin humo. Solo data.</div>
     </div>
 
     <div class="section-title">💵 Precio</div>
@@ -713,7 +744,8 @@ Pasame el link de pago y cómo obtengo el acceso."""
         </div>
     </div>
     """
-    return page_shell("AFTR Premium", inner)
+    return page_shell("AFTR Premium", inner, DEFAULT_LEAGUE)
+
 
    
 

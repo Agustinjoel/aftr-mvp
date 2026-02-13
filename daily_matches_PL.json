@@ -1,0 +1,182 @@
+[
+  {
+    "league": "PL",
+    "home": "Wolverhampton Wanderers FC",
+    "away": "Arsenal FC",
+    "utcDate": "2026-02-18T20:00:00Z",
+    "xg_home": 0.42,
+    "xg_away": 2.55,
+    "xg_total": 2.97,
+    "probs": {
+      "home": 0.043,
+      "draw": 0.123,
+      "away": 0.834,
+      "under_25": 0.43,
+      "over_25": 0.57,
+      "btts_yes": 0.317,
+      "btts_no": 0.683
+    }
+  },
+  {
+    "league": "PL",
+    "home": "Aston Villa FC",
+    "away": "Leeds United FC",
+    "utcDate": "2026-02-21T15:00:00Z",
+    "xg_home": 1.97,
+    "xg_away": 0.67,
+    "xg_total": 2.64,
+    "probs": {
+      "home": 0.681,
+      "draw": 0.202,
+      "away": 0.118,
+      "under_25": 0.509,
+      "over_25": 0.491,
+      "btts_yes": 0.421,
+      "btts_no": 0.579
+    }
+  },
+  {
+    "league": "PL",
+    "home": "Brentford FC",
+    "away": "Brighton & Hove Albion FC",
+    "utcDate": "2026-02-21T15:00:00Z",
+    "xg_home": 1.84,
+    "xg_away": 0.87,
+    "xg_total": 2.71,
+    "probs": {
+      "home": 0.602,
+      "draw": 0.224,
+      "away": 0.174,
+      "under_25": 0.49,
+      "over_25": 0.51,
+      "btts_yes": 0.49,
+      "btts_no": 0.51
+    }
+  },
+  {
+    "league": "PL",
+    "home": "Chelsea FC",
+    "away": "Burnley FC",
+    "utcDate": "2026-02-21T15:00:00Z",
+    "xg_home": 2.7,
+    "xg_away": 1.15,
+    "xg_total": 3.85,
+    "probs": {
+      "home": 0.701,
+      "draw": 0.16,
+      "away": 0.138,
+      "under_25": 0.261,
+      "over_25": 0.739,
+      "btts_yes": 0.638,
+      "btts_no": 0.362
+    }
+  },
+  {
+    "league": "PL",
+    "home": "West Ham United FC",
+    "away": "AFC Bournemouth",
+    "utcDate": "2026-02-21T17:30:00Z",
+    "xg_home": 2.02,
+    "xg_away": 2.98,
+    "xg_total": 5.0,
+    "probs": {
+      "home": 0.254,
+      "draw": 0.169,
+      "away": 0.577,
+      "under_25": 0.125,
+      "over_25": 0.875,
+      "btts_yes": 0.823,
+      "btts_no": 0.177
+    }
+  },
+  {
+    "league": "PL",
+    "home": "Manchester City FC",
+    "away": "Newcastle United FC",
+    "utcDate": "2026-02-21T20:00:00Z",
+    "xg_home": 2.09,
+    "xg_away": 0.5,
+    "xg_total": 2.59,
+    "probs": {
+      "home": 0.747,
+      "draw": 0.177,
+      "away": 0.076,
+      "under_25": 0.522,
+      "over_25": 0.478,
+      "btts_yes": 0.344,
+      "btts_no": 0.656
+    }
+  },
+  {
+    "league": "PL",
+    "home": "Sunderland AFC",
+    "away": "Fulham FC",
+    "utcDate": "2026-02-22T14:00:00Z",
+    "xg_home": 1.93,
+    "xg_away": 0.62,
+    "xg_total": 2.56,
+    "probs": {
+      "home": 0.686,
+      "draw": 0.203,
+      "away": 0.111,
+      "under_25": 0.529,
+      "over_25": 0.471,
+      "btts_yes": 0.397,
+      "btts_no": 0.603
+    }
+  },
+  {
+    "league": "PL",
+    "home": "Crystal Palace FC",
+    "away": "Wolverhampton Wanderers FC",
+    "utcDate": "2026-02-22T14:00:00Z",
+    "xg_home": 1.0,
+    "xg_away": 0.43,
+    "xg_total": 1.43,
+    "probs": {
+      "home": 0.489,
+      "draw": 0.354,
+      "away": 0.157,
+      "under_25": 0.826,
+      "over_25": 0.174,
+      "btts_yes": 0.221,
+      "btts_no": 0.779
+    }
+  },
+  {
+    "league": "PL",
+    "home": "Nottingham Forest FC",
+    "away": "Liverpool FC",
+    "utcDate": "2026-02-22T14:00:00Z",
+    "xg_home": 1.05,
+    "xg_away": 1.73,
+    "xg_total": 2.77,
+    "probs": {
+      "home": 0.229,
+      "draw": 0.238,
+      "away": 0.533,
+      "under_25": 0.476,
+      "over_25": 0.524,
+      "btts_yes": 0.534,
+      "btts_no": 0.466
+    }
+  },
+  {
+    "league": "PL",
+    "home": "Tottenham Hotspur FC",
+    "away": "Arsenal FC",
+    "utcDate": "2026-02-22T16:30:00Z",
+    "xg_home": 0.61,
+    "xg_away": 1.64,
+    "xg_total": 2.25,
+    "probs": {
+      "home": 0.136,
+      "draw": 0.241,
+      "away": 0.623,
+      "under_25": 0.609,
+      "over_25": 0.391,
+      "btts_yes": 0.37,
+      "btts_no": 0.63
+    }
+  }
+]

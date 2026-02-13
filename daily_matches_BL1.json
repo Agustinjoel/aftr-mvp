@@ -1,0 +1,326 @@
+[
+  {
+    "league": "BL1",
+    "home": "Borussia Dortmund",
+    "away": "1. FSV Mainz 05",
+    "utcDate": "2026-02-13T19:30:00Z",
+    "xg_home": 2.56,
+    "xg_away": 0.71,
+    "xg_total": 3.27,
+    "probs": {
+      "home": 0.773,
+      "draw": 0.146,
+      "away": 0.082,
+      "under_25": 0.365,
+      "over_25": 0.635,
+      "btts_yes": 0.471,
+      "btts_no": 0.529
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "SV Werder Bremen",
+    "away": "FC Bayern München",
+    "utcDate": "2026-02-14T14:30:00Z",
+    "xg_home": 0.63,
+    "xg_away": 4.2,
+    "xg_total": 4.83,
+    "probs": {
+      "home": 0.02,
+      "draw": 0.048,
+      "away": 0.932,
+      "under_25": 0.141,
+      "over_25": 0.859,
+      "btts_yes": 0.46,
+      "btts_no": 0.54
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "TSG 1899 Hoffenheim",
+    "away": "SC Freiburg",
+    "utcDate": "2026-02-14T14:30:00Z",
+    "xg_home": 2.79,
+    "xg_away": 1.05,
+    "xg_total": 3.85,
+    "probs": {
+      "home": 0.735,
+      "draw": 0.149,
+      "away": 0.116,
+      "under_25": 0.261,
+      "over_25": 0.739,
+      "btts_yes": 0.612,
+      "btts_no": 0.388
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "Eintracht Frankfurt",
+    "away": "Borussia Mönchengladbach",
+    "utcDate": "2026-02-14T14:30:00Z",
+    "xg_home": 1.29,
+    "xg_away": 1.48,
+    "xg_total": 2.77,
+    "probs": {
+      "home": 0.329,
+      "draw": 0.253,
+      "away": 0.418,
+      "under_25": 0.477,
+      "over_25": 0.523,
+      "btts_yes": 0.559,
+      "btts_no": 0.441
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "Hamburger SV",
+    "away": "1. FC Union Berlin",
+    "utcDate": "2026-02-14T14:30:00Z",
+    "xg_home": 1.48,
+    "xg_away": 0.75,
+    "xg_total": 2.24,
+    "probs": {
+      "home": 0.546,
+      "draw": 0.264,
+      "away": 0.19,
+      "under_25": 0.612,
+      "over_25": 0.388,
+      "btts_yes": 0.41,
+      "btts_no": 0.59
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "Bayer 04 Leverkusen",
+    "away": "FC St. Pauli 1910",
+    "utcDate": "2026-02-14T14:30:00Z",
+    "xg_home": 1.9,
+    "xg_away": 0.56,
+    "xg_total": 2.47,
+    "probs": {
+      "home": 0.696,
+      "draw": 0.203,
+      "away": 0.101,
+      "under_25": 0.553,
+      "over_25": 0.447,
+      "btts_yes": 0.366,
+      "btts_no": 0.634
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "VfB Stuttgart",
+    "away": "1. FC Köln",
+    "utcDate": "2026-02-14T17:30:00Z",
+    "xg_home": 1.39,
+    "xg_away": 0.83,
+    "xg_total": 2.22,
+    "probs": {
+      "home": 0.5,
+      "draw": 0.276,
+      "away": 0.225,
+      "under_25": 0.619,
+      "over_25": 0.381,
+      "btts_yes": 0.423,
+      "btts_no": 0.577
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "FC Augsburg",
+    "away": "1. FC Heidenheim 1846",
+    "utcDate": "2026-02-15T14:30:00Z",
+    "xg_home": 1.7,
+    "xg_away": 1.07,
+    "xg_total": 2.77,
+    "probs": {
+      "home": 0.523,
+      "draw": 0.24,
+      "away": 0.237,
+      "under_25": 0.477,
+      "over_25": 0.523,
+      "btts_yes": 0.536,
+      "btts_no": 0.464
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "RB Leipzig",
+    "away": "VfL Wolfsburg",
+    "utcDate": "2026-02-15T16:30:00Z",
+    "xg_home": 2.81,
+    "xg_away": 1.07,
+    "xg_total": 3.88,
+    "probs": {
+      "home": 0.735,
+      "draw": 0.148,
+      "away": 0.117,
+      "under_25": 0.256,
+      "over_25": 0.744,
+      "btts_yes": 0.618,
+      "btts_no": 0.382
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "1. FSV Mainz 05",
+    "away": "Hamburger SV",
+    "utcDate": "2026-02-20T19:30:00Z",
+    "xg_home": 1.14,
+    "xg_away": 0.49,
+    "xg_total": 1.63,
+    "probs": {
+      "home": 0.522,
+      "draw": 0.321,
+      "away": 0.157,
+      "under_25": 0.776,
+      "over_25": 0.224,
+      "btts_yes": 0.262,
+      "btts_no": 0.738
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "1. FC Union Berlin",
+    "away": "Bayer 04 Leverkusen",
+    "utcDate": "2026-02-21T14:30:00Z",
+    "xg_home": 1.44,
+    "xg_away": 2.01,
+    "xg_total": 3.45,
+    "probs": {
+      "home": 0.275,
+      "draw": 0.216,
+      "away": 0.51,
+      "under_25": 0.329,
+      "over_25": 0.671,
+      "btts_yes": 0.661,
+      "btts_no": 0.339
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "FC Bayern München",
+    "away": "Eintracht Frankfurt",
+    "utcDate": "2026-02-21T14:30:00Z",
+    "xg_home": 4.5,
+    "xg_away": 1.36,
+    "xg_total": 5.86,
+    "probs": {
+      "home": 0.868,
+      "draw": 0.075,
+      "away": 0.057,
+      "under_25": 0.069,
+      "over_25": 0.931,
+      "btts_yes": 0.735,
+      "btts_no": 0.265
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "VfL Wolfsburg",
+    "away": "FC Augsburg",
+    "utcDate": "2026-02-21T14:30:00Z",
+    "xg_home": 1.8,
+    "xg_away": 1.43,
+    "xg_total": 3.23,
+    "probs": {
+      "home": 0.463,
+      "draw": 0.229,
+      "away": 0.308,
+      "under_25": 0.373,
+      "over_25": 0.627,
+      "btts_yes": 0.636,
+      "btts_no": 0.364
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "1. FC Köln",
+    "away": "TSG 1899 Hoffenheim",
+    "utcDate": "2026-02-21T14:30:00Z",
+    "xg_home": 1.37,
+    "xg_away": 1.93,
+    "xg_total": 3.3,
+    "probs": {
+      "home": 0.273,
+      "draw": 0.221,
+      "away": 0.505,
+      "under_25": 0.36,
+      "over_25": 0.64,
+      "btts_yes": 0.638,
+      "btts_no": 0.362
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "RB Leipzig",
+    "away": "Borussia Dortmund",
+    "utcDate": "2026-02-21T17:30:00Z",
+    "xg_home": 1.46,
+    "xg_away": 1.7,
+    "xg_total": 3.16,
+    "probs": {
+      "home": 0.331,
+      "draw": 0.234,
+      "away": 0.435,
+      "under_25": 0.388,
+      "over_25": 0.612,
+      "btts_yes": 0.628,
+      "btts_no": 0.372
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "SC Freiburg",
+    "away": "Borussia Mönchengladbach",
+    "utcDate": "2026-02-22T14:30:00Z",
+    "xg_home": 1.44,
+    "xg_away": 0.91,
+    "xg_total": 2.34,
+    "probs": {
+      "home": 0.495,
+      "draw": 0.268,
+      "away": 0.237,
+      "under_25": 0.585,
+      "over_25": 0.415,
+      "btts_yes": 0.454,
+      "btts_no": 0.546
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "FC St. Pauli 1910",
+    "away": "SV Werder Bremen",
+    "utcDate": "2026-02-22T16:30:00Z",
+    "xg_home": 1.22,
+    "xg_away": 1.06,
+    "xg_total": 2.28,
+    "probs": {
+      "home": 0.398,
+      "draw": 0.284,
+      "away": 0.318,
+      "under_25": 0.601,
+      "over_25": 0.399,
+      "btts_yes": 0.461,
+      "btts_no": 0.539
+    }
+  },
+  {
+    "league": "BL1",
+    "home": "1. FC Heidenheim 1846",
+    "away": "VfB Stuttgart",
+    "utcDate": "2026-02-22T18:30:00Z",
+    "xg_home": 0.82,
+    "xg_away": 3.27,
+    "xg_total": 4.08,
+    "probs": {
+      "home": 0.059,
+      "draw": 0.102,
+      "away": 0.839,
+      "under_25": 0.226,
+      "over_25": 0.774,
+      "btts_yes": 0.537,
+      "btts_no": 0.463
+    }
+  }
+]

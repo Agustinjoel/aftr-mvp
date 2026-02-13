@@ -1,0 +1,457 @@
+[
+  {
+    "league": "FL1",
+    "home": "Stade Rennais FC 1901",
+    "away": "Paris Saint-Germain FC",
+    "utcDate": "2026-02-13T18:00:00Z",
+    "xg_home": 1.27,
+    "xg_away": 1.8,
+    "xg_total": 3.07,
+    "probs": {
+      "home": 0.271,
+      "draw": 0.231,
+      "away": 0.497,
+      "under_25": 0.408,
+      "over_25": 0.592,
+      "btts_yes": 0.6,
+      "btts_no": 0.4
+    },
+    "candidates": [
+      {
+        "market": "BTTS Yes",
+        "prob": 0.6,
+        "fair": 1.67
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.592,
+        "fair": 1.69
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "AS Monaco FC",
+    "away": "FC Nantes",
+    "utcDate": "2026-02-13T20:05:00Z",
+    "xg_home": 1.84,
+    "xg_away": 1.26,
+    "xg_total": 3.1,
+    "probs": {
+      "home": 0.51,
+      "draw": 0.228,
+      "away": 0.262,
+      "under_25": 0.401,
+      "over_25": 0.599,
+      "btts_yes": 0.603,
+      "btts_no": 0.397
+    },
+    "candidates": [
+      {
+        "market": "BTTS Yes",
+        "prob": 0.603,
+        "fair": 1.66
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.599,
+        "fair": 1.67
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "Olympique de Marseille",
+    "away": "RC Strasbourg Alsace",
+    "utcDate": "2026-02-14T16:00:00Z",
+    "xg_home": 3.01,
+    "xg_away": 1.45,
+    "xg_total": 4.47,
+    "probs": {
+      "home": 0.69,
+      "draw": 0.153,
+      "away": 0.158,
+      "under_25": 0.177,
+      "over_25": 0.823,
+      "btts_yes": 0.729,
+      "btts_no": 0.271
+    },
+    "candidates": [
+      {
+        "market": "Over 2.5",
+        "prob": 0.823,
+        "fair": 1.22
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.729,
+        "fair": 1.37
+      },
+      {
+        "market": "Home Win",
+        "prob": 0.69,
+        "fair": 1.45
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "Lille OSC",
+    "away": "Stade Brestois 29",
+    "utcDate": "2026-02-14T18:00:00Z",
+    "xg_home": 2.09,
+    "xg_away": 1.23,
+    "xg_total": 3.32,
+    "probs": {
+      "home": 0.57,
+      "draw": 0.209,
+      "away": 0.22,
+      "under_25": 0.356,
+      "over_25": 0.644,
+      "btts_yes": 0.62,
+      "btts_no": 0.38
+    },
+    "candidates": [
+      {
+        "market": "Over 2.5",
+        "prob": 0.644,
+        "fair": 1.55
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.62,
+        "fair": 1.61
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "Paris FC",
+    "away": "Racing Club de Lens",
+    "utcDate": "2026-02-14T20:05:00Z",
+    "xg_home": 1.03,
+    "xg_away": 2.33,
+    "xg_total": 3.36,
+    "probs": {
+      "home": 0.153,
+      "draw": 0.184,
+      "away": 0.663,
+      "under_25": 0.348,
+      "over_25": 0.652,
+      "btts_yes": 0.58,
+      "btts_no": 0.42
+    },
+    "candidates": [
+      {
+        "market": "Away Win",
+        "prob": 0.663,
+        "fair": 1.51
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.652,
+        "fair": 1.53
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.58,
+        "fair": 1.72
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "Le Havre AC",
+    "away": "Toulouse FC",
+    "utcDate": "2026-02-15T14:00:00Z",
+    "xg_home": 0.65,
+    "xg_away": 0.93,
+    "xg_total": 1.59,
+    "probs": {
+      "home": 0.245,
+      "draw": 0.35,
+      "away": 0.405,
+      "under_25": 0.787,
+      "over_25": 0.213,
+      "btts_yes": 0.291,
+      "btts_no": 0.709
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.787,
+        "fair": 1.27
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.709,
+        "fair": 1.41
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "FC Metz",
+    "away": "AJ Auxerre",
+    "utcDate": "2026-02-15T16:15:00Z",
+    "xg_home": 0.94,
+    "xg_away": 0.51,
+    "xg_total": 1.45,
+    "probs": {
+      "home": 0.444,
+      "draw": 0.361,
+      "away": 0.194,
+      "under_25": 0.821,
+      "over_25": 0.179,
+      "btts_yes": 0.244,
+      "btts_no": 0.756
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.821,
+        "fair": 1.22
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.756,
+        "fair": 1.32
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "Olympique Lyonnais",
+    "away": "OGC Nice",
+    "utcDate": "2026-02-15T19:45:00Z",
+    "xg_home": 2.5,
+    "xg_away": 0.78,
+    "xg_total": 3.28,
+    "probs": {
+      "home": 0.75,
+      "draw": 0.155,
+      "away": 0.095,
+      "under_25": 0.363,
+      "over_25": 0.637,
+      "btts_yes": 0.497,
+      "btts_no": 0.503
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.75,
+        "fair": 1.33
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.637,
+        "fair": 1.57
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "Stade Brestois 29",
+    "away": "Olympique de Marseille",
+    "utcDate": "2026-02-20T19:45:00Z",
+    "xg_home": 1.3,
+    "xg_away": 1.75,
+    "xg_total": 3.04,
+    "probs": {
+      "home": 0.286,
+      "draw": 0.235,
+      "away": 0.48,
+      "under_25": 0.413,
+      "over_25": 0.587,
+      "btts_yes": 0.6,
+      "btts_no": 0.4
+    },
+    "candidates": [
+      {
+        "market": "BTTS Yes",
+        "prob": 0.6,
+        "fair": 1.67
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.587,
+        "fair": 1.7
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "Racing Club de Lens",
+    "away": "AS Monaco FC",
+    "utcDate": "2026-02-21T16:00:00Z",
+    "xg_home": 1.76,
+    "xg_away": 0.39,
+    "xg_total": 2.15,
+    "probs": {
+      "home": 0.713,
+      "draw": 0.212,
+      "away": 0.075,
+      "under_25": 0.637,
+      "over_25": 0.363,
+      "btts_yes": 0.267,
+      "btts_no": 0.733
+    },
+    "candidates": [
+      {
+        "market": "BTTS No",
+        "prob": 0.733,
+        "fair": 1.36
+      },
+      {
+        "market": "Home Win",
+        "prob": 0.713,
+        "fair": 1.4
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "Toulouse FC",
+    "away": "Paris FC",
+    "utcDate": "2026-02-21T18:00:00Z",
+    "xg_home": 1.64,
+    "xg_away": 1.27,
+    "xg_total": 2.91,
+    "probs": {
+      "home": 0.46,
+      "draw": 0.243,
+      "away": 0.298,
+      "under_25": 0.444,
+      "over_25": 0.556,
+      "btts_yes": 0.58,
+      "btts_no": 0.42
+    },
+    "candidates": [
+      {
+        "market": "Over 2.5",
+        "prob": 0.556,
+        "fair": 1.8
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "Paris Saint-Germain FC",
+    "away": "FC Metz",
+    "utcDate": "2026-02-21T20:05:00Z",
+    "xg_home": 4.5,
+    "xg_away": 0.37,
+    "xg_total": 4.87,
+    "probs": {
+      "home": 0.966,
+      "draw": 0.027,
+      "away": 0.007,
+      "under_25": 0.137,
+      "over_25": 0.863,
+      "btts_yes": 0.308,
+      "btts_no": 0.692
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.966,
+        "fair": 1.04
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.863,
+        "fair": 1.16
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.692,
+        "fair": 1.45
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "FC Nantes",
+    "away": "Le Havre AC",
+    "utcDate": "2026-02-22T16:15:00Z",
+    "xg_home": 0.89,
+    "xg_away": 0.86,
+    "xg_total": 1.75,
+    "probs": {
+      "home": 0.343,
+      "draw": 0.335,
+      "away": 0.322,
+      "under_25": 0.745,
+      "over_25": 0.255,
+      "btts_yes": 0.339,
+      "btts_no": 0.661
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.745,
+        "fair": 1.34
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.661,
+        "fair": 1.51
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "OGC Nice",
+    "away": "FC Lorient",
+    "utcDate": "2026-02-22T16:15:00Z",
+    "xg_home": 1.21,
+    "xg_away": 0.69,
+    "xg_total": 1.9,
+    "probs": {
+      "home": 0.484,
+      "draw": 0.303,
+      "away": 0.213,
+      "under_25": 0.704,
+      "over_25": 0.296,
+      "btts_yes": 0.35,
+      "btts_no": 0.65
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.704,
+        "fair": 1.42
+      }
+    ]
+  },
+  {
+    "league": "FL1",
+    "home": "Angers SCO",
+    "away": "Lille OSC",
+    "utcDate": "2026-02-22T16:15:00Z",
+    "xg_home": 1.46,
+    "xg_away": 1.44,
+    "xg_total": 2.9,
+    "probs": {
+      "home": 0.38,
+      "draw": 0.248,
+      "away": 0.372,
+      "under_25": 0.445,
+      "over_25": 0.555,
+      "btts_yes": 0.586,
+      "btts_no": 0.414
+    },
+    "candidates": [
+      {
+        "market": "BTTS Yes",
+        "prob": 0.586,
+        "fair": 1.71
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.555,
+        "fair": 1.8
+      }
+    ]
+  }
+]
