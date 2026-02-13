@@ -1,35 +1,48 @@
-from fastapi import FastAPI, Query
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Query, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 import json
 import os
+import math
 import requests
+from datetime import datetime, timezone
+from urllib.parse import quote
 
 app = FastAPI()
 
 # =========================
-# Config
+# Monetización / Acceso
 # =========================
-FREE_PICKS_LIMIT = 10
+BASE_FREE_PICKS = 4          # gratis sin ads
+REWARDED_FREE_MAX = 6        # 1 ad = +1 pick extra (máx 6)
 PREMIUM_MESSAGE = "🔒 Premium: desbloqueá el resto de picks"
 
+# =========================
+# Ligas
+# =========================
 LEAGUES = {
     "PL": "Premier League",
     "PD": "LaLiga",
     "SA": "Serie A",
     "BL1": "Bundesliga",
     "FL1": "Ligue 1",
-    "LPF": "Argentina LPF",
+    # "LPF": "Argentina LPF",  # football-data v4 no lo tiene (404)
 }
 DEFAULT_LEAGUE = "PL"
 
-# football-data (escudos)
+# =========================
+# Football-data (escudos)
+# =========================
 API_KEY = os.getenv("FOOTBALL_DATA_API_KEY", "")
 HEADERS = {"X-Auth-Token": API_KEY}
 BASE = "https://api.football-data.org/v4"
-
 APP_LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/3/3b/Football_icon.svg"
 
+# Cache escudos por liga
+TEAM_CRESTS_BY_LEAGUE: dict[str, dict[str, str]] = {}
+
+# =========================
 # Telegram (ventas manual)
+# =========================
 TELEGRAM_USERNAME = "TUUSUARIO"  # <-- sin @
 TELEGRAM_MSG = (
     "Hola! Quiero activar AFTR Premium.\n"
@@ -37,12 +50,8 @@ TELEGRAM_MSG = (
     "Pasame el link de pago y cómo obtengo el acceso."
 )
 
-# Cache escudos por liga
-TEAM_CRESTS_BY_LEAGUE = {}
-
-
 # =========================
-# Utils
+# Utils JSON
 # =========================
 def picks_file(league: str) -> str:
     return f"daily_picks_{league}.json"
@@ -52,7 +61,7 @@ def matches_file(league: str) -> str:
     return f"daily_matches_{league}.json"
 
 
-def read_json(path):
+def read_json(path: str):
     if not os.path.exists(path):
         return []
     with open(path, "r", encoding="utf-8") as f:
@@ -66,11 +75,42 @@ def _safe_float(x, default=0.0):
         return default
 
 
+# =========================
+# Cookies: rewarded credits
+# =========================
+def get_ad_credits(request: Request) -> int:
+    try:
+        v = int(request.cookies.get("ad_credits", "0"))
+        return max(0, min(REWARDED_FREE_MAX, v))
+    except Exception:
+        return 0
+
+
+def set_ad_credits(resp, credits: int):
+    credits = max(0, min(REWARDED_FREE_MAX, credits))
+    # 7 días
+    resp.set_cookie(
+        "ad_credits",
+        str(credits),
+        max_age=60 * 60 * 24 * 7,
+        httponly=False,
+        samesite="lax",
+    )
+    return resp
+
+
+def free_limit_for_request(request: Request) -> int:
+    credits = get_ad_credits(request)
+    return min(BASE_FREE_PICKS + credits, BASE_FREE_PICKS + REWARDED_FREE_MAX)
+
+
+# =========================
+# Escudos
+# =========================
 def load_team_crests(league: str):
     if league in TEAM_CRESTS_BY_LEAGUE:
         return
 
-    # Si no hay API key, seguimos sin escudos
     if not API_KEY:
         TEAM_CRESTS_BY_LEAGUE[league] = {}
         return
@@ -106,7 +146,7 @@ def crest_img(league: str, team_name: str, size=22):
 
 
 # =========================
-# Confidence
+# Confidence chips
 # =========================
 def confidence(prob: float):
     p = _safe_float(prob, 0.0)
@@ -119,7 +159,7 @@ def confidence(prob: float):
 
 
 # =========================
-# Drivers + Rationale
+# Drivers + Rationale (solo para unlocked)
 # =========================
 def model_drivers(match_item: dict):
     home = match_item.get("home", "Home")
@@ -279,8 +319,8 @@ def ranked_candidates(picks):
     for p in picks:
         for c in p.get("candidates", []):
             ranking.append({
-                "home": p["home"],
-                "away": p["away"],
+                "home": p.get("home", ""),
+                "away": p.get("away", ""),
                 "utcDate": p.get("utcDate", ""),
                 "xg_total": p.get("xg_total", 0),
                 "market": c.get("market", ""),
@@ -292,7 +332,7 @@ def ranked_candidates(picks):
 
 
 # =========================
-# UI shell
+# UI
 # =========================
 def league_nav(league: str):
     pills = []
@@ -413,6 +453,21 @@ def page_shell(title, inner_html, league: str):
                 font-weight:900;
                 display:inline-block;
                 text-decoration:none;
+                cursor:pointer;
+            }}
+            .cta:disabled {{
+                opacity:0.6;
+                cursor:not-allowed;
+            }}
+            .adbox {{
+                height:160px;
+                border:1px dashed #334155;
+                border-radius:12px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                margin-top:12px;
+                background:#0f172a;
             }}
         </style>
     </head>
@@ -440,25 +495,63 @@ def page_shell(title, inner_html, league: str):
     """
 
 
-def render_cards(items, title_text, league: str, show_probs=True, premium_lock=False, show_candidates=True):
+def render_unlock_card(request: Request, league: str, back_url: str):
+    credits = get_ad_credits(request)
+    remaining_ads = max(0, REWARDED_FREE_MAX - credits)
+    free_now = free_limit_for_request(request)
+    max_free = BASE_FREE_PICKS + REWARDED_FREE_MAX
+
+    watch_link = f"/watch-ad?league={league}&back={quote(back_url, safe='/?=&')}"
+    return f"""
+    <div class="card" style="margin-bottom:14px;">
+        <div style="font-weight:900;">Free unlock</div>
+        <div class="muted">Gratis: {BASE_FREE_PICKS}. Desbloqueado por ads: +{credits}/{REWARDED_FREE_MAX}. Total free ahora: <b>{free_now}</b> / {max_free}.</div>
+        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="cta" href="{watch_link}">🎬 Ver anuncio (+1 pick)</a>
+            <a class="cta" href="/premium">💎 Premium</a>
+        </div>
+        <div class="muted" style="margin-top:8px;">Ads restantes para desbloquear hoy: {remaining_ads}</div>
+    </div>
+    """
+
+
+def render_cards(
+    request: Request,
+    items,
+    title_text,
+    league: str,
+    back_url: str,
+    show_probs=True,
+    premium_lock=False,
+    show_candidates=True,
+):
     if not items:
         return f'<div class="section-title">{title_text} (0)</div><div class="muted">No hay data para esta liga. Corré team_strength.py</div>'
 
     html = f'<div class="section-title">{title_text} ({len(items)})</div>'
+
+    if premium_lock:
+        html += render_unlock_card(request, league, back_url)
+
     html += '<div class="grid">'
 
     visible = items
     locked = []
-    if premium_lock:
-        visible = items[:FREE_PICKS_LIMIT]
-        locked = items[FREE_PICKS_LIMIT:]
 
+    if premium_lock:
+        free_limit = free_limit_for_request(request)
+        visible = items[:free_limit]
+        locked = items[free_limit:]
+
+    # Cargar escudos una vez por render
+    load_team_crests(league)
+
+    # Unlocked cards
     for it in visible:
-        badge = '<span class="badge">PICK</span>' if (it.get("candidates") and len(it["candidates"]) > 0) else ""
+        badge = '<span class="badge">PICK</span>' if (it.get("candidates") and len(it["candidates"]) > 0 and show_candidates) else ""
         home = it.get("home", "")
         away = it.get("away", "")
 
-        load_team_crests(league)
         home_crest = crest_img(league, home, 22)
         away_crest = crest_img(league, away, 22)
 
@@ -478,7 +571,7 @@ def render_cards(items, title_text, league: str, show_probs=True, premium_lock=F
             <div class="muted">U2.5 {p.get('under_25')} • O2.5 {p.get('over_25')} • BTTS Yes {p.get('btts_yes')}</div>
             """
 
-        # Drivers
+        # Drivers (solo si está desbloqueado)
         drv = model_drivers(it)
         if drv:
             bullets = "".join([f"<li>{d}</li>" for d in drv[:4]])
@@ -489,7 +582,7 @@ def render_cards(items, title_text, league: str, show_probs=True, premium_lock=F
             </div>
             """
 
-        # Candidates (solo en picks)
+        # Candidates (solo unlocked + show_candidates)
         if show_candidates and it.get("candidates"):
             for c in it["candidates"]:
                 prob_pct = round(_safe_float(c.get("prob")) * 100, 1)
@@ -508,7 +601,7 @@ def render_cards(items, title_text, league: str, show_probs=True, premium_lock=F
 
         html += "</div>"
 
-    # Premium lock: BLOQUEADAS LIMPIAS (sin data sensible)
+    # Locked cards (premium hard lock, sin data sensible)
     if premium_lock and locked:
         for it in locked[:6]:
             home = it.get("home", "")
@@ -539,10 +632,78 @@ def render_cards(items, title_text, league: str, show_probs=True, premium_lock=F
 
 
 # =========================
+# Rewarded flow
+# =========================
+@app.get("/watch-ad", response_class=HTMLResponse)
+def watch_ad(request: Request, league: str = Query(DEFAULT_LEAGUE), back: str = Query("/")):
+    league = league if league in LEAGUES else DEFAULT_LEAGUE
+    credits = get_ad_credits(request)
+
+    if credits >= REWARDED_FREE_MAX:
+        inner = f"""
+        <div class="hero">
+          <div class="hero-title">Rewarded</div>
+          <div class="hero-match">Ya desbloqueaste todo lo posible por ads 😈</div>
+          <div class="muted">Máximo: {REWARDED_FREE_MAX} picks extra.</div>
+          <a class="cta" href="{back}">Volver</a>
+        </div>
+        """
+        return page_shell("Watch Ad", inner, league)
+
+    inner = f"""
+    <div class="hero">
+        <div class="hero-title">Rewarded Ad</div>
+        <div class="hero-match">Desbloqueás +1 pick</div>
+        <div class="muted">Esperá 8 segundos y se habilita el botón.</div>
+    </div>
+
+    <div class="card">
+        <div style="font-weight:900; margin-bottom:10px;">Sponsor slot</div>
+        <div class="muted">Acá va un anuncio real (patrocinador / red compatible). Por ahora placeholder.</div>
+        <div class="adbox"><div class="muted">AD SPACE</div></div>
+
+        <div style="margin-top:14px;">
+            <button id="btn" class="cta" disabled>⏳ Esperando...</button>
+        </div>
+        <div class="muted" style="margin-top:10px;">Tip: esto mantiene el free vivo mientras premium despega.</div>
+    </div>
+
+    <script>
+      let t = 8;
+      const btn = document.getElementById("btn");
+      const tick = () => {{
+        if (t <= 0) {{
+          btn.disabled = false;
+          btn.textContent = "✅ Desbloquear +1 pick";
+          btn.onclick = () => {{
+            window.location.href = "/ad-reward?league={league}&back=" + encodeURIComponent("{back}");
+          }};
+          return;
+        }}
+        btn.textContent = "⏳ Esperando... " + t + "s";
+        t -= 1;
+        setTimeout(tick, 1000);
+      }};
+      tick();
+    </script>
+    """
+    return page_shell("Watch Ad", inner, league)
+
+
+@app.get("/ad-reward")
+def ad_reward(request: Request, league: str = Query(DEFAULT_LEAGUE), back: str = Query("/")):
+    credits = get_ad_credits(request)
+    credits = min(REWARDED_FREE_MAX, credits + 1)
+    resp = RedirectResponse(url=back, status_code=302)
+    return set_ad_credits(resp, credits)
+
+
+# =========================
 # JSON endpoints
 # =========================
 @app.get("/api/picks")
 def picks_json(league: str = Query(DEFAULT_LEAGUE)):
+    league = league if league in LEAGUES else DEFAULT_LEAGUE
     path = picks_file(league)
     if not os.path.exists(path):
         return {"error": f"No picks file found for {league}. Run team_strength.py."}
@@ -551,6 +712,7 @@ def picks_json(league: str = Query(DEFAULT_LEAGUE)):
 
 @app.get("/api/matches")
 def matches_json(league: str = Query(DEFAULT_LEAGUE)):
+    league = league if league in LEAGUES else DEFAULT_LEAGUE
     path = matches_file(league)
     if not os.path.exists(path):
         return {"error": f"No matches file found for {league}. Run team_strength.py."}
@@ -561,7 +723,7 @@ def matches_json(league: str = Query(DEFAULT_LEAGUE)):
 # Pages
 # =========================
 @app.get("/", response_class=HTMLResponse)
-def dashboard(league: str = Query(DEFAULT_LEAGUE)):
+def dashboard(request: Request, league: str = Query(DEFAULT_LEAGUE)):
     league = league if league in LEAGUES else DEFAULT_LEAGUE
 
     picks = read_json(picks_file(league))
@@ -585,7 +747,7 @@ def dashboard(league: str = Query(DEFAULT_LEAGUE)):
         drv = model_drivers(top_pick)
         bullets = "".join([f"<li>{d}</li>" for d in drv[:3]]) if drv else ""
 
-        hero = f"""
+        inner = f"""
         <div class="hero">
             <div class="hero-title">Top pick del día • {LEAGUES.get(league)}</div>
             <div class="hero-match">
@@ -608,29 +770,29 @@ def dashboard(league: str = Query(DEFAULT_LEAGUE)):
                 <div class="pickmeta">{rationale}</div>
             </div>
 
-            <div class="muted" style="margin-top:10px;">Picks: <b>{len(picks)}</b> • Matches: <b>{len(matches)}</b> • Free: <b>{FREE_PICKS_LIMIT}</b></div>
+            <div class="muted" style="margin-top:10px;">
+                Picks: <b>{len(picks)}</b> • Matches: <b>{len(matches)}</b> • Free base: <b>{BASE_FREE_PICKS}</b> • Rewarded max: <b>{REWARDED_FREE_MAX}</b>
+            </div>
         </div>
         """
     else:
-        hero = f"""
+        inner = f"""
         <div class="hero">
             <div class="hero-title">Top pick del día • {LEAGUES.get(league)}</div>
             <div class="muted">No hay picks todavía para esta liga. Corré team_strength.py</div>
         </div>
         """
 
-    inner = hero
-
+    # Ranking top 5 (solo “teaser” igual, es info agregada)
     inner += '<div class="section-title">🏆 Ranking de confianza (Top 5)</div>'
     if not ranking:
         inner += '<div class="muted">No hay ranking todavía.</div>'
     else:
         inner += '<div class="grid">'
+        load_team_crests(league)
         for i, r in enumerate(ranking[:5], start=1):
             prob_pct = round(_safe_float(r.get("prob")) * 100, 1)
             label, cls = confidence(r.get("prob"))
-
-            load_team_crests(league)
             home_crest = crest_img(league, r.get("home", ""), 20)
             away_crest = crest_img(league, r.get("away", ""), 20)
 
@@ -654,69 +816,78 @@ def dashboard(league: str = Query(DEFAULT_LEAGUE)):
     inner += '<div class="divider"></div>'
 
     inner += render_cards(
+        request,
         picks,
-        "🔥 Picks detectados (FREE + 🔒 Premium cerrado)",
+        "🔥 Picks detectados (Free + Rewarded + 🔒 Premium)",
         league=league,
+        back_url=f"/?league={league}",
         show_probs=True,
         premium_lock=True,
-        show_candidates=True
+        show_candidates=True,
     )
 
     inner += '<div class="divider"></div>'
 
     inner += render_cards(
+        request,
         matches,
         "📅 Próximos partidos (transparente, sin recomendaciones)",
         league=league,
+        back_url=f"/matches?league={league}",
         show_probs=True,
         premium_lock=False,
-        show_candidates=False
+        show_candidates=False,
     )
 
     return page_shell("AFTR Dashboard", inner, league)
 
 
 @app.get("/picks", response_class=HTMLResponse)
-def picks_page(league: str = Query(DEFAULT_LEAGUE)):
+def picks_page(request: Request, league: str = Query(DEFAULT_LEAGUE)):
     league = league if league in LEAGUES else DEFAULT_LEAGUE
     picks = read_json(picks_file(league))
+
     inner = render_cards(
+        request,
         picks,
-        "🔥 Picks detectados (FREE + 🔒 Premium cerrado)",
+        "🔥 Picks detectados (Free + Rewarded + 🔒 Premium)",
         league=league,
+        back_url=f"/picks?league={league}",
         show_probs=True,
         premium_lock=True,
-        show_candidates=True
+        show_candidates=True,
     )
     return page_shell("AFTR Picks", inner, league)
 
 
 @app.get("/matches", response_class=HTMLResponse)
-def matches_page(league: str = Query(DEFAULT_LEAGUE)):
+def matches_page(request: Request, league: str = Query(DEFAULT_LEAGUE)):
     league = league if league in LEAGUES else DEFAULT_LEAGUE
     matches = read_json(matches_file(league))
+
     inner = render_cards(
+        request,
         matches,
         "📅 Próximos partidos (transparente, sin recomendaciones)",
         league=league,
+        back_url=f"/matches?league={league}",
         show_probs=True,
         premium_lock=False,
-        show_candidates=False
+        show_candidates=False,
     )
     return page_shell("AFTR Matches", inner, league)
 
 
 @app.get("/premium", response_class=HTMLResponse)
 def premium_page():
-    # Link a tu chat con mensaje armado
-    contact_link = f"https://t.me/{AFTRPICK}?text={requests.utils.quote(TELEGRAM_MSG)}"
+    contact_link = f"https://t.me/{AFTERPICK}?text={requests.utils.quote(TELEGRAM_MSG)}"
 
     inner = f"""
     <div class="hero">
         <div class="hero-title">AFTR Premium</div>
         <div class="hero-match">Desbloqueá todos los picks.</div>
         <div class="muted">
-            Premium desbloquea el resto de picks (más de {FREE_PICKS_LIMIT}),
+            Premium desbloquea el resto de picks (más allá de {BASE_FREE_PICKS + REWARDED_FREE_MAX}),
             con drivers y rationale completo.
         </div>
     </div>
@@ -745,6 +916,7 @@ def premium_page():
     </div>
     """
     return page_shell("AFTR Premium", inner, DEFAULT_LEAGUE)
+
 
 
    
