@@ -2,9 +2,7 @@ from fastapi import FastAPI, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 import json
 import os
-import math
 import requests
-from datetime import datetime, timezone
 from urllib.parse import quote
 
 app = FastAPI()
@@ -25,7 +23,6 @@ LEAGUES = {
     "SA": "Serie A",
     "BL1": "Bundesliga",
     "FL1": "Ligue 1",
-    # "LPF": "Argentina LPF",  # football-data v4 no lo tiene (404)
 }
 DEFAULT_LEAGUE = "PL"
 
@@ -43,7 +40,7 @@ TEAM_CRESTS_BY_LEAGUE: dict[str, dict[str, str]] = {}
 # =========================
 # Telegram (ventas manual)
 # =========================
-TELEGRAM_USERNAME = "TUUSUARIO"  # <-- sin @
+TELEGRAM_USERNAME = "AFTRPICK"  # <-- sin @
 TELEGRAM_MSG = (
     "Hola! Quiero activar AFTR Premium.\n"
     "Vengo desde la app y quiero pagar el plan mensual.\n"
@@ -88,11 +85,11 @@ def get_ad_credits(request: Request) -> int:
 
 def set_ad_credits(resp, credits: int):
     credits = max(0, min(REWARDED_FREE_MAX, credits))
-    # 7 días
+    # ✅ Reset diario (24hs)
     resp.set_cookie(
         "ad_credits",
         str(credits),
-        max_age=60 * 60 * 24 * 7,
+        max_age=60 * 60 * 24,   # <-- 24hs
         httponly=False,
         samesite="lax",
     )
@@ -159,7 +156,7 @@ def confidence(prob: float):
 
 
 # =========================
-# Drivers + Rationale (solo para unlocked)
+# Drivers + Rationale (solo unlocked)
 # =========================
 def model_drivers(match_item: dict):
     home = match_item.get("home", "Home")
@@ -455,10 +452,7 @@ def page_shell(title, inner_html, league: str):
                 text-decoration:none;
                 cursor:pointer;
             }}
-            .cta:disabled {{
-                opacity:0.6;
-                cursor:not-allowed;
-            }}
+            .cta:disabled {{ opacity:0.6; cursor:not-allowed; }}
             .adbox {{
                 height:160px;
                 border:1px dashed #334155;
@@ -468,6 +462,21 @@ def page_shell(title, inner_html, league: str):
                 justify-content:center;
                 margin-top:12px;
                 background:#0f172a;
+            }}
+
+            /* ✅ progress bar */
+            .progress {{
+              margin-top:10px;
+              height:10px;
+              background:#0f172a;
+              border:1px solid #223457;
+              border-radius:999px;
+              overflow:hidden;
+            }}
+            .progress > div {{
+              height:100%;
+              width:0%;
+              background:#38bdf8;
             }}
         </style>
     </head>
@@ -500,6 +509,7 @@ def render_unlock_card(request: Request, league: str, back_url: str):
     remaining_ads = max(0, REWARDED_FREE_MAX - credits)
     free_now = free_limit_for_request(request)
     max_free = BASE_FREE_PICKS + REWARDED_FREE_MAX
+    pct = int((credits / REWARDED_FREE_MAX) * 100) if REWARDED_FREE_MAX else 0
 
     watch_link = f"/watch-ad?league={league}&back={quote(back_url, safe='/?=&')}"
     return f"""
@@ -511,6 +521,7 @@ def render_unlock_card(request: Request, league: str, back_url: str):
             <a class="cta" href="/premium">💎 Premium</a>
         </div>
         <div class="muted" style="margin-top:8px;">Ads restantes para desbloquear hoy: {remaining_ads}</div>
+        <div class="progress"><div style="width:{pct}%"></div></div>
     </div>
     """
 
@@ -543,7 +554,6 @@ def render_cards(
         visible = items[:free_limit]
         locked = items[free_limit:]
 
-    # Cargar escudos una vez por render
     load_team_crests(league)
 
     # Unlocked cards
@@ -571,7 +581,6 @@ def render_cards(
             <div class="muted">U2.5 {p.get('under_25')} • O2.5 {p.get('over_25')} • BTTS Yes {p.get('btts_yes')}</div>
             """
 
-        # Drivers (solo si está desbloqueado)
         drv = model_drivers(it)
         if drv:
             bullets = "".join([f"<li>{d}</li>" for d in drv[:4]])
@@ -582,7 +591,6 @@ def render_cards(
             </div>
             """
 
-        # Candidates (solo unlocked + show_candidates)
         if show_candidates and it.get("candidates"):
             for c in it["candidates"]:
                 prob_pct = round(_safe_float(c.get("prob")) * 100, 1)
@@ -601,7 +609,7 @@ def render_cards(
 
         html += "</div>"
 
-    # Locked cards (premium hard lock, sin data sensible)
+    # Locked cards
     if premium_lock and locked:
         for it in locked[:6]:
             home = it.get("home", "")
@@ -654,13 +662,23 @@ def watch_ad(request: Request, league: str = Query(DEFAULT_LEAGUE), back: str = 
     <div class="hero">
         <div class="hero-title">Rewarded Ad</div>
         <div class="hero-match">Desbloqueás +1 pick</div>
-        <div class="muted">Esperá 8 segundos y se habilita el botón.</div>
+        <div class="muted">Esperá 10 segundos y se habilita el botón.</div>
     </div>
 
     <div class="card">
         <div style="font-weight:900; margin-bottom:10px;">Sponsor slot</div>
-        <div class="muted">Acá va un anuncio real (patrocinador / red compatible). Por ahora placeholder.</div>
-        <div class="adbox"><div class="muted">AD SPACE</div></div>
+        <div class="muted">Por ahora es un house-ad (AFTR). Después metemos sponsor real.</div>
+
+        <!-- ✅ HOUSE AD -->
+        <div class="adbox">
+          <div style="text-align:center; padding:10px;">
+            <div style="font-weight:900; font-size:16px;">AFTR Premium</div>
+            <div class="muted" style="margin-top:6px;">Desbloqueá TODO + picks completos + rationale</div>
+            <div style="margin-top:12px;">
+              <a class="cta" href="/premium">💎 Ir a Premium</a>
+            </div>
+          </div>
+        </div>
 
         <div style="margin-top:14px;">
             <button id="btn" class="cta" disabled>⏳ Esperando...</button>
@@ -669,7 +687,7 @@ def watch_ad(request: Request, league: str = Query(DEFAULT_LEAGUE), back: str = 
     </div>
 
     <script>
-      let t = 8;
+      let t = 10;
       const btn = document.getElementById("btn");
       const tick = () => {{
         if (t <= 0) {{
@@ -725,7 +743,6 @@ def matches_json(league: str = Query(DEFAULT_LEAGUE)):
 @app.get("/", response_class=HTMLResponse)
 def dashboard(request: Request, league: str = Query(DEFAULT_LEAGUE)):
     league = league if league in LEAGUES else DEFAULT_LEAGUE
-
     picks = read_json(picks_file(league))
     matches = read_json(matches_file(league))
 
@@ -735,7 +752,6 @@ def dashboard(request: Request, league: str = Query(DEFAULT_LEAGUE)):
     if top_pick and top_candidate:
         prob_pct = round(_safe_float(top_candidate.get("prob")) * 100, 1)
         label, cls = confidence(top_candidate.get("prob"))
-
         home = top_pick.get("home", "")
         away = top_pick.get("away", "")
 
@@ -782,36 +798,6 @@ def dashboard(request: Request, league: str = Query(DEFAULT_LEAGUE)):
             <div class="muted">No hay picks todavía para esta liga. Corré team_strength.py</div>
         </div>
         """
-
-    # Ranking top 5 (solo “teaser” igual, es info agregada)
-    inner += '<div class="section-title">🏆 Ranking de confianza (Top 5)</div>'
-    if not ranking:
-        inner += '<div class="muted">No hay ranking todavía.</div>'
-    else:
-        inner += '<div class="grid">'
-        load_team_crests(league)
-        for i, r in enumerate(ranking[:5], start=1):
-            prob_pct = round(_safe_float(r.get("prob")) * 100, 1)
-            label, cls = confidence(r.get("prob"))
-            home_crest = crest_img(league, r.get("home", ""), 20)
-            away_crest = crest_img(league, r.get("away", ""), 20)
-
-            inner += f"""
-            <div class="card">
-                <div class="rowtitle">
-                    #{i} {home_crest} {r.get('home')} <span class="muted">vs</span> {r.get('away')} {away_crest}
-                    <span class="conf-chip {cls}">{label}</span>
-                </div>
-                <div class="meta">{r.get('utcDate','')} • xG total {r.get('xg_total')}</div>
-                <div class="pickbox">
-                    <div class="pickhead">
-                        <span>{r.get('market')} • {prob_pct}% • Fair {r.get('fair')}</span>
-                        <span class="conf-chip {cls}">{label}</span>
-                    </div>
-                </div>
-            </div>
-            """
-        inner += "</div>"
 
     inner += '<div class="divider"></div>'
 
@@ -880,7 +866,7 @@ def matches_page(request: Request, league: str = Query(DEFAULT_LEAGUE)):
 
 @app.get("/premium", response_class=HTMLResponse)
 def premium_page():
-    contact_link = f"https://t.me/{AFTERPICK}?text={requests.utils.quote(TELEGRAM_MSG)}"
+    contact_link = f"https://t.me/{TELEGRAM_USERNAME}?text={requests.utils.quote(TELEGRAM_MSG)}"
 
     inner = f"""
     <div class="hero">
@@ -895,16 +881,9 @@ def premium_page():
     <div class="section-title">🔓 Qué desbloqueás</div>
     <div class="card">
         <div>✅ Todos los picks diarios</div>
-        <div>✅ Ranking completo</div>
         <div>✅ Model Drivers</div>
         <div>✅ Bet rationale</div>
         <div class="muted" style="margin-top:8px;">Sin spam, sin humo. Solo data.</div>
-    </div>
-
-    <div class="section-title">💵 Precio</div>
-    <div class="card">
-        <div style="font-size:22px; font-weight:900;">24.99 USD / mes</div>
-        <div class="muted">Cancelás cuando quieras. Acceso inmediato.</div>
     </div>
 
     <div class="section-title">🚀 Activar Premium</div>
@@ -913,6 +892,7 @@ def premium_page():
         <div style="margin-top:12px;">
             <a href="{contact_link}" target="_blank" class="cta">💎 Quiero Premium</a>
         </div>
+        <div class="muted" style="margin-top:10px;">Pagos: lo definimos (MercadoPago/PayPal/Stripe) según mercado.</div>
     </div>
     """
     return page_shell("AFTR Premium", inner, DEFAULT_LEAGUE)
