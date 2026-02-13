@@ -481,22 +481,31 @@ def render_cards(items, title_text, show_probs=True, premium_lock=False, show_ca
         html += "</div>"
 
     if premium_lock and locked:
-        preview = locked[:2]
-        for it in preview:
+        # Mostrar tarjetas bloqueadas "limpias" (sin data filtrable)
+        for it in locked[:6]:  # muestra 6 bloqueadas (podés subir/bajar)
             home = it.get("home", "")
             away = it.get("away", "")
-            home_crest = crest_img(home, 22)
-            away_crest = crest_img(away, 22)
             html += f"""
             <div class="premium-card">
-                <div class="rowtitle blur">
-                    {home_crest} {home} <span class="muted">vs</span> {away} {away_crest}
+                <div class="rowtitle">
+                    {home} <span class="muted">vs</span> {away}
                     <span class="badge">PREMIUM</span>
                 </div>
-                <div class="meta blur">Model Drivers + Bet rationale (bloqueado)</div>
-                <div class="cta">{PREMIUM_MESSAGE}</div>
-                <div class="muted" style="margin-top:8px;">{len(locked)} picks más bloqueados</div>
+                <div class="meta">{it.get('utcDate','')}</div>
+                <div class="muted">{PREMIUM_MESSAGE}</div>
+                <a href="/premium" class="cta">💎 Desbloquear Premium</a>
             </div>
+            """
+
+        remaining = max(0, len(locked) - 6)
+        if remaining > 0:
+            html += f"""
+            <div class="premium-card">
+                <div class="rowtitle">🔒 +{remaining} picks más bloqueados</div>
+                <div class="muted">Activá Premium para verlos todos.</div>
+                <a href="/premium" class="cta">💎 Desbloquear Premium</a>
+            </div>
+        
             """
     html += "</div>"
     return html
@@ -615,8 +624,8 @@ def dashboard():
         picks,
         "🔥 Picks detectados (Drivers + Rationale + FREE + 🔒)",
         show_probs=True,
-        premium_lock=True,
-        show_candidates=True
+        premium_lock=False,
+        show_candidates=False
     )
 
     inner += '<div class="divider"></div>'
