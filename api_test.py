@@ -1,8 +1,10 @@
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Query, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 import json
 import os
 import requests
+import subprocess
+import sys
 from urllib.parse import quote
 
 app = FastAPI()
@@ -34,13 +36,18 @@ HEADERS = {"X-Auth-Token": API_KEY}
 BASE = "https://api.football-data.org/v4"
 APP_LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/3/3b/Football_icon.svg"
 
-# Cache escudos por liga
 TEAM_CRESTS_BY_LEAGUE: dict[str, dict[str, str]] = {}
+
+# =========================
+# Refresh (ADMIN)
+# =========================
+REFRESH_KEY = os.getenv("REFRESH_KEY", "")
+TEAM_STRENGTH_SCRIPT = "team_strength.py"
 
 # =========================
 # Telegram (ventas manual)
 # =========================
-TELEGRAM_USERNAME = "AFTRPICK"  # <-- sin @
+TELEGRAM_USERNAME = "TUUSUARIO"  # <-- sin @
 TELEGRAM_MSG = (
     "Hola! Quiero activar AFTR Premium.\n"
     "Vengo desde la app y quiero pagar el plan mensual.\n"
@@ -85,11 +92,11 @@ def get_ad_credits(request: Request) -> int:
 
 def set_ad_credits(resp, credits: int):
     credits = max(0, min(REWARDED_FREE_MAX, credits))
-    # ✅ Reset diario (24hs)
+    # ✅ Reset diario: 24hs
     resp.set_cookie(
         "ad_credits",
         str(credits),
-        max_age=60 * 60 * 24,   # <-- 24hs
+        max_age=60 * 60 * 24,
         httponly=False,
         samesite="lax",
     )
@@ -156,7 +163,7 @@ def confidence(prob: float):
 
 
 # =========================
-# Drivers + Rationale (solo unlocked)
+# Drivers + Rationale
 # =========================
 def model_drivers(match_item: dict):
     home = match_item.get("home", "Home")
@@ -453,6 +460,7 @@ def page_shell(title, inner_html, league: str):
                 cursor:pointer;
             }}
             .cta:disabled {{ opacity:0.6; cursor:not-allowed; }}
+
             .adbox {{
                 height:160px;
                 border:1px dashed #334155;
@@ -464,7 +472,6 @@ def page_shell(title, inner_html, league: str):
                 background:#0f172a;
             }}
 
-            /* ✅ progress bar */
             .progress {{
               margin-top:10px;
               height:10px;
@@ -491,8 +498,6 @@ def page_shell(title, inner_html, league: str):
                 <a href="/picks?league={league}">Picks</a>
                 <a href="/matches?league={league}">Matches</a>
                 <a href="/premium">Premium</a>
-                <a href="/api/picks?league={league}" target="_blank">JSON Picks</a>
-                <a href="/api/matches?league={league}" target="_blank">JSON Matches</a>
             </div>
         </div>
 
@@ -556,7 +561,6 @@ def render_cards(
 
     load_team_crests(league)
 
-    # Unlocked cards
     for it in visible:
         badge = '<span class="badge">PICK</span>' if (it.get("candidates") and len(it["candidates"]) > 0 and show_candidates) else ""
         home = it.get("home", "")
@@ -609,7 +613,6 @@ def render_cards(
 
         html += "</div>"
 
-    # Locked cards
     if premium_lock and locked:
         for it in locked[:6]:
             home = it.get("home", "")
@@ -637,6 +640,26 @@ def render_cards(
 
     html += "</div>"
     return html
+
+
+# =========================
+# ✅ ADMIN: Refresh endpoint (PROTEGIDO)
+# =========================
+@app.get("/refresh")
+def refresh(key: str = Query("")):
+    if not REFRESH_KEY:
+        raise HTTPException(status_code=500, detail="REFRESH_KEY no está seteada en env.")
+    if key != REFRESH_KEY:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    if not os.path.exists(TEAM_STRENGTH_SCRIPT):
+        raise HTTPException(status_code=500, detail=f"No encuentro {TEAM_STRENGTH_SCRIPT} en el servidor.")
+
+    try:
+        subprocess.check_call([sys.executable, TEAM_STRENGTH_SCRIPT])
+        return {"ok": True, "msg": "Refreshed JSONs"}
+    except subprocess.CalledProcessError as e:
+        raise HTTPException(status_code=500, detail=f"Error running team_strength.py: {e}")
 
 
 # =========================
@@ -669,7 +692,6 @@ def watch_ad(request: Request, league: str = Query(DEFAULT_LEAGUE), back: str = 
         <div style="font-weight:900; margin-bottom:10px;">Sponsor slot</div>
         <div class="muted">Por ahora es un house-ad (AFTR). Después metemos sponsor real.</div>
 
-        <!-- ✅ HOUSE AD -->
         <div class="adbox">
           <div style="text-align:center; padding:10px;">
             <div style="font-weight:900; font-size:16px;">AFTR Premium</div>
@@ -683,7 +705,6 @@ def watch_ad(request: Request, league: str = Query(DEFAULT_LEAGUE), back: str = 
         <div style="margin-top:14px;">
             <button id="btn" class="cta" disabled>⏳ Esperando...</button>
         </div>
-        <div class="muted" style="margin-top:10px;">Tip: esto mantiene el free vivo mientras premium despega.</div>
     </div>
 
     <script>
@@ -747,7 +768,6 @@ def dashboard(request: Request, league: str = Query(DEFAULT_LEAGUE)):
     matches = read_json(matches_file(league))
 
     top_pick, top_candidate = best_pick_overall(picks)
-    ranking = ranked_candidates(picks)
 
     if top_pick and top_candidate:
         prob_pct = round(_safe_float(top_candidate.get("prob")) * 100, 1)
@@ -785,17 +805,13 @@ def dashboard(request: Request, league: str = Query(DEFAULT_LEAGUE)):
                 </div>
                 <div class="pickmeta">{rationale}</div>
             </div>
-
-            <div class="muted" style="margin-top:10px;">
-                Picks: <b>{len(picks)}</b> • Matches: <b>{len(matches)}</b> • Free base: <b>{BASE_FREE_PICKS}</b> • Rewarded max: <b>{REWARDED_FREE_MAX}</b>
-            </div>
         </div>
         """
     else:
         inner = f"""
         <div class="hero">
             <div class="hero-title">Top pick del día • {LEAGUES.get(league)}</div>
-            <div class="muted">No hay picks todavía para esta liga. Corré team_strength.py</div>
+            <div class="muted">No hay picks todavía para esta liga. Corré /refresh (admin) o team_strength.py</div>
         </div>
         """
 
@@ -878,21 +894,12 @@ def premium_page():
         </div>
     </div>
 
-    <div class="section-title">🔓 Qué desbloqueás</div>
-    <div class="card">
-        <div>✅ Todos los picks diarios</div>
-        <div>✅ Model Drivers</div>
-        <div>✅ Bet rationale</div>
-        <div class="muted" style="margin-top:8px;">Sin spam, sin humo. Solo data.</div>
-    </div>
-
     <div class="section-title">🚀 Activar Premium</div>
     <div class="card">
         <div>Hacé click y te abrimos el chat con el mensaje listo:</div>
         <div style="margin-top:12px;">
             <a href="{contact_link}" target="_blank" class="cta">💎 Quiero Premium</a>
         </div>
-        <div class="muted" style="margin-top:10px;">Pagos: lo definimos (MercadoPago/PayPal/Stripe) según mercado.</div>
     </div>
     """
     return page_shell("AFTR Premium", inner, DEFAULT_LEAGUE)
