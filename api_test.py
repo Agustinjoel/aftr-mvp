@@ -15,12 +15,20 @@ REFRESH_KEY = os.getenv("REFRESH_KEY", "").strip()
 AUTO_REFRESH = os.getenv("AUTO_REFRESH", "0").strip() == "1"
 AUTO_REFRESH_EVERY_MIN = int(os.getenv("AUTO_REFRESH_EVERY_MIN", "60"))
 
-TELEGRAM_LINK = os.getenv("AFTR_TELEGRAM", "https://t.me/")  # poné el tuyo en Render si querés
+TELEGRAM_LINK = os.getenv(
+    "AFTR_TELEGRAM", "https://t.me/"
+)  # poné el tuyo en Render si querés
 
 # UI locking / ads
 FREE_CARDS = 10
 ADS_PER_DAY = 4
 ADS_SECONDS = 10
+
+import os, json
+import json
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
 
 LEAGUE_TABS = [
     ("PL", "Premier League"),
@@ -29,11 +37,73 @@ LEAGUE_TABS = [
     ("BL1", "Bundesliga"),
     ("FL1", "Ligue 1"),
     ("CL", "UCL"),
-    ("EL", "UEL"),
-    ("FAC", "FA Cup"),
 ]
 
+LEAGUES = {
+    "PL": "Premier League",
+    "PD": "LaLiga",
+    "SA": "Serie A",
+    "BL1": "Bundesliga",
+    "FL1": "Ligue 1",
+    "CL": "UEFA Champions League",
+}
+
+# alias por si el front manda nombres raros
+LEAGUE_ALIASES = {
+    "EPL": "PL",
+    "BUNDESLIGA": "BL1",
+    "LIGUE1": "FL1",
+    "LIGUE 1": "FL1",
+    "UCL": "CL",
+    "CHAMPIONS": "CL",
+    "CHAMPIONSLEAGUE": "CL",
+}
+
+def normalize_league(code: str) -> str:
+    if not code:
+        return "PL"
+    x = str(code).strip().upper()
+    x = LEAGUE_ALIASES.get(x, x)
+    return x if x in LEAGUES else "PL"
+
+def json_paths_for_league(league: str):
+    league = normalize_league(league)
+    matches_file = BASE_DIR / f"daily_matches_{league}.json"
+    picks_file = BASE_DIR / f"daily_picks_{league}.json"
+    # fallback viejo (por si algún archivo quedó sin sufijo)
+    if not matches_file.exists():
+        alt = BASE_DIR / "daily_matches.json"
+        if alt.exists():
+            matches_file = alt
+    if not picks_file.exists():
+        alt = BASE_DIR / "daily_picks.json"
+        if alt.exists():
+            picks_file = alt
+    return matches_file, picks_file
+
+def load_json_bundle(league: str):
+    matches_file, picks_file = json_paths_for_league(league)
+
+    matches = []
+    picks = []
+    try:
+        if matches_file.exists():
+            with open(matches_file, "r", encoding="utf-8") as f:
+                matches = json.load(f) or []
+    except Exception:
+        matches = []
+
+    try:
+        if picks_file.exists():
+            with open(picks_file, "r", encoding="utf-8") as f:
+                picks = json.load(f) or []
+    except Exception:
+        picks = []
+
+    return matches, picks, str(matches_file.name), str(picks_file.name)
+
 app = FastAPI(title="AFTR MVP", version="0.1.0")
+
 
 # -------------------------
 # DB helpers
@@ -43,8 +113,10 @@ def db():
     conn.row_factory = sqlite3.Row
     return conn
 
+
 def db_exists():
     return os.path.exists(DB_PATH)
+
 
 def get_meta(key, default=None):
     if not db_exists():
@@ -56,6 +128,7 @@ def get_meta(key, default=None):
     conn.close()
     return row["value"] if row else default
 
+
 def fetch_sections(league: str):
     if not db_exists():
         raise HTTPException(status_code=500, detail="Base de datos no encontrada")
@@ -63,7 +136,8 @@ def fetch_sections(league: str):
     conn = db()
     cur = conn.cursor()
 
-    cur.execute("""
+    cur.execute(
+        """
       SELECT
         m.league, m.match_id, m.utcDate, m.status, m.home, m.away,
         m.home_goals, m.away_goals,
@@ -76,7 +150,9 @@ def fetch_sections(league: str):
         ON p.league=m.league AND p.match_id=m.match_id
       WHERE m.league=?
       ORDER BY m.utcDate ASC
-    """, (league,))
+    """,
+        (league,),
+    )
     rows = [dict(r) for r in cur.fetchall()]
     conn.close()
 
@@ -124,8 +200,10 @@ def fetch_sections(league: str):
                 "prob": r.get("prob"),
                 "fair": r.get("fair"),
                 "rationale": r.get("rationale"),
-                "status": r.get("pick_status") or "PENDING"
-            } if r.get("market") else None
+                "status": r.get("pick_status") or "PENDING",
+            }
+            if r.get("market")
+            else None,
         }
 
         if is_live:
@@ -138,10 +216,13 @@ def fetch_sections(league: str):
                 recent.append(item)
 
     # recent last 60 (most recent first)
-    recent.sort(key=lambda x: x["dt"] or datetime(1970,1,1,tzinfo=timezone.utc), reverse=True)
+    recent.sort(
+        key=lambda x: x["dt"] or datetime(1970, 1, 1, tzinfo=timezone.utc), reverse=True
+    )
     recent = recent[:60]
 
     return live, upcoming, recent
+
 
 # -------------------------
 # Stats
@@ -175,8 +256,9 @@ def stats_summary():
         "wins": wins,
         "losses": losses,
         "pending": pending,
-        "winrate": round(wr, 2)
+        "winrate": round(wr, 2),
     }
+
 
 # -------------------------
 # HTML shell + CSS
@@ -184,7 +266,12 @@ def stats_summary():
 def page_shell(title, inner, league):
     last = get_meta(f"last_update_{league}", "n/a")
     tz = "Argentina (-03)"
-    tabs = "".join([f'<a class="tab {"on" if code==league else ""}" href="/?league={code}">{name}</a>' for code,name in LEAGUE_TABS])
+    tabs = "".join(
+        [
+            f'<a class="tab {"on" if code == league else ""}" href="/?league={code}">{name}</a>'
+            for code, name in LEAGUE_TABS
+        ]
+    )
 
     return f"""
 <!doctype html>
@@ -475,7 +562,7 @@ def page_shell(title, inner, league):
 
       <div class="controls">
         <select id="leagueSel" onchange="location.href='/?league='+this.value">
-          {''.join([f'<option value="{c}" {"selected" if c==league else ""}>{c} • {n}</option>' for c,n in LEAGUE_TABS])}
+          {"".join([f'<option value="{c}" {"selected" if c == league else ""}>{c} • {n}</option>' for c, n in LEAGUE_TABS])}
         </select>
 
         <button class="btn secondary" onclick="window.open('{TELEGRAM_LINK}','_blank')">💎 Premium</button>
@@ -702,26 +789,33 @@ def page_shell(title, inner, league):
 </html>
 """
 
+
 def fmt_dt_local(utc_iso):
     # show Argentina approx (UTC-3)
     if not utc_iso:
         return "-"
     try:
-        dt = datetime.fromisoformat(utc_iso.replace("Z","+00:00"))
+        dt = datetime.fromisoformat(utc_iso.replace("Z", "+00:00"))
     except Exception:
         return utc_iso
     ar = dt.astimezone(timezone(timedelta(hours=-3)))
     return ar.strftime("%d/%m %H:%M")
 
+
 def card_html(item, idx):
-    home = item["home"]; away = item["away"]
+    home = item["home"]
+    away = item["away"]
     crest_h = item.get("crest_home") or ""
     crest_a = item.get("crest_away") or ""
     mid = item["match_id"]
     status = item["status"]
 
     # match status label
-    st = "LIVE" if status in ("IN_PLAY","PAUSED") else ("UPCOMING" if status in ("SCHEDULED","TIMED") else "RECENT")
+    st = (
+        "LIVE"
+        if status in ("IN_PLAY", "PAUSED")
+        else ("UPCOMING" if status in ("SCHEDULED", "TIMED") else "RECENT")
+    )
 
     score = ""
     if item.get("home_goals") is not None and item.get("away_goals") is not None:
@@ -745,7 +839,7 @@ def card_html(item, idx):
 
         pct = ""
         if prob is not None:
-            pct = f"{prob*100:.1f}%"
+            pct = f"{prob * 100:.1f}%"
         fair_txt = f"{fair:.2f}" if fair is not None else "-"
 
         pick_html = f"""
@@ -765,7 +859,7 @@ def card_html(item, idx):
         <span class="tag">{st}</span>
         <span class="tag">{fmt_dt_local(item.get("utcDate"))}</span>
         <span class="tag">{xg}</span>
-        {f'<span class="tag">Score {score}</span>' if score else ''}
+        {f'<span class="tag">Score {score}</span>' if score else ""}
       </div>
     """
 
@@ -787,6 +881,7 @@ def card_html(item, idx):
     </div>
     """
 
+
 def section_html(title, dotcls, items, start_index):
     if not items:
         return f"""
@@ -800,14 +895,18 @@ def section_html(title, dotcls, items, start_index):
     for it in items:
         cards.append(card_html(it, idx))
         idx += 1
-    return f"""
+    return (
+        f"""
       <div class="section">
         <div class="sectitle"><span class="dot {dotcls}"></span>{title}</div>
         <div class="grid">
-          {''.join(cards)}
+          {"".join(cards)}
         </div>
       </div>
-    """, idx
+    """,
+        idx,
+    )
+
 
 # -------------------------
 # Routes
@@ -816,7 +915,7 @@ def section_html(title, dotcls, items, start_index):
 def dashboard(request: Request, league: str = "PL"):
     league = (league or "PL").upper()
     # validate league
-    if league not in [c for c,_ in LEAGUE_TABS]:
+    if league not in [c for c, _ in LEAGUE_TABS]:
         league = "PL"
 
     live, upcoming, recent = fetch_sections(league)
@@ -831,7 +930,7 @@ def dashboard(request: Request, league: str = "PL"):
 
     c = section_html("RECENT", "recent", recent, 0)
     html_parts.append(c)
-# --- SAFETY: por si algún helper devuelve (html, algo) ---
+    # --- SAFETY: por si algún helper devuelve (html, algo) ---
     fixed = []
     for p in html_parts:
         if isinstance(p, tuple):
@@ -842,26 +941,32 @@ def dashboard(request: Request, league: str = "PL"):
     inner = "\n".join(html_parts)
     return HTMLResponse(page_shell("AFTR Dashboard", inner, league))
 
+
 @app.get("/stats", response_class=HTMLResponse)
 def stats_page(league: str = "PL"):
     s = stats_summary()
     inner = f"""
     <div class="hero">
       <h1>Stats</h1>
-      <div class="sub">Picks totales: <b>{s['total_picks']}</b> • WIN: <b style="color:var(--good)">{s['wins']}</b> • LOSS: <b style="color:var(--bad)">{s['losses']}</b> • PENDING: <b>{s['pending']}</b></div>
-      <div class="sub">Winrate (sin pendientes): <b>{s['winrate']}%</b></div>
+      <div class="sub">Picks totales: <b>{s["total_picks"]}</b> • WIN: <b style="color:var(--good)">{s["wins"]}</b> • LOSS: <b style="color:var(--bad)">{s["losses"]}</b> • PENDING: <b>{s["pending"]}</b></div>
+      <div class="sub">Winrate (sin pendientes): <b>{s["winrate"]}%</b></div>
     </div>
     """
     return HTMLResponse(page_shell("AFTR Stats", inner, league.upper()))
+
 
 @app.get("/api/stats")
 def api_stats():
     return JSONResponse(stats_summary())
 
+
 @app.get("/refresh")
 def refresh(key: str = ""):
     if not REFRESH_KEY:
-        raise HTTPException(status_code=401, detail="REFRESH_KEY no está seteada como variable de entorno.")
+        raise HTTPException(
+            status_code=401,
+            detail="REFRESH_KEY no está seteada como variable de entorno.",
+        )
     if key != REFRESH_KEY:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
@@ -875,6 +980,7 @@ def refresh(key: str = ""):
 
     return {"ok": True, "msg": "DB actualizado"}
 
+
 @app.get("/debug/files")
 def debug_files(league: str = "PL"):
     # quick sanity check
@@ -882,9 +988,10 @@ def debug_files(league: str = "PL"):
         "cwd": os.getcwd(),
         "db_exists": db_exists(),
         "db_path": DB_PATH,
-        "league": league
+        "league": league,
     }
     return info
+
 
 # -------------------------
 # Auto-refresh background
@@ -902,17 +1009,12 @@ def _auto_refresh_loop():
             print(f"⚠️ Auto-refresh error: {e}")
         time.sleep(max(60, AUTO_REFRESH_EVERY_MIN * 60))
 
+
 @app.on_event("startup")
 def startup():
     # start auto refresh if enabled
     if AUTO_REFRESH:
         import threading
+
         t = threading.Thread(target=_auto_refresh_loop, daemon=True)
         t.start()
-
-
-
-
-
-
-

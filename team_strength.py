@@ -39,6 +39,7 @@ DAYS_AHEAD = 10
 MAX_PICKS_PER_LEAGUE = 12
 MIN_PROB_FOR_CANDIDATE = 0.60
 
+
 # =========================
 # DB
 # =========================
@@ -46,6 +47,7 @@ def db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 def init_db():
     conn = db()
@@ -96,17 +98,23 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def set_meta(key, value):
     conn = db()
     cur = conn.cursor()
-    cur.execute("INSERT INTO meta(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (key, str(value)))
+    cur.execute(
+        "INSERT INTO meta(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+        (key, str(value)),
+    )
     conn.commit()
     conn.close()
+
 
 def upsert_match(row):
     conn = db()
     cur = conn.cursor()
-    cur.execute("""
+    cur.execute(
+        """
     INSERT INTO matches(
       league, match_id, utcDate, status, home, away,
       home_goals, away_goals, crest_home, crest_away,
@@ -127,18 +135,34 @@ def upsert_match(row):
       xg_total=excluded.xg_total,
       probs_json=excluded.probs_json,
       updated_at=excluded.updated_at
-    """, (
-        row["league"], row["match_id"], row["utcDate"], row["status"], row["home"], row["away"],
-        row["home_goals"], row["away_goals"], row["crest_home"], row["crest_away"],
-        row["xg_home"], row["xg_away"], row["xg_total"], row["probs_json"], row["updated_at"]
-    ))
+    """,
+        (
+            row["league"],
+            row["match_id"],
+            row["utcDate"],
+            row["status"],
+            row["home"],
+            row["away"],
+            row["home_goals"],
+            row["away_goals"],
+            row["crest_home"],
+            row["crest_away"],
+            row["xg_home"],
+            row["xg_away"],
+            row["xg_total"],
+            row["probs_json"],
+            row["updated_at"],
+        ),
+    )
     conn.commit()
     conn.close()
+
 
 def upsert_pick(row):
     conn = db()
     cur = conn.cursor()
-    cur.execute("""
+    cur.execute(
+        """
     INSERT INTO picks(
       league, match_id, market, prob, fair, rationale, status, updated_at
     )
@@ -149,12 +173,21 @@ def upsert_pick(row):
       rationale=excluded.rationale,
       status=excluded.status,
       updated_at=excluded.updated_at
-    """, (
-        row["league"], row["match_id"], row["market"], row["prob"], row["fair"],
-        row["rationale"], row["status"], row["updated_at"]
-    ))
+    """,
+        (
+            row["league"],
+            row["match_id"],
+            row["market"],
+            row["prob"],
+            row["fair"],
+            row["rationale"],
+            row["status"],
+            row["updated_at"],
+        ),
+    )
     conn.commit()
     conn.close()
+
 
 # =========================
 # API fetch
@@ -172,17 +205,21 @@ def fetch_matches_range(competition, date_from, date_to):
         r.raise_for_status()
     return (r.json() or {}).get("matches", [])
 
+
 def now_utc():
     return datetime.now(timezone.utc)
 
+
 def iso_date(d: datetime):
     return d.date().isoformat()
+
 
 # =========================
 # Model (simple Poisson xG)
 # =========================
 def poisson_pmf(lmbda, k):
-    return math.exp(-lmbda) * (lmbda ** k) / math.factorial(k)
+    return math.exp(-lmbda) * (lmbda**k) / math.factorial(k)
+
 
 def match_probs(xg_home, xg_away, max_goals=8):
     # 1X2
@@ -236,13 +273,16 @@ def match_probs(xg_home, xg_away, max_goals=8):
         "btts_no": round(p_btts_no, 3),
     }
 
+
 def fair_odds(prob):
     if prob <= 0:
         return None
     return round(1.0 / prob, 2)
 
+
 def safe_team_name(t):
     return (t or "").strip()
+
 
 def extract_score(match):
     sc = (match.get("score") or {}).get("fullTime") or {}
@@ -250,11 +290,13 @@ def extract_score(match):
     ag = sc.get("away")
     return hg, ag
 
+
 def extract_crests(match):
     # football-data suele tener crest dentro de homeTeam/awayTeam
     ht = match.get("homeTeam") or {}
     at = match.get("awayTeam") or {}
     return ht.get("crest"), at.get("crest")
+
 
 # =========================
 # Strength calc
@@ -279,6 +321,7 @@ def league_finished_stats(matches):
 
     return (home_goals / games), (away_goals / games), games
 
+
 def team_strengths(matches, league_avg_home, league_avg_away):
     # totals per team
     stats = {}
@@ -286,8 +329,12 @@ def team_strengths(matches, league_avg_home, league_avg_away):
     def ensure(team):
         if team not in stats:
             stats[team] = {
-                "home_scored": 0, "home_conceded": 0, "home_games": 0,
-                "away_scored": 0, "away_conceded": 0, "away_games": 0,
+                "home_scored": 0,
+                "home_conceded": 0,
+                "home_games": 0,
+                "away_scored": 0,
+                "away_conceded": 0,
+                "away_games": 0,
             }
 
     for m in matches:
@@ -302,7 +349,8 @@ def team_strengths(matches, league_avg_home, league_avg_away):
         if not home or not away:
             continue
 
-        ensure(home); ensure(away)
+        ensure(home)
+        ensure(away)
 
         stats[home]["home_scored"] += int(hg)
         stats[home]["home_conceded"] += int(ag)
@@ -318,9 +366,13 @@ def team_strengths(matches, league_avg_home, league_avg_away):
         if s["home_games"] == 0 or s["away_games"] == 0:
             continue
         attack_home = (s["home_scored"] / s["home_games"]) / max(league_avg_home, 0.01)
-        defense_home = (s["home_conceded"] / s["home_games"]) / max(league_avg_away, 0.01)
+        defense_home = (s["home_conceded"] / s["home_games"]) / max(
+            league_avg_away, 0.01
+        )
         attack_away = (s["away_scored"] / s["away_games"]) / max(league_avg_away, 0.01)
-        defense_away = (s["away_conceded"] / s["away_games"]) / max(league_avg_home, 0.01)
+        defense_away = (s["away_conceded"] / s["away_games"]) / max(
+            league_avg_home, 0.01
+        )
 
         strength[team] = {
             "attack_home": attack_home,
@@ -330,6 +382,7 @@ def team_strengths(matches, league_avg_home, league_avg_away):
         }
 
     return strength
+
 
 def expected_goals(home, away, strength, league_avg_home, league_avg_away):
     # fallback if missing
@@ -345,6 +398,7 @@ def expected_goals(home, away, strength, league_avg_home, league_avg_away):
     xg_h = max(0.1, min(float(xg_h), 4.0))
     xg_a = max(0.1, min(float(xg_a), 4.0))
     return xg_h, xg_a
+
 
 # =========================
 # Picks selection + evaluation
@@ -369,16 +423,19 @@ def pick_candidates(probs):
     out.sort(key=lambda x: x[1], reverse=True)
     return out
 
+
 def rationale_from_probs(probs, xg_home, xg_away):
     # short transparent drivers
     total = xg_home + xg_away
     return f"xG {xg_home:.2f}-{xg_away:.2f} (total {total:.2f}) | 1X2 H {probs['home']:.3f} D {probs['draw']:.3f} A {probs['away']:.3f} | U2.5 {probs['under_25']:.3f} | BTTS No {probs['btts_no']:.3f}"
 
+
 def eval_pick(market, hg, ag):
     # return "WIN"/"LOSS"
     if hg is None or ag is None:
         return "PENDING"
-    hg = int(hg); ag = int(ag)
+    hg = int(hg)
+    ag = int(ag)
 
     if market == "Home Win":
         return "WIN" if hg > ag else "LOSS"
@@ -396,6 +453,7 @@ def eval_pick(market, hg, ag):
         return "WIN" if (hg == 0 or ag == 0) else "LOSS"
     return "PENDING"
 
+
 def evaluate_finished_picks():
     conn = db()
     cur = conn.cursor()
@@ -411,16 +469,19 @@ def evaluate_finished_picks():
 
     for r in rows:
         status = eval_pick(r["market"], r["home_goals"], r["away_goals"])
-        upsert_pick({
-            "league": r["league"],
-            "match_id": r["match_id"],
-            "market": r["market"],
-            "prob": None,
-            "fair": None,
-            "rationale": None,
-            "status": status,
-            "updated_at": now_utc().isoformat()
-        })
+        upsert_pick(
+            {
+                "league": r["league"],
+                "match_id": r["match_id"],
+                "market": r["market"],
+                "prob": None,
+                "fair": None,
+                "rationale": None,
+                "status": status,
+                "updated_at": now_utc().isoformat(),
+            }
+        )
+
 
 # =========================
 # MAIN
@@ -438,7 +499,11 @@ def run_competition(code):
         return
 
     finished = [m for m in matches if m.get("status") == "FINISHED"]
-    upcoming = [m for m in matches if m.get("status") in ("SCHEDULED", "TIMED", "IN_PLAY", "PAUSED")]
+    upcoming = [
+        m
+        for m in matches
+        if m.get("status") in ("SCHEDULED", "TIMED", "IN_PLAY", "PAUSED")
+    ]
 
     league_avg_home, league_avg_away, used = league_finished_stats(matches)
     print(f"Finished matches used: {used} | Upcoming in {DAYS_AHEAD}d: {len(upcoming)}")
@@ -467,27 +532,31 @@ def run_competition(code):
         hg = int(hg) if hg is not None else None
         ag = int(ag) if ag is not None else None
 
-        xg_h, xg_a = expected_goals(home, away, strength, league_avg_home, league_avg_away)
+        xg_h, xg_a = expected_goals(
+            home, away, strength, league_avg_home, league_avg_away
+        )
         probs = match_probs(xg_h, xg_a)
         probs_json = json.dumps(probs, ensure_ascii=False)
 
-        upsert_match({
-            "league": code,
-            "match_id": mid,
-            "utcDate": utcDate,
-            "status": status,
-            "home": home,
-            "away": away,
-            "home_goals": hg,
-            "away_goals": ag,
-            "crest_home": crest_home,
-            "crest_away": crest_away,
-            "xg_home": float(round(xg_h, 2)),
-            "xg_away": float(round(xg_a, 2)),
-            "xg_total": float(round(xg_h + xg_a, 2)),
-            "probs_json": probs_json,
-            "updated_at": updated_at
-        })
+        upsert_match(
+            {
+                "league": code,
+                "match_id": mid,
+                "utcDate": utcDate,
+                "status": status,
+                "home": home,
+                "away": away,
+                "home_goals": hg,
+                "away_goals": ag,
+                "crest_home": crest_home,
+                "crest_away": crest_away,
+                "xg_home": float(round(xg_h, 2)),
+                "xg_away": float(round(xg_a, 2)),
+                "xg_total": float(round(xg_h + xg_a, 2)),
+                "probs_json": probs_json,
+                "updated_at": updated_at,
+            }
+        )
         saved_matches += 1
 
         # Candidates only for upcoming (predict)
@@ -497,20 +566,23 @@ def run_competition(code):
                 # pick top 1 per match (clean MVP)
                 market, p, fair = cands[0]
                 rationale = rationale_from_probs(probs, xg_h, xg_a)
-                upsert_pick({
-                    "league": code,
-                    "match_id": mid,
-                    "market": market,
-                    "prob": float(p),
-                    "fair": float(fair) if fair else None,
-                    "rationale": rationale,
-                    "status": "PENDING",
-                    "updated_at": updated_at
-                })
+                upsert_pick(
+                    {
+                        "league": code,
+                        "match_id": mid,
+                        "market": market,
+                        "prob": float(p),
+                        "fair": float(fair) if fair else None,
+                        "rationale": rationale,
+                        "status": "PENDING",
+                        "updated_at": updated_at,
+                    }
+                )
                 saved_picks += 1
 
     set_meta(f"last_update_{code}", updated_at)
     print(f"Saved matches -> DB: {saved_matches} | Saved picks -> DB: {saved_picks}")
+
 
 def main():
     init_db()
@@ -522,6 +594,6 @@ def main():
     print("\n✅ Picks evaluados (WIN/LOSS) donde haya FT.")
     print("✅ SQLite actualizado.")
 
+
 if __name__ == "__main__":
     main()
-

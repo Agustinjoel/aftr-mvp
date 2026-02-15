@@ -75,7 +75,8 @@ def upsert_match(
     away_goals: Optional[int],
 ):
     with get_conn() as conn:
-        conn.execute("""
+        conn.execute(
+            """
         INSERT INTO matches (league, match_id, utcDate, status, home, away, home_goals, away_goals, last_updated)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(league, match_id) DO UPDATE SET
@@ -86,11 +87,19 @@ def upsert_match(
             home_goals=excluded.home_goals,
             away_goals=excluded.away_goals,
             last_updated=excluded.last_updated
-        """, (
-            league, match_id, utcDate, status, home, away,
-            home_goals, away_goals,
-            datetime.utcnow().isoformat()
-        ))
+        """,
+            (
+                league,
+                match_id,
+                utcDate,
+                status,
+                home,
+                away,
+                home_goals,
+                away_goals,
+                datetime.utcnow().isoformat(),
+            ),
+        )
 
 
 def upsert_pick(
@@ -110,7 +119,8 @@ def upsert_pick(
     candidates_json = json.dumps(candidates, ensure_ascii=False)
 
     with get_conn() as conn:
-        conn.execute("""
+        conn.execute(
+            """
         INSERT INTO picks (
             league, match_id, created_at,
             xg_home, xg_away, xg_total,
@@ -129,12 +139,21 @@ def upsert_pick(
             best_market=excluded.best_market,
             best_prob=excluded.best_prob,
             best_fair=excluded.best_fair
-        """, (
-            league, match_id, created_at,
-            xg_home, xg_away, xg_total,
-            probs_json, candidates_json,
-            best_market, best_prob, best_fair
-        ))
+        """,
+            (
+                league,
+                match_id,
+                created_at,
+                xg_home,
+                xg_away,
+                xg_total,
+                probs_json,
+                candidates_json,
+                best_market,
+                best_prob,
+                best_fair,
+            ),
+        )
 
 
 def _evaluate_market(market: str, hg: int, ag: int) -> Tuple[str, str]:
@@ -201,11 +220,14 @@ def evaluate_finished_picks():
 
             res, reason = _evaluate_market(market, hg or 0, ag or 0)
 
-            conn.execute("""
+            conn.execute(
+                """
             UPDATE picks
             SET result = ?, result_reason = ?
             WHERE league = ? AND match_id = ?
-            """, (res, reason, league, match_id))
+            """,
+                (res, reason, league, match_id),
+            )
 
 
 def fetch_sections(league: str) -> Dict[str, List[Dict[str, Any]]]:
@@ -213,16 +235,20 @@ def fetch_sections(league: str) -> Dict[str, List[Dict[str, Any]]]:
     Devuelve LIVE / UPCOMING / RECENT con info de pick (si existe).
     """
     with get_conn() as conn:
-        live = conn.execute("""
+        live = conn.execute(
+            """
         SELECT m.*, p.best_market, p.best_prob, p.best_fair, p.result, p.result_reason,
                p.xg_home, p.xg_away, p.xg_total
         FROM matches m
         LEFT JOIN picks p ON p.league = m.league AND p.match_id = m.match_id
         WHERE m.league = ? AND m.status IN ('IN_PLAY', 'PAUSED')
         ORDER BY m.utcDate ASC
-        """, (league,)).fetchall()
+        """,
+            (league,),
+        ).fetchall()
 
-        upcoming = conn.execute("""
+        upcoming = conn.execute(
+            """
         SELECT m.*, p.best_market, p.best_prob, p.best_fair, p.result, p.result_reason,
                p.xg_home, p.xg_away, p.xg_total
         FROM matches m
@@ -230,9 +256,12 @@ def fetch_sections(league: str) -> Dict[str, List[Dict[str, Any]]]:
         WHERE m.league = ? AND m.status IN ('SCHEDULED', 'TIMED')
         ORDER BY m.utcDate ASC
         LIMIT 50
-        """, (league,)).fetchall()
+        """,
+            (league,),
+        ).fetchall()
 
-        recent = conn.execute("""
+        recent = conn.execute(
+            """
         SELECT m.*, p.best_market, p.best_prob, p.best_fair, p.result, p.result_reason,
                p.xg_home, p.xg_away, p.xg_total
         FROM matches m
@@ -240,7 +269,9 @@ def fetch_sections(league: str) -> Dict[str, List[Dict[str, Any]]]:
         WHERE m.league = ? AND m.status = 'FINISHED'
         ORDER BY m.utcDate DESC
         LIMIT 30
-        """, (league,)).fetchall()
+        """,
+            (league,),
+        ).fetchall()
 
     def to_list(rs):
         out = []
@@ -248,7 +279,11 @@ def fetch_sections(league: str) -> Dict[str, List[Dict[str, Any]]]:
             out.append({k: r[k] for k in r.keys()})
         return out
 
-    return {"live": to_list(live), "upcoming": to_list(upcoming), "recent": to_list(recent)}
+    return {
+        "live": to_list(live),
+        "upcoming": to_list(upcoming),
+        "recent": to_list(recent),
+    }
 
 
 def get_last_updated() -> Optional[str]:

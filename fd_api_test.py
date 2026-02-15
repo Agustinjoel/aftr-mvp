@@ -2,9 +2,7 @@ import requests
 
 API_KEY = "3c139115487a45faa9ed84c633120c21"
 
-headers = {
-    "X-Auth-Token": API_KEY
-}
+headers = {"X-Auth-Token": API_KEY}
 
 url = "https://api.football-data.org/v4/competitions/PL/matches"
 
