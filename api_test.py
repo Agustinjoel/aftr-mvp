@@ -154,7 +154,7 @@ def load_json_league(league: str):
             with open(picks_file, "r", encoding="utf-8") as f:
                 picks = json.load(f)
             for p in picks:
-                mid = p.get("match_id") or p.get("id") or p.get("fixture_id")
+                mid = m.get("match_id") or m.get("matchId") or m.get("id") or m.get("fixture", {}).get("id")
                 if mid is None:
                     continue
                 picks_by_match[str(mid)] = p
@@ -163,14 +163,20 @@ def load_json_league(league: str):
 
     out = []
     for m in matches:
-        mid = m.get("match_id")
-        if mid is None:
-            mid = m.get("id")
-        if mid is None:
-            mid = m.get("fixture", {}).get("id")
+        mid = (
+    m.get("match_id")
+    or m.get("matchId")
+    or m.get("id")
+    or m.get("fixture", {}).get("id")
+)
 
-        mid_key = str(mid) if mid is not None else None
-        p = picks_by_match.get(mid_key, {}) if mid_key else {}
+# 🔥 fallback inteligente si no hay id
+if mid is None:
+    mid = f"{m.get('home','?')}_{m.get('away','?')}_{m.get('utcDate','?')}"
+
+mid_key = str(mid)
+p = picks_by_match.get(mid_key, {})
+
 
         home = m.get("home") or _norm_team_name(m.get("homeTeam")) or _norm_team_name(m.get("teams", {}).get("home"))
         away = m.get("away") or _norm_team_name(m.get("awayTeam")) or _norm_team_name(m.get("teams", {}).get("away"))
