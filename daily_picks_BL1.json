@@ -1,268 +1,258 @@
 [
   {
-    "league": "BL1",
-    "home": "Borussia Dortmund",
-    "away": "1. FSV Mainz 05",
-    "utcDate": "2026-02-13T19:30:00Z",
-    "xg_home": 2.56,
-    "xg_away": 0.71,
-    "xg_total": 3.27,
-    "probs": {
-      "home": 0.773,
-      "draw": 0.146,
-      "away": 0.082,
-      "under_25": 0.365,
-      "over_25": 0.635,
-      "btts_yes": 0.471,
-      "btts_no": 0.529
-    },
-    "candidates": [
-      {
-        "market": "Home Win",
-        "prob": 0.773,
-        "fair": 1.29
-      },
-      {
-        "market": "Over 2.5",
-        "prob": 0.635,
-        "fair": 1.57
-      }
-    ]
-  },
-  {
-    "league": "BL1",
+    "match_id": 540595,
+    "utcDate": "2026-02-14T14:30:00Z",
+    "status": "TIMED",
     "home": "SV Werder Bremen",
     "away": "FC Bayern München",
-    "utcDate": "2026-02-14T14:30:00Z",
-    "xg_home": 0.63,
-    "xg_away": 4.2,
-    "xg_total": 4.83,
+    "xg_home": 0.56,
+    "xg_away": 4.15,
+    "xg_total": 4.72,
     "probs": {
-      "home": 0.02,
-      "draw": 0.048,
-      "away": 0.932,
-      "under_25": 0.141,
-      "over_25": 0.859,
-      "btts_yes": 0.46,
-      "btts_no": 0.54
+      "home": 0.018,
+      "draw": 0.049,
+      "away": 0.933,
+      "over_25": 0.84,
+      "under_25": 0.16,
+      "btts_yes": 0.423,
+      "btts_no": 0.577
     },
     "candidates": [
       {
         "market": "Away Win",
-        "prob": 0.932,
+        "prob": 0.933,
         "fair": 1.07
-      },
-      {
-        "market": "Over 2.5",
-        "prob": 0.859,
-        "fair": 1.16
       }
     ]
   },
   {
-    "league": "BL1",
+    "match_id": 540596,
+    "utcDate": "2026-02-14T14:30:00Z",
+    "status": "TIMED",
     "home": "TSG 1899 Hoffenheim",
     "away": "SC Freiburg",
-    "utcDate": "2026-02-14T14:30:00Z",
-    "xg_home": 2.79,
-    "xg_away": 1.05,
-    "xg_total": 3.85,
+    "xg_home": 4.06,
+    "xg_away": 0.57,
+    "xg_total": 4.63,
     "probs": {
-      "home": 0.735,
-      "draw": 0.149,
-      "away": 0.116,
-      "under_25": 0.261,
-      "over_25": 0.739,
-      "btts_yes": 0.612,
-      "btts_no": 0.388
+      "home": 0.928,
+      "draw": 0.052,
+      "away": 0.02,
+      "over_25": 0.831,
+      "under_25": 0.169,
+      "btts_yes": 0.425,
+      "btts_no": 0.575
     },
     "candidates": [
       {
-        "market": "Over 2.5",
-        "prob": 0.739,
-        "fair": 1.35
-      },
-      {
         "market": "Home Win",
-        "prob": 0.735,
-        "fair": 1.36
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.612,
-        "fair": 1.63
+        "prob": 0.928,
+        "fair": 1.08
       }
     ]
   },
   {
-    "league": "BL1",
-    "home": "Bayer 04 Leverkusen",
-    "away": "FC St. Pauli 1910",
+    "match_id": 540598,
     "utcDate": "2026-02-14T14:30:00Z",
-    "xg_home": 1.9,
-    "xg_away": 0.56,
-    "xg_total": 2.47,
+    "status": "TIMED",
+    "home": "Eintracht Frankfurt",
+    "away": "Borussia Mönchengladbach",
+    "xg_home": 1.13,
+    "xg_away": 1.39,
+    "xg_total": 2.52,
     "probs": {
-      "home": 0.696,
-      "draw": 0.203,
-      "away": 0.101,
-      "under_25": 0.553,
-      "over_25": 0.447,
-      "btts_yes": 0.366,
-      "btts_no": 0.634
+      "home": 0.305,
+      "draw": 0.266,
+      "away": 0.428,
+      "over_25": 0.46,
+      "under_25": 0.54,
+      "btts_yes": 0.508,
+      "btts_no": 0.492
     },
     "candidates": [
       {
-        "market": "Home Win",
-        "prob": 0.696,
+        "market": "Under 2.5",
+        "prob": 0.54,
+        "fair": 1.85
+      }
+    ]
+  },
+  {
+    "match_id": 540600,
+    "utcDate": "2026-02-14T14:30:00Z",
+    "status": "TIMED",
+    "home": "Hamburger SV",
+    "away": "1. FC Union Berlin",
+    "xg_home": 0.95,
+    "xg_away": 0.69,
+    "xg_total": 1.64,
+    "probs": {
+      "home": 0.401,
+      "draw": 0.343,
+      "away": 0.256,
+      "over_25": 0.228,
+      "under_25": 0.772,
+      "btts_yes": 0.306,
+      "btts_no": 0.694
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.772,
+        "fair": 1.3
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.694,
         "fair": 1.44
       }
     ]
   },
   {
-    "league": "BL1",
-    "home": "RB Leipzig",
-    "away": "VfL Wolfsburg",
-    "utcDate": "2026-02-15T16:30:00Z",
-    "xg_home": 2.81,
-    "xg_away": 1.07,
-    "xg_total": 3.88,
+    "match_id": 540601,
+    "utcDate": "2026-02-14T14:30:00Z",
+    "status": "TIMED",
+    "home": "Bayer 04 Leverkusen",
+    "away": "FC St. Pauli 1910",
+    "xg_home": 2.33,
+    "xg_away": 0.62,
+    "xg_total": 2.95,
     "probs": {
-      "home": 0.735,
-      "draw": 0.148,
-      "away": 0.117,
-      "under_25": 0.256,
-      "over_25": 0.744,
-      "btts_yes": 0.618,
-      "btts_no": 0.382
+      "home": 0.759,
+      "draw": 0.16,
+      "away": 0.081,
+      "over_25": 0.565,
+      "under_25": 0.435,
+      "btts_yes": 0.416,
+      "btts_no": 0.584
     },
     "candidates": [
       {
-        "market": "Over 2.5",
-        "prob": 0.744,
-        "fair": 1.34
-      },
-      {
         "market": "Home Win",
-        "prob": 0.735,
-        "fair": 1.36
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.618,
-        "fair": 1.62
+        "prob": 0.759,
+        "fair": 1.32
       }
     ]
   },
   {
-    "league": "BL1",
-    "home": "1. FSV Mainz 05",
-    "away": "Hamburger SV",
-    "utcDate": "2026-02-20T19:30:00Z",
-    "xg_home": 1.14,
-    "xg_away": 0.49,
-    "xg_total": 1.63,
+    "match_id": 540603,
+    "utcDate": "2026-02-14T17:30:00Z",
+    "status": "TIMED",
+    "home": "VfB Stuttgart",
+    "away": "1. FC Köln",
+    "xg_home": 1.5,
+    "xg_away": 0.93,
+    "xg_total": 2.43,
     "probs": {
-      "home": 0.522,
-      "draw": 0.321,
-      "away": 0.157,
-      "under_25": 0.776,
-      "over_25": 0.224,
-      "btts_yes": 0.262,
-      "btts_no": 0.738
+      "home": 0.507,
+      "draw": 0.261,
+      "away": 0.232,
+      "over_25": 0.438,
+      "under_25": 0.562,
+      "btts_yes": 0.47,
+      "btts_no": 0.53
     },
     "candidates": [
       {
         "market": "Under 2.5",
-        "prob": 0.776,
-        "fair": 1.29
-      },
-      {
-        "market": "BTTS No",
-        "prob": 0.738,
-        "fair": 1.36
+        "prob": 0.562,
+        "fair": 1.78
       }
     ]
   },
   {
-    "league": "BL1",
-    "home": "1. FC Union Berlin",
-    "away": "Bayer 04 Leverkusen",
-    "utcDate": "2026-02-21T14:30:00Z",
-    "xg_home": 1.44,
-    "xg_away": 2.01,
-    "xg_total": 3.45,
+    "match_id": 540602,
+    "utcDate": "2026-02-15T14:30:00Z",
+    "status": "TIMED",
+    "home": "FC Augsburg",
+    "away": "1. FC Heidenheim 1846",
+    "xg_home": 1.48,
+    "xg_away": 1.11,
+    "xg_total": 2.59,
     "probs": {
-      "home": 0.275,
-      "draw": 0.216,
-      "away": 0.51,
-      "under_25": 0.329,
-      "over_25": 0.671,
-      "btts_yes": 0.661,
-      "btts_no": 0.339
+      "home": 0.456,
+      "draw": 0.259,
+      "away": 0.285,
+      "over_25": 0.478,
+      "under_25": 0.522,
+      "btts_yes": 0.518,
+      "btts_no": 0.482
     },
     "candidates": [
       {
-        "market": "Over 2.5",
-        "prob": 0.671,
-        "fair": 1.49
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.661,
-        "fair": 1.51
+        "market": "Under 2.5",
+        "prob": 0.522,
+        "fair": 1.92
       }
     ]
   },
   {
-    "league": "BL1",
-    "home": "FC Bayern München",
-    "away": "Eintracht Frankfurt",
-    "utcDate": "2026-02-21T14:30:00Z",
-    "xg_home": 4.5,
-    "xg_away": 1.36,
-    "xg_total": 5.86,
+    "match_id": 540599,
+    "utcDate": "2026-02-15T16:30:00Z",
+    "status": "TIMED",
+    "home": "RB Leipzig",
+    "away": "VfL Wolfsburg",
+    "xg_home": 2.95,
+    "xg_away": 1.21,
+    "xg_total": 4.17,
     "probs": {
-      "home": 0.868,
-      "draw": 0.075,
-      "away": 0.057,
-      "under_25": 0.069,
-      "over_25": 0.931,
-      "btts_yes": 0.735,
-      "btts_no": 0.265
+      "home": 0.725,
+      "draw": 0.147,
+      "away": 0.128,
+      "over_25": 0.783,
+      "under_25": 0.217,
+      "btts_yes": 0.665,
+      "btts_no": 0.335
     },
     "candidates": [
-      {
-        "market": "Over 2.5",
-        "prob": 0.931,
-        "fair": 1.07
-      },
       {
         "market": "Home Win",
-        "prob": 0.868,
-        "fair": 1.15
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.735,
-        "fair": 1.36
+        "prob": 0.725,
+        "fair": 1.38
       }
     ]
   },
   {
-    "league": "BL1",
-    "home": "VfL Wolfsburg",
-    "away": "FC Augsburg",
-    "utcDate": "2026-02-21T14:30:00Z",
-    "xg_home": 1.8,
-    "xg_away": 1.43,
-    "xg_total": 3.23,
+    "match_id": 540612,
+    "utcDate": "2026-02-20T19:30:00Z",
+    "status": "TIMED",
+    "home": "1. FSV Mainz 05",
+    "away": "Hamburger SV",
+    "xg_home": 1.6,
+    "xg_away": 0.68,
+    "xg_total": 2.28,
     "probs": {
-      "home": 0.463,
-      "draw": 0.229,
-      "away": 0.308,
-      "under_25": 0.373,
-      "over_25": 0.627,
+      "home": 0.595,
+      "draw": 0.248,
+      "away": 0.157,
+      "over_25": 0.399,
+      "under_25": 0.601,
+      "btts_yes": 0.394,
+      "btts_no": 0.606
+    },
+    "candidates": [
+      {
+        "market": "BTTS No",
+        "prob": 0.606,
+        "fair": 1.65
+      }
+    ]
+  },
+  {
+    "match_id": 540604,
+    "utcDate": "2026-02-21T14:30:00Z",
+    "status": "TIMED",
+    "home": "1. FC Union Berlin",
+    "away": "Bayer 04 Leverkusen",
+    "xg_home": 1.4,
+    "xg_away": 1.86,
+    "xg_total": 3.26,
+    "probs": {
+      "home": 0.291,
+      "draw": 0.226,
+      "away": 0.482,
+      "over_25": 0.631,
+      "under_25": 0.369,
       "btts_yes": 0.636,
       "btts_no": 0.364
     },
@@ -271,101 +261,193 @@
         "market": "BTTS Yes",
         "prob": 0.636,
         "fair": 1.57
-      },
-      {
-        "market": "Over 2.5",
-        "prob": 0.627,
-        "fair": 1.59
       }
     ]
   },
   {
-    "league": "BL1",
+    "match_id": 540605,
+    "utcDate": "2026-02-21T14:30:00Z",
+    "status": "TIMED",
+    "home": "FC Bayern München",
+    "away": "Eintracht Frankfurt",
+    "xg_home": 5.39,
+    "xg_away": 1.55,
+    "xg_total": 6.93,
+    "probs": {
+      "home": 0.885,
+      "draw": 0.065,
+      "away": 0.05,
+      "over_25": 0.962,
+      "under_25": 0.038,
+      "btts_yes": 0.783,
+      "btts_no": 0.217
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.885,
+        "fair": 1.13
+      }
+    ]
+  },
+  {
+    "match_id": 540610,
+    "utcDate": "2026-02-21T14:30:00Z",
+    "status": "TIMED",
+    "home": "VfL Wolfsburg",
+    "away": "FC Augsburg",
+    "xg_home": 2.0,
+    "xg_away": 1.14,
+    "xg_total": 3.14,
+    "probs": {
+      "home": 0.573,
+      "draw": 0.215,
+      "away": 0.212,
+      "over_25": 0.606,
+      "under_25": 0.394,
+      "btts_yes": 0.587,
+      "btts_no": 0.413
+    },
+    "candidates": [
+      {
+        "market": "Over 2.5",
+        "prob": 0.606,
+        "fair": 1.65
+      }
+    ]
+  },
+  {
+    "match_id": 540611,
+    "utcDate": "2026-02-21T14:30:00Z",
+    "status": "TIMED",
     "home": "1. FC Köln",
     "away": "TSG 1899 Hoffenheim",
-    "utcDate": "2026-02-21T14:30:00Z",
-    "xg_home": 1.37,
-    "xg_away": 1.93,
-    "xg_total": 3.3,
+    "xg_home": 1.23,
+    "xg_away": 1.79,
+    "xg_total": 3.02,
     "probs": {
-      "home": 0.273,
-      "draw": 0.221,
+      "home": 0.263,
+      "draw": 0.232,
       "away": 0.505,
-      "under_25": 0.36,
-      "over_25": 0.64,
-      "btts_yes": 0.638,
-      "btts_no": 0.362
+      "over_25": 0.58,
+      "under_25": 0.42,
+      "btts_yes": 0.589,
+      "btts_no": 0.411
     },
     "candidates": [
       {
-        "market": "Over 2.5",
-        "prob": 0.64,
-        "fair": 1.56
-      },
-      {
         "market": "BTTS Yes",
-        "prob": 0.638,
-        "fair": 1.57
+        "prob": 0.589,
+        "fair": 1.7
       }
     ]
   },
   {
-    "league": "BL1",
+    "match_id": 540606,
+    "utcDate": "2026-02-21T17:30:00Z",
+    "status": "TIMED",
     "home": "RB Leipzig",
     "away": "Borussia Dortmund",
-    "utcDate": "2026-02-21T17:30:00Z",
-    "xg_home": 1.46,
-    "xg_away": 1.7,
-    "xg_total": 3.16,
+    "xg_home": 1.45,
+    "xg_away": 1.86,
+    "xg_total": 3.31,
     "probs": {
-      "home": 0.331,
-      "draw": 0.234,
-      "away": 0.435,
-      "under_25": 0.388,
-      "over_25": 0.612,
-      "btts_yes": 0.628,
-      "btts_no": 0.372
+      "home": 0.304,
+      "draw": 0.225,
+      "away": 0.471,
+      "over_25": 0.642,
+      "under_25": 0.358,
+      "btts_yes": 0.646,
+      "btts_no": 0.354
     },
     "candidates": [
       {
         "market": "BTTS Yes",
-        "prob": 0.628,
-        "fair": 1.59
-      },
-      {
-        "market": "Over 2.5",
-        "prob": 0.612,
-        "fair": 1.63
+        "prob": 0.646,
+        "fair": 1.55
       }
     ]
   },
   {
-    "league": "BL1",
+    "match_id": 540609,
+    "utcDate": "2026-02-22T14:30:00Z",
+    "status": "TIMED",
+    "home": "SC Freiburg",
+    "away": "Borussia Mönchengladbach",
+    "xg_home": 1.58,
+    "xg_away": 0.83,
+    "xg_total": 2.41,
+    "probs": {
+      "home": 0.55,
+      "draw": 0.252,
+      "away": 0.198,
+      "over_25": 0.433,
+      "under_25": 0.567,
+      "btts_yes": 0.449,
+      "btts_no": 0.551
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.567,
+        "fair": 1.76
+      }
+    ]
+  },
+  {
+    "match_id": 540607,
+    "utcDate": "2026-02-22T16:30:00Z",
+    "status": "TIMED",
+    "home": "FC St. Pauli 1910",
+    "away": "SV Werder Bremen",
+    "xg_home": 0.67,
+    "xg_away": 0.69,
+    "xg_total": 1.36,
+    "probs": {
+      "home": 0.297,
+      "draw": 0.39,
+      "away": 0.314,
+      "over_25": 0.157,
+      "under_25": 0.843,
+      "btts_yes": 0.244,
+      "btts_no": 0.756
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.843,
+        "fair": 1.19
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.756,
+        "fair": 1.32
+      }
+    ]
+  },
+  {
+    "match_id": 540608,
+    "utcDate": "2026-02-22T18:30:00Z",
+    "status": "TIMED",
     "home": "1. FC Heidenheim 1846",
     "away": "VfB Stuttgart",
-    "utcDate": "2026-02-22T18:30:00Z",
-    "xg_home": 0.82,
-    "xg_away": 3.27,
-    "xg_total": 4.08,
+    "xg_home": 0.69,
+    "xg_away": 3.98,
+    "xg_total": 4.67,
     "probs": {
-      "home": 0.059,
-      "draw": 0.102,
-      "away": 0.839,
-      "under_25": 0.226,
-      "over_25": 0.774,
-      "btts_yes": 0.537,
-      "btts_no": 0.463
+      "home": 0.028,
+      "draw": 0.063,
+      "away": 0.909,
+      "over_25": 0.836,
+      "under_25": 0.164,
+      "btts_yes": 0.489,
+      "btts_no": 0.511
     },
     "candidates": [
       {
         "market": "Away Win",
-        "prob": 0.839,
-        "fair": 1.19
-      },
-      {
-        "market": "Over 2.5",
-        "prob": 0.774,
-        "fair": 1.29
+        "prob": 0.909,
+        "fair": 1.1
       }
     ]
   }

@@ -1,236 +1,307 @@
 [
   {
-    "league": "PL",
+    "match_id": 538094,
+    "utcDate": "2026-02-18T20:00:00Z",
+    "status": "TIMED",
     "home": "Wolverhampton Wanderers FC",
     "away": "Arsenal FC",
-    "utcDate": "2026-02-18T20:00:00Z",
-    "xg_home": 0.42,
-    "xg_away": 2.55,
-    "xg_total": 2.97,
+    "xg_home": 0.4,
+    "xg_away": 2.35,
+    "xg_total": 2.75,
     "probs": {
-      "home": 0.043,
-      "draw": 0.123,
-      "away": 0.834,
-      "under_25": 0.43,
-      "over_25": 0.57,
-      "btts_yes": 0.317,
-      "btts_no": 0.683
+      "home": 0.047,
+      "draw": 0.14,
+      "away": 0.813,
+      "over_25": 0.518,
+      "under_25": 0.482,
+      "btts_yes": 0.298,
+      "btts_no": 0.702
     },
     "candidates": [
       {
         "market": "Away Win",
-        "prob": 0.834,
-        "fair": 1.2
+        "prob": 0.813,
+        "fair": 1.23
       },
       {
         "market": "BTTS No",
-        "prob": 0.683,
-        "fair": 1.46
-      },
-      {
-        "market": "Over 2.5",
-        "prob": 0.57,
-        "fair": 1.75
+        "prob": 0.702,
+        "fair": 1.42
       }
     ]
   },
   {
-    "league": "PL",
+    "match_id": 538046,
+    "utcDate": "2026-02-21T15:00:00Z",
+    "status": "TIMED",
     "home": "Aston Villa FC",
     "away": "Leeds United FC",
-    "utcDate": "2026-02-21T15:00:00Z",
-    "xg_home": 1.97,
-    "xg_away": 0.67,
-    "xg_total": 2.64,
+    "xg_home": 2.0,
+    "xg_away": 0.48,
+    "xg_total": 2.47,
     "probs": {
-      "home": 0.681,
-      "draw": 0.202,
-      "away": 0.118,
-      "under_25": 0.509,
-      "over_25": 0.491,
-      "btts_yes": 0.421,
-      "btts_no": 0.579
+      "home": 0.736,
+      "draw": 0.186,
+      "away": 0.078,
+      "over_25": 0.449,
+      "under_25": 0.551,
+      "btts_yes": 0.327,
+      "btts_no": 0.673
     },
     "candidates": [
       {
         "market": "Home Win",
-        "prob": 0.681,
-        "fair": 1.47
-      }
-    ]
-  },
-  {
-    "league": "PL",
-    "home": "Chelsea FC",
-    "away": "Burnley FC",
-    "utcDate": "2026-02-21T15:00:00Z",
-    "xg_home": 2.7,
-    "xg_away": 1.15,
-    "xg_total": 3.85,
-    "probs": {
-      "home": 0.701,
-      "draw": 0.16,
-      "away": 0.138,
-      "under_25": 0.261,
-      "over_25": 0.739,
-      "btts_yes": 0.638,
-      "btts_no": 0.362
-    },
-    "candidates": [
-      {
-        "market": "Over 2.5",
-        "prob": 0.739,
-        "fair": 1.35
-      },
-      {
-        "market": "Home Win",
-        "prob": 0.701,
-        "fair": 1.43
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.638,
-        "fair": 1.57
-      }
-    ]
-  },
-  {
-    "league": "PL",
-    "home": "West Ham United FC",
-    "away": "AFC Bournemouth",
-    "utcDate": "2026-02-21T17:30:00Z",
-    "xg_home": 2.02,
-    "xg_away": 2.98,
-    "xg_total": 5.0,
-    "probs": {
-      "home": 0.254,
-      "draw": 0.169,
-      "away": 0.577,
-      "under_25": 0.125,
-      "over_25": 0.875,
-      "btts_yes": 0.823,
-      "btts_no": 0.177
-    },
-    "candidates": [
-      {
-        "market": "Over 2.5",
-        "prob": 0.875,
-        "fair": 1.14
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.823,
-        "fair": 1.21
-      }
-    ]
-  },
-  {
-    "league": "PL",
-    "home": "Manchester City FC",
-    "away": "Newcastle United FC",
-    "utcDate": "2026-02-21T20:00:00Z",
-    "xg_home": 2.09,
-    "xg_away": 0.5,
-    "xg_total": 2.59,
-    "probs": {
-      "home": 0.747,
-      "draw": 0.177,
-      "away": 0.076,
-      "under_25": 0.522,
-      "over_25": 0.478,
-      "btts_yes": 0.344,
-      "btts_no": 0.656
-    },
-    "candidates": [
-      {
-        "market": "Home Win",
-        "prob": 0.747,
-        "fair": 1.34
+        "prob": 0.736,
+        "fair": 1.36
       },
       {
         "market": "BTTS No",
-        "prob": 0.656,
+        "prob": 0.673,
+        "fair": 1.49
+      }
+    ]
+  },
+  {
+    "match_id": 538048,
+    "utcDate": "2026-02-21T15:00:00Z",
+    "status": "TIMED",
+    "home": "Brentford FC",
+    "away": "Brighton & Hove Albion FC",
+    "xg_home": 2.0,
+    "xg_away": 0.78,
+    "xg_total": 2.78,
+    "probs": {
+      "home": 0.659,
+      "draw": 0.204,
+      "away": 0.137,
+      "over_25": 0.524,
+      "under_25": 0.476,
+      "btts_yes": 0.467,
+      "btts_no": 0.533
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.659,
         "fair": 1.52
       }
     ]
   },
   {
-    "league": "PL",
+    "match_id": 538049,
+    "utcDate": "2026-02-21T15:00:00Z",
+    "status": "TIMED",
+    "home": "Chelsea FC",
+    "away": "Burnley FC",
+    "xg_home": 2.56,
+    "xg_away": 1.27,
+    "xg_total": 3.83,
+    "probs": {
+      "home": 0.651,
+      "draw": 0.176,
+      "away": 0.173,
+      "over_25": 0.734,
+      "under_25": 0.266,
+      "btts_yes": 0.663,
+      "btts_no": 0.337
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.651,
+        "fair": 1.54
+      }
+    ]
+  },
+  {
+    "match_id": 538054,
+    "utcDate": "2026-02-21T17:30:00Z",
+    "status": "TIMED",
+    "home": "West Ham United FC",
+    "away": "AFC Bournemouth",
+    "xg_home": 2.41,
+    "xg_away": 2.38,
+    "xg_total": 4.79,
+    "probs": {
+      "home": 0.41,
+      "draw": 0.189,
+      "away": 0.401,
+      "over_25": 0.856,
+      "under_25": 0.144,
+      "btts_yes": 0.825,
+      "btts_no": 0.175
+    },
+    "candidates": [
+      {
+        "market": "Over 2.5",
+        "prob": 0.856,
+        "fair": 1.17
+      }
+    ]
+  },
+  {
+    "match_id": 538051,
+    "utcDate": "2026-02-21T20:00:00Z",
+    "status": "TIMED",
+    "home": "Manchester City FC",
+    "away": "Newcastle United FC",
+    "xg_home": 2.62,
+    "xg_away": 0.51,
+    "xg_total": 3.13,
+    "probs": {
+      "home": 0.824,
+      "draw": 0.125,
+      "away": 0.051,
+      "over_25": 0.602,
+      "under_25": 0.398,
+      "btts_yes": 0.368,
+      "btts_no": 0.632
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.824,
+        "fair": 1.21
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.632,
+        "fair": 1.58
+      }
+    ]
+  },
+  {
+    "match_id": 538045,
+    "utcDate": "2026-02-22T14:00:00Z",
+    "status": "TIMED",
     "home": "Sunderland AFC",
     "away": "Fulham FC",
-    "utcDate": "2026-02-22T14:00:00Z",
-    "xg_home": 1.93,
-    "xg_away": 0.62,
-    "xg_total": 2.56,
+    "xg_home": 1.6,
+    "xg_away": 0.69,
+    "xg_total": 2.3,
     "probs": {
-      "home": 0.686,
-      "draw": 0.203,
-      "away": 0.111,
-      "under_25": 0.529,
-      "over_25": 0.471,
+      "home": 0.593,
+      "draw": 0.247,
+      "away": 0.159,
+      "over_25": 0.403,
+      "under_25": 0.597,
+      "btts_yes": 0.399,
+      "btts_no": 0.601
+    },
+    "candidates": [
+      {
+        "market": "BTTS No",
+        "prob": 0.601,
+        "fair": 1.66
+      }
+    ]
+  },
+  {
+    "match_id": 538047,
+    "utcDate": "2026-02-22T14:00:00Z",
+    "status": "TIMED",
+    "home": "Crystal Palace FC",
+    "away": "Wolverhampton Wanderers FC",
+    "xg_home": 1.09,
+    "xg_away": 0.5,
+    "xg_total": 1.59,
+    "probs": {
+      "home": 0.501,
+      "draw": 0.331,
+      "away": 0.168,
+      "over_25": 0.214,
+      "under_25": 0.786,
+      "btts_yes": 0.261,
+      "btts_no": 0.739
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.786,
+        "fair": 1.27
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.739,
+        "fair": 1.35
+      }
+    ]
+  },
+  {
+    "match_id": 538052,
+    "utcDate": "2026-02-22T14:00:00Z",
+    "status": "TIMED",
+    "home": "Nottingham Forest FC",
+    "away": "Liverpool FC",
+    "xg_home": 1.07,
+    "xg_away": 1.57,
+    "xg_total": 2.64,
+    "probs": {
+      "home": 0.258,
+      "draw": 0.252,
+      "away": 0.49,
+      "over_25": 0.493,
+      "under_25": 0.507,
+      "btts_yes": 0.521,
+      "btts_no": 0.479
+    },
+    "candidates": [
+      {
+        "market": "BTTS Yes",
+        "prob": 0.521,
+        "fair": 1.92
+      }
+    ]
+  },
+  {
+    "match_id": 538053,
+    "utcDate": "2026-02-22T16:30:00Z",
+    "status": "TIMED",
+    "home": "Tottenham Hotspur FC",
+    "away": "Arsenal FC",
+    "xg_home": 0.62,
+    "xg_away": 1.99,
+    "xg_total": 2.61,
+    "probs": {
+      "home": 0.105,
+      "draw": 0.196,
+      "away": 0.699,
+      "over_25": 0.483,
+      "under_25": 0.517,
       "btts_yes": 0.397,
       "btts_no": 0.603
     },
     "candidates": [
       {
-        "market": "Home Win",
-        "prob": 0.686,
-        "fair": 1.46
+        "market": "Away Win",
+        "prob": 0.699,
+        "fair": 1.43
       }
     ]
   },
   {
-    "league": "PL",
-    "home": "Crystal Palace FC",
-    "away": "Wolverhampton Wanderers FC",
-    "utcDate": "2026-02-22T14:00:00Z",
-    "xg_home": 1.0,
-    "xg_away": 0.43,
-    "xg_total": 1.43,
+    "match_id": 538050,
+    "utcDate": "2026-02-23T20:00:00Z",
+    "status": "TIMED",
+    "home": "Everton FC",
+    "away": "Manchester United FC",
+    "xg_home": 1.18,
+    "xg_away": 2.77,
+    "xg_total": 3.95,
     "probs": {
-      "home": 0.489,
-      "draw": 0.354,
-      "away": 0.157,
-      "under_25": 0.826,
-      "over_25": 0.174,
-      "btts_yes": 0.221,
-      "btts_no": 0.779
-    },
-    "candidates": [
-      {
-        "market": "Under 2.5",
-        "prob": 0.826,
-        "fair": 1.21
-      },
-      {
-        "market": "BTTS No",
-        "prob": 0.779,
-        "fair": 1.28
-      }
-    ]
-  },
-  {
-    "league": "PL",
-    "home": "Tottenham Hotspur FC",
-    "away": "Arsenal FC",
-    "utcDate": "2026-02-22T16:30:00Z",
-    "xg_home": 0.61,
-    "xg_away": 1.64,
-    "xg_total": 2.25,
-    "probs": {
-      "home": 0.136,
-      "draw": 0.241,
-      "away": 0.623,
-      "under_25": 0.609,
-      "over_25": 0.391,
-      "btts_yes": 0.37,
-      "btts_no": 0.63
+      "home": 0.138,
+      "draw": 0.158,
+      "away": 0.705,
+      "over_25": 0.752,
+      "under_25": 0.248,
+      "btts_yes": 0.648,
+      "btts_no": 0.352
     },
     "candidates": [
       {
         "market": "Away Win",
-        "prob": 0.623,
-        "fair": 1.6
+        "prob": 0.705,
+        "fair": 1.42
       }
     ]
   }
