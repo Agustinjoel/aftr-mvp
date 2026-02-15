@@ -189,16 +189,19 @@ def load_json_league(league: str):
 
     # picks opcional
     picks_by_match = {}
-    if os.path.exists(pf):
-        try:
-            with open(pf, "r", encoding="utf-8") as f:
-                picks = json.load(f)
-            for p in picks:
-                mid = p.get("match_id") or p.get("id") or p.get("fixture_id")
-                if mid is not None:
-                    picks_by_match[str(mid)] = p
-        except Exception:
-            pass
+if os.path.exists(pf):
+    try:
+        with open(pf, "r", encoding="utf-8") as f:
+            picks = json.load(f)
+
+        for p in picks:
+            mid = p.get("match_id") or p.get("id") or p.get("fixture_id")
+            if mid is None:
+                continue
+            picks_by_match[str(mid)] = p  # ✅ siempre string
+    except Exception:
+        pass
+
 
     out = []
     for m in matches:
@@ -210,8 +213,9 @@ def load_json_league(league: str):
             mid = m.get("fixture", {}).get("id")
 
         # normalizo a string para mapear con picks
-        mid_key = str(mid) if mid is not None else None
-        p = picks_by_match.get(mid_key, {}) if mid_key else {}
+        mid_key = str(mid) if mid is not None else None   # ✅ match_id normalizado
+
+         = picks_by_match.get(mid_key, {}) if mid_key else {}
 
         # home/away pueden venir como strings o dicts
         home = m.get("home") or _norm_team_name(m.get("homeTeam")) or _norm_team_name(m.get("teams", {}).get("home"))
@@ -223,7 +227,7 @@ def load_json_league(league: str):
         xh, xa, xt = _norm_xg(m)
 
         out.append({
-            "match_id": mid,
+            "match_id": mid,   # ✅ guardo el id original
             "utcDate": utcDate,
             "status": status,
             "home": home,
@@ -239,7 +243,7 @@ def load_json_league(league: str):
             "confidence": p.get("confidence"),
             "result": p.get("result") or "PENDING",
             "result_reason": p.get("result_reason", ""),
-        })
+})
 
     return out
 
