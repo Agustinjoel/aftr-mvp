@@ -130,6 +130,50 @@ def get_last_updated():
 # =========================
 # JSON fallback
 # =========================
+def _norm_team_name(x):
+    # acepta string o dict
+    if isinstance(x, str):
+        return x
+    if isinstance(x, dict):
+        return x.get("name") or x.get("shortName") or x.get("team") or x.get("id") or "?"
+    return "?"
+
+def _norm_status(m):
+    return m.get("status") or m.get("fixture", {}).get("status", {}).get("short") or m.get("state") or ""
+
+def _norm_date(m):
+    # acepta utcDate o date o fixture.date
+    return m.get("utcDate") or m.get("date") or m.get("fixture", {}).get("date") or ""
+
+def _norm_score(m):
+    # football-data: score.fullTime.home/away
+    sc = m.get("score", {}) or {}
+    ft = sc.get("fullTime", {}) or {}
+    hg = m.get("home_goals", None)
+    ag = m.get("away_goals", None)
+    if hg is None and ag is None:
+        hg = ft.get("home")
+        ag = ft.get("away")
+    # API-Football style fallback:
+    if hg is None and ag is None:
+        goals = m.get("goals") or m.get("score", {}).get("goals")
+        if isinstance(goals, dict):
+            hg = goals.get("home")
+            ag = goals.get("away")
+    return hg, ag
+
+def _norm_xg(m):
+    # intenta varios nombres
+    xh = m.get("xg_home", m.get("xG_home"))
+    xa = m.get("xg_away", m.get("xG_away"))
+    xt = m.get("xg_total", m.get("xG_total"))
+    if xt is None and (xh is not None and xa is not None):
+        try:
+            xt = float(xh) + float(xa)
+        except Exception:
+            pass
+    return xh, xa, xt
+
 def load_json_league(league: str):
     mf = f"daily_matches_{league}.json"
     pf = f"daily_picks_{league}.json"
@@ -143,32 +187,52 @@ def load_json_league(league: str):
     except Exception:
         return []
 
+    # picks opcional
     picks_by_match = {}
     if os.path.exists(pf):
         try:
             with open(pf, "r", encoding="utf-8") as f:
                 picks = json.load(f)
             for p in picks:
-                picks_by_match[p.get("match_id")] = p
+                mid = p.get("match_id") or p.get("id") or p.get("fixture_id")
+                if mid is not None:
+                    picks_by_match[str(mid)] = p
         except Exception:
             pass
 
     out = []
     for m in matches:
+        # match_id puede venir como match_id o id o fixture.id
         mid = m.get("match_id")
-        p = picks_by_match.get(mid, {})
+        if mid is None:
+            mid = m.get("id")
+        if mid is None:
+            mid = m.get("fixture", {}).get("id")
+
+        # normalizo a string para mapear con picks
+        mid_key = str(mid) if mid is not None else None
+        p = picks_by_match.get(mid_key, {}) if mid_key else {}
+
+        # home/away pueden venir como strings o dicts
+        home = m.get("home") or _norm_team_name(m.get("homeTeam")) or _norm_team_name(m.get("teams", {}).get("home"))
+        away = m.get("away") or _norm_team_name(m.get("awayTeam")) or _norm_team_name(m.get("teams", {}).get("away"))
+
+        status = _norm_status(m)
+        utcDate = _norm_date(m)
+        hg, ag = _norm_score(m)
+        xh, xa, xt = _norm_xg(m)
 
         out.append({
             "match_id": mid,
-            "utcDate": m.get("utcDate"),
-            "status": m.get("status"),
-            "home": m.get("home"),
-            "away": m.get("away"),
-            "home_goals": m.get("home_goals"),
-            "away_goals": m.get("away_goals"),
-            "xg_home": m.get("xg_home"),
-            "xg_away": m.get("xg_away"),
-            "xg_total": m.get("xg_total"),
+            "utcDate": utcDate,
+            "status": status,
+            "home": home,
+            "away": away,
+            "home_goals": hg,
+            "away_goals": ag,
+            "xg_home": xh,
+            "xg_away": xa,
+            "xg_total": xt,
             "market": p.get("market"),
             "prob": p.get("prob"),
             "fair": p.get("fair"),
@@ -178,6 +242,7 @@ def load_json_league(league: str):
         })
 
     return out
+
 
 
 def fetch_all_for_league(league: str):
@@ -699,6 +764,34 @@ def startup_event():
         t = threading.Thread(target=_auto_refresh_loop, daemon=True)
         t.start()
         print("✅ Auto-refresh thread started.")
+
+@app.get("/api/debug")
+def api_debug(league: str = "PL"):
+    mf = f"daily_matches_{league}.json"
+    pf = f"daily_picks_{league}.json"
+
+    info = {
+        "cwd": os.getcwd(),
+        "db_file": DB_FILE,
+        "matches_file": mf,
+        "picks_file": pf,
+        "matches_exists": os.path.exists(mf),
+        "picks_exists": os.path.exists(pf),
+        "matches_size": os.path.getsize(mf) if os.path.exists(mf) else 0,
+        "picks_size": os.path.getsize(pf) if os.path.exists(pf) else 0,
+    }
+
+    sample = None
+    if os.path.exists(mf):
+        try:
+            with open(mf, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            info["matches_count"] = len(data) if isinstance(data, list) else "not_list"
+            sample = data[0] if isinstance(data, list) and data else None
+        except Exception as e:
+            info["matches_read_error"] = str(e)
+
+    return {"info": info, "sample_first_match": sample}
 
 
 
