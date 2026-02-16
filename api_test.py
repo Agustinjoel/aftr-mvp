@@ -10,7 +10,15 @@ import requests
 from fastapi import FastAPI, Request, HTTPException, Query
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
+# =========================
+# Monetización / Acceso
+# =========================
+BASE_FREE_PICKS = 4
+REWARDED_FREE_MAX = 6
+PREMIUM_MESSAGE = "🔒 Premium: desbloqueá el resto de picks"
+
 APP_TITLE = "AFTR • MVP"
+
 app = FastAPI(title=APP_TITLE)
 DB_PATH = os.getenv("AFTR_DB_PATH", "aftr.db")
 
