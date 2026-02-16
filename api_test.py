@@ -1,15 +1,17 @@
-from fastapi import FastAPI, Query, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+import os
 import json
 import time
 import sqlite3
 import subprocess
 from datetime import datetime, timezone, timedelta
+from urllib.parse import quote
 
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+import requests
+from fastapi import FastAPI, Request, HTTPException, Query
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 APP_TITLE = "AFTR • MVP"
+app = FastAPI(title=APP_TITLE)
 DB_PATH = os.getenv("AFTR_DB_PATH", "aftr.db")
 
 REFRESH_KEY = os.getenv("REFRESH_KEY", "").strip()
