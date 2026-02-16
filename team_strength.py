@@ -1,385 +1,598 @@
 import os
-import json
 import math
-from datetime import datetime, timezone, timedelta
-
+import json
+import sqlite3
 import requests
+from datetime import datetime, timedelta, timezone
 
-API_KEY = os.getenv("FOOTBALL_DATA_API_KEY", "3c139115487a45faa9ed84c633120c21")
+# =========================
+# CONFIG
+# =========================
+API_KEY = os.getenv("FOOTBALL_DATA_API_KEY", "").strip()
+if not API_KEY:
+    raise SystemExit("ERROR: FOOTBALL_DATA_API_KEY no está seteada.")
+
 HEADERS = {"X-Auth-Token": API_KEY}
-
 BASE = "https://api.football-data.org/v4"
 
+DB_PATH = os.getenv("AFTR_DB_PATH", "aftr.db")
+
+# Ligas / Copas (football-data.org)
+# OJO: algunas pueden tirar 404 según plan/coverage -> NO rompe, se skippea.
 LEAGUES = {
     "PL": "Premier League",
     "PD": "LaLiga",
     "SA": "Serie A",
     "BL1": "Bundesliga",
     "FL1": "Ligue 1",
-    "LPF": "Argentina LPF",  # ojo: puede no estar en tu plan; si falla, se saltea
+    "CL": "UEFA Champions League",
+    "EL": "UEFA Europa League",
+    "FAC": "FA Cup",
+    # "CDR": "Copa del Rey",  # suele no estar -> si querés probar, descomentá y listo
+    # "LPF": "Argentina LPF", # 404 seguro en football-data -> no recomendado
 }
 
-# Ventana de partidos futuros que vamos a analizar (próximos N días)
-LOOKAHEAD_DAYS = 10
+DAYS_BACK = 180
+DAYS_AHEAD = 10
 
-# Umbrales (ajustables)
-THRESH_AWAY_WIN = 0.62
-THRESH_HOME_WIN = 0.62
-THRESH_UNDER25 = 0.65
-THRESH_OVER25 = 0.55
-THRESH_BTTS_NO = 0.65
-THRESH_BTTS_YES = 0.58
-
-MAX_GOALS = 10  # para Poisson
+# Picks:
+MAX_PICKS_PER_LEAGUE = 12
+MIN_PROB_FOR_CANDIDATE = 0.60
 
 
-def parse_utc(dt_str: str) -> datetime:
-    # Ej: "2026-02-12T20:00:00Z"
-    return datetime.fromisoformat(dt_str.replace("Z", "+00:00")).astimezone(timezone.utc)
+# =========================
+# DB
+# =========================
+def db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 
-def poisson_pmf(k: int, lam: float) -> float:
-    if lam <= 0:
-        return 1.0 if k == 0 else 0.0
-    return math.exp(-lam) * (lam ** k) / math.factorial(k)
+def init_db():
+    conn = db()
+    cur = conn.cursor()
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS meta (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    )
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS matches (
+      league TEXT,
+      match_id TEXT,
+      utcDate TEXT,
+      status TEXT,
+      home TEXT,
+      away TEXT,
+      home_goals INTEGER,
+      away_goals INTEGER,
+      crest_home TEXT,
+      crest_away TEXT,
+      xg_home REAL,
+      xg_away REAL,
+      xg_total REAL,
+      probs_json TEXT,
+      updated_at TEXT,
+      PRIMARY KEY (league, match_id)
+    )
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS picks (
+      league TEXT,
+      match_id TEXT,
+      market TEXT,
+      prob REAL,
+      fair REAL,
+      rationale TEXT,
+      status TEXT,         -- PENDING / WIN / LOSS
+      updated_at TEXT,
+      PRIMARY KEY (league, match_id, market)
+    )
+    """)
+
+    conn.commit()
+    conn.close()
 
 
-def probs_1x2(lh: float, la: float) -> dict:
-    # matriz goles
-    home_win = 0.0
-    draw = 0.0
-    away_win = 0.0
-
-    ph = [poisson_pmf(i, lh) for i in range(MAX_GOALS + 1)]
-    pa = [poisson_pmf(j, la) for j in range(MAX_GOALS + 1)]
-
-    for i in range(MAX_GOALS + 1):
-        for j in range(MAX_GOALS + 1):
-            p = ph[i] * pa[j]
-            if i > j:
-                home_win += p
-            elif i == j:
-                draw += p
-            else:
-                away_win += p
-
-    # normalización leve por truncamiento
-    s = home_win + draw + away_win
-    if s > 0:
-        home_win /= s
-        draw /= s
-        away_win /= s
-
-    return {"home": home_win, "draw": draw, "away": away_win}
+def set_meta(key, value):
+    conn = db()
+    cur = conn.cursor()
+    cur.execute(
+        "INSERT INTO meta(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+        (key, str(value)),
+    )
+    conn.commit()
+    conn.close()
 
 
-def prob_over_under_25(lh: float, la: float) -> dict:
-    # Total goals = i+j. Over 2.5 => total >= 3
-    ph = [poisson_pmf(i, lh) for i in range(MAX_GOALS + 1)]
-    pa = [poisson_pmf(j, la) for j in range(MAX_GOALS + 1)]
-
-    under = 0.0
-    over = 0.0
-    for i in range(MAX_GOALS + 1):
-        for j in range(MAX_GOALS + 1):
-            p = ph[i] * pa[j]
-            if (i + j) <= 2:
-                under += p
-            else:
-                over += p
-
-    s = under + over
-    if s > 0:
-        under /= s
-        over /= s
-    return {"under_25": under, "over_25": over}
-
-
-def prob_btts(lh: float, la: float) -> dict:
-    ph = [poisson_pmf(i, lh) for i in range(MAX_GOALS + 1)]
-    pa = [poisson_pmf(j, la) for j in range(MAX_GOALS + 1)]
-
-    yes = 0.0
-    no = 0.0
-    for i in range(MAX_GOALS + 1):
-        for j in range(MAX_GOALS + 1):
-            p = ph[i] * pa[j]
-            if i >= 1 and j >= 1:
-                yes += p
-            else:
-                no += p
-
-    s = yes + no
-    if s > 0:
-        yes /= s
-        no /= s
-    return {"btts_yes": yes, "btts_no": no}
-
-
-def fair_odds(p: float) -> float | None:
-    if p <= 0:
-        return None
-    return round(1.0 / p, 2)
-
-
-def fetch_matches(league_code: str) -> list[dict]:
-    url = f"{BASE}/competitions/{league_code}/matches"
-    r = requests.get(url, headers=HEADERS, timeout=30)
-    if r.status_code != 200:
-        raise RuntimeError(f"{league_code}: HTTP {r.status_code} -> {r.text[:200]}")
-    data = r.json()
-    return data.get("matches", [])
+def upsert_match(row):
+    conn = db()
+    cur = conn.cursor()
+    cur.execute(
+        """
+    INSERT INTO matches(
+      league, match_id, utcDate, status, home, away,
+      home_goals, away_goals, crest_home, crest_away,
+      xg_home, xg_away, xg_total, probs_json, updated_at
+    )
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    ON CONFLICT(league, match_id) DO UPDATE SET
+      utcDate=excluded.utcDate,
+      status=excluded.status,
+      home=excluded.home,
+      away=excluded.away,
+      home_goals=excluded.home_goals,
+      away_goals=excluded.away_goals,
+      crest_home=excluded.crest_home,
+      crest_away=excluded.crest_away,
+      xg_home=excluded.xg_home,
+      xg_away=excluded.xg_away,
+      xg_total=excluded.xg_total,
+      probs_json=excluded.probs_json,
+      updated_at=excluded.updated_at
+    """,
+        (
+            row["league"],
+            row["match_id"],
+            row["utcDate"],
+            row["status"],
+            row["home"],
+            row["away"],
+            row["home_goals"],
+            row["away_goals"],
+            row["crest_home"],
+            row["crest_away"],
+            row["xg_home"],
+            row["xg_away"],
+            row["xg_total"],
+            row["probs_json"],
+            row["updated_at"],
+        ),
+    )
+    conn.commit()
+    conn.close()
 
 
-def split_matches(matches: list[dict]):
-    finished = []
-    upcoming = []
+def upsert_pick(row):
+    conn = db()
+    cur = conn.cursor()
+    cur.execute(
+        """
+    INSERT INTO picks(
+      league, match_id, market, prob, fair, rationale, status, updated_at
+    )
+    VALUES(?,?,?,?,?,?,?,?)
+    ON CONFLICT(league, match_id, market) DO UPDATE SET
+      prob=excluded.prob,
+      fair=excluded.fair,
+      rationale=excluded.rationale,
+      status=excluded.status,
+      updated_at=excluded.updated_at
+    """,
+        (
+            row["league"],
+            row["match_id"],
+            row["market"],
+            row["prob"],
+            row["fair"],
+            row["rationale"],
+            row["status"],
+            row["updated_at"],
+        ),
+    )
+    conn.commit()
+    conn.close()
 
-    now = datetime.now(timezone.utc)
-    horizon = now + timedelta(days=LOOKAHEAD_DAYS)
 
-    for m in matches:
-        status = m.get("status")
-        utc = m.get("utcDate")
-        if not utc:
-            continue
-
+# =========================
+# API fetch
+# =========================
+def fetch_matches_range(competition, date_from, date_to):
+    url = f"{BASE}/competitions/{competition}/matches"
+    params = {"dateFrom": date_from, "dateTo": date_to}
+    r = requests.get(url, headers=HEADERS, params=params, timeout=25)
+    if not r.ok:
         try:
-            dt = parse_utc(utc)
+            j = r.json()
         except Exception:
-            continue
-
-        if status == "FINISHED":
-            finished.append(m)
-        else:
-            # TIMED / SCHEDULED / POSTPONED etc -> nos quedamos con futuros cercanos
-            if now <= dt <= horizon:
-                upcoming.append(m)
-
-    return finished, upcoming
+            j = r.text
+        print(f"⚠️  {competition}: HTTP {r.status_code} -> {j}")
+        r.raise_for_status()
+    return (r.json() or {}).get("matches", [])
 
 
-def league_averages(finished_matches: list[dict]) -> tuple[float, float]:
+def now_utc():
+    return datetime.now(timezone.utc)
+
+
+def iso_date(d: datetime):
+    return d.date().isoformat()
+
+
+# =========================
+# Model (simple Poisson xG)
+# =========================
+def poisson_pmf(lmbda, k):
+    return math.exp(-lmbda) * (lmbda**k) / math.factorial(k)
+
+
+def match_probs(xg_home, xg_away, max_goals=8):
+    # 1X2
+    p_home = 0.0
+    p_draw = 0.0
+    p_away = 0.0
+    # Totals / BTTS
+    p_under25 = 0.0
+    p_over25 = 0.0
+    p_btts_yes = 0.0
+    p_btts_no = 0.0
+
+    for h in range(max_goals + 1):
+        ph = poisson_pmf(xg_home, h)
+        for a in range(max_goals + 1):
+            pa = poisson_pmf(xg_away, a)
+            p = ph * pa
+
+            if h > a:
+                p_home += p
+            elif h == a:
+                p_draw += p
+            else:
+                p_away += p
+
+            total = h + a
+            if total <= 2:
+                p_under25 += p
+            else:
+                p_over25 += p
+
+            if h > 0 and a > 0:
+                p_btts_yes += p
+            else:
+                p_btts_no += p
+
+    # normalize small numeric drift
+    s = p_home + p_draw + p_away
+    if s > 0:
+        p_home /= s
+        p_draw /= s
+        p_away /= s
+
+    return {
+        "home": round(p_home, 3),
+        "draw": round(p_draw, 3),
+        "away": round(p_away, 3),
+        "under_25": round(p_under25, 3),
+        "over_25": round(p_over25, 3),
+        "btts_yes": round(p_btts_yes, 3),
+        "btts_no": round(p_btts_no, 3),
+    }
+
+
+def fair_odds(prob):
+    if prob <= 0:
+        return None
+    return round(1.0 / prob, 2)
+
+
+def safe_team_name(t):
+    return (t or "").strip()
+
+
+def extract_score(match):
+    sc = (match.get("score") or {}).get("fullTime") or {}
+    hg = sc.get("home")
+    ag = sc.get("away")
+    return hg, ag
+
+
+def extract_crests(match):
+    # football-data suele tener crest dentro de homeTeam/awayTeam
+    ht = match.get("homeTeam") or {}
+    at = match.get("awayTeam") or {}
+    return ht.get("crest"), at.get("crest")
+
+
+# =========================
+# Strength calc
+# =========================
+def league_finished_stats(matches):
     home_goals = 0
     away_goals = 0
-    n = 0
+    games = 0
 
-    for m in finished_matches:
-        sc = m.get("score", {}).get("fullTime", {})
-        hg = sc.get("home")
-        ag = sc.get("away")
+    for m in matches:
+        if m.get("status") != "FINISHED":
+            continue
+        hg, ag = extract_score(m)
         if hg is None or ag is None:
             continue
-        home_goals += hg
-        away_goals += ag
-        n += 1
+        home_goals += int(hg)
+        away_goals += int(ag)
+        games += 1
 
-    # fallback si no hay datos
-    if n == 0:
-        return (1.45, 1.20)
+    if games == 0:
+        return 1.4, 1.1, 0
 
-    return (home_goals / n, away_goals / n)
+    return (home_goals / games), (away_goals / games), games
 
 
-def team_strengths(finished_matches: list[dict], avg_home: float, avg_away: float) -> dict:
-    # Calcula promedios home/away por equipo y los transforma en factores (attack/defense)
+def team_strengths(matches, league_avg_home, league_avg_away):
+    # totals per team
     stats = {}
-    for m in finished_matches:
-        home = m["homeTeam"]["name"]
-        away = m["awayTeam"]["name"]
-        sc = m.get("score", {}).get("fullTime", {})
-        hg = sc.get("home")
-        ag = sc.get("away")
+
+    def ensure(team):
+        if team not in stats:
+            stats[team] = {
+                "home_scored": 0,
+                "home_conceded": 0,
+                "home_games": 0,
+                "away_scored": 0,
+                "away_conceded": 0,
+                "away_games": 0,
+            }
+
+    for m in matches:
+        if m.get("status") != "FINISHED":
+            continue
+        hg, ag = extract_score(m)
         if hg is None or ag is None:
             continue
 
-        stats.setdefault(home, {"hs": 0, "hc": 0, "hg": 0, "as": 0, "ac": 0, "ag": 0})
-        stats.setdefault(away, {"hs": 0, "hc": 0, "hg": 0, "as": 0, "ac": 0, "ag": 0})
+        home = safe_team_name((m.get("homeTeam") or {}).get("name"))
+        away = safe_team_name((m.get("awayTeam") or {}).get("name"))
+        if not home or not away:
+            continue
 
-        # home team
-        stats[home]["hs"] += hg
-        stats[home]["hc"] += ag
-        stats[home]["hg"] += 1
+        ensure(home)
+        ensure(away)
 
-        # away team
-        stats[away]["as"] += ag
-        stats[away]["ac"] += hg
-        stats[away]["ag"] += 1
+        stats[home]["home_scored"] += int(hg)
+        stats[home]["home_conceded"] += int(ag)
+        stats[home]["home_games"] += 1
 
-    strengths = {}
+        stats[away]["away_scored"] += int(ag)
+        stats[away]["away_conceded"] += int(hg)
+        stats[away]["away_games"] += 1
+
+    # normalize into attack/defense factors
+    strength = {}
     for team, s in stats.items():
-        hg = s["hg"]
-        ag = s["ag"]
+        if s["home_games"] == 0 or s["away_games"] == 0:
+            continue
+        attack_home = (s["home_scored"] / s["home_games"]) / max(league_avg_home, 0.01)
+        defense_home = (s["home_conceded"] / s["home_games"]) / max(
+            league_avg_away, 0.01
+        )
+        attack_away = (s["away_scored"] / s["away_games"]) / max(league_avg_away, 0.01)
+        defense_away = (s["away_conceded"] / s["away_games"]) / max(
+            league_avg_home, 0.01
+        )
 
-        # evitar div/0
-        if hg == 0:
-            # casi no debería pasar, pero por las dudas
-            attack_home = 1.0
-            defense_home = 1.0
-        else:
-            attack_home = (s["hs"] / hg) / avg_home
-            defense_home = (s["hc"] / hg) / avg_away
-
-        if ag == 0:
-            attack_away = 1.0
-            defense_away = 1.0
-        else:
-            attack_away = (s["as"] / ag) / avg_away
-            defense_away = (s["ac"] / ag) / avg_home
-
-        strengths[team] = {
+        strength[team] = {
             "attack_home": attack_home,
             "defense_home": defense_home,
             "attack_away": attack_away,
             "defense_away": defense_away,
         }
 
-    return strengths
+    return strength
 
 
-def expected_goals(home: str, away: str, strengths: dict, avg_home: float, avg_away: float) -> tuple[float, float]:
-    # fallback neutral si faltan datos
-    h = strengths.get(home, {"attack_home": 1, "defense_home": 1})
-    a = strengths.get(away, {"attack_away": 1, "defense_away": 1})
+def expected_goals(home, away, strength, league_avg_home, league_avg_away):
+    # fallback if missing
+    sh = strength.get(home)
+    sa = strength.get(away)
+    if not sh or not sa:
+        return league_avg_home, league_avg_away
 
-    attack_home = h.get("attack_home", 1.0)
-    defense_home = h.get("defense_home", 1.0)
+    xg_h = league_avg_home * sh["attack_home"] * sa["defense_away"]
+    xg_a = league_avg_away * sa["attack_away"] * sh["defense_home"]
 
-    attack_away = a.get("attack_away", 1.0)
-    defense_away = a.get("defense_away", 1.0)
-
-    # modelo clásico: λ_home = avg_home * attack_home * defense_away
-    lh = avg_home * attack_home * defense_away
-    la = avg_away * attack_away * defense_home
-
-    # clamps suaves para evitar locuras por pocos partidos
-    lh = max(0.2, min(4.5, lh))
-    la = max(0.2, min(4.5, la))
-
-    return lh, la
+    # sanity clamp
+    xg_h = max(0.1, min(float(xg_h), 4.0))
+    xg_a = max(0.1, min(float(xg_a), 4.0))
+    return xg_h, xg_a
 
 
-def build_candidates(probs: dict) -> list[dict]:
-    cands = []
+# =========================
+# Picks selection + evaluation
+# =========================
+def pick_candidates(probs):
+    cand = []
+    # choose strongest markets only
+    cand.append(("Home Win", probs["home"]))
+    cand.append(("Draw", probs["draw"]))
+    cand.append(("Away Win", probs["away"]))
+    cand.append(("Under 2.5", probs["under_25"]))
+    cand.append(("Over 2.5", probs["over_25"]))
+    cand.append(("BTTS No", probs["btts_no"]))
+    cand.append(("BTTS Yes", probs["btts_yes"]))
 
-    ph = probs["home"]
-    pd = probs["draw"]
-    pa = probs["away"]
-
-    under = probs["under_25"]
-    over = probs["over_25"]
-
-    by = probs["btts_yes"]
-    bn = probs["btts_no"]
-
-    if pa >= THRESH_AWAY_WIN:
-        cands.append({"market": "Away Win", "prob": round(pa, 3), "fair": fair_odds(pa)})
-    if ph >= THRESH_HOME_WIN:
-        cands.append({"market": "Home Win", "prob": round(ph, 3), "fair": fair_odds(ph)})
-
-    if under >= THRESH_UNDER25:
-        cands.append({"market": "Under 2.5", "prob": round(under, 3), "fair": fair_odds(under)})
-    if over >= THRESH_OVER25:
-        cands.append({"market": "Over 2.5", "prob": round(over, 3), "fair": fair_odds(over)})
-
-    if bn >= THRESH_BTTS_NO:
-        cands.append({"market": "BTTS No", "prob": round(bn, 3), "fair": fair_odds(bn)})
-    if by >= THRESH_BTTS_YES:
-        cands.append({"market": "BTTS Yes", "prob": round(by, 3), "fair": fair_odds(by)})
-
-    # orden por prob desc
-    cands.sort(key=lambda x: x["prob"], reverse=True)
-    return cands
+    # filter by prob threshold
+    out = []
+    for mkt, p in cand:
+        if p >= MIN_PROB_FOR_CANDIDATE:
+            out.append((mkt, p, fair_odds(p)))
+    # sort by prob desc
+    out.sort(key=lambda x: x[1], reverse=True)
+    return out
 
 
-def run_league(league_code: str):
-    print(f"\n=== {league_code} • {LEAGUES.get(league_code,'League')} ===")
+def rationale_from_probs(probs, xg_home, xg_away):
+    # short transparent drivers
+    total = xg_home + xg_away
+    return f"xG {xg_home:.2f}-{xg_away:.2f} (total {total:.2f}) | 1X2 H {probs['home']:.3f} D {probs['draw']:.3f} A {probs['away']:.3f} | U2.5 {probs['under_25']:.3f} | BTTS No {probs['btts_no']:.3f}"
 
-    matches = fetch_matches(league_code)
-    finished, upcoming = split_matches(matches)
 
-    avg_home, avg_away = league_averages(finished)
-    strengths = team_strengths(finished, avg_home, avg_away)
+def eval_pick(market, hg, ag):
+    # return "WIN"/"LOSS"
+    if hg is None or ag is None:
+        return "PENDING"
+    hg = int(hg)
+    ag = int(ag)
 
-    daily_matches = []
-    daily_picks = []
+    if market == "Home Win":
+        return "WIN" if hg > ag else "LOSS"
+    if market == "Away Win":
+        return "WIN" if ag > hg else "LOSS"
+    if market == "Draw":
+        return "WIN" if hg == ag else "LOSS"
+    if market == "Under 2.5":
+        return "WIN" if (hg + ag) <= 2 else "LOSS"
+    if market == "Over 2.5":
+        return "WIN" if (hg + ag) >= 3 else "LOSS"
+    if market == "BTTS Yes":
+        return "WIN" if (hg > 0 and ag > 0) else "LOSS"
+    if market == "BTTS No":
+        return "WIN" if (hg == 0 or ag == 0) else "LOSS"
+    return "PENDING"
 
-    for m in sorted(upcoming, key=lambda x: x.get("utcDate", "")):
-        home = m["homeTeam"]["name"]
-        away = m["awayTeam"]["name"]
-        utc = m.get("utcDate")
 
-        lh, la = expected_goals(home, away, strengths, avg_home, avg_away)
+def evaluate_finished_picks():
+    conn = db()
+    cur = conn.cursor()
+    cur.execute("""
+      SELECT p.league, p.match_id, p.market,
+             m.home_goals, m.away_goals, m.status
+      FROM picks p
+      JOIN matches m ON m.league=p.league AND m.match_id=p.match_id
+      WHERE m.status='FINISHED'
+    """)
+    rows = cur.fetchall()
+    conn.close()
 
-        p1x2 = probs_1x2(lh, la)
-        pou = prob_over_under_25(lh, la)
-        pbtts = prob_btts(lh, la)
+    for r in rows:
+        status = eval_pick(r["market"], r["home_goals"], r["away_goals"])
+        upsert_pick(
+            {
+                "league": r["league"],
+                "match_id": r["match_id"],
+                "market": r["market"],
+                "prob": None,
+                "fair": None,
+                "rationale": None,
+                "status": status,
+                "updated_at": now_utc().isoformat(),
+            }
+        )
 
-        probs = {
-            "home": round(p1x2["home"], 3),
-            "draw": round(p1x2["draw"], 3),
-            "away": round(p1x2["away"], 3),
-            "under_25": round(pou["under_25"], 3),
-            "over_25": round(pou["over_25"], 3),
-            "btts_yes": round(pbtts["btts_yes"], 3),
-            "btts_no": round(pbtts["btts_no"], 3),
-        }
 
-        item = {
-            "league": league_code,
-            "home": home,
-            "away": away,
-            "utcDate": utc,
-            "xg_home": round(lh, 2),
-            "xg_away": round(la, 2),
-            "xg_total": round(lh + la, 2),
-            "probs": probs,
-        }
+# =========================
+# MAIN
+# =========================
+def run_competition(code):
+    print(f"\n=== {code} • {LEAGUES.get(code, code)} ===")
+    d0 = now_utc()
+    date_from = iso_date(d0 - timedelta(days=DAYS_BACK))
+    date_to = iso_date(d0 + timedelta(days=DAYS_AHEAD))
 
-        daily_matches.append(item)
+    try:
+        matches = fetch_matches_range(code, date_from, date_to)
+    except Exception:
+        print(f"⚠️  {code} sin datos (skip).")
+        return
 
-        candidates = build_candidates({
-            "home": p1x2["home"],
-            "draw": p1x2["draw"],
-            "away": p1x2["away"],
-            "under_25": pou["under_25"],
-            "over_25": pou["over_25"],
-            "btts_yes": pbtts["btts_yes"],
-            "btts_no": pbtts["btts_no"],
-        })
+    finished = [m for m in matches if m.get("status") == "FINISHED"]
+    upcoming = [
+        m
+        for m in matches
+        if m.get("status") in ("SCHEDULED", "TIMED", "IN_PLAY", "PAUSED")
+    ]
 
-        if candidates:
-            pick_item = dict(item)
-            pick_item["candidates"] = candidates
-            daily_picks.append(pick_item)
+    league_avg_home, league_avg_away, used = league_finished_stats(matches)
+    print(f"Finished matches used: {used} | Upcoming in {DAYS_AHEAD}d: {len(upcoming)}")
+    print(f"League avg home: {league_avg_home:.2f} | away: {league_avg_away:.2f}")
 
-    # guardar por liga
-    matches_path = f"daily_matches_{league_code}.json"
-    picks_path = f"daily_picks_{league_code}.json"
+    strength = team_strengths(matches, league_avg_home, league_avg_away)
 
-    with open(matches_path, "w", encoding="utf-8") as f:
-        json.dump(daily_matches, f, ensure_ascii=False, indent=2)
+    updated_at = now_utc().isoformat()
+    saved_matches = 0
+    saved_picks = 0
 
-    with open(picks_path, "w", encoding="utf-8") as f:
-        json.dump(daily_picks, f, ensure_ascii=False, indent=2)
+    for m in upcoming + finished:
+        mid = m.get("id")
+        if mid is None:
+            continue
+        mid = str(mid)
 
-    print(f"Finished matches used: {len(finished)} | Upcoming in {LOOKAHEAD_DAYS}d: {len(daily_matches)}")
-    print(f"League avg home: {avg_home:.2f} | away: {avg_away:.2f}")
-    print(f"Saved: {matches_path} ({len(daily_matches)})")
-    print(f"Saved: {picks_path} ({len(daily_picks)}) ✅")
+        utcDate = m.get("utcDate")
+        status = m.get("status")
+
+        home = safe_team_name((m.get("homeTeam") or {}).get("name"))
+        away = safe_team_name((m.get("awayTeam") or {}).get("name"))
+        crest_home, crest_away = extract_crests(m)
+
+        hg, ag = extract_score(m)
+        hg = int(hg) if hg is not None else None
+        ag = int(ag) if ag is not None else None
+
+        xg_h, xg_a = expected_goals(
+            home, away, strength, league_avg_home, league_avg_away
+        )
+        probs = match_probs(xg_h, xg_a)
+        probs_json = json.dumps(probs, ensure_ascii=False)
+
+        upsert_match(
+            {
+                "league": code,
+                "match_id": mid,
+                "utcDate": utcDate,
+                "status": status,
+                "home": home,
+                "away": away,
+                "home_goals": hg,
+                "away_goals": ag,
+                "crest_home": crest_home,
+                "crest_away": crest_away,
+                "xg_home": float(round(xg_h, 2)),
+                "xg_away": float(round(xg_a, 2)),
+                "xg_total": float(round(xg_h + xg_a, 2)),
+                "probs_json": probs_json,
+                "updated_at": updated_at,
+            }
+        )
+        saved_matches += 1
+
+        # Candidates only for upcoming (predict)
+        if status in ("SCHEDULED", "TIMED"):
+            cands = pick_candidates(probs)
+            if cands:
+                # pick top 1 per match (clean MVP)
+                market, p, fair = cands[0]
+                rationale = rationale_from_probs(probs, xg_h, xg_a)
+                upsert_pick(
+                    {
+                        "league": code,
+                        "match_id": mid,
+                        "market": market,
+                        "prob": float(p),
+                        "fair": float(fair) if fair else None,
+                        "rationale": rationale,
+                        "status": "PENDING",
+                        "updated_at": updated_at,
+                    }
+                )
+                saved_picks += 1
+
+    set_meta(f"last_update_{code}", updated_at)
+    print(f"Saved matches -> DB: {saved_matches} | Saved picks -> DB: {saved_picks}")
 
 
 def main():
-    if not API_KEY:
-        print("ERROR: FOOTBALL_DATA_API_KEY no está seteada.")
-        print("En Windows PowerShell (local):  set FOOTBALL_DATA_API_KEY=TU_KEY")
-        return
-
+    init_db()
     for code in LEAGUES.keys():
-        try:
-            run_league(code)
-        except Exception as e:
-            print(f"⚠️  {code} skipped -> {e}")
+        run_competition(code)
+
+    evaluate_finished_picks()
+    set_meta("last_update_all", now_utc().isoformat())
+    print("\n✅ Picks evaluados (WIN/LOSS) donde haya FT.")
+    print("✅ SQLite actualizado.")
 
 
 if __name__ == "__main__":

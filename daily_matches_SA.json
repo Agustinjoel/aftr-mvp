@@ -1,344 +1,222 @@
 [
   {
-    "league": "SA",
-    "home": "AC Pisa 1909",
-    "away": "AC Milan",
-    "utcDate": "2026-02-13T19:45:00Z",
-    "xg_home": 0.2,
-    "xg_away": 1.77,
-    "xg_total": 1.97,
-    "probs": {
-      "home": 0.036,
-      "draw": 0.193,
-      "away": 0.771,
-      "under_25": 0.684,
-      "over_25": 0.316,
-      "btts_yes": 0.151,
-      "btts_no": 0.849
-    }
-  },
-  {
-    "league": "SA",
+    "match_id": 537056,
+    "utcDate": "2026-02-14T14:00:00Z",
+    "status": "TIMED",
     "home": "Como 1907",
     "away": "ACF Fiorentina",
-    "utcDate": "2026-02-14T14:00:00Z",
-    "xg_home": 2.07,
-    "xg_away": 0.42,
-    "xg_total": 2.5,
-    "probs": {
-      "home": 0.765,
-      "draw": 0.172,
-      "away": 0.064,
-      "under_25": 0.545,
-      "over_25": 0.455,
-      "btts_yes": 0.301,
-      "btts_no": 0.699
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537059,
+    "utcDate": "2026-02-14T17:00:00Z",
+    "status": "TIMED",
     "home": "SS Lazio",
     "away": "Atalanta BC",
-    "utcDate": "2026-02-14T17:00:00Z",
-    "xg_home": 1.18,
-    "xg_away": 1.11,
-    "xg_total": 2.29,
-    "probs": {
-      "home": 0.376,
-      "draw": 0.285,
-      "away": 0.34,
-      "under_25": 0.6,
-      "over_25": 0.4,
-      "btts_yes": 0.463,
-      "btts_no": 0.537
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537058,
+    "utcDate": "2026-02-14T19:45:00Z",
+    "status": "TIMED",
     "home": "FC Internazionale Milano",
     "away": "Juventus FC",
-    "utcDate": "2026-02-14T19:45:00Z",
-    "xg_home": 1.8,
-    "xg_away": 0.97,
-    "xg_total": 2.77,
-    "probs": {
-      "home": 0.57,
-      "draw": 0.23,
-      "away": 0.2,
-      "under_25": 0.477,
-      "over_25": 0.523,
-      "btts_yes": 0.517,
-      "btts_no": 0.483
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537063,
+    "utcDate": "2026-02-15T11:30:00Z",
+    "status": "TIMED",
     "home": "Udinese Calcio",
     "away": "US Sassuolo Calcio",
-    "utcDate": "2026-02-15T11:30:00Z",
-    "xg_home": 0.98,
-    "xg_away": 1.45,
-    "xg_total": 2.43,
-    "probs": {
-      "home": 0.256,
-      "draw": 0.265,
-      "away": 0.479,
-      "under_25": 0.562,
-      "over_25": 0.438,
-      "btts_yes": 0.479,
-      "btts_no": 0.521
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537060,
+    "utcDate": "2026-02-15T14:00:00Z",
+    "status": "TIMED",
     "home": "Parma Calcio 1913",
     "away": "Hellas Verona FC",
-    "utcDate": "2026-02-15T14:00:00Z",
-    "xg_home": 0.96,
-    "xg_away": 0.72,
-    "xg_total": 1.68,
-    "probs": {
-      "home": 0.398,
-      "draw": 0.339,
-      "away": 0.262,
-      "under_25": 0.763,
-      "over_25": 0.237,
-      "btts_yes": 0.316,
-      "btts_no": 0.684
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537064,
+    "utcDate": "2026-02-15T14:00:00Z",
+    "status": "TIMED",
     "home": "US Cremonese",
     "away": "Genoa CFC",
-    "utcDate": "2026-02-15T14:00:00Z",
-    "xg_home": 1.36,
-    "xg_away": 1.62,
-    "xg_total": 2.97,
-    "probs": {
-      "home": 0.322,
-      "draw": 0.242,
-      "away": 0.436,
-      "under_25": 0.429,
-      "over_25": 0.571,
-      "btts_yes": 0.595,
-      "btts_no": 0.405
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537057,
+    "utcDate": "2026-02-15T17:00:00Z",
+    "status": "TIMED",
     "home": "Torino FC",
     "away": "Bologna FC 1909",
-    "utcDate": "2026-02-15T17:00:00Z",
-    "xg_home": 1.11,
-    "xg_away": 2.41,
-    "xg_total": 3.53,
-    "probs": {
-      "home": 0.159,
-      "draw": 0.18,
-      "away": 0.661,
-      "under_25": 0.316,
-      "over_25": 0.684,
-      "btts_yes": 0.612,
-      "btts_no": 0.388
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537062,
+    "utcDate": "2026-02-15T19:45:00Z",
+    "status": "TIMED",
     "home": "SSC Napoli",
     "away": "AS Roma",
-    "utcDate": "2026-02-15T19:45:00Z",
-    "xg_home": 0.91,
-    "xg_away": 0.77,
-    "xg_total": 1.68,
-    "probs": {
-      "home": 0.367,
-      "draw": 0.342,
-      "away": 0.291,
-      "under_25": 0.764,
-      "over_25": 0.236,
-      "btts_yes": 0.32,
-      "btts_no": 0.68
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537055,
+    "utcDate": "2026-02-16T19:45:00Z",
+    "status": "TIMED",
     "home": "Cagliari Calcio",
     "away": "US Lecce",
-    "utcDate": "2026-02-16T19:45:00Z",
-    "xg_home": 1.46,
-    "xg_away": 0.56,
-    "xg_total": 2.02,
-    "probs": {
-      "home": 0.593,
-      "draw": 0.265,
-      "away": 0.141,
-      "under_25": 0.671,
-      "over_25": 0.329,
-      "btts_yes": 0.33,
-      "btts_no": 0.67
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537046,
+    "utcDate": "2026-02-18T19:45:00Z",
+    "status": "TIMED",
     "home": "AC Milan",
     "away": "Como 1907",
-    "utcDate": "2026-02-18T19:45:00Z",
-    "xg_home": 0.99,
-    "xg_away": 1.1,
-    "xg_total": 2.09,
-    "probs": {
-      "home": 0.323,
-      "draw": 0.3,
-      "away": 0.377,
-      "under_25": 0.652,
-      "over_25": 0.348,
-      "btts_yes": 0.42,
-      "btts_no": 0.58
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537073,
+    "utcDate": "2026-02-20T19:45:00Z",
+    "status": "TIMED",
     "home": "US Sassuolo Calcio",
     "away": "Hellas Verona FC",
-    "utcDate": "2026-02-20T19:45:00Z",
-    "xg_home": 1.44,
-    "xg_away": 0.8,
-    "xg_total": 2.24,
-    "probs": {
-      "home": 0.522,
-      "draw": 0.269,
-      "away": 0.209,
-      "under_25": 0.611,
-      "over_25": 0.389,
-      "btts_yes": 0.421,
-      "btts_no": 0.579
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537072,
+    "utcDate": "2026-02-21T14:00:00Z",
+    "status": "TIMED",
     "home": "Juventus FC",
     "away": "Como 1907",
-    "utcDate": "2026-02-21T14:00:00Z",
-    "xg_home": 1.34,
-    "xg_away": 1.12,
-    "xg_total": 2.46,
-    "probs": {
-      "home": 0.418,
-      "draw": 0.271,
-      "away": 0.312,
-      "under_25": 0.554,
-      "over_25": 0.446,
-      "btts_yes": 0.497,
-      "btts_no": 0.503
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537074,
+    "utcDate": "2026-02-21T17:00:00Z",
+    "status": "TIMED",
     "home": "US Lecce",
     "away": "FC Internazionale Milano",
-    "utcDate": "2026-02-21T17:00:00Z",
-    "xg_home": 0.41,
-    "xg_away": 2.14,
-    "xg_total": 2.55,
-    "probs": {
-      "home": 0.058,
-      "draw": 0.163,
-      "away": 0.779,
-      "under_25": 0.532,
-      "over_25": 0.468,
-      "btts_yes": 0.296,
-      "btts_no": 0.704
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537069,
+    "utcDate": "2026-02-21T19:45:00Z",
+    "status": "TIMED",
     "home": "Cagliari Calcio",
     "away": "SS Lazio",
-    "utcDate": "2026-02-21T19:45:00Z",
-    "xg_home": 0.8,
-    "xg_away": 0.68,
-    "xg_total": 1.49,
-    "probs": {
-      "home": 0.351,
-      "draw": 0.368,
-      "away": 0.281,
-      "under_25": 0.812,
-      "over_25": 0.188,
-      "btts_yes": 0.274,
-      "btts_no": 0.726
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537070,
+    "utcDate": "2026-02-22T11:30:00Z",
+    "status": "TIMED",
     "home": "Genoa CFC",
     "away": "Torino FC",
-    "utcDate": "2026-02-22T11:30:00Z",
-    "xg_home": 1.55,
-    "xg_away": 1.2,
-    "xg_total": 2.76,
-    "probs": {
-      "home": 0.454,
-      "draw": 0.251,
-      "away": 0.295,
-      "under_25": 0.48,
-      "over_25": 0.52,
-      "btts_yes": 0.552,
-      "btts_no": 0.448
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537068,
+    "utcDate": "2026-02-22T14:00:00Z",
+    "status": "TIMED",
     "home": "Atalanta BC",
     "away": "SSC Napoli",
-    "utcDate": "2026-02-22T14:00:00Z",
-    "xg_home": 1.3,
-    "xg_away": 0.87,
-    "xg_total": 2.18,
-    "probs": {
-      "home": 0.465,
-      "draw": 0.284,
-      "away": 0.25,
-      "under_25": 0.629,
-      "over_25": 0.371,
-      "btts_yes": 0.424,
-      "btts_no": 0.576
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537066,
+    "utcDate": "2026-02-22T17:00:00Z",
+    "status": "TIMED",
     "home": "AC Milan",
     "away": "Parma Calcio 1913",
-    "utcDate": "2026-02-22T17:00:00Z",
-    "xg_home": 1.32,
-    "xg_away": 0.47,
-    "xg_total": 1.79,
-    "probs": {
-      "home": 0.578,
-      "draw": 0.288,
-      "away": 0.133,
-      "under_25": 0.733,
-      "over_25": 0.267,
-      "btts_yes": 0.276,
-      "btts_no": 0.724
+    "score": {
+      "home": null,
+      "away": null
     }
   },
   {
-    "league": "SA",
+    "match_id": 537067,
+    "utcDate": "2026-02-22T19:45:00Z",
+    "status": "TIMED",
     "home": "AS Roma",
     "away": "US Cremonese",
-    "utcDate": "2026-02-22T19:45:00Z",
-    "xg_home": 1.45,
-    "xg_away": 0.33,
-    "xg_total": 1.79,
-    "probs": {
-      "home": 0.657,
-      "draw": 0.259,
-      "away": 0.083,
-      "under_25": 0.734,
-      "over_25": 0.266,
-      "btts_yes": 0.218,
-      "btts_no": 0.782
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537065,
+    "utcDate": "2026-02-23T17:30:00Z",
+    "status": "TIMED",
+    "home": "ACF Fiorentina",
+    "away": "AC Pisa 1909",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537071,
+    "utcDate": "2026-02-23T19:45:00Z",
+    "status": "TIMED",
+    "home": "Bologna FC 1909",
+    "away": "Udinese Calcio",
+    "score": {
+      "home": null,
+      "away": null
     }
   }
 ]

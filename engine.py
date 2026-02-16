@@ -1,8 +1,10 @@
 import math
 
+
 # Función Poisson
 def poisson_probability(lmbda, k):
-    return (math.exp(-lmbda) * (lmbda ** k)) / math.factorial(k)
+    return (math.exp(-lmbda) * (lmbda**k)) / math.factorial(k)
+
 
 # Calcular matriz de probabilidades
 def match_prediction(home_avg_goals, away_avg_goals):
@@ -16,7 +18,6 @@ def match_prediction(home_avg_goals, away_avg_goals):
 
     for home_goals in range(max_goals):
         for away_goals in range(max_goals):
-
             prob_home = poisson_probability(home_avg_goals, home_goals)
             prob_away = poisson_probability(away_avg_goals, away_goals)
 
@@ -47,9 +48,9 @@ print("Away Win Probability:", round(away * 100, 2), "%")
 print("Over 2.5 Probability:", round(over * 100, 2), "%")
 
 print("\nFair Odds:")
-print("Home:", round(1/home, 2))
-print("Draw:", round(1/draw, 2))
-print("Away:", round(1/away, 2))
+print("Home:", round(1 / home, 2))
+print("Draw:", round(1 / draw, 2))
+print("Away:", round(1 / away, 2))
 bookmaker_home_odds = 2.20
 bookmaker_draw_odds = 3.80
 bookmaker_away_odds = 3.50

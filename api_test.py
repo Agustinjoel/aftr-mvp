@@ -1,687 +1,931 @@
-import os
+from fastapi import FastAPI, Query, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 import json
-import subprocess
-import threading
-import time
-from datetime import datetime, timezone, timedelta
+import os
+import requests
+from urllib.parse import quote
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+app = FastAPI()
 
+# =========================
+# Monetización / Acceso
+# =========================
+BASE_FREE_PICKS = 4          # gratis sin ads
+REWARDED_FREE_MAX = 6        # 1 ad = +1 pick extra (máx 6)
+PREMIUM_MESSAGE = "🔒 Premium: desbloqueá el resto de picks"
 
-APP_TITLE = "AFTR MVP"
-DEFAULT_LEAGUE = "PL"
-
-# Argentina UTC-3
-LOCAL_TZ = timezone(timedelta(hours=-3))
-
-# Refresh settings
-AUTO_REFRESH = os.getenv("AUTO_REFRESH", "1") == "1"
-REFRESH_EVERY_MIN = int(os.getenv("REFRESH_EVERY_MIN", "15"))
-REFRESH_KEY = os.getenv("REFRESH_KEY", "").strip()
-
-# Optional: link de Telegram en el dashboard
-TELEGRAM_LINK = os.getenv("TELEGRAM_LINK", "").strip()
-
+# =========================
+# Ligas
+# =========================
 LEAGUES = {
     "PL": "Premier League",
     "PD": "LaLiga",
     "SA": "Serie A",
     "BL1": "Bundesliga",
     "FL1": "Ligue 1",
-    "CL": "Champions League",
-    "EL": "Europa League",
-    "FAC": "FA Cup",
 }
+DEFAULT_LEAGUE = "PL"
 
-# football-data statuses (y usamos nuestros defaults si falta)
-LIVE_STATUSES = {"IN_PLAY", "PAUSED", "LIVE"}
-UPCOMING_STATUSES = {"SCHEDULED", "TIMED", "UPCOMING"}
-FINISHED_STATUS = "FINISHED"
+# =========================
+# Football-data (escudos)
+# =========================
+API_KEY = os.getenv("FOOTBALL_DATA_API_KEY", "")
+HEADERS = {"X-Auth-Token": API_KEY}
+BASE = "https://api.football-data.org/v4"
+APP_LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/3/3b/Football_icon.svg"
 
-app = FastAPI(title=APP_TITLE)
+# Cache escudos por liga
+TEAM_CRESTS_BY_LEAGUE: dict[str, dict[str, str]] = {}
+
+# =========================
+# Telegram (ventas manual)
+# =========================
+# ✅ EN PRODUCCIÓN: seteá AFTR_TELEGRAM en Render:
+#   AFTR_TELEGRAM = https://t.me/TUUSUARIO   (o canal, o invite)
+AFTR_TELEGRAM = os.getenv("AFTR_TELEGRAM", "").strip()
+
+TELEGRAM_USERNAME = "AFTRPICK"  # fallback si no seteás AFTR_TELEGRAM
+TELEGRAM_MSG = (
+    "Hola! Quiero activar AFTR Premium.\n"
+    "Vengo desde la app y quiero pagar el plan mensual.\n"
+    "Pasame el link de pago y cómo obtengo el acceso."
+)
+
+def telegram_contact_link() -> str:
+    msg = quote(TELEGRAM_MSG)
+
+    # Si el env var ya es un link completo -> lo usamos tal cual
+    if AFTR_TELEGRAM.startswith("http://") or AFTR_TELEGRAM.startswith("https://"):
+        # si es un invite link tipo https://t.me/+xxxx no siempre acepta ?text=...,
+        # por eso lo agregamos solo si parece username/canal normal:
+        if "t.me/+" in AFTR_TELEGRAM:
+            return AFTR_TELEGRAM
+        joiner = "&" if "?" in AFTR_TELEGRAM else "?"
+        return f"{AFTR_TELEGRAM}{joiner}text={msg}"
+
+    # Si no hay link, armamos con username (fallback)
+    user = AFTR_TELEGRAM if AFTR_TELEGRAM else TELEGRAM_USERNAME
+    user = user.replace("@", "")
+    return f"https://t.me/{user}?text={msg}"
 
 
 # =========================
-# Time utils
+# Utils JSON
 # =========================
-def safe_parse_dt(utc_iso: str):
-    if not utc_iso:
-        return None
-    s = utc_iso.replace("Z", "+00:00")
+def picks_file(league: str) -> str:
+    return f"daily_picks_{league}.json"
+
+
+def matches_file(league: str) -> str:
+    return f"daily_matches_{league}.json"
+
+
+def read_json(path: str):
+    if not os.path.exists(path):
+        return []
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _safe_float(x, default=0.0):
     try:
-        return datetime.fromisoformat(s)
+        return float(x)
     except Exception:
-        return None
+        return default
 
 
-def fmt_local_dt(utc_iso: str):
-    dt = safe_parse_dt(utc_iso)
-    if not dt:
-        return utc_iso or ""
-    return dt.astimezone(LOCAL_TZ).strftime("%d/%m %H:%M")
-
-
-def fmt_num(x):
-    if x is None:
-        return "-"
+# =========================
+# Cookies: rewarded credits
+# =========================
+def get_ad_credits(request: Request) -> int:
     try:
-        return f"{float(x):.2f}"
+        v = int(request.cookies.get("ad_credits", "0"))
+        return max(0, min(REWARDED_FREE_MAX, v))
     except Exception:
-        return str(x)
+        return 0
 
 
-def fmt_prob(p):
-    if p is None:
-        return "-"
+def set_ad_credits(resp, credits: int, request: Request):
+    """
+    ✅ Fix importante: en HTTPS (Render) marcamos Secure=True.
+    Si no, algunos navegadores ignoran cookies y te queda el "ver anuncio" sin efecto.
+    """
+    credits = max(0, min(REWARDED_FREE_MAX, credits))
+    is_https = (request.url.scheme == "https")
+
+    resp.set_cookie(
+        "ad_credits",
+        str(credits),
+        max_age=60 * 60 * 24,   # 24hs
+        httponly=False,
+        samesite="lax",
+        secure=is_https,        # ✅ CLAVE para Render
+    )
+    return resp
+
+
+def free_limit_for_request(request: Request) -> int:
+    credits = get_ad_credits(request)
+    return min(BASE_FREE_PICKS + credits, BASE_FREE_PICKS + REWARDED_FREE_MAX)
+
+
+# =========================
+# Escudos
+# =========================
+def load_team_crests(league: str):
+    if league in TEAM_CRESTS_BY_LEAGUE:
+        return
+
+    if not API_KEY:
+        TEAM_CRESTS_BY_LEAGUE[league] = {}
+        return
+
     try:
-        return f"{round(float(p) * 100, 1)}%"
+        url = f"{BASE}/competitions/{league}/teams"
+        r = requests.get(url, headers=HEADERS, timeout=20)
+        if r.status_code != 200:
+            TEAM_CRESTS_BY_LEAGUE[league] = {}
+            return
+
+        data = r.json()
+        teams = data.get("teams", [])
+        mapping = {}
+
+        for t in teams:
+            name = t.get("name")
+            crest = t.get("crest") or t.get("crestUrl")
+            if name and crest:
+                mapping[name] = crest
+
+        TEAM_CRESTS_BY_LEAGUE[league] = mapping
     except Exception:
-        return "-"
+        TEAM_CRESTS_BY_LEAGUE[league] = {}
+
+
+def crest_img(league: str, team_name: str, size=22):
+    mapping = TEAM_CRESTS_BY_LEAGUE.get(league, {})
+    url = mapping.get(team_name, "")
+    if not url:
+        return ""
+    return f'<img src="{url}" width="{size}" height="{size}" style="object-fit:contain;">'
 
 
 # =========================
-# ID normalization (CLAVE)
+# Confidence chips
 # =========================
-def make_composite_id(home: str, away: str, utcDate: str):
-    # id estable aunque no venga match_id (caso Render)
-    home = (home or "?").strip()
-    away = (away or "?").strip()
-    utcDate = (utcDate or "?").strip()
-    return f"{home}__{away}__{utcDate}"
-
-
-def get_match_id(m: dict):
-    # soporta todos los formatos que vimos
-    mid = (
-        m.get("match_id")
-        or m.get("matchId")
-        or m.get("id")
-        or m.get("fixture", {}).get("id")
-    )
-    return mid
+def confidence(prob: float):
+    p = _safe_float(prob, 0.0)
+    if p >= 0.70:
+        return ("HIGH", "conf-high")
+    elif p >= 0.60:
+        return ("MED", "conf-med")
+    else:
+        return ("LOW", "conf-low")
 
 
 # =========================
-# JSON normalization
+# Drivers + Rationale (solo unlocked)
 # =========================
-def norm_team_name(x):
-    if isinstance(x, str):
-        return x
-    if isinstance(x, dict):
-        return x.get("name") or x.get("shortName") or "?"
-    return "?"
+def model_drivers(match_item: dict):
+    home = match_item.get("home", "Home")
+    away = match_item.get("away", "Away")
 
+    xh = _safe_float(match_item.get("xg_home"))
+    xa = _safe_float(match_item.get("xg_away"))
+    xt = _safe_float(match_item.get("xg_total"))
 
-def norm_date(m: dict):
-    return m.get("utcDate") or m.get("date") or m.get("fixture", {}).get("date") or ""
+    p = match_item.get("probs") or {}
+    ph = _safe_float(p.get("home"))
+    pd = _safe_float(p.get("draw"))
+    pa = _safe_float(p.get("away"))
+    p_under = _safe_float(p.get("under_25"))
+    p_over = _safe_float(p.get("over_25"))
+    p_btts_yes = _safe_float(p.get("btts_yes"))
+    p_btts_no = _safe_float(p.get("btts_no"))
 
+    drivers = []
 
-def norm_status(m: dict):
-    st = (
-        m.get("status")
-        or m.get("fixture", {}).get("status", {}).get("short")
-        or m.get("state")
-        or ""
-    )
-    return st
+    edge = xa - xh
+    if abs(edge) >= 0.80:
+        leader = away if edge > 0 else home
+        drivers.append(f"Dominio esperado: **{leader}** por edge xG grande ({xh:.2f} vs {xa:.2f}).")
+    elif abs(edge) >= 0.35:
+        leader = away if edge > 0 else home
+        drivers.append(f"Ventaja ligera: **{leader}** por edge xG ({xh:.2f} vs {xa:.2f}).")
+    else:
+        drivers.append(f"Partido parejo por xG ({xh:.2f} vs {xa:.2f}) → más volatilidad.")
 
+    if xt <= 2.10:
+        drivers.append(f"Ambiente cerrado: total xG **{xt:.2f}** (tendencia a pocos goles).")
+    elif xt >= 2.80:
+        drivers.append(f"Ambiente abierto: total xG **{xt:.2f}** (tendencia a goles).")
+    else:
+        drivers.append(f"Ambiente medio: total xG **{xt:.2f}** (equilibrado).")
 
-def norm_score(m: dict):
-    # formato "plano" que venías guardando
-    hg = m.get("home_goals", None)
-    ag = m.get("away_goals", None)
-    if hg is not None or ag is not None:
-        return hg, ag
-
-    # football-data raw: score.fullTime.home/away
-    sc = m.get("score", {}) or {}
-    ft = sc.get("fullTime", {}) or {}
-    hg = ft.get("home")
-    ag = ft.get("away")
-    if hg is not None or ag is not None:
-        return hg, ag
-
-    # api-football: goals.home/away
-    goals = m.get("goals")
-    if isinstance(goals, dict):
-        return goals.get("home"), goals.get("away")
-
-    return None, None
-
-
-def norm_xg(m: dict):
-    # Render sample trae xg_* directo
-    xh = m.get("xg_home", m.get("xG_home"))
-    xa = m.get("xg_away", m.get("xG_away"))
-    xt = m.get("xg_total", m.get("xG_total"))
-    if xt is None and xh is not None and xa is not None:
-        try:
-            xt = float(xh) + float(xa)
-        except Exception:
-            pass
-    return xh, xa, xt
-
-
-def normalize_match(m: dict):
-    utcDate = norm_date(m)
-    status = norm_status(m)
-
-    home = (
-        m.get("home")
-        or norm_team_name(m.get("homeTeam"))
-        or norm_team_name(m.get("teams", {}).get("home"))
-    )
-    away = (
-        m.get("away")
-        or norm_team_name(m.get("awayTeam"))
-        or norm_team_name(m.get("teams", {}).get("away"))
-    )
-
-    mid = get_match_id(m)
-    if mid is None:
-        mid = make_composite_id(home, away, utcDate)
-
-    hg, ag = norm_score(m)
-    xh, xa, xt = norm_xg(m)
-
-    # Si no viene status, lo inferimos por fecha/score (caso Render)
-    if not status:
-        dt = safe_parse_dt(utcDate)
-        if dt:
-            now = datetime.now(timezone.utc)
-            if hg is not None and ag is not None:
-                status = FINISHED_STATUS
-            elif dt <= now:
-                # si ya pasó pero no tenemos FT, lo tratamos como LIVE/IN_PLAY? (suave)
-                status = "TIMED"
-            else:
-                status = "TIMED"
+    if ph or pd or pa:
+        fav = max([(ph, home), (pd, "Draw"), (pa, away)], key=lambda t: t[0])
+        if fav[1] != "Draw" and fav[0] >= 0.55:
+            drivers.append(f"Favorito claro según 1X2: **{fav[1]}** ({fav[0]:.3f}).")
+        elif fav[1] == "Draw" and fav[0] >= 0.33:
+            drivers.append(f"Empate con peso (Draw {fav[0]:.3f}) → ojo con double chance.")
         else:
-            status = "TIMED"
+            drivers.append("1X2 sin súper favorito → mejor mirar mercados de goles.")
 
-    return {
-        "match_id": str(mid),
-        "utcDate": utcDate,
-        "status": status,
-        "home": home,
-        "away": away,
-        "home_goals": hg,
-        "away_goals": ag,
-        "xg_home": xh,
-        "xg_away": xa,
-        "xg_total": xt,
-        # probs si existen (Render sample)
-        "probs": m.get("probs") if isinstance(m.get("probs"), dict) else None,
-    }
+    if p_under >= 0.62:
+        drivers.append(f"Señal Under fuerte: Under2.5 **{p_under:.3f}**.")
+    elif p_over >= 0.50 and xt >= 2.6:
+        drivers.append(f"Over con argumento: Over2.5 **{p_over:.3f}** + total xG alto.")
+
+    if p_btts_no >= 0.62 and min(xh, xa) <= 0.9:
+        drivers.append(f"BTTS NO respaldado: BTTS No **{p_btts_no:.3f}** + ataque flojo esperado.")
+    elif p_btts_yes >= 0.55 and xt >= 2.6:
+        drivers.append(f"BTTS YES con argumento: BTTS Yes **{p_btts_yes:.3f}** + total xG alto.")
+
+    return drivers
+
+
+def bet_type_rationale(market: str, match_item: dict, prob: float):
+    xh = _safe_float(match_item.get("xg_home"))
+    xa = _safe_float(match_item.get("xg_away"))
+    xt = _safe_float(match_item.get("xg_total"))
+    p = match_item.get("probs") or {}
+
+    ph = _safe_float(p.get("home"))
+    pa = _safe_float(p.get("away"))
+    p_under = _safe_float(p.get("under_25"))
+    p_over = _safe_float(p.get("over_25"))
+    p_btts_yes = _safe_float(p.get("btts_yes"))
+    p_btts_no = _safe_float(p.get("btts_no"))
+
+    m = (market or "").lower()
+    pr = _safe_float(prob)
+
+    if "under" in m:
+        bits = []
+        if xt <= 2.2:
+            bits.append(f"total xG bajo ({xt:.2f})")
+        if p_under:
+            bits.append(f"Under2.5 prob {p_under:.3f}")
+        if min(xh, xa) <= 0.9:
+            bits.append(f"uno con ataque flojo (min xG {min(xh, xa):.2f})")
+        return " + ".join(bits) + f" → Under (pick {pr:.3f})."
+
+    if "over" in m:
+        bits = []
+        if xt >= 2.8:
+            bits.append(f"total xG alto ({xt:.2f})")
+        if p_over:
+            bits.append(f"Over2.5 prob {p_over:.3f}")
+        if min(xh, xa) >= 1.1:
+            bits.append(f"ambos generan (min xG {min(xh, xa):.2f})")
+        return " + ".join(bits) + f" → Over (pick {pr:.3f})."
+
+    if "btts" in m and "yes" in m:
+        bits = []
+        if xt >= 2.6:
+            bits.append(f"total xG alto ({xt:.2f})")
+        if min(xh, xa) >= 1.0:
+            bits.append(f"ambos llegan (min xG {min(xh, xa):.2f})")
+        if p_btts_yes:
+            bits.append(f"BTTS Yes prob {p_btts_yes:.3f}")
+        return " + ".join(bits) + f" → BTTS Yes (pick {pr:.3f})."
+
+    if "btts" in m and "no" in m:
+        bits = []
+        if min(xh, xa) <= 0.9:
+            bits.append(f"uno con poca producción (min xG {min(xh, xa):.2f})")
+        if p_btts_no:
+            bits.append(f"BTTS No prob {p_btts_no:.3f}")
+        return " + ".join(bits) + f" → BTTS No (pick {pr:.3f})."
+
+    if "home" in m and "win" in m:
+        bits = []
+        if xh > xa:
+            bits.append(f"home xG arriba ({xh:.2f} vs {xa:.2f})")
+        if ph:
+            bits.append(f"Home prob {ph:.3f}")
+        return " + ".join(bits) + f" → Home Win (pick {pr:.3f})."
+
+    if "away" in m and "win" in m:
+        bits = []
+        if xa > xh:
+            bits.append(f"away xG arriba ({xa:.2f} vs {xh:.2f})")
+        if pa:
+            bits.append(f"Away prob {pa:.3f}")
+        return " + ".join(bits) + f" → Away Win (pick {pr:.3f})."
+
+    return f"xG ({xh:.2f}/{xa:.2f}, total {xt:.2f}) + prob {pr:.3f}."
 
 
 # =========================
-# Load matches + picks
+# Picks helpers
 # =========================
-def load_json_league(league: str):
-    mf = f"daily_matches_{league}.json"
-    pf = f"daily_picks_{league}.json"
+def best_candidate_for_match(match_item):
+    candidates = match_item.get("candidates") or []
+    if not candidates:
+        return None
+    return max(candidates, key=lambda c: (_safe_float(c.get("prob", 0)), -_safe_float(c.get("fair"), 999)))
 
-    if not os.path.exists(mf):
-        return []
 
-    try:
-        with open(mf, "r", encoding="utf-8") as f:
-            raw_matches = json.load(f)
-        if not isinstance(raw_matches, list):
-            return []
-    except Exception:
-        return []
+def best_pick_overall(picks):
+    best = None
+    for p in picks:
+        c = best_candidate_for_match(p)
+        if not c:
+            continue
+        score = _safe_float(c.get("prob"), 0)
+        if (best is None) or (score > best[2]):
+            best = (p, c, score)
+    return (best[0], best[1]) if best else (None, None)
 
-    # picks indexados por:
-    # 1) match_id string si existe
-    # 2) fallback composite home/away/utcDate si no existe id
-    picks_by_id = {}
-    picks_by_comp = {}
 
-    if os.path.exists(pf):
-        try:
-            with open(pf, "r", encoding="utf-8") as f:
-                raw_picks = json.load(f)
-            if isinstance(raw_picks, list):
-                for p in raw_picks:
-                    # match_id si viene
-                    pid = p.get("match_id") or p.get("matchId") or p.get("id") or p.get("fixture_id")
-                    if pid is not None:
-                        picks_by_id[str(pid)] = p
-                        continue
-
-                    # fallback: si el pick trae home/away/utcDate
-                    comp = make_composite_id(p.get("home"), p.get("away"), p.get("utcDate"))
-                    picks_by_comp[comp] = p
-        except Exception:
-            pass
-
-    out = []
-    for m in raw_matches:
-        nm = normalize_match(m)
-        mid = nm["match_id"]
-
-        # 1) intentamos por ID
-        p = picks_by_id.get(mid)
-
-        # 2) si no hay, intentamos composite
-        if not p:
-            comp = make_composite_id(nm["home"], nm["away"], nm["utcDate"])
-            p = picks_by_comp.get(comp)
-
-        # attach pick fields
-        nm["market"] = (p or {}).get("market")
-        nm["prob"] = (p or {}).get("prob")
-        nm["fair"] = (p or {}).get("fair")
-        nm["confidence"] = (p or {}).get("confidence")
-        nm["result"] = (p or {}).get("result") or "PENDING"
-        nm["result_reason"] = (p or {}).get("result_reason", "")
-
-        out.append(nm)
-
-    return out
+def ranked_candidates(picks):
+    ranking = []
+    for p in picks:
+        for c in p.get("candidates", []):
+            ranking.append({
+                "home": p.get("home", ""),
+                "away": p.get("away", ""),
+                "utcDate": p.get("utcDate", ""),
+                "xg_total": p.get("xg_total", 0),
+                "market": c.get("market", ""),
+                "prob": c.get("prob", 0),
+                "fair": c.get("fair", None),
+            })
+    ranking.sort(key=lambda x: _safe_float(x["prob"]), reverse=True)
+    return ranking
 
 
 # =========================
-# UI helpers
+# UI
 # =========================
-def pill(text, cls="pill"):
-    return f'<span class="{cls}">{text}</span>'
-
-
-def badge_status(status):
-    if status in LIVE_STATUSES:
-        return pill("LIVE", "pill live")
-    if status == FINISHED_STATUS:
-        return pill("FINISHED", "pill fin")
-    return pill("UPCOMING", "pill upc")
-
-
-def badge_result(res):
-    res = res or "PENDING"
-    if res == "WIN":
-        return pill("WIN", "pill win")
-    if res == "LOSS":
-        return pill("LOSS", "pill loss")
-    return pill("PENDING", "pill pend")
-
-
-def pick_line(item):
-    if not item.get("market"):
-        return '<div class="muted">Sin pick (todavía)</div>'
-
-    return f"""
-    <div class="pickbox">
-        <div class="pickhead">
-            <b>{item['market']}</b> {badge_result(item.get("result"))}
-        </div>
-        <div class="pickmeta">
-            prob <b>{fmt_prob(item.get('prob'))}</b> • fair <b>{fmt_num(item.get('fair'))}</b> • conf <b>{item.get('confidence','-')}</b><br/>
-            <span class="muted">{item.get('result_reason','')}</span>
-        </div>
-    </div>
-    """
-
-
-def match_card(item, compact=True):
-    local_dt = fmt_local_dt(item.get("utcDate", ""))
-    status = item.get("status", "")
-
-    score = ""
-    if item.get("home_goals") is not None and item.get("away_goals") is not None:
-        score = f"{item['home_goals']}-{item['away_goals']}"
-
-    xg = ""
-    if item.get("xg_home") is not None and item.get("xg_away") is not None:
-        xg = f"xG {fmt_num(item.get('xg_home'))}-{fmt_num(item.get('xg_away'))} (tot {fmt_num(item.get('xg_total'))})"
-
-    meta_line = f"{local_dt} • {xg}".strip(" •")
-
-    return f"""
-    <div class="card{' compact' if compact else ''}">
-        <div class="rowtitle">
-            <span class="teams">{item.get('home','?')} vs {item.get('away','?')}</span>
-            {badge_status(status)}
-            {pill(score, "pill score") if score else ""}
-        </div>
-        <div class="meta">{meta_line}</div>
-        {pick_line(item)}
-    </div>
-    """
-
-
-def league_select(current):
-    opts = []
+def league_nav(league: str):
+    pills = []
     for code, name in LEAGUES.items():
-        sel = "selected" if code == current else ""
-        opts.append(f'<option value="{code}" {sel}>{code} • {name}</option>')
+        active = "pill-active" if code == league else ""
+        pills.append(f'<a class="pill {active}" href="/?league={code}">{name}</a>')
+    return '<div class="leaguebar">' + "".join(pills) + "</div>"
+
+
+def page_shell(title, inner_html, league: str):
     return f"""
-    <select id="leagueSel" class="select" onchange="location.href='/?league='+this.value">
-        {''.join(opts)}
-    </select>
+    <html>
+    <head>
+        <meta charset="utf-8" />
+        <title>{title}</title>
+        <style>
+            body {{ background:#0b1220; color:#e5e7eb; font-family: Arial; padding:24px; }}
+            .topbar {{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:12px; flex-wrap:wrap; }}
+            .brand {{ font-weight:900; font-size:20px; letter-spacing:0.4px; display:flex; align-items:center; gap:10px; }}
+            .brand img {{ width:26px; height:26px; }}
+            .links a {{ color:#60a5fa; text-decoration:none; margin-left:12px; font-size:14px; }}
+
+            .leaguebar {{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 16px; }}
+            .pill {{
+                padding:8px 10px; border-radius:999px; font-size:12px; font-weight:800;
+                border:1px solid #223457; text-decoration:none; color:#cbd5e1; background:#0f172a;
+            }}
+            .pill-active {{ background:#0f2440; border-color:#38bdf8; color:#e5e7eb; }}
+
+            .section-title {{ margin:18px 0 10px; font-size:16px; color:#cbd5e1; }}
+            .grid {{ display:grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap:14px; }}
+            .card {{ background:#111a2e; border:1px solid #1f2a44; padding:14px; border-radius:12px; }}
+
+            .meta {{ color:#94a3b8; font-size:12px; margin-bottom:10px; }}
+            .muted {{ color:#94a3b8; }}
+            .divider {{ height:1px; background:#1f2a44; margin:18px 0; }}
+
+            .hero {{ background: linear-gradient(135deg, #0f172a, #0b2a1a); border:1px solid #1f2a44; padding:18px; border-radius:16px; margin-bottom:18px; }}
+            .hero-title {{ font-size:13px; color:#86efac; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }}
+            .hero-match {{ font-size:22px; font-weight:900; margin-bottom:6px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }}
+            .market {{ font-size:18px; font-weight:900; color:#38bdf8; margin-top:10px; }}
+            .rowtitle {{ font-size:16px; font-weight:800; margin-bottom:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }}
+            .badge {{ display:inline-block; padding:4px 8px; border-radius:8px; background:#0b2a1a; border:1px solid #14532d; color:#86efac; font-size:12px; margin-left:8px; }}
+
+            .conf-chip {{
+                display:inline-block;
+                padding:4px 8px;
+                border-radius:999px;
+                font-size:12px;
+                font-weight:800;
+                letter-spacing:0.5px;
+                margin-left:8px;
+                border:1px solid #223457;
+                background:#0f172a;
+            }}
+            .conf-high {{ color:#86efac; border-color:#14532d; background:#0b2a1a; }}
+            .conf-med  {{ color:#fde68a; border-color:#92400e; background:#2a1d0b; }}
+            .conf-low  {{ color:#fca5a5; border-color:#7f1d1d; background:#2a0b0b; }}
+
+            .drivers {{
+                margin-top:10px;
+                padding:10px 12px;
+                border-radius:14px;
+                background:#0f172a;
+                border:1px solid #223457;
+            }}
+            .drivers-title {{
+                font-weight:900;
+                color:#86efac;
+                font-size:12px;
+                letter-spacing:0.6px;
+                text-transform:uppercase;
+                margin-bottom:8px;
+            }}
+            .drivers ul {{
+                margin:0;
+                padding-left:18px;
+                color:#cbd5e1;
+                font-size:12px;
+                line-height:1.5;
+            }}
+
+            .pickbox {{
+                margin-top:10px;
+                padding:12px;
+                border-radius:14px;
+                background:#0f2440;
+                border:1px solid #223457;
+            }}
+            .pickhead {{
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:10px;
+                flex-wrap:wrap;
+                font-weight:800;
+            }}
+            .pickmeta {{
+                margin-top:6px;
+                color:#cbd5e1;
+                font-size:12px;
+                line-height:1.4;
+            }}
+
+            .premium-card {{
+                background: rgba(17,26,46,0.6);
+                border:1px dashed #334155;
+                padding:14px;
+                border-radius:12px;
+            }}
+            .cta {{
+                margin-top:10px;
+                padding:10px 12px;
+                border-radius:10px;
+                background:#0f2440;
+                border:1px solid #223457;
+                color:#e5e7eb;
+                font-weight:900;
+                display:inline-block;
+                text-decoration:none;
+                cursor:pointer;
+            }}
+            .cta:disabled {{ opacity:0.6; cursor:not-allowed; }}
+            .adbox {{
+                height:160px;
+                border:1px dashed #334155;
+                border-radius:12px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                margin-top:12px;
+                background:#0f172a;
+            }}
+
+            /* progress bar */
+            .progress {{
+              margin-top:10px;
+              height:10px;
+              background:#0f172a;
+              border:1px solid #223457;
+              border-radius:999px;
+              overflow:hidden;
+            }}
+            .progress > div {{
+              height:100%;
+              width:0%;
+              background:#38bdf8;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="topbar">
+            <div class="brand">
+                <img src="{APP_LOGO_URL}" alt="logo">
+                AFTR • AI Picks
+            </div>
+            <div class="links">
+                <a href="/?league={league}">Dashboard</a>
+                <a href="/picks?league={league}">Picks</a>
+                <a href="/matches?league={league}">Matches</a>
+                <a href="/premium">Premium</a>
+                <a href="/api/picks?league={league}" target="_blank">JSON Picks</a>
+                <a href="/api/matches?league={league}" target="_blank">JSON Matches</a>
+            </div>
+        </div>
+
+        {league_nav(league)}
+
+        {inner_html}
+    </body>
+    </html>
     """
 
 
-def split_sections(items):
-    live = [x for x in items if x.get("status") in LIVE_STATUSES]
-    upcoming = [x for x in items if x.get("status") in UPCOMING_STATUSES]
-    recent = [x for x in items if x.get("status") == FINISHED_STATUS]
+def render_unlock_card(request: Request, league: str, back_url: str):
+    credits = get_ad_credits(request)
+    remaining_ads = max(0, REWARDED_FREE_MAX - credits)
+    free_now = free_limit_for_request(request)
+    max_free = BASE_FREE_PICKS + REWARDED_FREE_MAX
+    pct = int((credits / REWARDED_FREE_MAX) * 100) if REWARDED_FREE_MAX else 0
 
-    # si algunos vienen como TIMED siempre, al menos ordenamos por fecha
-    live.sort(key=lambda x: x.get("utcDate") or "")
-    upcoming.sort(key=lambda x: x.get("utcDate") or "")
-    recent.sort(key=lambda x: x.get("utcDate") or "", reverse=True)
-    recent = recent[:60]
-
-    return live, upcoming, recent
-
-
-def page_shell(title, inner, league):
-    tg = ""
-    if TELEGRAM_LINK:
-        tg = f'<a class="chip" href="{TELEGRAM_LINK}" target="_blank">💬 Telegram</a>'
-
+    watch_link = f"/watch-ad?league={league}&back={quote(back_url, safe='/?=&')}"
     return f"""
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>{title}</title>
-<style>
-:root {{
-  --bg:#0b1220;
-  --card:#111a2e;
-  --muted:#94a3b8;
-  --line:#1f2a44;
-  --acc:#7c3aed;
-}}
-*{{box-sizing:border-box}}
-body {{
-  margin:0; font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto;
-  background:var(--bg); color:#e5e7eb;
-}}
-a{{color:#c4b5fd; text-decoration:none}}
-.wrap{{max-width:1120px; margin:0 auto; padding:16px}}
-.topbar{{display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:14px}}
-.brand{{font-weight:900; letter-spacing:0.5px}}
-.links{{display:flex; gap:12px; align-items:center; flex-wrap:wrap}}
-.muted{{color:var(--muted)}}
-.hero{{background:linear-gradient(135deg,#111a2e,#0f2440); border:1px solid var(--line); padding:14px; border-radius:14px; margin-bottom:12px}}
-.hero-title{{font-size:20px; font-weight:900}}
-.controls{{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px}}
-.select{{background:#0b1730; border:1px solid var(--line); color:#e5e7eb; padding:8px 10px; border-radius:10px}}
-.btn{{background:var(--acc); color:white; border:0; padding:8px 12px; border-radius:10px; font-weight:800; cursor:pointer}}
-.grid {{
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap:10px;
-}}
-.card {{
-  background:var(--card);
-  border:1px solid var(--line);
-  padding:10px;
-  border-radius:12px;
-}}
-.card.compact{{padding:10px}}
-.rowtitle {{
-  font-size:14px;
-  font-weight:900;
-  margin-bottom:4px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap;
-}}
-.teams{{font-weight:900}}
-.meta{{color:var(--muted); font-size:11px; margin-top:4px}}
-.pill{{display:inline-block; padding:3px 8px; border-radius:999px; font-size:11px; border:1px solid var(--line); background:#0b1730}}
-.pill.win{{border-color:#14532d; background:#052e16; color:#86efac}}
-.pill.loss{{border-color:#7f1d1d; background:#450a0a; color:#fca5a5}}
-.pill.pend{{border-color:#78350f; background:#2a1707; color:#fde68a}}
-.pill.live{{border-color:#7f1d1d; background:#450a0a; color:#fecaca}}
-.pill.fin{{border-color:#0f172a; background:#0b1730; color:#cbd5e1}}
-.pill.upc{{border-color:#334155; background:#0b1730; color:#cbd5e1}}
-.pill.score{{opacity:.95}}
-.pickbox {{
-  margin-top:8px;
-  padding:10px;
-  border-radius:12px;
-  background:#0f2440;
-  border:1px solid #223457;
-}}
-.pickhead{{font-size:12px}}
-.pickmeta{{font-size:11px; margin-top:6px}}
-.sectionTitle{{margin:14px 0 8px; font-size:13px; font-weight:900; color:#cbd5e1}}
-hr{{border:0; border-top:1px solid var(--line); margin:14px 0}}
-.chip{{border:1px solid var(--line); background:#0b1730; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:800; color:#e5e7eb}}
-.topPickTitle{{font-weight:900; margin:2px 0 10px; color:#e2e8f0}}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <div class="topbar">
-    <div class="brand">AFTR • MVP</div>
-    <div class="links">
-      <a class="chip" href="/?league={league}">Dashboard</a>
-      <a class="chip" href="/stats">Stats</a>
-      <a class="chip" href="/docs">Docs</a>
-      {tg}
+    <div class="card" style="margin-bottom:14px;">
+        <div style="font-weight:900;">Free unlock</div>
+        <div class="muted">Gratis: {BASE_FREE_PICKS}. Desbloqueado por ads: +{credits}/{REWARDED_FREE_MAX}. Total free ahora: <b>{free_now}</b> / {max_free}.</div>
+        <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="cta" href="{watch_link}">🎬 Ver anuncio (+1 pick)</a>
+            <a class="cta" href="/premium">💎 Premium</a>
+        </div>
+        <div class="muted" style="margin-top:8px;">Ads restantes para desbloquear hoy: {remaining_ads}</div>
+        <div class="progress"><div style="width:{pct}%"></div></div>
     </div>
-  </div>
+    """
 
-  <div class="hero">
-    <div class="hero-title">{title}</div>
-    <div class="muted">Liga: <b>{league} • {LEAGUES.get(league,"")}</b> • Horario <b>AR (-03)</b></div>
-    <div class="controls">
-      {league_select(league)}
-      <button class="btn" onclick="refreshNow()">⚡ Refresh</button>
-      <span class="muted">Si no tenés key → Unauthorized (normal).</span>
-    </div>
-  </div>
 
-  {inner}
-</div>
+def render_cards(
+    request: Request,
+    items,
+    title_text,
+    league: str,
+    back_url: str,
+    show_probs=True,
+    premium_lock=False,
+    show_candidates=True,
+):
+    if not items:
+        return f'<div class="section-title">{title_text} (0)</div><div class="muted">No hay data para esta liga. Corré team_strength.py</div>'
 
-<script>
-async function refreshNow() {{
-  const key = prompt("REFRESH key?");
-  if(!key) return;
-  const r = await fetch(`/refresh?key=${{encodeURIComponent(key)}}`);
-  const j = await r.json();
-  alert(JSON.stringify(j));
-  location.reload();
-}}
-</script>
-</body>
-</html>
-"""
+    html = f'<div class="section-title">{title_text} ({len(items)})</div>'
+
+    if premium_lock:
+        html += render_unlock_card(request, league, back_url)
+
+    html += '<div class="grid">'
+
+    visible = items
+    locked = []
+
+    if premium_lock:
+        free_limit = free_limit_for_request(request)
+        visible = items[:free_limit]
+        locked = items[free_limit:]
+
+    load_team_crests(league)
+
+    # Unlocked cards
+    for it in visible:
+        badge = '<span class="badge">PICK</span>' if (it.get("candidates") and len(it["candidates"]) > 0 and show_candidates) else ""
+        home = it.get("home", "")
+        away = it.get("away", "")
+
+        home_crest = crest_img(league, home, 22)
+        away_crest = crest_img(league, away, 22)
+
+        html += f"""
+        <div class="card">
+            <div class="rowtitle">
+                {home_crest} {home} <span class="muted">vs</span> {away} {away_crest}
+                {badge}
+            </div>
+            <div class="meta">{it.get('utcDate','')} • xG {it.get('xg_home',0)} - {it.get('xg_away',0)} (total {it.get('xg_total',0)})</div>
+        """
+
+        if show_probs and it.get("probs"):
+            p = it["probs"]
+            html += f"""
+            <div class="muted">1X2: H {p.get('home')} • D {p.get('draw')} • A {p.get('away')}</div>
+            <div class="muted">U2.5 {p.get('under_25')} • O2.5 {p.get('over_25')} • BTTS Yes {p.get('btts_yes')}</div>
+            """
+
+        drv = model_drivers(it)
+        if drv:
+            bullets = "".join([f"<li>{d}</li>" for d in drv[:4]])
+            html += f"""
+            <div class="drivers">
+                <div class="drivers-title">Model Drivers</div>
+                <ul>{bullets}</ul>
+            </div>
+            """
+
+        if show_candidates and it.get("candidates"):
+            for c in it["candidates"]:
+                prob_pct = round(_safe_float(c.get("prob")) * 100, 1)
+                label, cls = confidence(c.get("prob"))
+                rationale = bet_type_rationale(c.get("market", ""), it, c.get("prob"))
+
+                html += f"""
+                <div class="pickbox">
+                    <div class="pickhead">
+                        <span>{c.get("market")} • {prob_pct}% • Fair {c.get("fair")}</span>
+                        <span class="conf-chip {cls}">{label}</span>
+                    </div>
+                    <div class="pickmeta"><b>Bet rationale:</b> {rationale}</div>
+                </div>
+                """
+
+        html += "</div>"
+
+    # Locked cards
+    if premium_lock and locked:
+        for it in locked[:6]:
+            home = it.get("home", "")
+            away = it.get("away", "")
+            html += f"""
+            <div class="premium-card">
+                <div class="rowtitle">
+                    {home} <span class="muted">vs</span> {away}
+                    <span class="badge">PREMIUM</span>
+                </div>
+                <div class="meta">{it.get('utcDate','')}</div>
+                <div class="muted">{PREMIUM_MESSAGE}</div>
+                <a href="/premium" class="cta">💎 Desbloquear Premium</a>
+            </div>
+            """
+        remaining = max(0, len(locked) - 6)
+        if remaining > 0:
+            html += f"""
+            <div class="premium-card">
+                <div class="rowtitle">🔒 +{remaining} picks más bloqueados</div>
+                <div class="muted">Activá Premium para verlos todos.</div>
+                <a href="/premium" class="cta">💎 Desbloquear Premium</a>
+            </div>
+            """
+
+    html += "</div>"
+    return html
 
 
 # =========================
-# Routes
+# Rewarded flow
+# =========================
+@app.get("/watch-ad", response_class=HTMLResponse)
+def watch_ad(request: Request, league: str = Query(DEFAULT_LEAGUE), back: str = Query("/")):
+    league = league if league in LEAGUES else DEFAULT_LEAGUE
+    credits = get_ad_credits(request)
+
+    if credits >= REWARDED_FREE_MAX:
+        inner = f"""
+        <div class="hero">
+          <div class="hero-title">Rewarded</div>
+          <div class="hero-match">Ya desbloqueaste todo lo posible por ads 😈</div>
+          <div class="muted">Máximo: {REWARDED_FREE_MAX} picks extra.</div>
+          <a class="cta" href="{back}">Volver</a>
+        </div>
+        """
+        return page_shell("Watch Ad", inner, league)
+
+    inner = f"""
+    <div class="hero">
+        <div class="hero-title">Rewarded Ad</div>
+        <div class="hero-match">Desbloqueás +1 pick</div>
+        <div class="muted">Esperá 10 segundos y se habilita el botón.</div>
+    </div>
+
+    <div class="card">
+        <div style="font-weight:900; margin-bottom:10px;">Sponsor slot</div>
+        <div class="muted">Por ahora es un house-ad (AFTR). Después metemos sponsor real.</div>
+
+        <div class="adbox">
+          <div style="text-align:center; padding:10px;">
+            <div style="font-weight:900; font-size:16px;">AFTR Premium</div>
+            <div class="muted" style="margin-top:6px;">Desbloqueá TODO + picks completos + rationale</div>
+            <div style="margin-top:12px;">
+              <a class="cta" href="/premium">💎 Ir a Premium</a>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+            <button id="btn" class="cta" disabled>⏳ Esperando...</button>
+        </div>
+        <div class="muted" style="margin-top:10px;">Tip: esto mantiene el free vivo mientras premium despega.</div>
+    </div>
+
+    <script>
+      let t = 10;
+      const btn = document.getElementById("btn");
+      const tick = () => {{
+        if (t <= 0) {{
+          btn.disabled = false;
+          btn.textContent = "✅ Desbloquear +1 pick";
+          btn.onclick = () => {{
+            window.location.href = "/ad-reward?league={league}&back=" + encodeURIComponent("{back}");
+          }};
+          return;
+        }}
+        btn.textContent = "⏳ Esperando... " + t + "s";
+        t -= 1;
+        setTimeout(tick, 1000);
+      }};
+      tick();
+    </script>
+    """
+    return page_shell("Watch Ad", inner, league)
+
+
+@app.get("/ad-reward")
+def ad_reward(request: Request, league: str = Query(DEFAULT_LEAGUE), back: str = Query("/")):
+    credits = get_ad_credits(request)
+    credits = min(REWARDED_FREE_MAX, credits + 1)
+    resp = RedirectResponse(url=back, status_code=302)
+    return set_ad_credits(resp, credits, request)
+
+
+# =========================
+# JSON endpoints
+# =========================
+@app.get("/api/picks")
+def picks_json(league: str = Query(DEFAULT_LEAGUE)):
+    league = league if league in LEAGUES else DEFAULT_LEAGUE
+    path = picks_file(league)
+    if not os.path.exists(path):
+        return {"error": f"No picks file found for {league}. Run team_strength.py."}
+    return read_json(path)
+
+
+@app.get("/api/matches")
+def matches_json(league: str = Query(DEFAULT_LEAGUE)):
+    league = league if league in LEAGUES else DEFAULT_LEAGUE
+    path = matches_file(league)
+    if not os.path.exists(path):
+        return {"error": f"No matches file found for {league}. Run team_strength.py."}
+    return read_json(path)
+
+
+# =========================
+# Pages
 # =========================
 @app.get("/", response_class=HTMLResponse)
-def dashboard(league: str = DEFAULT_LEAGUE):
-    if league not in LEAGUES:
-        league = DEFAULT_LEAGUE
+def dashboard(request: Request, league: str = Query(DEFAULT_LEAGUE)):
+    league = league if league in LEAGUES else DEFAULT_LEAGUE
+    picks = read_json(picks_file(league))
+    matches = read_json(matches_file(league))
 
-    items = load_json_league(league)
-    live, upcoming, recent = split_sections(items)
+    top_pick, top_candidate = best_pick_overall(picks)
 
-    # TOP PICK: mejor prob (si hay picks)
-    top_pick = None
-    pool = [x for x in upcoming if x.get("market") and x.get("prob") is not None]
-    if pool:
-        try:
-            top_pick = sorted(pool, key=lambda x: float(x.get("prob", 0.0)), reverse=True)[0]
-        except Exception:
-            top_pick = pool[0]
+    if top_pick and top_candidate:
+        prob_pct = round(_safe_float(top_candidate.get("prob")) * 100, 1)
+        label, cls = confidence(top_candidate.get("prob"))
+        home = top_pick.get("home", "")
+        away = top_pick.get("away", "")
 
-    inner = ""
-    if top_pick:
-        inner += f"""
-        <div class="topPickTitle">⭐ TOP PICK</div>
-        <div class="grid">
-            {match_card(top_pick, compact=False)}
+        load_team_crests(league)
+        home_crest = crest_img(league, home, 26)
+        away_crest = crest_img(league, away, 26)
+
+        rationale = bet_type_rationale(top_candidate.get("market", ""), top_pick, top_candidate.get("prob"))
+        drv = model_drivers(top_pick)
+        bullets = "".join([f"<li>{d}</li>" for d in drv[:3]]) if drv else ""
+
+        inner = f"""
+        <div class="hero">
+            <div class="hero-title">Top pick del día • {LEAGUES.get(league)}</div>
+            <div class="hero-match">
+                {home_crest} {home} <span class="muted">vs</span> {away} {away_crest}
+                <span class="conf-chip {cls}">{label}</span>
+            </div>
+            <div class="meta">{top_pick.get('utcDate','')} • xG {top_pick.get('xg_home')} - {top_pick.get('xg_away')} (total {top_pick.get('xg_total')})</div>
+            <div class="market">{top_candidate.get('market')} → {prob_pct}% • Fair {top_candidate.get('fair')}</div>
+
+            <div class="drivers" style="margin-top:12px;">
+                <div class="drivers-title">Top Drivers</div>
+                <ul>{bullets}</ul>
+            </div>
+
+            <div class="pickbox" style="margin-top:12px;">
+                <div class="pickhead">
+                    <span>Bet rationale</span>
+                    <span class="conf-chip {cls}">{label}</span>
+                </div>
+                <div class="pickmeta">{rationale}</div>
+            </div>
+
+            <div class="muted" style="margin-top:10px;">
+                Picks: <b>{len(picks)}</b> • Matches: <b>{len(matches)}</b> • Free base: <b>{BASE_FREE_PICKS}</b> • Rewarded max: <b>{REWARDED_FREE_MAX}</b>
+            </div>
         </div>
-        <hr/>
+        """
+    else:
+        inner = f"""
+        <div class="hero">
+            <div class="hero-title">Top pick del día • {LEAGUES.get(league)}</div>
+            <div class="muted">No hay picks todavía para esta liga. Corré team_strength.py</div>
+        </div>
         """
 
-    def section(title, lst):
-        if not lst:
-            return f"<div class='muted'>No hay datos en {title}.</div>"
-        return f"""
-        <div class="sectionTitle">{title}</div>
-        <div class="grid">
-          {''.join([match_card(it, compact=True) for it in lst])}
-        </div>
-        """
+    inner += '<div class="divider"></div>'
 
-    inner += section("🔴 LIVE", live)
-    inner += "<hr/>"
-    inner += section("🗓️ UPCOMING", upcoming)
-    inner += "<hr/>"
-    inner += section("🧾 RECENT (últimos 60)", recent)
+    inner += render_cards(
+        request,
+        picks,
+        "🔥 Picks detectados (Free + Rewarded + 🔒 Premium)",
+        league=league,
+        back_url=f"/?league={league}",
+        show_probs=True,
+        premium_lock=True,
+        show_candidates=True,
+    )
+
+    inner += '<div class="divider"></div>'
+
+    inner += render_cards(
+        request,
+        matches,
+        "📅 Próximos partidos (transparente, sin recomendaciones)",
+        league=league,
+        back_url=f"/matches?league={league}",
+        show_probs=True,
+        premium_lock=False,
+        show_candidates=False,
+    )
 
     return page_shell("AFTR Dashboard", inner, league)
 
 
-@app.get("/api/stats")
-def api_stats():
-    total = wins = losses = pending = 0
-    for lg in LEAGUES.keys():
-        pf = f"daily_picks_{lg}.json"
-        if os.path.exists(pf):
-            try:
-                with open(pf, "r", encoding="utf-8") as f:
-                    picks = json.load(f)
-                if isinstance(picks, list):
-                    for p in picks:
-                        total += 1
-                        r = (p.get("result") or "PENDING")
-                        if r == "WIN":
-                            wins += 1
-                        elif r == "LOSS":
-                            losses += 1
-                        else:
-                            pending += 1
-            except Exception:
-                pass
+@app.get("/picks", response_class=HTMLResponse)
+def picks_page(request: Request, league: str = Query(DEFAULT_LEAGUE)):
+    league = league if league in LEAGUES else DEFAULT_LEAGUE
+    picks = read_json(picks_file(league))
 
-    decided = wins + losses
-    winrate = round((wins / decided) * 100, 2) if decided > 0 else 0
-    return {"total_picks": total, "wins": wins, "losses": losses, "pending": pending, "winrate": winrate}
+    inner = render_cards(
+        request,
+        picks,
+        "🔥 Picks detectados (Free + Rewarded + 🔒 Premium)",
+        league=league,
+        back_url=f"/picks?league={league}",
+        show_probs=True,
+        premium_lock=True,
+        show_candidates=True,
+    )
+    return page_shell("AFTR Picks", inner, league)
 
 
-@app.get("/stats", response_class=HTMLResponse)
-def stats_page():
-    s = api_stats()
+@app.get("/matches", response_class=HTMLResponse)
+def matches_page(request: Request, league: str = Query(DEFAULT_LEAGUE)):
+    league = league if league in LEAGUES else DEFAULT_LEAGUE
+    matches = read_json(matches_file(league))
+
+    inner = render_cards(
+        request,
+        matches,
+        "📅 Próximos partidos (transparente, sin recomendaciones)",
+        league=league,
+        back_url=f"/matches?league={league}",
+        show_probs=True,
+        premium_lock=False,
+        show_candidates=False,
+    )
+    return page_shell("AFTR Matches", inner, league)
+
+
+@app.get("/premium", response_class=HTMLResponse)
+def premium_page():
+    contact_link = telegram_contact_link()
+
     inner = f"""
-    <div class="grid">
-        <div class="card"><div class="rowtitle">📌 Picks totales</div><div style="font-size:28px;font-weight:900;">{s['total_picks']}</div><div class="muted">Incluye pending</div></div>
-        <div class="card"><div class="rowtitle">✅ Wins</div><div style="font-size:28px;font-weight:900;color:#86efac;">{s['wins']}</div></div>
-        <div class="card"><div class="rowtitle">❌ Losses</div><div style="font-size:28px;font-weight:900;color:#fca5a5;">{s['losses']}</div></div>
-        <div class="card"><div class="rowtitle">⏳ Pending</div><div style="font-size:28px;font-weight:900;color:#fde68a;">{s['pending']}</div></div>
-        <div class="card" style="grid-column: span 2;"><div class="rowtitle">📈 Winrate (decididos)</div><div style="font-size:34px;font-weight:900;">{s['winrate']}%</div></div>
+    <div class="hero">
+        <div class="hero-title">AFTR Premium</div>
+        <div class="hero-match">Desbloqueá todos los picks.</div>
+        <div class="muted">
+            Premium desbloquea el resto de picks (más allá de {BASE_FREE_PICKS + REWARDED_FREE_MAX}),
+            con drivers y rationale completo.
+        </div>
     </div>
-    """
-    return page_shell("AFTR Stats", inner, DEFAULT_LEAGUE)
 
-
-@app.get("/docs", response_class=HTMLResponse)
-def docs_page():
-    inner = f"""
+    <div class="section-title">🔓 Qué desbloqueás</div>
     <div class="card">
-      <div class="rowtitle">📚 Endpoints</div>
-      <div class="muted" style="margin-top:8px; line-height:1.6;">
-        • <b>/</b> Dashboard<br/>
-        • <b>/stats</b> Stats<br/>
-        • <b>/api/stats</b> Stats JSON<br/>
-        • <b>/api/debug?league=PL</b> Debug JSON<br/>
-        • <b>/refresh?key=...</b> fuerza update (requiere <b>REFRESH_KEY</b>)<br/>
-        <hr/>
-        <b>Auto-refresh</b>: cada {REFRESH_EVERY_MIN} min (si <b>AUTO_REFRESH=1</b>).<br/>
-      </div>
+        <div>✅ Todos los picks diarios</div>
+        <div>✅ Model Drivers</div>
+        <div>✅ Bet rationale</div>
+        <div class="muted" style="margin-top:8px;">Sin spam, sin humo. Solo data.</div>
+    </div>
+
+    <div class="section-title">🚀 Activar Premium</div>
+    <div class="card">
+        <div>Hacé click y te abrimos Telegram con el mensaje listo:</div>
+        <div style="margin-top:12px;">
+            <a href="{contact_link}" target="_blank" rel="noopener" class="cta">💎 Quiero Premium</a>
+        </div>
+        <div class="muted" style="margin-top:10px;">Pagos: lo definimos (MercadoPago/PayPal/Stripe) según mercado.</div>
     </div>
     """
-    return page_shell("AFTR Docs", inner, DEFAULT_LEAGUE)
+    return page_shell("AFTR Premium", inner, DEFAULT_LEAGUE)
 
 
-@app.get("/api/debug")
-def api_debug(league: str = "PL"):
-    mf = f"daily_matches_{league}.json"
-    pf = f"daily_picks_{league}.json"
 
-    info = {
-        "cwd": os.getcwd(),
-        "matches_file": mf,
-        "picks_file": pf,
-        "matches_exists": os.path.exists(mf),
-        "picks_exists": os.path.exists(pf),
-        "matches_size": os.path.getsize(mf) if os.path.exists(mf) else 0,
-        "picks_size": os.path.getsize(pf) if os.path.exists(pf) else 0,
-    }
-
-    sample = None
-    sample_norm = None
-
-    if os.path.exists(mf):
-        try:
-            with open(mf, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            info["matches_count"] = len(data) if isinstance(data, list) else "not_list"
-            if isinstance(data, list) and data:
-                sample = data[0]
-                sample_norm = normalize_match(sample)
-        except Exception as e:
-            info["matches_read_error"] = str(e)
-
-    return {"info": info, "sample_first_match": sample, "sample_normalized": sample_norm}
-
-
-@app.get("/refresh")
-def refresh(key: str = ""):
-    if not REFRESH_KEY:
-        raise HTTPException(status_code=401, detail="REFRESH_KEY no está seteada como variable de entorno.")
-    if key != REFRESH_KEY:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    try:
-        subprocess.run([os.sys.executable, "team_strength.py"], check=True)
-    except subprocess.CalledProcessError as e:
-        raise HTTPException(status_code=500, detail=f"Refresh failed: {e}")
-
-    return {"ok": True, "msg": "JSON actualizados"}
-
-
-def _auto_refresh_loop():
-    while True:
-        time.sleep(max(60, REFRESH_EVERY_MIN * 60))
-        try:
-            subprocess.run([os.sys.executable, "team_strength.py"], check=True)
-            print("✅ Auto-refresh OK")
-        except Exception as e:
-            print(f"⚠️ Auto-refresh failed: {e}")
-
-
-@app.on_event("startup")
-def startup_event():
-    # seed local (si faltan JSON)
-    try:
-        if not os.path.exists("daily_matches_PL.json"):
-            subprocess.run([os.sys.executable, "team_strength.py"], check=True)
-    except Exception as e:
-        print(f"⚠️ Seed startup failed: {e}")
-
-    if AUTO_REFRESH:
-        t = threading.Thread(target=_auto_refresh_loop, daemon=True)
-        t.start()
-        print("✅ Auto-refresh thread started.")
-
-
+   
 
 
 
