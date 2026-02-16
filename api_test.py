@@ -15,9 +15,12 @@ REFRESH_KEY = os.getenv("REFRESH_KEY", "").strip()
 AUTO_REFRESH = os.getenv("AUTO_REFRESH", "0").strip() == "1"
 AUTO_REFRESH_EVERY_MIN = int(os.getenv("AUTO_REFRESH_EVERY_MIN", "60"))
 
+TELEGRAM_USERNAME = "AFTRPICK"
+
 TELEGRAM_LINK = os.getenv(
-    "AFTR_TELEGRAM", "https://t.me/"
-)  # poné el tuyo en Render si querés
+    "AFTR_TELEGRAM",
+    f"https://t.me/{TELEGRAM_USERNAME}"
+).strip()
 
 # UI locking / ads
 FREE_CARDS = 10
