@@ -1,0 +1,1314 @@
+[
+  {
+    "utcDate": "2026-02-18T17:45:00Z",
+    "home": "Qarabağ Ağdam FK",
+    "away": "Newcastle United FC",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-18T20:00:00Z",
+    "home": "Club Brugge KV",
+    "away": "Club Atlético de Madrid",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-18T20:00:00Z",
+    "home": "PAE Olympiakos SFP",
+    "away": "Bayer 04 Leverkusen",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-18T20:00:00Z",
+    "home": "FK Bodø/Glimt",
+    "away": "FC Internazionale Milano",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-24T17:45:00Z",
+    "home": "Club Atlético de Madrid",
+    "away": "Club Brugge KV",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-24T20:00:00Z",
+    "home": "Newcastle United FC",
+    "away": "Qarabağ Ağdam FK",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-24T20:00:00Z",
+    "home": "Bayer 04 Leverkusen",
+    "away": "PAE Olympiakos SFP",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-24T20:00:00Z",
+    "home": "FC Internazionale Milano",
+    "away": "FK Bodø/Glimt",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-25T17:45:00Z",
+    "home": "Atalanta BC",
+    "away": "Borussia Dortmund",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-25T20:00:00Z",
+    "home": "Real Madrid CF",
+    "away": "Sport Lisboa e Benfica",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-25T20:00:00Z",
+    "home": "Paris Saint-Germain FC",
+    "away": "AS Monaco FC",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-25T20:00:00Z",
+    "home": "Juventus FC",
+    "away": "Galatasaray SK",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-11T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-11T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-11T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-11T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-11T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-11T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-11T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-11T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-18T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-18T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-18T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-18T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-18T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-18T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-18T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-18T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-07T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-07T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-08T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-08T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-14T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-14T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-15T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-15T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-28T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-29T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-05-05T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-05-06T00:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-05-30T16:00:00Z",
+    "home": "",
+    "away": "",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  }
+]

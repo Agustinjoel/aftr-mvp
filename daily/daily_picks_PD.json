@@ -1,0 +1,1922 @@
+[
+  {
+    "utcDate": "2026-02-18T19:00:00Z",
+    "home": "Levante UD",
+    "away": "Villarreal CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-20T20:00:00Z",
+    "home": "Athletic Club",
+    "away": "Elche CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-21T13:00:00Z",
+    "home": "Real Sociedad de Fútbol",
+    "away": "Real Oviedo",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-21T15:15:00Z",
+    "home": "Real Betis Balompié",
+    "away": "Rayo Vallecano de Madrid",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-21T17:30:00Z",
+    "home": "CA Osasuna",
+    "away": "Real Madrid CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-21T20:00:00Z",
+    "home": "Club Atlético de Madrid",
+    "away": "RCD Espanyol de Barcelona",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-22T13:00:00Z",
+    "home": "Getafe CF",
+    "away": "Sevilla FC",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-22T15:15:00Z",
+    "home": "FC Barcelona",
+    "away": "Levante UD",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-22T17:30:00Z",
+    "home": "RC Celta de Vigo",
+    "away": "RCD Mallorca",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-22T20:00:00Z",
+    "home": "Villarreal CF",
+    "away": "Valencia CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-23T20:00:00Z",
+    "home": "Deportivo Alavés",
+    "away": "Girona FC",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-27T20:00:00Z",
+    "home": "Levante UD",
+    "away": "Deportivo Alavés",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-28T13:00:00Z",
+    "home": "Rayo Vallecano de Madrid",
+    "away": "Athletic Club",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-28T15:15:00Z",
+    "home": "FC Barcelona",
+    "away": "Villarreal CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-28T17:30:00Z",
+    "home": "RCD Mallorca",
+    "away": "Real Sociedad de Fútbol",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-02-28T20:00:00Z",
+    "home": "Real Oviedo",
+    "away": "Club Atlético de Madrid",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-01T13:00:00Z",
+    "home": "Elche CF",
+    "away": "RCD Espanyol de Barcelona",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-01T15:15:00Z",
+    "home": "Valencia CF",
+    "away": "CA Osasuna",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-01T17:30:00Z",
+    "home": "Real Betis Balompié",
+    "away": "Sevilla FC",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-01T20:00:00Z",
+    "home": "Girona FC",
+    "away": "RC Celta de Vigo",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-02T20:00:00Z",
+    "home": "Real Madrid CF",
+    "away": "Getafe CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-04T18:00:00Z",
+    "home": "Rayo Vallecano de Madrid",
+    "away": "Real Oviedo",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-06T20:00:00Z",
+    "home": "CA Osasuna",
+    "away": "RCD Mallorca",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-07T13:00:00Z",
+    "home": "Getafe CF",
+    "away": "Real Betis Balompié",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-07T15:15:00Z",
+    "home": "Levante UD",
+    "away": "Girona FC",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-07T17:30:00Z",
+    "home": "Club Atlético de Madrid",
+    "away": "Real Sociedad de Fútbol",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-07T20:00:00Z",
+    "home": "RC Celta de Vigo",
+    "away": "Real Madrid CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-08T13:00:00Z",
+    "home": "Villarreal CF",
+    "away": "Elche CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-08T15:15:00Z",
+    "home": "Athletic Club",
+    "away": "FC Barcelona",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-08T17:30:00Z",
+    "home": "Sevilla FC",
+    "away": "Rayo Vallecano de Madrid",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-08T20:00:00Z",
+    "home": "Valencia CF",
+    "away": "Deportivo Alavés",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-09T20:00:00Z",
+    "home": "RCD Espanyol de Barcelona",
+    "away": "Real Oviedo",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Deportivo Alavés",
+    "away": "Villarreal CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Club Atlético de Madrid",
+    "away": "Getafe CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "FC Barcelona",
+    "away": "Sevilla FC",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Real Betis Balompié",
+    "away": "RC Celta de Vigo",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Real Oviedo",
+    "away": "Valencia CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Girona FC",
+    "away": "Athletic Club",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Real Madrid CF",
+    "away": "Elche CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "RCD Mallorca",
+    "away": "RCD Espanyol de Barcelona",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Rayo Vallecano de Madrid",
+    "away": "Levante UD",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Real Sociedad de Fútbol",
+    "away": "CA Osasuna",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "Athletic Club",
+    "away": "Real Betis Balompié",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "FC Barcelona",
+    "away": "Rayo Vallecano de Madrid",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "Elche CF",
+    "away": "RCD Mallorca",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "RCD Espanyol de Barcelona",
+    "away": "Getafe CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "Levante UD",
+    "away": "Real Oviedo",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "Sevilla FC",
+    "away": "Valencia CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "RC Celta de Vigo",
+    "away": "Deportivo Alavés",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "Real Madrid CF",
+    "away": "Club Atlético de Madrid",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "CA Osasuna",
+    "away": "Girona FC",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "Villarreal CF",
+    "away": "Real Sociedad de Fútbol",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "Deportivo Alavés",
+    "away": "CA Osasuna",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "Club Atlético de Madrid",
+    "away": "FC Barcelona",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "Real Betis Balompié",
+    "away": "RCD Espanyol de Barcelona",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "Girona FC",
+    "away": "Villarreal CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "RCD Mallorca",
+    "away": "Real Madrid CF",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "Real Oviedo",
+    "away": "Sevilla FC",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "Getafe CF",
+    "away": "Athletic Club",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "Valencia CF",
+    "away": "RC Celta de Vigo",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184
+      }
+    ]
+  }
+]

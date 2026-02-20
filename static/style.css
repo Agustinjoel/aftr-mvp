@@ -1,0 +1,17 @@
+body { background:#0b1220; color:#e5e7eb; font-family: Arial; padding:20px; }
+.top { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+.brand { font-weight:900; font-size:18px; }
+.links a { color:#60a5fa; text-decoration:none; margin-left:10px; font-size:13px; }
+
+.leaguebar { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 16px; }
+.pill { padding:8px 10px; border-radius:999px; font-size:12px; font-weight:800;
+  border:1px solid #223457; text-decoration:none; color:#cbd5e1; background:#0f172a; }
+.pill.active { background:#0f2440; border-color:#38bdf8; color:#e5e7eb; }
+
+.grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px; }
+.card { background:#111a2e; border:1px solid #1f2a44; padding:12px; border-radius:12px; }
+.row { font-size:14px; font-weight:800; }
+.meta { color:#94a3b8; font-size:12px; margin-top:6px; }
+.pick { margin-top:10px; font-weight:900; color:#38bdf8; }
+.muted { color:#94a3b8; }
+h2 { margin:14px 0 10px; }
