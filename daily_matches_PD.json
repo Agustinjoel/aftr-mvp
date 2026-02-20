@@ -1,0 +1,222 @@
+[
+  {
+    "match_id": 544450,
+    "utcDate": "2026-02-14T13:00:00Z",
+    "status": "TIMED",
+    "home": "RCD Espanyol de Barcelona",
+    "away": "RC Celta de Vigo",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544442,
+    "utcDate": "2026-02-14T15:15:00Z",
+    "status": "TIMED",
+    "home": "Getafe CF",
+    "away": "Villarreal CF",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544445,
+    "utcDate": "2026-02-14T17:30:00Z",
+    "status": "TIMED",
+    "home": "Sevilla FC",
+    "away": "Deportivo Alavés",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544444,
+    "utcDate": "2026-02-14T20:00:00Z",
+    "status": "TIMED",
+    "home": "Real Madrid CF",
+    "away": "Real Sociedad de Fútbol",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544446,
+    "utcDate": "2026-02-15T13:00:00Z",
+    "status": "TIMED",
+    "home": "Real Oviedo",
+    "away": "Athletic Club",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544447,
+    "utcDate": "2026-02-15T15:15:00Z",
+    "status": "TIMED",
+    "home": "Rayo Vallecano de Madrid",
+    "away": "Club Atlético de Madrid",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544443,
+    "utcDate": "2026-02-15T17:30:00Z",
+    "status": "TIMED",
+    "home": "Levante UD",
+    "away": "Valencia CF",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544449,
+    "utcDate": "2026-02-15T20:00:00Z",
+    "status": "TIMED",
+    "home": "RCD Mallorca",
+    "away": "Real Betis Balompié",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544448,
+    "utcDate": "2026-02-16T20:00:00Z",
+    "status": "TIMED",
+    "home": "Girona FC",
+    "away": "FC Barcelona",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544364,
+    "utcDate": "2026-02-18T19:00:00Z",
+    "status": "TIMED",
+    "home": "Levante UD",
+    "away": "Villarreal CF",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544452,
+    "utcDate": "2026-02-20T20:00:00Z",
+    "status": "TIMED",
+    "home": "Athletic Club",
+    "away": "Elche CF",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544460,
+    "utcDate": "2026-02-21T13:00:00Z",
+    "status": "TIMED",
+    "home": "Real Sociedad de Fútbol",
+    "away": "Real Oviedo",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544455,
+    "utcDate": "2026-02-21T15:15:00Z",
+    "status": "TIMED",
+    "home": "Real Betis Balompié",
+    "away": "Rayo Vallecano de Madrid",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544458,
+    "utcDate": "2026-02-21T17:30:00Z",
+    "status": "TIMED",
+    "home": "CA Osasuna",
+    "away": "Real Madrid CF",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544453,
+    "utcDate": "2026-02-21T20:00:00Z",
+    "status": "TIMED",
+    "home": "Club Atlético de Madrid",
+    "away": "RCD Espanyol de Barcelona",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544457,
+    "utcDate": "2026-02-22T13:00:00Z",
+    "status": "TIMED",
+    "home": "Getafe CF",
+    "away": "Sevilla FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544454,
+    "utcDate": "2026-02-22T15:15:00Z",
+    "status": "TIMED",
+    "home": "FC Barcelona",
+    "away": "Levante UD",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544456,
+    "utcDate": "2026-02-22T17:30:00Z",
+    "status": "TIMED",
+    "home": "RC Celta de Vigo",
+    "away": "RCD Mallorca",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544459,
+    "utcDate": "2026-02-22T20:00:00Z",
+    "status": "TIMED",
+    "home": "Villarreal CF",
+    "away": "Valencia CF",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 544451,
+    "utcDate": "2026-02-23T20:00:00Z",
+    "status": "TIMED",
+    "home": "Deportivo Alavés",
+    "away": "Girona FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  }
+]

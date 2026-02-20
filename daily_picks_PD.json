@@ -1,0 +1,577 @@
+[
+  {
+    "match_id": 544450,
+    "utcDate": "2026-02-14T13:00:00Z",
+    "status": "TIMED",
+    "home": "RCD Espanyol de Barcelona",
+    "away": "RC Celta de Vigo",
+    "xg_home": 0.36,
+    "xg_away": 1.46,
+    "xg_total": 1.82,
+    "probs": {
+      "home": 0.089,
+      "draw": 0.259,
+      "away": 0.652,
+      "over_25": 0.275,
+      "under_25": 0.725,
+      "btts_yes": 0.232,
+      "btts_no": 0.768
+    },
+    "candidates": [
+      {
+        "market": "BTTS No",
+        "prob": 0.768,
+        "fair": 1.3
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.725,
+        "fair": 1.38
+      },
+      {
+        "market": "Away Win",
+        "prob": 0.652,
+        "fair": 1.53
+      }
+    ]
+  },
+  {
+    "match_id": 544442,
+    "utcDate": "2026-02-14T15:15:00Z",
+    "status": "TIMED",
+    "home": "Getafe CF",
+    "away": "Villarreal CF",
+    "xg_home": 0.39,
+    "xg_away": 1.59,
+    "xg_total": 1.98,
+    "probs": {
+      "home": 0.087,
+      "draw": 0.238,
+      "away": 0.675,
+      "over_25": 0.318,
+      "under_25": 0.682,
+      "btts_yes": 0.258,
+      "btts_no": 0.742
+    },
+    "candidates": [
+      {
+        "market": "BTTS No",
+        "prob": 0.742,
+        "fair": 1.35
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.682,
+        "fair": 1.47
+      },
+      {
+        "market": "Away Win",
+        "prob": 0.675,
+        "fair": 1.48
+      }
+    ]
+  },
+  {
+    "match_id": 544445,
+    "utcDate": "2026-02-14T17:30:00Z",
+    "status": "TIMED",
+    "home": "Sevilla FC",
+    "away": "Deportivo Alavés",
+    "xg_home": 1.4,
+    "xg_away": 0.71,
+    "xg_total": 2.12,
+    "probs": {
+      "home": 0.535,
+      "draw": 0.275,
+      "away": 0.19,
+      "over_25": 0.355,
+      "under_25": 0.645,
+      "btts_yes": 0.385,
+      "btts_no": 0.615
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.645,
+        "fair": 1.55
+      }
+    ]
+  },
+  {
+    "match_id": 544444,
+    "utcDate": "2026-02-14T20:00:00Z",
+    "status": "TIMED",
+    "home": "Real Madrid CF",
+    "away": "Real Sociedad de Fútbol",
+    "xg_home": 1.63,
+    "xg_away": 0.83,
+    "xg_total": 2.46,
+    "probs": {
+      "home": 0.562,
+      "draw": 0.247,
+      "away": 0.191,
+      "over_25": 0.447,
+      "under_25": 0.553,
+      "btts_yes": 0.455,
+      "btts_no": 0.545
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.562,
+        "fair": 1.78
+      }
+    ]
+  },
+  {
+    "match_id": 544446,
+    "utcDate": "2026-02-15T13:00:00Z",
+    "status": "TIMED",
+    "home": "Real Oviedo",
+    "away": "Athletic Club",
+    "xg_home": 0.36,
+    "xg_away": 0.39,
+    "xg_total": 0.75,
+    "probs": {
+      "home": 0.218,
+      "draw": 0.541,
+      "away": 0.24,
+      "over_25": 0.04,
+      "under_25": 0.96,
+      "btts_yes": 0.097,
+      "btts_no": 0.903
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.96,
+        "fair": 1.04
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.903,
+        "fair": 1.11
+      }
+    ]
+  },
+  {
+    "match_id": 544447,
+    "utcDate": "2026-02-15T15:15:00Z",
+    "status": "TIMED",
+    "home": "Rayo Vallecano de Madrid",
+    "away": "Club Atlético de Madrid",
+    "xg_home": 0.41,
+    "xg_away": 0.89,
+    "xg_total": 1.3,
+    "probs": {
+      "home": 0.163,
+      "draw": 0.381,
+      "away": 0.455,
+      "over_25": 0.143,
+      "under_25": 0.857,
+      "btts_yes": 0.199,
+      "btts_no": 0.801
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.857,
+        "fair": 1.17
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.801,
+        "fair": 1.25
+      }
+    ]
+  },
+  {
+    "match_id": 544443,
+    "utcDate": "2026-02-15T17:30:00Z",
+    "status": "TIMED",
+    "home": "Levante UD",
+    "away": "Valencia CF",
+    "xg_home": 1.07,
+    "xg_away": 1.02,
+    "xg_total": 2.09,
+    "probs": {
+      "home": 0.362,
+      "draw": 0.3,
+      "away": 0.337,
+      "over_25": 0.347,
+      "under_25": 0.653,
+      "btts_yes": 0.42,
+      "btts_no": 0.58
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.653,
+        "fair": 1.53
+      }
+    ]
+  },
+  {
+    "match_id": 544449,
+    "utcDate": "2026-02-15T20:00:00Z",
+    "status": "TIMED",
+    "home": "RCD Mallorca",
+    "away": "Real Betis Balompié",
+    "xg_home": 1.98,
+    "xg_away": 1.31,
+    "xg_total": 3.29,
+    "probs": {
+      "home": 0.528,
+      "draw": 0.218,
+      "away": 0.253,
+      "over_25": 0.639,
+      "under_25": 0.361,
+      "btts_yes": 0.63,
+      "btts_no": 0.37
+    },
+    "candidates": [
+      {
+        "market": "Over 2.5",
+        "prob": 0.639,
+        "fair": 1.56
+      }
+    ]
+  },
+  {
+    "match_id": 544448,
+    "utcDate": "2026-02-16T20:00:00Z",
+    "status": "TIMED",
+    "home": "Girona FC",
+    "away": "FC Barcelona",
+    "xg_home": 1.12,
+    "xg_away": 3.11,
+    "xg_total": 4.23,
+    "probs": {
+      "home": 0.103,
+      "draw": 0.132,
+      "away": 0.764,
+      "over_25": 0.791,
+      "under_25": 0.209,
+      "btts_yes": 0.643,
+      "btts_no": 0.357
+    },
+    "candidates": [
+      {
+        "market": "Away Win",
+        "prob": 0.764,
+        "fair": 1.31
+      }
+    ]
+  },
+  {
+    "match_id": 544364,
+    "utcDate": "2026-02-18T19:00:00Z",
+    "status": "TIMED",
+    "home": "Levante UD",
+    "away": "Villarreal CF",
+    "xg_home": 0.67,
+    "xg_away": 2.86,
+    "xg_total": 3.53,
+    "probs": {
+      "home": 0.061,
+      "draw": 0.12,
+      "away": 0.819,
+      "over_25": 0.681,
+      "under_25": 0.319,
+      "btts_yes": 0.461,
+      "btts_no": 0.539
+    },
+    "candidates": [
+      {
+        "market": "Away Win",
+        "prob": 0.819,
+        "fair": 1.22
+      }
+    ]
+  },
+  {
+    "match_id": 544452,
+    "utcDate": "2026-02-20T20:00:00Z",
+    "status": "TIMED",
+    "home": "Athletic Club",
+    "away": "Elche CF",
+    "xg_home": 1.64,
+    "xg_away": 1.0,
+    "xg_total": 2.64,
+    "probs": {
+      "home": 0.524,
+      "draw": 0.246,
+      "away": 0.23,
+      "over_25": 0.493,
+      "under_25": 0.507,
+      "btts_yes": 0.51,
+      "btts_no": 0.49
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.524,
+        "fair": 1.91
+      }
+    ]
+  },
+  {
+    "match_id": 544460,
+    "utcDate": "2026-02-21T13:00:00Z",
+    "status": "TIMED",
+    "home": "Real Sociedad de Fútbol",
+    "away": "Real Oviedo",
+    "xg_home": 3.46,
+    "xg_away": 1.17,
+    "xg_total": 4.63,
+    "probs": {
+      "home": 0.796,
+      "draw": 0.115,
+      "away": 0.089,
+      "over_25": 0.837,
+      "under_25": 0.163,
+      "btts_yes": 0.667,
+      "btts_no": 0.333
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.796,
+        "fair": 1.26
+      }
+    ]
+  },
+  {
+    "match_id": 544455,
+    "utcDate": "2026-02-21T15:15:00Z",
+    "status": "TIMED",
+    "home": "Real Betis Balompié",
+    "away": "Rayo Vallecano de Madrid",
+    "xg_home": 2.88,
+    "xg_away": 0.67,
+    "xg_total": 3.54,
+    "probs": {
+      "home": 0.822,
+      "draw": 0.119,
+      "away": 0.06,
+      "over_25": 0.684,
+      "under_25": 0.316,
+      "btts_yes": 0.459,
+      "btts_no": 0.541
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.822,
+        "fair": 1.22
+      }
+    ]
+  },
+  {
+    "match_id": 544458,
+    "utcDate": "2026-02-21T17:30:00Z",
+    "status": "TIMED",
+    "home": "CA Osasuna",
+    "away": "Real Madrid CF",
+    "xg_home": 0.67,
+    "xg_away": 2.32,
+    "xg_total": 2.99,
+    "probs": {
+      "home": 0.091,
+      "draw": 0.165,
+      "away": 0.744,
+      "over_25": 0.574,
+      "under_25": 0.426,
+      "btts_yes": 0.441,
+      "btts_no": 0.559
+    },
+    "candidates": [
+      {
+        "market": "Away Win",
+        "prob": 0.744,
+        "fair": 1.34
+      }
+    ]
+  },
+  {
+    "match_id": 544453,
+    "utcDate": "2026-02-21T20:00:00Z",
+    "status": "TIMED",
+    "home": "Club Atlético de Madrid",
+    "away": "RCD Espanyol de Barcelona",
+    "xg_home": 1.73,
+    "xg_away": 0.47,
+    "xg_total": 2.2,
+    "probs": {
+      "home": 0.685,
+      "draw": 0.221,
+      "away": 0.095,
+      "over_25": 0.377,
+      "under_25": 0.623,
+      "btts_yes": 0.308,
+      "btts_no": 0.692
+    },
+    "candidates": [
+      {
+        "market": "BTTS No",
+        "prob": 0.692,
+        "fair": 1.45
+      },
+      {
+        "market": "Home Win",
+        "prob": 0.685,
+        "fair": 1.46
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.623,
+        "fair": 1.61
+      }
+    ]
+  },
+  {
+    "match_id": 544457,
+    "utcDate": "2026-02-22T13:00:00Z",
+    "status": "TIMED",
+    "home": "Getafe CF",
+    "away": "Sevilla FC",
+    "xg_home": 0.77,
+    "xg_away": 0.68,
+    "xg_total": 1.45,
+    "probs": {
+      "home": 0.338,
+      "draw": 0.375,
+      "away": 0.287,
+      "over_25": 0.178,
+      "under_25": 0.822,
+      "btts_yes": 0.265,
+      "btts_no": 0.735
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.822,
+        "fair": 1.22
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.735,
+        "fair": 1.36
+      }
+    ]
+  },
+  {
+    "match_id": 544454,
+    "utcDate": "2026-02-22T15:15:00Z",
+    "status": "TIMED",
+    "home": "FC Barcelona",
+    "away": "Levante UD",
+    "xg_home": 3.58,
+    "xg_away": 0.45,
+    "xg_total": 4.04,
+    "probs": {
+      "home": 0.917,
+      "draw": 0.062,
+      "away": 0.021,
+      "over_25": 0.76,
+      "under_25": 0.24,
+      "btts_yes": 0.355,
+      "btts_no": 0.645
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.917,
+        "fair": 1.09
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.645,
+        "fair": 1.55
+      }
+    ]
+  },
+  {
+    "match_id": 544456,
+    "utcDate": "2026-02-22T17:30:00Z",
+    "status": "TIMED",
+    "home": "RC Celta de Vigo",
+    "away": "RCD Mallorca",
+    "xg_home": 2.34,
+    "xg_away": 0.88,
+    "xg_total": 3.21,
+    "probs": {
+      "home": 0.699,
+      "draw": 0.176,
+      "away": 0.124,
+      "over_25": 0.622,
+      "under_25": 0.378,
+      "btts_yes": 0.527,
+      "btts_no": 0.473
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.699,
+        "fair": 1.43
+      }
+    ]
+  },
+  {
+    "match_id": 544459,
+    "utcDate": "2026-02-22T20:00:00Z",
+    "status": "TIMED",
+    "home": "Villarreal CF",
+    "away": "Valencia CF",
+    "xg_home": 2.65,
+    "xg_away": 0.73,
+    "xg_total": 3.38,
+    "probs": {
+      "home": 0.78,
+      "draw": 0.14,
+      "away": 0.079,
+      "over_25": 0.654,
+      "under_25": 0.346,
+      "btts_yes": 0.481,
+      "btts_no": 0.519
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.78,
+        "fair": 1.28
+      }
+    ]
+  },
+  {
+    "match_id": 544451,
+    "utcDate": "2026-02-23T20:00:00Z",
+    "status": "TIMED",
+    "home": "Deportivo Alavés",
+    "away": "Girona FC",
+    "xg_home": 0.78,
+    "xg_away": 1.01,
+    "xg_total": 1.79,
+    "probs": {
+      "home": 0.275,
+      "draw": 0.327,
+      "away": 0.399,
+      "over_25": 0.267,
+      "under_25": 0.733,
+      "btts_yes": 0.345,
+      "btts_no": 0.655
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.733,
+        "fair": 1.36
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.655,
+        "fair": 1.53
+      }
+    ]
+  }
+]

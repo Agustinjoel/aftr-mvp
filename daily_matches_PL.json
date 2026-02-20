@@ -1,0 +1,123 @@
+[
+  {
+    "match_id": 538094,
+    "utcDate": "2026-02-18T20:00:00Z",
+    "status": "TIMED",
+    "home": "Wolverhampton Wanderers FC",
+    "away": "Arsenal FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 538046,
+    "utcDate": "2026-02-21T15:00:00Z",
+    "status": "TIMED",
+    "home": "Aston Villa FC",
+    "away": "Leeds United FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 538048,
+    "utcDate": "2026-02-21T15:00:00Z",
+    "status": "TIMED",
+    "home": "Brentford FC",
+    "away": "Brighton & Hove Albion FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 538049,
+    "utcDate": "2026-02-21T15:00:00Z",
+    "status": "TIMED",
+    "home": "Chelsea FC",
+    "away": "Burnley FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 538054,
+    "utcDate": "2026-02-21T17:30:00Z",
+    "status": "TIMED",
+    "home": "West Ham United FC",
+    "away": "AFC Bournemouth",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 538051,
+    "utcDate": "2026-02-21T20:00:00Z",
+    "status": "TIMED",
+    "home": "Manchester City FC",
+    "away": "Newcastle United FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 538045,
+    "utcDate": "2026-02-22T14:00:00Z",
+    "status": "TIMED",
+    "home": "Sunderland AFC",
+    "away": "Fulham FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 538047,
+    "utcDate": "2026-02-22T14:00:00Z",
+    "status": "TIMED",
+    "home": "Crystal Palace FC",
+    "away": "Wolverhampton Wanderers FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 538052,
+    "utcDate": "2026-02-22T14:00:00Z",
+    "status": "TIMED",
+    "home": "Nottingham Forest FC",
+    "away": "Liverpool FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 538053,
+    "utcDate": "2026-02-22T16:30:00Z",
+    "status": "TIMED",
+    "home": "Tottenham Hotspur FC",
+    "away": "Arsenal FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 538050,
+    "utcDate": "2026-02-23T20:00:00Z",
+    "status": "TIMED",
+    "home": "Everton FC",
+    "away": "Manchester United FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  }
+]

@@ -1,0 +1,453 @@
+[
+  {
+    "match_id": 542601,
+    "utcDate": "2026-02-14T16:00:00Z",
+    "status": "TIMED",
+    "home": "Olympique de Marseille",
+    "away": "RC Strasbourg Alsace",
+    "xg_home": 2.83,
+    "xg_away": 1.48,
+    "xg_total": 4.31,
+    "probs": {
+      "home": 0.653,
+      "draw": 0.166,
+      "away": 0.181,
+      "over_25": 0.802,
+      "under_25": 0.198,
+      "btts_yes": 0.726,
+      "btts_no": 0.274
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.653,
+        "fair": 1.53
+      }
+    ]
+  },
+  {
+    "match_id": 542602,
+    "utcDate": "2026-02-14T18:00:00Z",
+    "status": "TIMED",
+    "home": "Lille OSC",
+    "away": "Stade Brestois 29",
+    "xg_home": 2.88,
+    "xg_away": 1.61,
+    "xg_total": 4.5,
+    "probs": {
+      "home": 0.636,
+      "draw": 0.167,
+      "away": 0.197,
+      "over_25": 0.825,
+      "under_25": 0.175,
+      "btts_yes": 0.756,
+      "btts_no": 0.244
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.636,
+        "fair": 1.57
+      }
+    ]
+  },
+  {
+    "match_id": 542599,
+    "utcDate": "2026-02-14T20:05:00Z",
+    "status": "TIMED",
+    "home": "Paris FC",
+    "away": "Racing Club de Lens",
+    "xg_home": 0.83,
+    "xg_away": 2.87,
+    "xg_total": 3.7,
+    "probs": {
+      "home": 0.08,
+      "draw": 0.131,
+      "away": 0.789,
+      "over_25": 0.711,
+      "under_25": 0.289,
+      "btts_yes": 0.531,
+      "btts_no": 0.469
+    },
+    "candidates": [
+      {
+        "market": "Away Win",
+        "prob": 0.789,
+        "fair": 1.27
+      }
+    ]
+  },
+  {
+    "match_id": 542595,
+    "utcDate": "2026-02-15T14:00:00Z",
+    "status": "TIMED",
+    "home": "Le Havre AC",
+    "away": "Toulouse FC",
+    "xg_home": 0.44,
+    "xg_away": 0.64,
+    "xg_total": 1.08,
+    "probs": {
+      "home": 0.215,
+      "draw": 0.442,
+      "away": 0.342,
+      "over_25": 0.096,
+      "under_25": 0.904,
+      "btts_yes": 0.169,
+      "btts_no": 0.831
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.904,
+        "fair": 1.11
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.831,
+        "fair": 1.2
+      }
+    ]
+  },
+  {
+    "match_id": 542597,
+    "utcDate": "2026-02-15T16:15:00Z",
+    "status": "TIMED",
+    "home": "FC Lorient",
+    "away": "Angers SCO",
+    "xg_home": 0.89,
+    "xg_away": 0.8,
+    "xg_total": 1.68,
+    "probs": {
+      "home": 0.355,
+      "draw": 0.342,
+      "away": 0.304,
+      "over_25": 0.239,
+      "under_25": 0.761,
+      "btts_yes": 0.323,
+      "btts_no": 0.677
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.761,
+        "fair": 1.31
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.677,
+        "fair": 1.48
+      }
+    ]
+  },
+  {
+    "match_id": 542598,
+    "utcDate": "2026-02-15T16:15:00Z",
+    "status": "TIMED",
+    "home": "FC Metz",
+    "away": "AJ Auxerre",
+    "xg_home": 1.3,
+    "xg_away": 0.6,
+    "xg_total": 1.9,
+    "probs": {
+      "home": 0.538,
+      "draw": 0.291,
+      "away": 0.171,
+      "over_25": 0.296,
+      "under_25": 0.704,
+      "btts_yes": 0.327,
+      "btts_no": 0.673
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.704,
+        "fair": 1.42
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.673,
+        "fair": 1.49
+      }
+    ]
+  },
+  {
+    "match_id": 542600,
+    "utcDate": "2026-02-15T19:45:00Z",
+    "status": "TIMED",
+    "home": "Olympique Lyonnais",
+    "away": "OGC Nice",
+    "xg_home": 2.44,
+    "xg_away": 0.9,
+    "xg_total": 3.34,
+    "probs": {
+      "home": 0.712,
+      "draw": 0.168,
+      "away": 0.119,
+      "over_25": 0.647,
+      "under_25": 0.353,
+      "btts_yes": 0.54,
+      "btts_no": 0.46
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.712,
+        "fair": 1.4
+      }
+    ]
+  },
+  {
+    "match_id": 542612,
+    "utcDate": "2026-02-20T19:45:00Z",
+    "status": "TIMED",
+    "home": "Stade Brestois 29",
+    "away": "Olympique de Marseille",
+    "xg_home": 1.32,
+    "xg_away": 1.67,
+    "xg_total": 2.99,
+    "probs": {
+      "home": 0.303,
+      "draw": 0.239,
+      "away": 0.458,
+      "over_25": 0.575,
+      "under_25": 0.425,
+      "btts_yes": 0.595,
+      "btts_no": 0.405
+    },
+    "candidates": [
+      {
+        "market": "BTTS Yes",
+        "prob": 0.595,
+        "fair": 1.68
+      }
+    ]
+  },
+  {
+    "match_id": 542610,
+    "utcDate": "2026-02-21T16:00:00Z",
+    "status": "TIMED",
+    "home": "Racing Club de Lens",
+    "away": "AS Monaco FC",
+    "xg_home": 1.66,
+    "xg_away": 0.31,
+    "xg_total": 1.98,
+    "probs": {
+      "home": 0.715,
+      "draw": 0.221,
+      "away": 0.065,
+      "over_25": 0.317,
+      "under_25": 0.683,
+      "btts_yes": 0.218,
+      "btts_no": 0.782
+    },
+    "candidates": [
+      {
+        "market": "BTTS No",
+        "prob": 0.782,
+        "fair": 1.28
+      },
+      {
+        "market": "Home Win",
+        "prob": 0.715,
+        "fair": 1.4
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.683,
+        "fair": 1.46
+      }
+    ]
+  },
+  {
+    "match_id": 542606,
+    "utcDate": "2026-02-21T18:00:00Z",
+    "status": "TIMED",
+    "home": "Toulouse FC",
+    "away": "Paris FC",
+    "xg_home": 1.2,
+    "xg_away": 0.73,
+    "xg_total": 1.93,
+    "probs": {
+      "home": 0.471,
+      "draw": 0.303,
+      "away": 0.226,
+      "over_25": 0.304,
+      "under_25": 0.696,
+      "btts_yes": 0.362,
+      "btts_no": 0.638
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.696,
+        "fair": 1.44
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.638,
+        "fair": 1.57
+      }
+    ]
+  },
+  {
+    "match_id": 542608,
+    "utcDate": "2026-02-21T20:05:00Z",
+    "status": "TIMED",
+    "home": "Paris Saint-Germain FC",
+    "away": "FC Metz",
+    "xg_home": 4.88,
+    "xg_away": 0.48,
+    "xg_total": 5.36,
+    "probs": {
+      "home": 0.964,
+      "draw": 0.027,
+      "away": 0.008,
+      "over_25": 0.889,
+      "under_25": 0.111,
+      "btts_yes": 0.377,
+      "btts_no": 0.623
+    },
+    "candidates": [
+      {
+        "market": "Home Win",
+        "prob": 0.964,
+        "fair": 1.04
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.623,
+        "fair": 1.61
+      }
+    ]
+  },
+  {
+    "match_id": 542604,
+    "utcDate": "2026-02-22T14:00:00Z",
+    "status": "TIMED",
+    "home": "AJ Auxerre",
+    "away": "Stade Rennais FC 1901",
+    "xg_home": 1.07,
+    "xg_away": 0.96,
+    "xg_total": 2.02,
+    "probs": {
+      "home": 0.375,
+      "draw": 0.306,
+      "away": 0.319,
+      "over_25": 0.329,
+      "under_25": 0.671,
+      "btts_yes": 0.403,
+      "btts_no": 0.597
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.671,
+        "fair": 1.49
+      }
+    ]
+  },
+  {
+    "match_id": 542605,
+    "utcDate": "2026-02-22T16:15:00Z",
+    "status": "TIMED",
+    "home": "FC Nantes",
+    "away": "Le Havre AC",
+    "xg_home": 0.93,
+    "xg_away": 1.14,
+    "xg_total": 2.07,
+    "probs": {
+      "home": 0.297,
+      "draw": 0.3,
+      "away": 0.402,
+      "over_25": 0.342,
+      "under_25": 0.658,
+      "btts_yes": 0.411,
+      "btts_no": 0.589
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.658,
+        "fair": 1.52
+      }
+    ]
+  },
+  {
+    "match_id": 542607,
+    "utcDate": "2026-02-22T16:15:00Z",
+    "status": "TIMED",
+    "home": "OGC Nice",
+    "away": "FC Lorient",
+    "xg_home": 1.03,
+    "xg_away": 1.13,
+    "xg_total": 2.15,
+    "probs": {
+      "home": 0.327,
+      "draw": 0.295,
+      "away": 0.378,
+      "over_25": 0.365,
+      "under_25": 0.635,
+      "btts_yes": 0.434,
+      "btts_no": 0.566
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.635,
+        "fair": 1.57
+      }
+    ]
+  },
+  {
+    "match_id": 542611,
+    "utcDate": "2026-02-22T16:15:00Z",
+    "status": "TIMED",
+    "home": "Angers SCO",
+    "away": "Lille OSC",
+    "xg_home": 1.5,
+    "xg_away": 0.82,
+    "xg_total": 2.32,
+    "probs": {
+      "home": 0.531,
+      "draw": 0.262,
+      "away": 0.207,
+      "over_25": 0.409,
+      "under_25": 0.591,
+      "btts_yes": 0.435,
+      "btts_no": 0.565
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.591,
+        "fair": 1.69
+      }
+    ]
+  },
+  {
+    "match_id": 542609,
+    "utcDate": "2026-02-22T19:45:00Z",
+    "status": "TIMED",
+    "home": "RC Strasbourg Alsace",
+    "away": "Olympique Lyonnais",
+    "xg_home": 1.17,
+    "xg_away": 1.22,
+    "xg_total": 2.39,
+    "probs": {
+      "home": 0.348,
+      "draw": 0.278,
+      "away": 0.375,
+      "over_25": 0.426,
+      "under_25": 0.574,
+      "btts_yes": 0.485,
+      "btts_no": 0.515
+    },
+    "candidates": [
+      {
+        "market": "Under 2.5",
+        "prob": 0.574,
+        "fair": 1.74
+      }
+    ]
+  }
+]

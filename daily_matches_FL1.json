@@ -1,0 +1,178 @@
+[
+  {
+    "match_id": 542601,
+    "utcDate": "2026-02-14T16:00:00Z",
+    "status": "TIMED",
+    "home": "Olympique de Marseille",
+    "away": "RC Strasbourg Alsace",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542602,
+    "utcDate": "2026-02-14T18:00:00Z",
+    "status": "TIMED",
+    "home": "Lille OSC",
+    "away": "Stade Brestois 29",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542599,
+    "utcDate": "2026-02-14T20:05:00Z",
+    "status": "TIMED",
+    "home": "Paris FC",
+    "away": "Racing Club de Lens",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542595,
+    "utcDate": "2026-02-15T14:00:00Z",
+    "status": "TIMED",
+    "home": "Le Havre AC",
+    "away": "Toulouse FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542597,
+    "utcDate": "2026-02-15T16:15:00Z",
+    "status": "TIMED",
+    "home": "FC Lorient",
+    "away": "Angers SCO",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542598,
+    "utcDate": "2026-02-15T16:15:00Z",
+    "status": "TIMED",
+    "home": "FC Metz",
+    "away": "AJ Auxerre",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542600,
+    "utcDate": "2026-02-15T19:45:00Z",
+    "status": "TIMED",
+    "home": "Olympique Lyonnais",
+    "away": "OGC Nice",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542612,
+    "utcDate": "2026-02-20T19:45:00Z",
+    "status": "TIMED",
+    "home": "Stade Brestois 29",
+    "away": "Olympique de Marseille",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542610,
+    "utcDate": "2026-02-21T16:00:00Z",
+    "status": "TIMED",
+    "home": "Racing Club de Lens",
+    "away": "AS Monaco FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542606,
+    "utcDate": "2026-02-21T18:00:00Z",
+    "status": "TIMED",
+    "home": "Toulouse FC",
+    "away": "Paris FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542608,
+    "utcDate": "2026-02-21T20:05:00Z",
+    "status": "TIMED",
+    "home": "Paris Saint-Germain FC",
+    "away": "FC Metz",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542604,
+    "utcDate": "2026-02-22T14:00:00Z",
+    "status": "TIMED",
+    "home": "AJ Auxerre",
+    "away": "Stade Rennais FC 1901",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542605,
+    "utcDate": "2026-02-22T16:15:00Z",
+    "status": "TIMED",
+    "home": "FC Nantes",
+    "away": "Le Havre AC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542607,
+    "utcDate": "2026-02-22T16:15:00Z",
+    "status": "TIMED",
+    "home": "OGC Nice",
+    "away": "FC Lorient",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542611,
+    "utcDate": "2026-02-22T16:15:00Z",
+    "status": "TIMED",
+    "home": "Angers SCO",
+    "away": "Lille OSC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 542609,
+    "utcDate": "2026-02-22T19:45:00Z",
+    "status": "TIMED",
+    "home": "RC Strasbourg Alsace",
+    "away": "Olympique Lyonnais",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  }
+]

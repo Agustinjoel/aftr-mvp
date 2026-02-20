@@ -1,0 +1,222 @@
+[
+  {
+    "match_id": 537056,
+    "utcDate": "2026-02-14T14:00:00Z",
+    "status": "TIMED",
+    "home": "Como 1907",
+    "away": "ACF Fiorentina",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537059,
+    "utcDate": "2026-02-14T17:00:00Z",
+    "status": "TIMED",
+    "home": "SS Lazio",
+    "away": "Atalanta BC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537058,
+    "utcDate": "2026-02-14T19:45:00Z",
+    "status": "TIMED",
+    "home": "FC Internazionale Milano",
+    "away": "Juventus FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537063,
+    "utcDate": "2026-02-15T11:30:00Z",
+    "status": "TIMED",
+    "home": "Udinese Calcio",
+    "away": "US Sassuolo Calcio",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537060,
+    "utcDate": "2026-02-15T14:00:00Z",
+    "status": "TIMED",
+    "home": "Parma Calcio 1913",
+    "away": "Hellas Verona FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537064,
+    "utcDate": "2026-02-15T14:00:00Z",
+    "status": "TIMED",
+    "home": "US Cremonese",
+    "away": "Genoa CFC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537057,
+    "utcDate": "2026-02-15T17:00:00Z",
+    "status": "TIMED",
+    "home": "Torino FC",
+    "away": "Bologna FC 1909",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537062,
+    "utcDate": "2026-02-15T19:45:00Z",
+    "status": "TIMED",
+    "home": "SSC Napoli",
+    "away": "AS Roma",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537055,
+    "utcDate": "2026-02-16T19:45:00Z",
+    "status": "TIMED",
+    "home": "Cagliari Calcio",
+    "away": "US Lecce",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537046,
+    "utcDate": "2026-02-18T19:45:00Z",
+    "status": "TIMED",
+    "home": "AC Milan",
+    "away": "Como 1907",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537073,
+    "utcDate": "2026-02-20T19:45:00Z",
+    "status": "TIMED",
+    "home": "US Sassuolo Calcio",
+    "away": "Hellas Verona FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537072,
+    "utcDate": "2026-02-21T14:00:00Z",
+    "status": "TIMED",
+    "home": "Juventus FC",
+    "away": "Como 1907",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537074,
+    "utcDate": "2026-02-21T17:00:00Z",
+    "status": "TIMED",
+    "home": "US Lecce",
+    "away": "FC Internazionale Milano",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537069,
+    "utcDate": "2026-02-21T19:45:00Z",
+    "status": "TIMED",
+    "home": "Cagliari Calcio",
+    "away": "SS Lazio",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537070,
+    "utcDate": "2026-02-22T11:30:00Z",
+    "status": "TIMED",
+    "home": "Genoa CFC",
+    "away": "Torino FC",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537068,
+    "utcDate": "2026-02-22T14:00:00Z",
+    "status": "TIMED",
+    "home": "Atalanta BC",
+    "away": "SSC Napoli",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537066,
+    "utcDate": "2026-02-22T17:00:00Z",
+    "status": "TIMED",
+    "home": "AC Milan",
+    "away": "Parma Calcio 1913",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537067,
+    "utcDate": "2026-02-22T19:45:00Z",
+    "status": "TIMED",
+    "home": "AS Roma",
+    "away": "US Cremonese",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537065,
+    "utcDate": "2026-02-23T17:30:00Z",
+    "status": "TIMED",
+    "home": "ACF Fiorentina",
+    "away": "AC Pisa 1909",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 537071,
+    "utcDate": "2026-02-23T19:45:00Z",
+    "status": "TIMED",
+    "home": "Bologna FC 1909",
+    "away": "Udinese Calcio",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  }
+]

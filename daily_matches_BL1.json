@@ -1,0 +1,189 @@
+[
+  {
+    "match_id": 540595,
+    "utcDate": "2026-02-14T14:30:00Z",
+    "status": "TIMED",
+    "home": "SV Werder Bremen",
+    "away": "FC Bayern München",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540596,
+    "utcDate": "2026-02-14T14:30:00Z",
+    "status": "TIMED",
+    "home": "TSG 1899 Hoffenheim",
+    "away": "SC Freiburg",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540598,
+    "utcDate": "2026-02-14T14:30:00Z",
+    "status": "TIMED",
+    "home": "Eintracht Frankfurt",
+    "away": "Borussia Mönchengladbach",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540600,
+    "utcDate": "2026-02-14T14:30:00Z",
+    "status": "TIMED",
+    "home": "Hamburger SV",
+    "away": "1. FC Union Berlin",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540601,
+    "utcDate": "2026-02-14T14:30:00Z",
+    "status": "TIMED",
+    "home": "Bayer 04 Leverkusen",
+    "away": "FC St. Pauli 1910",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540603,
+    "utcDate": "2026-02-14T17:30:00Z",
+    "status": "TIMED",
+    "home": "VfB Stuttgart",
+    "away": "1. FC Köln",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540602,
+    "utcDate": "2026-02-15T14:30:00Z",
+    "status": "TIMED",
+    "home": "FC Augsburg",
+    "away": "1. FC Heidenheim 1846",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540599,
+    "utcDate": "2026-02-15T16:30:00Z",
+    "status": "TIMED",
+    "home": "RB Leipzig",
+    "away": "VfL Wolfsburg",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540612,
+    "utcDate": "2026-02-20T19:30:00Z",
+    "status": "TIMED",
+    "home": "1. FSV Mainz 05",
+    "away": "Hamburger SV",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540604,
+    "utcDate": "2026-02-21T14:30:00Z",
+    "status": "TIMED",
+    "home": "1. FC Union Berlin",
+    "away": "Bayer 04 Leverkusen",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540605,
+    "utcDate": "2026-02-21T14:30:00Z",
+    "status": "TIMED",
+    "home": "FC Bayern München",
+    "away": "Eintracht Frankfurt",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540610,
+    "utcDate": "2026-02-21T14:30:00Z",
+    "status": "TIMED",
+    "home": "VfL Wolfsburg",
+    "away": "FC Augsburg",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540611,
+    "utcDate": "2026-02-21T14:30:00Z",
+    "status": "TIMED",
+    "home": "1. FC Köln",
+    "away": "TSG 1899 Hoffenheim",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540606,
+    "utcDate": "2026-02-21T17:30:00Z",
+    "status": "TIMED",
+    "home": "RB Leipzig",
+    "away": "Borussia Dortmund",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540609,
+    "utcDate": "2026-02-22T14:30:00Z",
+    "status": "TIMED",
+    "home": "SC Freiburg",
+    "away": "Borussia Mönchengladbach",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540607,
+    "utcDate": "2026-02-22T16:30:00Z",
+    "status": "TIMED",
+    "home": "FC St. Pauli 1910",
+    "away": "SV Werder Bremen",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  },
+  {
+    "match_id": 540608,
+    "utcDate": "2026-02-22T18:30:00Z",
+    "status": "TIMED",
+    "home": "1. FC Heidenheim 1846",
+    "away": "VfB Stuttgart",
+    "score": {
+      "home": null,
+      "away": null
+    }
+  }
+]
