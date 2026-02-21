@@ -1,0 +1,602 @@
+[
+  {
+    "utcDate": "2026-02-22T14:30:00Z",
+    "home": "SC Freiburg",
+    "away": "Borussia Mönchengladbach",
+    "league": "BL1",
+    "home_team_id": 17,
+    "away_team_id": 18,
+    "home_crest": "https://crests.football-data.org/17.png",
+    "away_crest": "https://crests.football-data.org/18.png"
+  },
+  {
+    "utcDate": "2026-02-22T16:30:00Z",
+    "home": "FC St. Pauli 1910",
+    "away": "SV Werder Bremen",
+    "league": "BL1",
+    "home_team_id": 20,
+    "away_team_id": 12,
+    "home_crest": "https://crests.football-data.org/20.png",
+    "away_crest": "https://crests.football-data.org/12.png"
+  },
+  {
+    "utcDate": "2026-02-22T18:30:00Z",
+    "home": "1. FC Heidenheim 1846",
+    "away": "VfB Stuttgart",
+    "league": "BL1",
+    "home_team_id": 44,
+    "away_team_id": 10,
+    "home_crest": "https://crests.football-data.org/44.png",
+    "away_crest": "https://crests.football-data.org/10.png"
+  },
+  {
+    "utcDate": "2026-02-27T19:30:00Z",
+    "home": "FC Augsburg",
+    "away": "1. FC Köln",
+    "league": "BL1",
+    "home_team_id": 16,
+    "away_team_id": 1,
+    "home_crest": "https://crests.football-data.org/16.png",
+    "away_crest": "https://crests.football-data.org/1.png"
+  },
+  {
+    "utcDate": "2026-02-28T14:30:00Z",
+    "home": "Bayer 04 Leverkusen",
+    "away": "1. FSV Mainz 05",
+    "league": "BL1",
+    "home_team_id": 3,
+    "away_team_id": 15,
+    "home_crest": "https://crests.football-data.org/3.png",
+    "away_crest": "https://crests.football-data.org/15.png"
+  },
+  {
+    "utcDate": "2026-02-28T14:30:00Z",
+    "home": "Borussia Mönchengladbach",
+    "away": "1. FC Union Berlin",
+    "league": "BL1",
+    "home_team_id": 18,
+    "away_team_id": 28,
+    "home_crest": "https://crests.football-data.org/18.png",
+    "away_crest": "https://crests.football-data.org/28.png"
+  },
+  {
+    "utcDate": "2026-02-28T14:30:00Z",
+    "home": "TSG 1899 Hoffenheim",
+    "away": "FC St. Pauli 1910",
+    "league": "BL1",
+    "home_team_id": 2,
+    "away_team_id": 20,
+    "home_crest": "https://crests.football-data.org/2.png",
+    "away_crest": "https://crests.football-data.org/20.png"
+  },
+  {
+    "utcDate": "2026-02-28T14:30:00Z",
+    "home": "SV Werder Bremen",
+    "away": "1. FC Heidenheim 1846",
+    "league": "BL1",
+    "home_team_id": 12,
+    "away_team_id": 44,
+    "home_crest": "https://crests.football-data.org/12.png",
+    "away_crest": "https://crests.football-data.org/44.png"
+  },
+  {
+    "utcDate": "2026-02-28T17:30:00Z",
+    "home": "Borussia Dortmund",
+    "away": "FC Bayern München",
+    "league": "BL1",
+    "home_team_id": 4,
+    "away_team_id": 5,
+    "home_crest": "https://crests.football-data.org/4.png",
+    "away_crest": "https://crests.football-data.org/5.png"
+  },
+  {
+    "utcDate": "2026-03-01T14:30:00Z",
+    "home": "VfB Stuttgart",
+    "away": "VfL Wolfsburg",
+    "league": "BL1",
+    "home_team_id": 10,
+    "away_team_id": 11,
+    "home_crest": "https://crests.football-data.org/10.png",
+    "away_crest": "https://crests.football-data.org/11.png"
+  },
+  {
+    "utcDate": "2026-03-01T16:30:00Z",
+    "home": "Eintracht Frankfurt",
+    "away": "SC Freiburg",
+    "league": "BL1",
+    "home_team_id": 19,
+    "away_team_id": 17,
+    "home_crest": "https://crests.football-data.org/19.png",
+    "away_crest": "https://crests.football-data.org/17.png"
+  },
+  {
+    "utcDate": "2026-03-01T18:30:00Z",
+    "home": "Hamburger SV",
+    "away": "RB Leipzig",
+    "league": "BL1",
+    "home_team_id": 7,
+    "away_team_id": 721,
+    "home_crest": "https://crests.football-data.org/7.png",
+    "away_crest": "https://crests.football-data.org/721.png"
+  },
+  {
+    "utcDate": "2026-03-04T19:30:00Z",
+    "home": "Hamburger SV",
+    "away": "Bayer 04 Leverkusen",
+    "league": "BL1",
+    "home_team_id": 7,
+    "away_team_id": 3,
+    "home_crest": "https://crests.football-data.org/7.png",
+    "away_crest": "https://crests.football-data.org/3.png"
+  },
+  {
+    "utcDate": "2026-03-06T19:30:00Z",
+    "home": "FC Bayern München",
+    "away": "Borussia Mönchengladbach",
+    "league": "BL1",
+    "home_team_id": 5,
+    "away_team_id": 18,
+    "home_crest": "https://crests.football-data.org/5.png",
+    "away_crest": "https://crests.football-data.org/18.png"
+  },
+  {
+    "utcDate": "2026-03-07T14:30:00Z",
+    "home": "SC Freiburg",
+    "away": "Bayer 04 Leverkusen",
+    "league": "BL1",
+    "home_team_id": 17,
+    "away_team_id": 3,
+    "home_crest": "https://crests.football-data.org/17.png",
+    "away_crest": "https://crests.football-data.org/3.png"
+  },
+  {
+    "utcDate": "2026-03-07T14:30:00Z",
+    "home": "1. FSV Mainz 05",
+    "away": "VfB Stuttgart",
+    "league": "BL1",
+    "home_team_id": 15,
+    "away_team_id": 10,
+    "home_crest": "https://crests.football-data.org/15.png",
+    "away_crest": "https://crests.football-data.org/10.png"
+  },
+  {
+    "utcDate": "2026-03-07T14:30:00Z",
+    "home": "RB Leipzig",
+    "away": "FC Augsburg",
+    "league": "BL1",
+    "home_team_id": 721,
+    "away_team_id": 16,
+    "home_crest": "https://crests.football-data.org/721.png",
+    "away_crest": "https://crests.football-data.org/16.png"
+  },
+  {
+    "utcDate": "2026-03-07T14:30:00Z",
+    "home": "1. FC Heidenheim 1846",
+    "away": "TSG 1899 Hoffenheim",
+    "league": "BL1",
+    "home_team_id": 44,
+    "away_team_id": 2,
+    "home_crest": "https://crests.football-data.org/44.png",
+    "away_crest": "https://crests.football-data.org/2.png"
+  },
+  {
+    "utcDate": "2026-03-07T14:30:00Z",
+    "home": "VfL Wolfsburg",
+    "away": "Hamburger SV",
+    "league": "BL1",
+    "home_team_id": 11,
+    "away_team_id": 7,
+    "home_crest": "https://crests.football-data.org/11.png",
+    "away_crest": "https://crests.football-data.org/7.png"
+  },
+  {
+    "utcDate": "2026-03-07T17:30:00Z",
+    "home": "1. FC Köln",
+    "away": "Borussia Dortmund",
+    "league": "BL1",
+    "home_team_id": 1,
+    "away_team_id": 4,
+    "home_crest": "https://crests.football-data.org/1.png",
+    "away_crest": "https://crests.football-data.org/4.png"
+  },
+  {
+    "utcDate": "2026-03-08T14:30:00Z",
+    "home": "FC St. Pauli 1910",
+    "away": "Eintracht Frankfurt",
+    "league": "BL1",
+    "home_team_id": 20,
+    "away_team_id": 19,
+    "home_crest": "https://crests.football-data.org/20.png",
+    "away_crest": "https://crests.football-data.org/19.png"
+  },
+  {
+    "utcDate": "2026-03-08T16:30:00Z",
+    "home": "1. FC Union Berlin",
+    "away": "SV Werder Bremen",
+    "league": "BL1",
+    "home_team_id": 28,
+    "away_team_id": 12,
+    "home_crest": "https://crests.football-data.org/28.png",
+    "away_crest": "https://crests.football-data.org/12.png"
+  },
+  {
+    "utcDate": "2026-03-13T19:30:00Z",
+    "home": "Borussia Mönchengladbach",
+    "away": "FC St. Pauli 1910",
+    "league": "BL1",
+    "home_team_id": 18,
+    "away_team_id": 20,
+    "home_crest": "https://crests.football-data.org/18.png",
+    "away_crest": "https://crests.football-data.org/20.png"
+  },
+  {
+    "utcDate": "2026-03-14T14:30:00Z",
+    "home": "Bayer 04 Leverkusen",
+    "away": "FC Bayern München",
+    "league": "BL1",
+    "home_team_id": 3,
+    "away_team_id": 5,
+    "home_crest": "https://crests.football-data.org/3.png",
+    "away_crest": "https://crests.football-data.org/5.png"
+  },
+  {
+    "utcDate": "2026-03-14T14:30:00Z",
+    "home": "TSG 1899 Hoffenheim",
+    "away": "VfL Wolfsburg",
+    "league": "BL1",
+    "home_team_id": 2,
+    "away_team_id": 11,
+    "home_crest": "https://crests.football-data.org/2.png",
+    "away_crest": "https://crests.football-data.org/11.png"
+  },
+  {
+    "utcDate": "2026-03-14T14:30:00Z",
+    "home": "Borussia Dortmund",
+    "away": "FC Augsburg",
+    "league": "BL1",
+    "home_team_id": 4,
+    "away_team_id": 16,
+    "home_crest": "https://crests.football-data.org/4.png",
+    "away_crest": "https://crests.football-data.org/16.png"
+  },
+  {
+    "utcDate": "2026-03-14T14:30:00Z",
+    "home": "Eintracht Frankfurt",
+    "away": "1. FC Heidenheim 1846",
+    "league": "BL1",
+    "home_team_id": 19,
+    "away_team_id": 44,
+    "home_crest": "https://crests.football-data.org/19.png",
+    "away_crest": "https://crests.football-data.org/44.png"
+  },
+  {
+    "utcDate": "2026-03-14T17:30:00Z",
+    "home": "Hamburger SV",
+    "away": "1. FC Köln",
+    "league": "BL1",
+    "home_team_id": 7,
+    "away_team_id": 1,
+    "home_crest": "https://crests.football-data.org/7.png",
+    "away_crest": "https://crests.football-data.org/1.png"
+  },
+  {
+    "utcDate": "2026-03-15T14:30:00Z",
+    "home": "SV Werder Bremen",
+    "away": "1. FSV Mainz 05",
+    "league": "BL1",
+    "home_team_id": 12,
+    "away_team_id": 15,
+    "home_crest": "https://crests.football-data.org/12.png",
+    "away_crest": "https://crests.football-data.org/15.png"
+  },
+  {
+    "utcDate": "2026-03-15T16:30:00Z",
+    "home": "SC Freiburg",
+    "away": "1. FC Union Berlin",
+    "league": "BL1",
+    "home_team_id": 17,
+    "away_team_id": 28,
+    "home_crest": "https://crests.football-data.org/17.png",
+    "away_crest": "https://crests.football-data.org/28.png"
+  },
+  {
+    "utcDate": "2026-03-15T18:30:00Z",
+    "home": "VfB Stuttgart",
+    "away": "RB Leipzig",
+    "league": "BL1",
+    "home_team_id": 10,
+    "away_team_id": 721,
+    "home_crest": "https://crests.football-data.org/10.png",
+    "away_crest": "https://crests.football-data.org/721.png"
+  },
+  {
+    "utcDate": "2026-03-20T19:30:00Z",
+    "home": "RB Leipzig",
+    "away": "TSG 1899 Hoffenheim",
+    "league": "BL1",
+    "home_team_id": 721,
+    "away_team_id": 2,
+    "home_crest": "https://crests.football-data.org/721.png",
+    "away_crest": "https://crests.football-data.org/2.png"
+  },
+  {
+    "utcDate": "2026-03-21T14:30:00Z",
+    "home": "1. FC Heidenheim 1846",
+    "away": "Bayer 04 Leverkusen",
+    "league": "BL1",
+    "home_team_id": 44,
+    "away_team_id": 3,
+    "home_crest": "https://crests.football-data.org/44.png",
+    "away_crest": "https://crests.football-data.org/3.png"
+  },
+  {
+    "utcDate": "2026-03-21T14:30:00Z",
+    "home": "VfL Wolfsburg",
+    "away": "SV Werder Bremen",
+    "league": "BL1",
+    "home_team_id": 11,
+    "away_team_id": 12,
+    "home_crest": "https://crests.football-data.org/11.png",
+    "away_crest": "https://crests.football-data.org/12.png"
+  },
+  {
+    "utcDate": "2026-03-21T14:30:00Z",
+    "home": "1. FC Köln",
+    "away": "Borussia Mönchengladbach",
+    "league": "BL1",
+    "home_team_id": 1,
+    "away_team_id": 18,
+    "home_crest": "https://crests.football-data.org/1.png",
+    "away_crest": "https://crests.football-data.org/18.png"
+  },
+  {
+    "utcDate": "2026-03-21T14:30:00Z",
+    "home": "FC Bayern München",
+    "away": "1. FC Union Berlin",
+    "league": "BL1",
+    "home_team_id": 5,
+    "away_team_id": 28,
+    "home_crest": "https://crests.football-data.org/5.png",
+    "away_crest": "https://crests.football-data.org/28.png"
+  },
+  {
+    "utcDate": "2026-03-21T17:30:00Z",
+    "home": "Borussia Dortmund",
+    "away": "Hamburger SV",
+    "league": "BL1",
+    "home_team_id": 4,
+    "away_team_id": 7,
+    "home_crest": "https://crests.football-data.org/4.png",
+    "away_crest": "https://crests.football-data.org/7.png"
+  },
+  {
+    "utcDate": "2026-03-22T14:30:00Z",
+    "home": "1. FSV Mainz 05",
+    "away": "Eintracht Frankfurt",
+    "league": "BL1",
+    "home_team_id": 15,
+    "away_team_id": 19,
+    "home_crest": "https://crests.football-data.org/15.png",
+    "away_crest": "https://crests.football-data.org/19.png"
+  },
+  {
+    "utcDate": "2026-03-22T16:30:00Z",
+    "home": "FC St. Pauli 1910",
+    "away": "SC Freiburg",
+    "league": "BL1",
+    "home_team_id": 20,
+    "away_team_id": 17,
+    "home_crest": "https://crests.football-data.org/20.png",
+    "away_crest": "https://crests.football-data.org/17.png"
+  },
+  {
+    "utcDate": "2026-03-22T18:30:00Z",
+    "home": "FC Augsburg",
+    "away": "VfB Stuttgart",
+    "league": "BL1",
+    "home_team_id": 16,
+    "away_team_id": 10,
+    "home_crest": "https://crests.football-data.org/16.png",
+    "away_crest": "https://crests.football-data.org/10.png"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "SC Freiburg",
+    "away": "FC Bayern München",
+    "league": "BL1",
+    "home_team_id": 17,
+    "away_team_id": 5,
+    "home_crest": "https://crests.football-data.org/17.png",
+    "away_crest": "https://crests.football-data.org/5.png"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "VfB Stuttgart",
+    "away": "Borussia Dortmund",
+    "league": "BL1",
+    "home_team_id": 10,
+    "away_team_id": 4,
+    "home_crest": "https://crests.football-data.org/10.png",
+    "away_crest": "https://crests.football-data.org/4.png"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "TSG 1899 Hoffenheim",
+    "away": "1. FSV Mainz 05",
+    "league": "BL1",
+    "home_team_id": 2,
+    "away_team_id": 15,
+    "home_crest": "https://crests.football-data.org/2.png",
+    "away_crest": "https://crests.football-data.org/15.png"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "SV Werder Bremen",
+    "away": "RB Leipzig",
+    "league": "BL1",
+    "home_team_id": 12,
+    "away_team_id": 721,
+    "home_crest": "https://crests.football-data.org/12.png",
+    "away_crest": "https://crests.football-data.org/721.png"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "Bayer 04 Leverkusen",
+    "away": "VfL Wolfsburg",
+    "league": "BL1",
+    "home_team_id": 3,
+    "away_team_id": 11,
+    "home_crest": "https://crests.football-data.org/3.png",
+    "away_crest": "https://crests.football-data.org/11.png"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "Hamburger SV",
+    "away": "FC Augsburg",
+    "league": "BL1",
+    "home_team_id": 7,
+    "away_team_id": 16,
+    "home_crest": "https://crests.football-data.org/7.png",
+    "away_crest": "https://crests.football-data.org/16.png"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "1. FC Union Berlin",
+    "away": "FC St. Pauli 1910",
+    "league": "BL1",
+    "home_team_id": 28,
+    "away_team_id": 20,
+    "home_crest": "https://crests.football-data.org/28.png",
+    "away_crest": "https://crests.football-data.org/20.png"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "Borussia Mönchengladbach",
+    "away": "1. FC Heidenheim 1846",
+    "league": "BL1",
+    "home_team_id": 18,
+    "away_team_id": 44,
+    "home_crest": "https://crests.football-data.org/18.png",
+    "away_crest": "https://crests.football-data.org/44.png"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "Eintracht Frankfurt",
+    "away": "1. FC Köln",
+    "league": "BL1",
+    "home_team_id": 19,
+    "away_team_id": 1,
+    "home_crest": "https://crests.football-data.org/19.png",
+    "away_crest": "https://crests.football-data.org/1.png"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "FC St. Pauli 1910",
+    "away": "FC Bayern München",
+    "league": "BL1",
+    "home_team_id": 20,
+    "away_team_id": 5,
+    "home_crest": "https://crests.football-data.org/20.png",
+    "away_crest": "https://crests.football-data.org/5.png"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "Borussia Dortmund",
+    "away": "Bayer 04 Leverkusen",
+    "league": "BL1",
+    "home_team_id": 4,
+    "away_team_id": 3,
+    "home_crest": "https://crests.football-data.org/4.png",
+    "away_crest": "https://crests.football-data.org/3.png"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "VfL Wolfsburg",
+    "away": "Eintracht Frankfurt",
+    "league": "BL1",
+    "home_team_id": 11,
+    "away_team_id": 19,
+    "home_crest": "https://crests.football-data.org/11.png",
+    "away_crest": "https://crests.football-data.org/19.png"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "1. FSV Mainz 05",
+    "away": "SC Freiburg",
+    "league": "BL1",
+    "home_team_id": 15,
+    "away_team_id": 17,
+    "home_crest": "https://crests.football-data.org/15.png",
+    "away_crest": "https://crests.football-data.org/17.png"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "1. FC Köln",
+    "away": "SV Werder Bremen",
+    "league": "BL1",
+    "home_team_id": 1,
+    "away_team_id": 12,
+    "home_crest": "https://crests.football-data.org/1.png",
+    "away_crest": "https://crests.football-data.org/12.png"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "RB Leipzig",
+    "away": "Borussia Mönchengladbach",
+    "league": "BL1",
+    "home_team_id": 721,
+    "away_team_id": 18,
+    "home_crest": "https://crests.football-data.org/721.png",
+    "away_crest": "https://crests.football-data.org/18.png"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "1. FC Heidenheim 1846",
+    "away": "1. FC Union Berlin",
+    "league": "BL1",
+    "home_team_id": 44,
+    "away_team_id": 28,
+    "home_crest": "https://crests.football-data.org/44.png",
+    "away_crest": "https://crests.football-data.org/28.png"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "FC Augsburg",
+    "away": "TSG 1899 Hoffenheim",
+    "league": "BL1",
+    "home_team_id": 16,
+    "away_team_id": 2,
+    "home_crest": "https://crests.football-data.org/16.png",
+    "away_crest": "https://crests.football-data.org/2.png"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "VfB Stuttgart",
+    "away": "Hamburger SV",
+    "league": "BL1",
+    "home_team_id": 10,
+    "away_team_id": 7,
+    "home_crest": "https://crests.football-data.org/10.png",
+    "away_crest": "https://crests.football-data.org/7.png"
+  },
+  {
+    "utcDate": "2026-04-18T00:00:00Z",
+    "home": "SC Freiburg",
+    "away": "1. FC Heidenheim 1846",
+    "league": "BL1",
+    "home_team_id": 17,
+    "away_team_id": 44,
+    "home_crest": "https://crests.football-data.org/17.png",
+    "away_crest": "https://crests.football-data.org/44.png"
+  },
+  {
+    "utcDate": "2026-04-18T00:00:00Z",
+    "home": "FC St. Pauli 1910",
+    "away": "1. FC Köln",
+    "league": "BL1",
+    "home_team_id": 20,
+    "away_team_id": 1,
+    "home_crest": "https://crests.football-data.org/20.png",
+    "away_crest": "https://crests.football-data.org/1.png"
+  }
+]

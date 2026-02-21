@@ -1,10 +1,6 @@
-DEFAULT_LEAGUE = "PL"
+"""
+Ligas y liga por defecto. Reexporta desde config para compatibilidad.
+"""
+from config.settings import DEFAULT_LEAGUE, LEAGUES
 
-LEAGUES = {
-    "PL": "Premier League",
-    "PD": "LaLiga",
-    "SA": "Serie A",
-    "BL1": "Bundesliga",
-    "FL1": "Ligue 1",
-    "CL": "UEFA Champions League",
-}
+__all__ = ["DEFAULT_LEAGUE", "LEAGUES"]

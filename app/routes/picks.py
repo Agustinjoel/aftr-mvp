@@ -4,16 +4,15 @@ from typing import Iterable
 
 from fastapi import APIRouter, Query
 
+from config.settings import settings
 from data.cache import read_json
-from models.enums import DEFAULT_LEAGUE, LEAGUES
 
 router = APIRouter()
 
 
 @router.get("/picks")
-def get_picks(league: str = Query(DEFAULT_LEAGUE)):
-    league = league if league in LEAGUES else DEFAULT_LEAGUE
-    return read_json(f"daily_picks_{league}.json")
+def get_picks(league: str = Query(settings.default_league)):
+    league = league if settings.is_valid_league(league) else settings.default_league
     return read_json(f"daily_picks_{league}.json")
 
 
@@ -95,9 +94,9 @@ def _compute_metrics(rows: Iterable[sqlite3.Row]) -> dict[str, float | int]:
 
 
 @router.get("/stats/summary")
-def get_stats_summary(league: str = Query(DEFAULT_LEAGUE)):
-    league = league if league in LEAGUES else DEFAULT_LEAGUE
-    db_path = os.getenv("AFTR_DB_PATH") or os.getenv("DB_PATH") or "aftr.db"
+def get_stats_summary(league: str = Query(settings.default_league)):
+    league = league if settings.is_valid_league(league) else settings.default_league
+    db_path = settings.db_path
 
     rows, source = _read_pick_rows(league, db_path)
     metrics = _compute_metrics(rows)

@@ -1,0 +1,602 @@
+[
+  {
+    "utcDate": "2026-02-21T20:05:00Z",
+    "home": "Paris Saint-Germain FC",
+    "away": "FC Metz",
+    "league": "FL1",
+    "home_team_id": 524,
+    "away_team_id": 545,
+    "home_crest": "https://crests.football-data.org/524.png",
+    "away_crest": "https://crests.football-data.org/545.png"
+  },
+  {
+    "utcDate": "2026-02-22T14:00:00Z",
+    "home": "AJ Auxerre",
+    "away": "Stade Rennais FC 1901",
+    "league": "FL1",
+    "home_team_id": 519,
+    "away_team_id": 529,
+    "home_crest": "https://crests.football-data.org/519.png",
+    "away_crest": "https://crests.football-data.org/529.png"
+  },
+  {
+    "utcDate": "2026-02-22T16:15:00Z",
+    "home": "FC Nantes",
+    "away": "Le Havre AC",
+    "league": "FL1",
+    "home_team_id": 543,
+    "away_team_id": 533,
+    "home_crest": "https://crests.football-data.org/543.png",
+    "away_crest": "https://crests.football-data.org/533.png"
+  },
+  {
+    "utcDate": "2026-02-22T16:15:00Z",
+    "home": "OGC Nice",
+    "away": "FC Lorient",
+    "league": "FL1",
+    "home_team_id": 522,
+    "away_team_id": 525,
+    "home_crest": "https://crests.football-data.org/522.png",
+    "away_crest": "https://crests.football-data.org/525.png"
+  },
+  {
+    "utcDate": "2026-02-22T16:15:00Z",
+    "home": "Angers SCO",
+    "away": "Lille OSC",
+    "league": "FL1",
+    "home_team_id": 532,
+    "away_team_id": 521,
+    "home_crest": "https://crests.football-data.org/532.png",
+    "away_crest": "https://crests.football-data.org/521.png"
+  },
+  {
+    "utcDate": "2026-02-22T19:45:00Z",
+    "home": "RC Strasbourg Alsace",
+    "away": "Olympique Lyonnais",
+    "league": "FL1",
+    "home_team_id": 576,
+    "away_team_id": 523,
+    "home_crest": "https://crests.football-data.org/576.png",
+    "away_crest": "https://crests.football-data.org/523.png"
+  },
+  {
+    "utcDate": "2026-02-27T19:45:00Z",
+    "home": "RC Strasbourg Alsace",
+    "away": "Racing Club de Lens",
+    "league": "FL1",
+    "home_team_id": 576,
+    "away_team_id": 546,
+    "home_crest": "https://crests.football-data.org/576.png",
+    "away_crest": "https://crests.football-data.org/546.png"
+  },
+  {
+    "utcDate": "2026-02-28T16:00:00Z",
+    "home": "Stade Rennais FC 1901",
+    "away": "Toulouse FC",
+    "league": "FL1",
+    "home_team_id": 529,
+    "away_team_id": 511,
+    "home_crest": "https://crests.football-data.org/529.png",
+    "away_crest": "https://crests.football-data.org/511.png"
+  },
+  {
+    "utcDate": "2026-02-28T18:00:00Z",
+    "home": "AS Monaco FC",
+    "away": "Angers SCO",
+    "league": "FL1",
+    "home_team_id": 548,
+    "away_team_id": 532,
+    "home_crest": "https://crests.football-data.org/548.png",
+    "away_crest": "https://crests.football-data.org/532.png"
+  },
+  {
+    "utcDate": "2026-02-28T20:05:00Z",
+    "home": "Le Havre AC",
+    "away": "Paris Saint-Germain FC",
+    "league": "FL1",
+    "home_team_id": 533,
+    "away_team_id": 524,
+    "home_crest": "https://crests.football-data.org/533.png",
+    "away_crest": "https://crests.football-data.org/524.png"
+  },
+  {
+    "utcDate": "2026-03-01T14:00:00Z",
+    "home": "Paris FC",
+    "away": "OGC Nice",
+    "league": "FL1",
+    "home_team_id": 1045,
+    "away_team_id": 522,
+    "home_crest": "https://crests.football-data.org/1045.png",
+    "away_crest": "https://crests.football-data.org/522.png"
+  },
+  {
+    "utcDate": "2026-03-01T16:15:00Z",
+    "home": "FC Lorient",
+    "away": "AJ Auxerre",
+    "league": "FL1",
+    "home_team_id": 525,
+    "away_team_id": 519,
+    "home_crest": "https://crests.football-data.org/525.png",
+    "away_crest": "https://crests.football-data.org/519.png"
+  },
+  {
+    "utcDate": "2026-03-01T16:15:00Z",
+    "home": "FC Metz",
+    "away": "Stade Brestois 29",
+    "league": "FL1",
+    "home_team_id": 545,
+    "away_team_id": 512,
+    "home_crest": "https://crests.football-data.org/545.png",
+    "away_crest": "https://crests.football-data.org/512.png"
+  },
+  {
+    "utcDate": "2026-03-01T16:15:00Z",
+    "home": "Lille OSC",
+    "away": "FC Nantes",
+    "league": "FL1",
+    "home_team_id": 521,
+    "away_team_id": 543,
+    "home_crest": "https://crests.football-data.org/521.png",
+    "away_crest": "https://crests.football-data.org/543.png"
+  },
+  {
+    "utcDate": "2026-03-01T19:45:00Z",
+    "home": "Olympique de Marseille",
+    "away": "Olympique Lyonnais",
+    "league": "FL1",
+    "home_team_id": 516,
+    "away_team_id": 523,
+    "home_crest": "https://crests.football-data.org/516.png",
+    "away_crest": "https://crests.football-data.org/523.png"
+  },
+  {
+    "utcDate": "2026-03-06T19:45:00Z",
+    "home": "Paris Saint-Germain FC",
+    "away": "AS Monaco FC",
+    "league": "FL1",
+    "home_team_id": 524,
+    "away_team_id": 548,
+    "home_crest": "https://crests.football-data.org/524.png",
+    "away_crest": "https://crests.football-data.org/548.png"
+  },
+  {
+    "utcDate": "2026-03-07T16:00:00Z",
+    "home": "FC Nantes",
+    "away": "Angers SCO",
+    "league": "FL1",
+    "home_team_id": 543,
+    "away_team_id": 532,
+    "home_crest": "https://crests.football-data.org/543.png",
+    "away_crest": "https://crests.football-data.org/532.png"
+  },
+  {
+    "utcDate": "2026-03-07T18:00:00Z",
+    "home": "AJ Auxerre",
+    "away": "RC Strasbourg Alsace",
+    "league": "FL1",
+    "home_team_id": 519,
+    "away_team_id": 576,
+    "home_crest": "https://crests.football-data.org/519.png",
+    "away_crest": "https://crests.football-data.org/576.png"
+  },
+  {
+    "utcDate": "2026-03-07T20:05:00Z",
+    "home": "Toulouse FC",
+    "away": "Olympique de Marseille",
+    "league": "FL1",
+    "home_team_id": 511,
+    "away_team_id": 516,
+    "home_crest": "https://crests.football-data.org/511.png",
+    "away_crest": "https://crests.football-data.org/516.png"
+  },
+  {
+    "utcDate": "2026-03-08T14:00:00Z",
+    "home": "Racing Club de Lens",
+    "away": "FC Metz",
+    "league": "FL1",
+    "home_team_id": 546,
+    "away_team_id": 545,
+    "home_crest": "https://crests.football-data.org/546.png",
+    "away_crest": "https://crests.football-data.org/545.png"
+  },
+  {
+    "utcDate": "2026-03-08T16:15:00Z",
+    "home": "OGC Nice",
+    "away": "Stade Rennais FC 1901",
+    "league": "FL1",
+    "home_team_id": 522,
+    "away_team_id": 529,
+    "home_crest": "https://crests.football-data.org/522.png",
+    "away_crest": "https://crests.football-data.org/529.png"
+  },
+  {
+    "utcDate": "2026-03-08T16:15:00Z",
+    "home": "Lille OSC",
+    "away": "FC Lorient",
+    "league": "FL1",
+    "home_team_id": 521,
+    "away_team_id": 525,
+    "home_crest": "https://crests.football-data.org/521.png",
+    "away_crest": "https://crests.football-data.org/525.png"
+  },
+  {
+    "utcDate": "2026-03-08T16:15:00Z",
+    "home": "Stade Brestois 29",
+    "away": "Le Havre AC",
+    "league": "FL1",
+    "home_team_id": 512,
+    "away_team_id": 533,
+    "home_crest": "https://crests.football-data.org/512.png",
+    "away_crest": "https://crests.football-data.org/533.png"
+  },
+  {
+    "utcDate": "2026-03-08T19:45:00Z",
+    "home": "Olympique Lyonnais",
+    "away": "Paris FC",
+    "league": "FL1",
+    "home_team_id": 523,
+    "away_team_id": 1045,
+    "home_crest": "https://crests.football-data.org/523.png",
+    "away_crest": "https://crests.football-data.org/1045.png"
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Le Havre AC",
+    "away": "Olympique Lyonnais",
+    "league": "FL1",
+    "home_team_id": 533,
+    "away_team_id": 523,
+    "home_crest": "https://crests.football-data.org/533.png",
+    "away_crest": "https://crests.football-data.org/523.png"
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "AS Monaco FC",
+    "away": "Stade Brestois 29",
+    "league": "FL1",
+    "home_team_id": 548,
+    "away_team_id": 512,
+    "home_crest": "https://crests.football-data.org/548.png",
+    "away_crest": "https://crests.football-data.org/512.png"
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "FC Lorient",
+    "away": "Racing Club de Lens",
+    "league": "FL1",
+    "home_team_id": 525,
+    "away_team_id": 546,
+    "home_crest": "https://crests.football-data.org/525.png",
+    "away_crest": "https://crests.football-data.org/546.png"
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "FC Metz",
+    "away": "Toulouse FC",
+    "league": "FL1",
+    "home_team_id": 545,
+    "away_team_id": 511,
+    "home_crest": "https://crests.football-data.org/545.png",
+    "away_crest": "https://crests.football-data.org/511.png"
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Olympique de Marseille",
+    "away": "AJ Auxerre",
+    "league": "FL1",
+    "home_team_id": 516,
+    "away_team_id": 519,
+    "home_crest": "https://crests.football-data.org/516.png",
+    "away_crest": "https://crests.football-data.org/519.png"
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Paris Saint-Germain FC",
+    "away": "FC Nantes",
+    "league": "FL1",
+    "home_team_id": 524,
+    "away_team_id": 543,
+    "home_crest": "https://crests.football-data.org/524.png",
+    "away_crest": "https://crests.football-data.org/543.png"
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "RC Strasbourg Alsace",
+    "away": "Paris FC",
+    "league": "FL1",
+    "home_team_id": 576,
+    "away_team_id": 1045,
+    "home_crest": "https://crests.football-data.org/576.png",
+    "away_crest": "https://crests.football-data.org/1045.png"
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Angers SCO",
+    "away": "OGC Nice",
+    "league": "FL1",
+    "home_team_id": 532,
+    "away_team_id": 522,
+    "home_crest": "https://crests.football-data.org/532.png",
+    "away_crest": "https://crests.football-data.org/522.png"
+  },
+  {
+    "utcDate": "2026-03-15T00:00:00Z",
+    "home": "Stade Rennais FC 1901",
+    "away": "Lille OSC",
+    "league": "FL1",
+    "home_team_id": 529,
+    "away_team_id": 521,
+    "home_crest": "https://crests.football-data.org/529.png",
+    "away_crest": "https://crests.football-data.org/521.png"
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "AJ Auxerre",
+    "away": "Stade Brestois 29",
+    "league": "FL1",
+    "home_team_id": 519,
+    "away_team_id": 512,
+    "home_crest": "https://crests.football-data.org/519.png",
+    "away_crest": "https://crests.football-data.org/512.png"
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "FC Nantes",
+    "away": "RC Strasbourg Alsace",
+    "league": "FL1",
+    "home_team_id": 543,
+    "away_team_id": 576,
+    "home_crest": "https://crests.football-data.org/543.png",
+    "away_crest": "https://crests.football-data.org/576.png"
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "Paris FC",
+    "away": "Le Havre AC",
+    "league": "FL1",
+    "home_team_id": 1045,
+    "away_team_id": 533,
+    "home_crest": "https://crests.football-data.org/1045.png",
+    "away_crest": "https://crests.football-data.org/533.png"
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "Toulouse FC",
+    "away": "FC Lorient",
+    "league": "FL1",
+    "home_team_id": 511,
+    "away_team_id": 525,
+    "home_crest": "https://crests.football-data.org/511.png",
+    "away_crest": "https://crests.football-data.org/525.png"
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "OGC Nice",
+    "away": "Paris Saint-Germain FC",
+    "league": "FL1",
+    "home_team_id": 522,
+    "away_team_id": 524,
+    "home_crest": "https://crests.football-data.org/522.png",
+    "away_crest": "https://crests.football-data.org/524.png"
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "Olympique Lyonnais",
+    "away": "AS Monaco FC",
+    "league": "FL1",
+    "home_team_id": 523,
+    "away_team_id": 548,
+    "home_crest": "https://crests.football-data.org/523.png",
+    "away_crest": "https://crests.football-data.org/548.png"
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "Olympique de Marseille",
+    "away": "Lille OSC",
+    "league": "FL1",
+    "home_team_id": 516,
+    "away_team_id": 521,
+    "home_crest": "https://crests.football-data.org/516.png",
+    "away_crest": "https://crests.football-data.org/521.png"
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "Racing Club de Lens",
+    "away": "Angers SCO",
+    "league": "FL1",
+    "home_team_id": 546,
+    "away_team_id": 532,
+    "home_crest": "https://crests.football-data.org/546.png",
+    "away_crest": "https://crests.football-data.org/532.png"
+  },
+  {
+    "utcDate": "2026-03-22T00:00:00Z",
+    "home": "Stade Rennais FC 1901",
+    "away": "FC Metz",
+    "league": "FL1",
+    "home_team_id": 529,
+    "away_team_id": 545,
+    "home_crest": "https://crests.football-data.org/529.png",
+    "away_crest": "https://crests.football-data.org/545.png"
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "Le Havre AC",
+    "away": "AJ Auxerre",
+    "league": "FL1",
+    "home_team_id": 533,
+    "away_team_id": 519,
+    "home_crest": "https://crests.football-data.org/533.png",
+    "away_crest": "https://crests.football-data.org/519.png"
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "AS Monaco FC",
+    "away": "Olympique de Marseille",
+    "league": "FL1",
+    "home_team_id": 548,
+    "away_team_id": 516,
+    "home_crest": "https://crests.football-data.org/548.png",
+    "away_crest": "https://crests.football-data.org/516.png"
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "FC Lorient",
+    "away": "Paris FC",
+    "league": "FL1",
+    "home_team_id": 525,
+    "away_team_id": 1045,
+    "home_crest": "https://crests.football-data.org/525.png",
+    "away_crest": "https://crests.football-data.org/1045.png"
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "FC Metz",
+    "away": "FC Nantes",
+    "league": "FL1",
+    "home_team_id": 545,
+    "away_team_id": 543,
+    "home_crest": "https://crests.football-data.org/545.png",
+    "away_crest": "https://crests.football-data.org/543.png"
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "Lille OSC",
+    "away": "Racing Club de Lens",
+    "league": "FL1",
+    "home_team_id": 521,
+    "away_team_id": 546,
+    "home_crest": "https://crests.football-data.org/521.png",
+    "away_crest": "https://crests.football-data.org/546.png"
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "Paris Saint-Germain FC",
+    "away": "Toulouse FC",
+    "league": "FL1",
+    "home_team_id": 524,
+    "away_team_id": 511,
+    "home_crest": "https://crests.football-data.org/524.png",
+    "away_crest": "https://crests.football-data.org/511.png"
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "RC Strasbourg Alsace",
+    "away": "OGC Nice",
+    "league": "FL1",
+    "home_team_id": 576,
+    "away_team_id": 522,
+    "home_crest": "https://crests.football-data.org/576.png",
+    "away_crest": "https://crests.football-data.org/522.png"
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "Angers SCO",
+    "away": "Olympique Lyonnais",
+    "league": "FL1",
+    "home_team_id": 532,
+    "away_team_id": 523,
+    "home_crest": "https://crests.football-data.org/532.png",
+    "away_crest": "https://crests.football-data.org/523.png"
+  },
+  {
+    "utcDate": "2026-04-05T00:00:00Z",
+    "home": "Stade Brestois 29",
+    "away": "Stade Rennais FC 1901",
+    "league": "FL1",
+    "home_team_id": 512,
+    "away_team_id": 529,
+    "home_crest": "https://crests.football-data.org/512.png",
+    "away_crest": "https://crests.football-data.org/529.png"
+  },
+  {
+    "utcDate": "2026-04-12T00:00:00Z",
+    "home": "AJ Auxerre",
+    "away": "FC Nantes",
+    "league": "FL1",
+    "home_team_id": 519,
+    "away_team_id": 543,
+    "home_crest": "https://crests.football-data.org/519.png",
+    "away_crest": "https://crests.football-data.org/543.png"
+  },
+  {
+    "utcDate": "2026-04-12T00:00:00Z",
+    "home": "Paris FC",
+    "away": "AS Monaco FC",
+    "league": "FL1",
+    "home_team_id": 1045,
+    "away_team_id": 548,
+    "home_crest": "https://crests.football-data.org/1045.png",
+    "away_crest": "https://crests.football-data.org/548.png"
+  },
+  {
+    "utcDate": "2026-04-12T00:00:00Z",
+    "home": "Toulouse FC",
+    "away": "Lille OSC",
+    "league": "FL1",
+    "home_team_id": 511,
+    "away_team_id": 521,
+    "home_crest": "https://crests.football-data.org/511.png",
+    "away_crest": "https://crests.football-data.org/521.png"
+  },
+  {
+    "utcDate": "2026-04-12T00:00:00Z",
+    "home": "OGC Nice",
+    "away": "Le Havre AC",
+    "league": "FL1",
+    "home_team_id": 522,
+    "away_team_id": 533,
+    "home_crest": "https://crests.football-data.org/522.png",
+    "away_crest": "https://crests.football-data.org/533.png"
+  },
+  {
+    "utcDate": "2026-04-12T00:00:00Z",
+    "home": "Olympique Lyonnais",
+    "away": "FC Lorient",
+    "league": "FL1",
+    "home_team_id": 523,
+    "away_team_id": 525,
+    "home_crest": "https://crests.football-data.org/523.png",
+    "away_crest": "https://crests.football-data.org/525.png"
+  },
+  {
+    "utcDate": "2026-04-12T00:00:00Z",
+    "home": "Olympique de Marseille",
+    "away": "FC Metz",
+    "league": "FL1",
+    "home_team_id": 516,
+    "away_team_id": 545,
+    "home_crest": "https://crests.football-data.org/516.png",
+    "away_crest": "https://crests.football-data.org/545.png"
+  },
+  {
+    "utcDate": "2026-04-12T00:00:00Z",
+    "home": "Racing Club de Lens",
+    "away": "Paris Saint-Germain FC",
+    "league": "FL1",
+    "home_team_id": 546,
+    "away_team_id": 524,
+    "home_crest": "https://crests.football-data.org/546.png",
+    "away_crest": "https://crests.football-data.org/524.png"
+  },
+  {
+    "utcDate": "2026-04-12T00:00:00Z",
+    "home": "Stade Brestois 29",
+    "away": "RC Strasbourg Alsace",
+    "league": "FL1",
+    "home_team_id": 512,
+    "away_team_id": 576,
+    "home_crest": "https://crests.football-data.org/512.png",
+    "away_crest": "https://crests.football-data.org/576.png"
+  },
+  {
+    "utcDate": "2026-04-12T00:00:00Z",
+    "home": "Stade Rennais FC 1901",
+    "away": "Angers SCO",
+    "league": "FL1",
+    "home_team_id": 529,
+    "away_team_id": 532,
+    "home_crest": "https://crests.football-data.org/529.png",
+    "away_crest": "https://crests.football-data.org/532.png"
+  }
+]

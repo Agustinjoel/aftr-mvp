@@ -17,8 +17,8 @@ Write-Host 'Installing requirements into .venv...'
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 
 if (-not $SkipRefresh) {
-    Write-Host 'Refreshing daily data...'
-    .\.venv\Scripts\python.exe daily/refresh.py
+    Write-Host 'Refreshing daily data (matches + picks)...'
+    .\.venv\Scripts\python.exe -m app.cli refresh
 }
 
 if (-not $SkipTests) {

@@ -1,11 +1,11 @@
-import os
 import sqlite3
 from contextlib import contextmanager
 from typing import Any, Dict, List, Optional, Tuple
 import json
 from datetime import datetime
 
-DB_PATH = os.getenv("DB_PATH", "aftr.db")
+from config.settings import DB_PATH
+from core.evaluation import evaluate_market
 
 
 @contextmanager
@@ -156,49 +156,6 @@ def upsert_pick(
         )
 
 
-def _evaluate_market(market: str, hg: int, ag: int) -> Tuple[str, str]:
-    total = (hg or 0) + (ag or 0)
-    m = (market or "").lower().strip()
-
-    if "under 2.5" in m:
-        if total <= 2:
-            return ("WIN", f"Total {total} (<=2)")
-        return ("LOSS", f"Total {total} (>=3)")
-
-    if "over 2.5" in m:
-        if total >= 3:
-            return ("WIN", f"Total {total} (>=3)")
-        return ("LOSS", f"Total {total} (<=2)")
-
-    if "btts yes" in m or "ambos marcan" in m:
-        if (hg or 0) >= 1 and (ag or 0) >= 1:
-            return ("WIN", f"HG {hg} / AG {ag}")
-        return ("LOSS", f"HG {hg} / AG {ag}")
-
-    if "btts no" in m:
-        if (hg or 0) == 0 or (ag or 0) == 0:
-            return ("WIN", f"HG {hg} / AG {ag}")
-        return ("LOSS", f"HG {hg} / AG {ag}")
-
-    if "home win" in m or "local" in m:
-        if (hg or 0) > (ag or 0):
-            return ("WIN", f"{hg}-{ag}")
-        return ("LOSS", f"{hg}-{ag}")
-
-    if "away win" in m or "visitante" in m:
-        if (ag or 0) > (hg or 0):
-            return ("WIN", f"{hg}-{ag}")
-        return ("LOSS", f"{hg}-{ag}")
-
-    if "draw" in m or "empate" in m:
-        if (hg or 0) == (ag or 0):
-            return ("WIN", f"{hg}-{ag}")
-        return ("LOSS", f"{hg}-{ag}")
-
-    # Si algún mercado raro, no lo penalizamos, lo dejamos pendiente
-    return ("PUSH", "Market not supported")
-
-
 def evaluate_finished_picks():
     """
     Busca picks PENDING cuya match esté FINISHED y calcula WIN/LOSS.
@@ -218,7 +175,7 @@ def evaluate_finished_picks():
             hg = r["home_goals"]
             ag = r["away_goals"]
 
-            res, reason = _evaluate_market(market, hg or 0, ag or 0)
+            res, reason = evaluate_market(market, hg or 0, ag or 0)
 
             conn.execute(
                 """

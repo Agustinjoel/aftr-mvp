@@ -1,0 +1,3542 @@
+[
+  {
+    "utcDate": "2026-02-22T14:30:00Z",
+    "home": "SC Freiburg",
+    "away": "Borussia Mönchengladbach",
+    "home_crest": "https://crests.football-data.org/17.png",
+    "away_crest": "https://crests.football-data.org/18.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-22T16:30:00Z",
+    "home": "FC St. Pauli 1910",
+    "away": "SV Werder Bremen",
+    "home_crest": "https://crests.football-data.org/20.png",
+    "away_crest": "https://crests.football-data.org/12.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-22T18:30:00Z",
+    "home": "1. FC Heidenheim 1846",
+    "away": "VfB Stuttgart",
+    "home_crest": "https://crests.football-data.org/44.png",
+    "away_crest": "https://crests.football-data.org/10.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-27T19:30:00Z",
+    "home": "FC Augsburg",
+    "away": "1. FC Köln",
+    "home_crest": "https://crests.football-data.org/16.png",
+    "away_crest": "https://crests.football-data.org/1.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-28T14:30:00Z",
+    "home": "Bayer 04 Leverkusen",
+    "away": "1. FSV Mainz 05",
+    "home_crest": "https://crests.football-data.org/3.png",
+    "away_crest": "https://crests.football-data.org/15.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-28T14:30:00Z",
+    "home": "Borussia Mönchengladbach",
+    "away": "1. FC Union Berlin",
+    "home_crest": "https://crests.football-data.org/18.png",
+    "away_crest": "https://crests.football-data.org/28.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-28T14:30:00Z",
+    "home": "TSG 1899 Hoffenheim",
+    "away": "FC St. Pauli 1910",
+    "home_crest": "https://crests.football-data.org/2.png",
+    "away_crest": "https://crests.football-data.org/20.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-28T14:30:00Z",
+    "home": "SV Werder Bremen",
+    "away": "1. FC Heidenheim 1846",
+    "home_crest": "https://crests.football-data.org/12.png",
+    "away_crest": "https://crests.football-data.org/44.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-28T17:30:00Z",
+    "home": "Borussia Dortmund",
+    "away": "FC Bayern München",
+    "home_crest": "https://crests.football-data.org/4.png",
+    "away_crest": "https://crests.football-data.org/5.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-01T14:30:00Z",
+    "home": "VfB Stuttgart",
+    "away": "VfL Wolfsburg",
+    "home_crest": "https://crests.football-data.org/10.png",
+    "away_crest": "https://crests.football-data.org/11.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-01T16:30:00Z",
+    "home": "Eintracht Frankfurt",
+    "away": "SC Freiburg",
+    "home_crest": "https://crests.football-data.org/19.png",
+    "away_crest": "https://crests.football-data.org/17.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-01T18:30:00Z",
+    "home": "Hamburger SV",
+    "away": "RB Leipzig",
+    "home_crest": "https://crests.football-data.org/7.png",
+    "away_crest": "https://crests.football-data.org/721.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-04T19:30:00Z",
+    "home": "Hamburger SV",
+    "away": "Bayer 04 Leverkusen",
+    "home_crest": "https://crests.football-data.org/7.png",
+    "away_crest": "https://crests.football-data.org/3.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-06T19:30:00Z",
+    "home": "FC Bayern München",
+    "away": "Borussia Mönchengladbach",
+    "home_crest": "https://crests.football-data.org/5.png",
+    "away_crest": "https://crests.football-data.org/18.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-07T14:30:00Z",
+    "home": "SC Freiburg",
+    "away": "Bayer 04 Leverkusen",
+    "home_crest": "https://crests.football-data.org/17.png",
+    "away_crest": "https://crests.football-data.org/3.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-07T14:30:00Z",
+    "home": "1. FSV Mainz 05",
+    "away": "VfB Stuttgart",
+    "home_crest": "https://crests.football-data.org/15.png",
+    "away_crest": "https://crests.football-data.org/10.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-07T14:30:00Z",
+    "home": "RB Leipzig",
+    "away": "FC Augsburg",
+    "home_crest": "https://crests.football-data.org/721.png",
+    "away_crest": "https://crests.football-data.org/16.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-07T14:30:00Z",
+    "home": "1. FC Heidenheim 1846",
+    "away": "TSG 1899 Hoffenheim",
+    "home_crest": "https://crests.football-data.org/44.png",
+    "away_crest": "https://crests.football-data.org/2.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-07T14:30:00Z",
+    "home": "VfL Wolfsburg",
+    "away": "Hamburger SV",
+    "home_crest": "https://crests.football-data.org/11.png",
+    "away_crest": "https://crests.football-data.org/7.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-07T17:30:00Z",
+    "home": "1. FC Köln",
+    "away": "Borussia Dortmund",
+    "home_crest": "https://crests.football-data.org/1.png",
+    "away_crest": "https://crests.football-data.org/4.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-08T14:30:00Z",
+    "home": "FC St. Pauli 1910",
+    "away": "Eintracht Frankfurt",
+    "home_crest": "https://crests.football-data.org/20.png",
+    "away_crest": "https://crests.football-data.org/19.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-08T16:30:00Z",
+    "home": "1. FC Union Berlin",
+    "away": "SV Werder Bremen",
+    "home_crest": "https://crests.football-data.org/28.png",
+    "away_crest": "https://crests.football-data.org/12.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-13T19:30:00Z",
+    "home": "Borussia Mönchengladbach",
+    "away": "FC St. Pauli 1910",
+    "home_crest": "https://crests.football-data.org/18.png",
+    "away_crest": "https://crests.football-data.org/20.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-14T14:30:00Z",
+    "home": "Bayer 04 Leverkusen",
+    "away": "FC Bayern München",
+    "home_crest": "https://crests.football-data.org/3.png",
+    "away_crest": "https://crests.football-data.org/5.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-14T14:30:00Z",
+    "home": "TSG 1899 Hoffenheim",
+    "away": "VfL Wolfsburg",
+    "home_crest": "https://crests.football-data.org/2.png",
+    "away_crest": "https://crests.football-data.org/11.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-14T14:30:00Z",
+    "home": "Borussia Dortmund",
+    "away": "FC Augsburg",
+    "home_crest": "https://crests.football-data.org/4.png",
+    "away_crest": "https://crests.football-data.org/16.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-14T14:30:00Z",
+    "home": "Eintracht Frankfurt",
+    "away": "1. FC Heidenheim 1846",
+    "home_crest": "https://crests.football-data.org/19.png",
+    "away_crest": "https://crests.football-data.org/44.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-14T17:30:00Z",
+    "home": "Hamburger SV",
+    "away": "1. FC Köln",
+    "home_crest": "https://crests.football-data.org/7.png",
+    "away_crest": "https://crests.football-data.org/1.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-15T14:30:00Z",
+    "home": "SV Werder Bremen",
+    "away": "1. FSV Mainz 05",
+    "home_crest": "https://crests.football-data.org/12.png",
+    "away_crest": "https://crests.football-data.org/15.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-15T16:30:00Z",
+    "home": "SC Freiburg",
+    "away": "1. FC Union Berlin",
+    "home_crest": "https://crests.football-data.org/17.png",
+    "away_crest": "https://crests.football-data.org/28.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-15T18:30:00Z",
+    "home": "VfB Stuttgart",
+    "away": "RB Leipzig",
+    "home_crest": "https://crests.football-data.org/10.png",
+    "away_crest": "https://crests.football-data.org/721.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-20T19:30:00Z",
+    "home": "RB Leipzig",
+    "away": "TSG 1899 Hoffenheim",
+    "home_crest": "https://crests.football-data.org/721.png",
+    "away_crest": "https://crests.football-data.org/2.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-21T14:30:00Z",
+    "home": "1. FC Heidenheim 1846",
+    "away": "Bayer 04 Leverkusen",
+    "home_crest": "https://crests.football-data.org/44.png",
+    "away_crest": "https://crests.football-data.org/3.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-21T14:30:00Z",
+    "home": "VfL Wolfsburg",
+    "away": "SV Werder Bremen",
+    "home_crest": "https://crests.football-data.org/11.png",
+    "away_crest": "https://crests.football-data.org/12.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-21T14:30:00Z",
+    "home": "1. FC Köln",
+    "away": "Borussia Mönchengladbach",
+    "home_crest": "https://crests.football-data.org/1.png",
+    "away_crest": "https://crests.football-data.org/18.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-21T14:30:00Z",
+    "home": "FC Bayern München",
+    "away": "1. FC Union Berlin",
+    "home_crest": "https://crests.football-data.org/5.png",
+    "away_crest": "https://crests.football-data.org/28.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-21T17:30:00Z",
+    "home": "Borussia Dortmund",
+    "away": "Hamburger SV",
+    "home_crest": "https://crests.football-data.org/4.png",
+    "away_crest": "https://crests.football-data.org/7.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-22T14:30:00Z",
+    "home": "1. FSV Mainz 05",
+    "away": "Eintracht Frankfurt",
+    "home_crest": "https://crests.football-data.org/15.png",
+    "away_crest": "https://crests.football-data.org/19.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-22T16:30:00Z",
+    "home": "FC St. Pauli 1910",
+    "away": "SC Freiburg",
+    "home_crest": "https://crests.football-data.org/20.png",
+    "away_crest": "https://crests.football-data.org/17.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-22T18:30:00Z",
+    "home": "FC Augsburg",
+    "away": "VfB Stuttgart",
+    "home_crest": "https://crests.football-data.org/16.png",
+    "away_crest": "https://crests.football-data.org/10.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "SC Freiburg",
+    "away": "FC Bayern München",
+    "home_crest": "https://crests.football-data.org/17.png",
+    "away_crest": "https://crests.football-data.org/5.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "VfB Stuttgart",
+    "away": "Borussia Dortmund",
+    "home_crest": "https://crests.football-data.org/10.png",
+    "away_crest": "https://crests.football-data.org/4.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "TSG 1899 Hoffenheim",
+    "away": "1. FSV Mainz 05",
+    "home_crest": "https://crests.football-data.org/2.png",
+    "away_crest": "https://crests.football-data.org/15.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "SV Werder Bremen",
+    "away": "RB Leipzig",
+    "home_crest": "https://crests.football-data.org/12.png",
+    "away_crest": "https://crests.football-data.org/721.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "Bayer 04 Leverkusen",
+    "away": "VfL Wolfsburg",
+    "home_crest": "https://crests.football-data.org/3.png",
+    "away_crest": "https://crests.football-data.org/11.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "Hamburger SV",
+    "away": "FC Augsburg",
+    "home_crest": "https://crests.football-data.org/7.png",
+    "away_crest": "https://crests.football-data.org/16.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "1. FC Union Berlin",
+    "away": "FC St. Pauli 1910",
+    "home_crest": "https://crests.football-data.org/28.png",
+    "away_crest": "https://crests.football-data.org/20.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "Borussia Mönchengladbach",
+    "away": "1. FC Heidenheim 1846",
+    "home_crest": "https://crests.football-data.org/18.png",
+    "away_crest": "https://crests.football-data.org/44.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "Eintracht Frankfurt",
+    "away": "1. FC Köln",
+    "home_crest": "https://crests.football-data.org/19.png",
+    "away_crest": "https://crests.football-data.org/1.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "FC St. Pauli 1910",
+    "away": "FC Bayern München",
+    "home_crest": "https://crests.football-data.org/20.png",
+    "away_crest": "https://crests.football-data.org/5.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "Borussia Dortmund",
+    "away": "Bayer 04 Leverkusen",
+    "home_crest": "https://crests.football-data.org/4.png",
+    "away_crest": "https://crests.football-data.org/3.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "VfL Wolfsburg",
+    "away": "Eintracht Frankfurt",
+    "home_crest": "https://crests.football-data.org/11.png",
+    "away_crest": "https://crests.football-data.org/19.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "1. FSV Mainz 05",
+    "away": "SC Freiburg",
+    "home_crest": "https://crests.football-data.org/15.png",
+    "away_crest": "https://crests.football-data.org/17.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "1. FC Köln",
+    "away": "SV Werder Bremen",
+    "home_crest": "https://crests.football-data.org/1.png",
+    "away_crest": "https://crests.football-data.org/12.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "RB Leipzig",
+    "away": "Borussia Mönchengladbach",
+    "home_crest": "https://crests.football-data.org/721.png",
+    "away_crest": "https://crests.football-data.org/18.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "1. FC Heidenheim 1846",
+    "away": "1. FC Union Berlin",
+    "home_crest": "https://crests.football-data.org/44.png",
+    "away_crest": "https://crests.football-data.org/28.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "FC Augsburg",
+    "away": "TSG 1899 Hoffenheim",
+    "home_crest": "https://crests.football-data.org/16.png",
+    "away_crest": "https://crests.football-data.org/2.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-11T00:00:00Z",
+    "home": "VfB Stuttgart",
+    "away": "Hamburger SV",
+    "home_crest": "https://crests.football-data.org/10.png",
+    "away_crest": "https://crests.football-data.org/7.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-18T00:00:00Z",
+    "home": "SC Freiburg",
+    "away": "1. FC Heidenheim 1846",
+    "home_crest": "https://crests.football-data.org/17.png",
+    "away_crest": "https://crests.football-data.org/44.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-04-18T00:00:00Z",
+    "home": "FC St. Pauli 1910",
+    "away": "1. FC Köln",
+    "home_crest": "https://crests.football-data.org/20.png",
+    "away_crest": "https://crests.football-data.org/1.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  }
+]

@@ -1,46 +1,39 @@
+"""
+Acceso a cache JSON: lectura/escritura en data/cache con fallback a daily/.
+Usa config.settings para rutas.
+"""
+from __future__ import annotations
+
 import json
-import os
+from typing import Any
 
-# engine/
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-# Nueva carpeta cache
-CACHE_DIR = os.path.join(BASE_DIR, "data", "cache")
-
-# Fallback (por si algún día usás daily)
-DAILY_DIR = os.path.join(BASE_DIR, "daily")
+# Import tardío para evitar ciclos; se resuelve en runtime
+def _get_dirs():
+    from config.settings import CACHE_DIR, DAILY_DIR
+    return CACHE_DIR, DAILY_DIR
 
 
-def read_json(filename: str):
+def read_json(filename: str) -> list[Any] | dict[str, Any]:
     """
-    Lee primero desde data/cache.
-    Si no existe, intenta desde daily.
+    Lee primero desde data/cache; si no existe, desde daily/.
     Si no encuentra nada, devuelve [].
     """
-
-    # 1️⃣ Buscar en cache
-    cache_path = os.path.join(CACHE_DIR, filename)
-    if os.path.exists(cache_path):
+    cache_dir, daily_dir = _get_dirs()
+    cache_path = cache_dir / filename
+    if cache_path.exists():
         with open(cache_path, "r", encoding="utf-8") as f:
             return json.load(f)
-
-    # 2️⃣ Buscar en daily (fallback)
-    daily_path = os.path.join(DAILY_DIR, filename)
-    if os.path.exists(daily_path):
+    daily_path = daily_dir / filename
+    if daily_path.exists():
         with open(daily_path, "r", encoding="utf-8") as f:
             return json.load(f)
-
-    # 3️⃣ Si no existe
     return []
 
 
-def write_json(filename: str, data):
-    """
-    Guarda SIEMPRE en data/cache.
-    """
-    os.makedirs(CACHE_DIR, exist_ok=True)
-
-    path = os.path.join(CACHE_DIR, filename)
-
+def write_json(filename: str, data: Any) -> None:
+    """Guarda siempre en data/cache."""
+    cache_dir, _ = _get_dirs()
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    path = cache_dir / filename
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)

@@ -1,4 +1,25 @@
-# AFTR MVP
+# AFTR Pick
+
+API y dashboard de picks deportivos (Poisson, Football-Data.org).
+
+## Arquitectura (producción)
+
+- **config/** – Configuración centralizada desde env (`.env` o variables de entorno).
+- **core/** – Lógica de negocio: Poisson, evaluación de mercados, candidatos (sin I/O).
+- **data/** – Acceso a datos: cache JSON (`data/cache`), proveedor Football-Data.org.
+- **services/** – Pipeline de refresco: fetch partidos → calcular picks → guardar en cache.
+- **app/** – FastAPI: rutas, UI, CLI (`python -m app.cli refresh`).
+- **db.py** – SQLite opcional para stats y evaluación WIN/LOSS (mismo esquema único).
+
+**Refresco:** un solo comando actualiza partidos y picks para todas las ligas:
+
+```powershell
+.\.venv\Scripts\python.exe -m app.cli refresh
+```
+
+Configuración: copiar `.env.example` a `.env` y definir `FOOTBALL_DATA_API_KEY`.
+
+---
 
 ## Windows (PowerShell): fix `No module named pytest`
 
@@ -57,3 +78,9 @@ Opciones útiles:
 Abrí:
 - http://127.0.0.1:8000
 - http://127.0.0.1:8000/docs
+
+## Producción
+
+- Variables: ver `.env.example`. En servidor usar env vars o archivo `.env` fuera del repo.
+- Refresco programado: ejecutar `python -m app.cli refresh` vía cron/tarea programada.
+- Servir con uvicorn detrás de un reverse proxy (nginx, Caddy) con `--host 0.0.0.0` si aplica.
