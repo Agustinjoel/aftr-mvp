@@ -28,12 +28,20 @@ FOOTBALL_DATA_API_KEY: str = (os.getenv("FOOTBALL_DATA_API_KEY") or "").strip()
 
 # Ligas soportadas (código -> nombre)
 LEAGUES: dict[str, str] = {
+    "BSA": "Campeonato Brasileiro Série A",
+    "ELC": "Championship",
     "PL": "Premier League",
+    "EC": "European Championship",
+    "DED": "Eredivise",
+    "PPL": "Primera Liga",
+    "CLI": "Copa Libertadores",
+    "WC": "FIFA World Cup",
     "PD": "LaLiga",
     "SA": "Serie A",
     "BL1": "Bundesliga",
     "FL1": "Ligue 1",
     "CL": "UEFA Champions League",
+
 }
 DEFAULT_LEAGUE: str = os.getenv("AFTR_DEFAULT_LEAGUE", "PL")
 

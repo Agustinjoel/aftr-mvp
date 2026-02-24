@@ -1,10 +1,10 @@
 [
   {
-    "utcDate": "2026-02-27T19:45:00Z",
-    "home": "Parma Calcio 1913",
-    "away": "Cagliari Calcio",
-    "home_crest": "https://crests.football-data.org/112.png",
-    "away_crest": "https://crests.football-data.org/104.png",
+    "utcDate": "2026-02-25T22:00:00Z",
+    "home": "RB Bragantino",
+    "away": "CA Paranaense",
+    "home_crest": "https://crests.football-data.org/4286.png",
+    "away_crest": "https://crests.football-data.org/1768.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -59,11 +59,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-02-28T14:00:00Z",
-    "home": "Como 1907",
-    "away": "US Lecce",
-    "home_crest": "https://crests.football-data.org/7397.png",
-    "away_crest": "https://crests.football-data.org/5890.png",
+    "utcDate": "2026-02-25T22:00:00Z",
+    "home": "Clube do Remo",
+    "away": "SC Internacional",
+    "home_crest": "https://crests.football-data.org/4287.png",
+    "away_crest": "https://crests.football-data.org/6684.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -118,11 +118,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-02-28T17:00:00Z",
-    "home": "Hellas Verona FC",
-    "away": "SSC Napoli",
-    "home_crest": "https://crests.football-data.org/450.png",
-    "away_crest": "https://crests.football-data.org/113.png",
+    "utcDate": "2026-02-25T22:30:00Z",
+    "home": "Coritiba FBC",
+    "away": "São Paulo FC",
+    "home_crest": "https://crests.football-data.org/4241.png",
+    "away_crest": "https://crests.football-data.org/1776.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -177,11 +177,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-02-28T19:45:00Z",
-    "home": "FC Internazionale Milano",
-    "away": "Genoa CFC",
-    "home_crest": "https://crests.football-data.org/108.png",
-    "away_crest": "https://crests.football-data.org/107.png",
+    "utcDate": "2026-02-25T23:00:00Z",
+    "home": "Cruzeiro EC",
+    "away": "SC Corinthians Paulista",
+    "home_crest": "https://crests.football-data.org/1771.png",
+    "away_crest": "https://crests.football-data.org/1779.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -236,11 +236,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-01T11:30:00Z",
-    "home": "US Cremonese",
-    "away": "AC Milan",
-    "home_crest": "https://crests.football-data.org/457.png",
-    "away_crest": "https://crests.football-data.org/98.png",
+    "utcDate": "2026-02-26T00:30:00Z",
+    "home": "Grêmio FBPA",
+    "away": "CA Mineiro",
+    "home_crest": "https://crests.football-data.org/1767.png",
+    "away_crest": "https://crests.football-data.org/1766.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -295,11 +295,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-01T14:00:00Z",
-    "home": "US Sassuolo Calcio",
-    "away": "Atalanta BC",
-    "home_crest": "https://crests.football-data.org/471.png",
-    "away_crest": "https://crests.football-data.org/102.png",
+    "utcDate": "2026-02-26T00:30:00Z",
+    "home": "SE Palmeiras",
+    "away": "Fluminense FC",
+    "home_crest": "https://crests.football-data.org/1769.png",
+    "away_crest": "https://crests.football-data.org/1765.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -354,11 +354,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-01T17:00:00Z",
-    "home": "Torino FC",
-    "away": "SS Lazio",
-    "home_crest": "https://crests.football-data.org/586.png",
-    "away_crest": "https://crests.football-data.org/110.png",
+    "utcDate": "2026-02-26T22:00:00Z",
+    "home": "Santos FC",
+    "away": "CR Vasco da Gama",
+    "home_crest": "https://crests.football-data.org/6685.png",
+    "away_crest": "https://crests.football-data.org/1780.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -413,11 +413,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-01T19:45:00Z",
-    "home": "AS Roma",
-    "away": "Juventus FC",
-    "home_crest": "https://crests.football-data.org/100.png",
-    "away_crest": "https://crests.football-data.org/109.png",
+    "utcDate": "2026-03-11T00:30:00Z",
+    "home": "Mirassol FC",
+    "away": "Santos FC",
+    "home_crest": "https://crests.football-data.org/4364.png",
+    "away_crest": "https://crests.football-data.org/6685.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -472,11 +472,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-02T17:30:00Z",
-    "home": "AC Pisa 1909",
-    "away": "Bologna FC 1909",
-    "home_crest": "https://crests.football-data.org/487.png",
-    "away_crest": "https://crests.football-data.org/103.png",
+    "utcDate": "2026-03-11T22:00:00Z",
+    "home": "CA Paranaense",
+    "away": "Botafogo FR",
+    "home_crest": "https://crests.football-data.org/1768.png",
+    "away_crest": "https://crests.football-data.org/1770.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -531,11 +531,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-02T19:45:00Z",
-    "home": "Udinese Calcio",
-    "away": "ACF Fiorentina",
-    "home_crest": "https://crests.football-data.org/115.png",
-    "away_crest": "https://crests.football-data.org/99.png",
+    "utcDate": "2026-03-11T22:00:00Z",
+    "home": "CA Mineiro",
+    "away": "SC Internacional",
+    "home_crest": "https://crests.football-data.org/1766.png",
+    "away_crest": "https://crests.football-data.org/6684.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -590,11 +590,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-08T00:00:00Z",
-    "home": "Cagliari Calcio",
-    "away": "Como 1907",
-    "home_crest": "https://crests.football-data.org/104.png",
-    "away_crest": "https://crests.football-data.org/7397.png",
+    "utcDate": "2026-03-11T23:00:00Z",
+    "home": "EC Bahia",
+    "away": "EC Vitória",
+    "home_crest": "https://crests.football-data.org/1777.png",
+    "away_crest": "https://crests.football-data.org/1782.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -649,11 +649,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-08T00:00:00Z",
-    "home": "Genoa CFC",
-    "away": "AS Roma",
-    "home_crest": "https://crests.football-data.org/107.png",
-    "away_crest": "https://crests.football-data.org/100.png",
+    "utcDate": "2026-03-12T00:30:00Z",
+    "home": "SC Corinthians Paulista",
+    "away": "Coritiba FBC",
+    "home_crest": "https://crests.football-data.org/1779.png",
+    "away_crest": "https://crests.football-data.org/4241.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -708,11 +708,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-08T00:00:00Z",
-    "home": "Bologna FC 1909",
-    "away": "Hellas Verona FC",
-    "home_crest": "https://crests.football-data.org/103.png",
-    "away_crest": "https://crests.football-data.org/450.png",
+    "utcDate": "2026-03-12T00:30:00Z",
+    "home": "CR Flamengo",
+    "away": "Cruzeiro EC",
+    "home_crest": "https://crests.football-data.org/1783.png",
+    "away_crest": "https://crests.football-data.org/1771.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -767,11 +767,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-08T00:00:00Z",
-    "home": "Juventus FC",
-    "away": "AC Pisa 1909",
-    "home_crest": "https://crests.football-data.org/109.png",
-    "away_crest": "https://crests.football-data.org/487.png",
+    "utcDate": "2026-03-12T22:00:00Z",
+    "home": "Clube do Remo",
+    "away": "Fluminense FC",
+    "home_crest": "https://crests.football-data.org/4287.png",
+    "away_crest": "https://crests.football-data.org/1765.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -826,11 +826,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-08T00:00:00Z",
-    "home": "SS Lazio",
-    "away": "US Sassuolo Calcio",
-    "home_crest": "https://crests.football-data.org/110.png",
-    "away_crest": "https://crests.football-data.org/471.png",
+    "utcDate": "2026-03-12T22:30:00Z",
+    "home": "CR Vasco da Gama",
+    "away": "SE Palmeiras",
+    "home_crest": "https://crests.football-data.org/1780.png",
+    "away_crest": "https://crests.football-data.org/1769.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -885,11 +885,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-08T00:00:00Z",
-    "home": "SSC Napoli",
-    "away": "Torino FC",
-    "home_crest": "https://crests.football-data.org/113.png",
-    "away_crest": "https://crests.football-data.org/586.png",
+    "utcDate": "2026-03-12T23:00:00Z",
+    "home": "São Paulo FC",
+    "away": "Chapecoense AF",
+    "home_crest": "https://crests.football-data.org/1776.png",
+    "away_crest": "https://crests.football-data.org/1772.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -944,11 +944,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-08T00:00:00Z",
-    "home": "US Lecce",
-    "away": "US Cremonese",
-    "home_crest": "https://crests.football-data.org/5890.png",
-    "away_crest": "https://crests.football-data.org/457.png",
+    "utcDate": "2026-03-13T00:30:00Z",
+    "home": "Grêmio FBPA",
+    "away": "RB Bragantino",
+    "home_crest": "https://crests.football-data.org/1767.png",
+    "away_crest": "https://crests.football-data.org/4286.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1003,11 +1003,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-08T00:00:00Z",
-    "home": "ACF Fiorentina",
-    "away": "Parma Calcio 1913",
-    "home_crest": "https://crests.football-data.org/99.png",
-    "away_crest": "https://crests.football-data.org/112.png",
+    "utcDate": "2026-03-14T21:30:00Z",
+    "home": "EC Vitória",
+    "away": "CA Mineiro",
+    "home_crest": "https://crests.football-data.org/1782.png",
+    "away_crest": "https://crests.football-data.org/1766.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1062,11 +1062,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-08T00:00:00Z",
-    "home": "AC Milan",
-    "away": "FC Internazionale Milano",
-    "home_crest": "https://crests.football-data.org/98.png",
-    "away_crest": "https://crests.football-data.org/108.png",
+    "utcDate": "2026-03-14T23:30:00Z",
+    "home": "Botafogo FR",
+    "away": "CR Flamengo",
+    "home_crest": "https://crests.football-data.org/1770.png",
+    "away_crest": "https://crests.football-data.org/1783.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1121,11 +1121,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-08T00:00:00Z",
-    "home": "Atalanta BC",
-    "away": "Udinese Calcio",
-    "home_crest": "https://crests.football-data.org/102.png",
-    "away_crest": "https://crests.football-data.org/115.png",
+    "utcDate": "2026-03-15T19:00:00Z",
+    "home": "Fluminense FC",
+    "away": "CA Paranaense",
+    "home_crest": "https://crests.football-data.org/1765.png",
+    "away_crest": "https://crests.football-data.org/1768.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1180,11 +1180,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-15T00:00:00Z",
-    "home": "Como 1907",
-    "away": "AS Roma",
-    "home_crest": "https://crests.football-data.org/7397.png",
-    "away_crest": "https://crests.football-data.org/100.png",
+    "utcDate": "2026-03-15T19:00:00Z",
+    "home": "SC Internacional",
+    "away": "EC Bahia",
+    "home_crest": "https://crests.football-data.org/6684.png",
+    "away_crest": "https://crests.football-data.org/1777.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1239,11 +1239,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-15T00:00:00Z",
-    "home": "Torino FC",
-    "away": "Parma Calcio 1913",
-    "home_crest": "https://crests.football-data.org/586.png",
-    "away_crest": "https://crests.football-data.org/112.png",
+    "utcDate": "2026-03-15T19:00:00Z",
+    "home": "Santos FC",
+    "away": "SC Corinthians Paulista",
+    "home_crest": "https://crests.football-data.org/6685.png",
+    "away_crest": "https://crests.football-data.org/1779.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1298,11 +1298,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-15T00:00:00Z",
-    "home": "Hellas Verona FC",
-    "away": "Genoa CFC",
-    "home_crest": "https://crests.football-data.org/450.png",
-    "away_crest": "https://crests.football-data.org/107.png",
+    "utcDate": "2026-03-15T21:30:00Z",
+    "home": "Coritiba FBC",
+    "away": "Clube do Remo",
+    "home_crest": "https://crests.football-data.org/4241.png",
+    "away_crest": "https://crests.football-data.org/4287.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1357,11 +1357,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-15T00:00:00Z",
-    "home": "FC Internazionale Milano",
-    "away": "Atalanta BC",
-    "home_crest": "https://crests.football-data.org/108.png",
-    "away_crest": "https://crests.football-data.org/102.png",
+    "utcDate": "2026-03-15T21:30:00Z",
+    "home": "SE Palmeiras",
+    "away": "Mirassol FC",
+    "home_crest": "https://crests.football-data.org/1769.png",
+    "away_crest": "https://crests.football-data.org/4364.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1416,11 +1416,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-15T00:00:00Z",
-    "home": "SS Lazio",
-    "away": "AC Milan",
-    "home_crest": "https://crests.football-data.org/110.png",
-    "away_crest": "https://crests.football-data.org/98.png",
+    "utcDate": "2026-03-15T23:30:00Z",
+    "home": "RB Bragantino",
+    "away": "São Paulo FC",
+    "home_crest": "https://crests.football-data.org/4286.png",
+    "away_crest": "https://crests.football-data.org/1776.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1475,11 +1475,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-15T00:00:00Z",
-    "home": "AC Pisa 1909",
-    "away": "Cagliari Calcio",
-    "home_crest": "https://crests.football-data.org/487.png",
-    "away_crest": "https://crests.football-data.org/104.png",
+    "utcDate": "2026-03-15T23:30:00Z",
+    "home": "Cruzeiro EC",
+    "away": "CR Vasco da Gama",
+    "home_crest": "https://crests.football-data.org/1771.png",
+    "away_crest": "https://crests.football-data.org/1780.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1534,11 +1534,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-15T00:00:00Z",
-    "home": "US Sassuolo Calcio",
-    "away": "Bologna FC 1909",
-    "home_crest": "https://crests.football-data.org/471.png",
-    "away_crest": "https://crests.football-data.org/103.png",
+    "utcDate": "2026-03-16T23:00:00Z",
+    "home": "Chapecoense AF",
+    "away": "Grêmio FBPA",
+    "home_crest": "https://crests.football-data.org/1772.png",
+    "away_crest": "https://crests.football-data.org/1767.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1593,11 +1593,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-15T00:00:00Z",
-    "home": "SSC Napoli",
-    "away": "US Lecce",
-    "home_crest": "https://crests.football-data.org/113.png",
-    "away_crest": "https://crests.football-data.org/5890.png",
+    "utcDate": "2026-03-18T22:00:00Z",
+    "home": "EC Bahia",
+    "away": "RB Bragantino",
+    "home_crest": "https://crests.football-data.org/1777.png",
+    "away_crest": "https://crests.football-data.org/4286.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1652,11 +1652,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-15T00:00:00Z",
-    "home": "Udinese Calcio",
-    "away": "Juventus FC",
-    "home_crest": "https://crests.football-data.org/115.png",
-    "away_crest": "https://crests.football-data.org/109.png",
+    "utcDate": "2026-03-18T22:00:00Z",
+    "home": "SE Palmeiras",
+    "away": "Botafogo FR",
+    "home_crest": "https://crests.football-data.org/1769.png",
+    "away_crest": "https://crests.football-data.org/1770.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1711,11 +1711,542 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-15T00:00:00Z",
-    "home": "US Cremonese",
-    "away": "ACF Fiorentina",
-    "home_crest": "https://crests.football-data.org/457.png",
-    "away_crest": "https://crests.football-data.org/99.png",
+    "utcDate": "2026-03-18T22:30:00Z",
+    "home": "CA Paranaense",
+    "away": "Cruzeiro EC",
+    "home_crest": "https://crests.football-data.org/1768.png",
+    "away_crest": "https://crests.football-data.org/1771.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-18T23:00:00Z",
+    "home": "CA Mineiro",
+    "away": "São Paulo FC",
+    "home_crest": "https://crests.football-data.org/1766.png",
+    "away_crest": "https://crests.football-data.org/1776.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-18T23:00:00Z",
+    "home": "Mirassol FC",
+    "away": "Coritiba FBC",
+    "home_crest": "https://crests.football-data.org/4364.png",
+    "away_crest": "https://crests.football-data.org/4241.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-19T00:30:00Z",
+    "home": "Santos FC",
+    "away": "SC Internacional",
+    "home_crest": "https://crests.football-data.org/6685.png",
+    "away_crest": "https://crests.football-data.org/6684.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-19T00:30:00Z",
+    "home": "CR Vasco da Gama",
+    "away": "Fluminense FC",
+    "home_crest": "https://crests.football-data.org/1780.png",
+    "away_crest": "https://crests.football-data.org/1765.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-19T22:00:00Z",
+    "home": "Grêmio FBPA",
+    "away": "EC Vitória",
+    "home_crest": "https://crests.football-data.org/1767.png",
+    "away_crest": "https://crests.football-data.org/1782.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-19T23:00:00Z",
+    "home": "CR Flamengo",
+    "away": "Clube do Remo",
+    "home_crest": "https://crests.football-data.org/1783.png",
+    "away_crest": "https://crests.football-data.org/4287.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-20T00:30:00Z",
+    "home": "Chapecoense AF",
+    "away": "SC Corinthians Paulista",
+    "home_crest": "https://crests.football-data.org/1772.png",
+    "away_crest": "https://crests.football-data.org/1779.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-21T19:00:00Z",
+    "home": "RB Bragantino",
+    "away": "Botafogo FR",
+    "home_crest": "https://crests.football-data.org/4286.png",
+    "away_crest": "https://crests.football-data.org/1770.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-03-21T21:30:00Z",
+    "home": "Fluminense FC",
+    "away": "CA Mineiro",
+    "home_crest": "https://crests.football-data.org/1765.png",
+    "away_crest": "https://crests.football-data.org/1766.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1771,10 +2302,10 @@
   },
   {
     "utcDate": "2026-03-22T00:00:00Z",
-    "home": "ACF Fiorentina",
-    "away": "FC Internazionale Milano",
-    "home_crest": "https://crests.football-data.org/99.png",
-    "away_crest": "https://crests.football-data.org/108.png",
+    "home": "São Paulo FC",
+    "away": "SE Palmeiras",
+    "home_crest": "https://crests.football-data.org/1776.png",
+    "away_crest": "https://crests.football-data.org/1769.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1829,11 +2360,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-22T00:00:00Z",
-    "home": "AC Milan",
-    "away": "Torino FC",
-    "home_crest": "https://crests.football-data.org/98.png",
-    "away_crest": "https://crests.football-data.org/586.png",
+    "utcDate": "2026-03-22T19:00:00Z",
+    "home": "CA Paranaense",
+    "away": "Coritiba FBC",
+    "home_crest": "https://crests.football-data.org/1768.png",
+    "away_crest": "https://crests.football-data.org/4241.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1888,11 +2419,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-22T00:00:00Z",
-    "home": "AS Roma",
-    "away": "US Lecce",
-    "home_crest": "https://crests.football-data.org/100.png",
-    "away_crest": "https://crests.football-data.org/5890.png",
+    "utcDate": "2026-03-22T19:00:00Z",
+    "home": "Cruzeiro EC",
+    "away": "Santos FC",
+    "home_crest": "https://crests.football-data.org/1771.png",
+    "away_crest": "https://crests.football-data.org/6685.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -1947,11 +2478,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-22T00:00:00Z",
-    "home": "Atalanta BC",
-    "away": "Hellas Verona FC",
-    "home_crest": "https://crests.football-data.org/102.png",
-    "away_crest": "https://crests.football-data.org/450.png",
+    "utcDate": "2026-03-22T19:00:00Z",
+    "home": "Clube do Remo",
+    "away": "EC Bahia",
+    "home_crest": "https://crests.football-data.org/4287.png",
+    "away_crest": "https://crests.football-data.org/1777.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2006,11 +2537,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-22T00:00:00Z",
-    "home": "Cagliari Calcio",
-    "away": "SSC Napoli",
-    "home_crest": "https://crests.football-data.org/104.png",
-    "away_crest": "https://crests.football-data.org/113.png",
+    "utcDate": "2026-03-22T19:00:00Z",
+    "home": "CR Vasco da Gama",
+    "away": "Grêmio FBPA",
+    "home_crest": "https://crests.football-data.org/1780.png",
+    "away_crest": "https://crests.football-data.org/1767.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2065,11 +2596,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-22T00:00:00Z",
-    "home": "Genoa CFC",
-    "away": "Udinese Calcio",
-    "home_crest": "https://crests.football-data.org/107.png",
-    "away_crest": "https://crests.football-data.org/115.png",
+    "utcDate": "2026-03-22T21:30:00Z",
+    "home": "SC Internacional",
+    "away": "Chapecoense AF",
+    "home_crest": "https://crests.football-data.org/6684.png",
+    "away_crest": "https://crests.football-data.org/1772.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2124,11 +2655,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-22T00:00:00Z",
-    "home": "Como 1907",
-    "away": "AC Pisa 1909",
-    "home_crest": "https://crests.football-data.org/7397.png",
-    "away_crest": "https://crests.football-data.org/487.png",
+    "utcDate": "2026-03-22T21:30:00Z",
+    "home": "EC Vitória",
+    "away": "Mirassol FC",
+    "home_crest": "https://crests.football-data.org/1782.png",
+    "away_crest": "https://crests.football-data.org/4364.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2183,11 +2714,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-22T00:00:00Z",
-    "home": "Bologna FC 1909",
-    "away": "SS Lazio",
-    "home_crest": "https://crests.football-data.org/103.png",
-    "away_crest": "https://crests.football-data.org/110.png",
+    "utcDate": "2026-03-22T23:30:00Z",
+    "home": "SC Corinthians Paulista",
+    "away": "CR Flamengo",
+    "home_crest": "https://crests.football-data.org/1779.png",
+    "away_crest": "https://crests.football-data.org/1783.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2242,11 +2773,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-22T00:00:00Z",
-    "home": "Juventus FC",
-    "away": "US Sassuolo Calcio",
-    "home_crest": "https://crests.football-data.org/109.png",
-    "away_crest": "https://crests.football-data.org/471.png",
+    "utcDate": "2026-04-01T00:00:00Z",
+    "home": "EC Bahia",
+    "away": "CA Paranaense",
+    "home_crest": "https://crests.football-data.org/1777.png",
+    "away_crest": "https://crests.football-data.org/1768.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2301,11 +2832,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-03-22T00:00:00Z",
-    "home": "Parma Calcio 1913",
-    "away": "US Cremonese",
-    "home_crest": "https://crests.football-data.org/112.png",
-    "away_crest": "https://crests.football-data.org/457.png",
+    "utcDate": "2026-04-01T00:00:00Z",
+    "home": "Botafogo FR",
+    "away": "Mirassol FC",
+    "home_crest": "https://crests.football-data.org/1770.png",
+    "away_crest": "https://crests.football-data.org/4364.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2360,11 +2891,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-04-04T00:00:00Z",
-    "home": "Hellas Verona FC",
-    "away": "ACF Fiorentina",
-    "home_crest": "https://crests.football-data.org/450.png",
-    "away_crest": "https://crests.football-data.org/99.png",
+    "utcDate": "2026-04-01T00:00:00Z",
+    "home": "RB Bragantino",
+    "away": "CR Flamengo",
+    "home_crest": "https://crests.football-data.org/4286.png",
+    "away_crest": "https://crests.football-data.org/1783.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2419,11 +2950,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-04-04T00:00:00Z",
-    "home": "FC Internazionale Milano",
-    "away": "AS Roma",
-    "home_crest": "https://crests.football-data.org/108.png",
-    "away_crest": "https://crests.football-data.org/100.png",
+    "utcDate": "2026-04-01T00:00:00Z",
+    "home": "Chapecoense AF",
+    "away": "CA Mineiro",
+    "home_crest": "https://crests.football-data.org/1772.png",
+    "away_crest": "https://crests.football-data.org/1766.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2478,11 +3009,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-04-04T00:00:00Z",
-    "home": "Juventus FC",
-    "away": "Genoa CFC",
-    "home_crest": "https://crests.football-data.org/109.png",
-    "away_crest": "https://crests.football-data.org/107.png",
+    "utcDate": "2026-04-01T00:00:00Z",
+    "home": "Coritiba FBC",
+    "away": "CR Vasco da Gama",
+    "home_crest": "https://crests.football-data.org/4241.png",
+    "away_crest": "https://crests.football-data.org/1780.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2537,11 +3068,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-04-04T00:00:00Z",
-    "home": "SS Lazio",
-    "away": "Parma Calcio 1913",
-    "home_crest": "https://crests.football-data.org/110.png",
-    "away_crest": "https://crests.football-data.org/112.png",
+    "utcDate": "2026-04-01T00:00:00Z",
+    "home": "Cruzeiro EC",
+    "away": "EC Vitória",
+    "home_crest": "https://crests.football-data.org/1771.png",
+    "away_crest": "https://crests.football-data.org/1782.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2596,11 +3127,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-04-04T00:00:00Z",
-    "home": "AC Pisa 1909",
-    "away": "Torino FC",
-    "home_crest": "https://crests.football-data.org/487.png",
-    "away_crest": "https://crests.football-data.org/586.png",
+    "utcDate": "2026-04-01T00:00:00Z",
+    "home": "Fluminense FC",
+    "away": "SC Corinthians Paulista",
+    "home_crest": "https://crests.football-data.org/1765.png",
+    "away_crest": "https://crests.football-data.org/1779.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2655,11 +3186,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-04-04T00:00:00Z",
-    "home": "US Sassuolo Calcio",
-    "away": "Cagliari Calcio",
-    "home_crest": "https://crests.football-data.org/471.png",
-    "away_crest": "https://crests.football-data.org/104.png",
+    "utcDate": "2026-04-01T00:00:00Z",
+    "home": "SC Internacional",
+    "away": "São Paulo FC",
+    "home_crest": "https://crests.football-data.org/6684.png",
+    "away_crest": "https://crests.football-data.org/1776.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2714,11 +3245,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-04-04T00:00:00Z",
-    "home": "SSC Napoli",
-    "away": "AC Milan",
-    "home_crest": "https://crests.football-data.org/113.png",
-    "away_crest": "https://crests.football-data.org/98.png",
+    "utcDate": "2026-04-01T00:00:00Z",
+    "home": "SE Palmeiras",
+    "away": "Grêmio FBPA",
+    "home_crest": "https://crests.football-data.org/1769.png",
+    "away_crest": "https://crests.football-data.org/1767.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2773,70 +3304,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-04-04T00:00:00Z",
-    "home": "Udinese Calcio",
-    "away": "Como 1907",
-    "home_crest": "https://crests.football-data.org/115.png",
-    "away_crest": "https://crests.football-data.org/7397.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "PENDING"
-  },
-  {
-    "utcDate": "2026-04-04T00:00:00Z",
-    "home": "US Cremonese",
-    "away": "Bologna FC 1909",
-    "home_crest": "https://crests.football-data.org/457.png",
-    "away_crest": "https://crests.football-data.org/103.png",
+    "utcDate": "2026-04-01T00:00:00Z",
+    "home": "Santos FC",
+    "away": "Clube do Remo",
+    "home_crest": "https://crests.football-data.org/6685.png",
+    "away_crest": "https://crests.football-data.org/4287.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2892,10 +3364,10 @@
   },
   {
     "utcDate": "2026-04-04T00:00:00Z",
-    "home": "US Lecce",
-    "away": "Atalanta BC",
-    "home_crest": "https://crests.football-data.org/5890.png",
-    "away_crest": "https://crests.football-data.org/102.png",
+    "home": "CA Mineiro",
+    "away": "CA Paranaense",
+    "home_crest": "https://crests.football-data.org/1766.png",
+    "away_crest": "https://crests.football-data.org/1768.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -2950,11 +3422,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-04-12T00:00:00Z",
-    "home": "ACF Fiorentina",
-    "away": "SS Lazio",
-    "home_crest": "https://crests.football-data.org/99.png",
-    "away_crest": "https://crests.football-data.org/110.png",
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "EC Bahia",
+    "away": "SE Palmeiras",
+    "home_crest": "https://crests.football-data.org/1777.png",
+    "away_crest": "https://crests.football-data.org/1769.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -3009,11 +3481,11 @@
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-04-12T00:00:00Z",
-    "home": "AC Milan",
-    "away": "Udinese Calcio",
-    "home_crest": "https://crests.football-data.org/98.png",
-    "away_crest": "https://crests.football-data.org/115.png",
+    "utcDate": "2026-04-04T00:00:00Z",
+    "home": "Chapecoense AF",
+    "away": "EC Vitória",
+    "home_crest": "https://crests.football-data.org/1772.png",
+    "away_crest": "https://crests.football-data.org/1782.png",
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
@@ -3066,772 +3538,5 @@
     "best_prob": 0.7396,
     "best_fair": 1.35,
     "result": "PENDING"
-  },
-  {
-    "utcDate": "2026-04-12T00:00:00Z",
-    "home": "AS Roma",
-    "away": "AC Pisa 1909",
-    "home_crest": "https://crests.football-data.org/100.png",
-    "away_crest": "https://crests.football-data.org/487.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "PENDING"
-  },
-  {
-    "utcDate": "2026-04-12T00:00:00Z",
-    "home": "Atalanta BC",
-    "away": "Juventus FC",
-    "home_crest": "https://crests.football-data.org/102.png",
-    "away_crest": "https://crests.football-data.org/109.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "PENDING"
-  },
-  {
-    "utcDate": "2026-04-12T00:00:00Z",
-    "home": "Cagliari Calcio",
-    "away": "US Cremonese",
-    "home_crest": "https://crests.football-data.org/104.png",
-    "away_crest": "https://crests.football-data.org/457.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "PENDING"
-  },
-  {
-    "utcDate": "2026-04-12T00:00:00Z",
-    "home": "Genoa CFC",
-    "away": "US Sassuolo Calcio",
-    "home_crest": "https://crests.football-data.org/107.png",
-    "away_crest": "https://crests.football-data.org/471.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "PENDING"
-  },
-  {
-    "utcDate": "2026-04-12T00:00:00Z",
-    "home": "Como 1907",
-    "away": "FC Internazionale Milano",
-    "home_crest": "https://crests.football-data.org/7397.png",
-    "away_crest": "https://crests.football-data.org/108.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "PENDING"
-  },
-  {
-    "utcDate": "2026-04-12T00:00:00Z",
-    "home": "Bologna FC 1909",
-    "away": "US Lecce",
-    "home_crest": "https://crests.football-data.org/103.png",
-    "away_crest": "https://crests.football-data.org/5890.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "PENDING"
-  },
-  {
-    "utcDate": "2026-04-12T00:00:00Z",
-    "home": "Torino FC",
-    "away": "Hellas Verona FC",
-    "home_crest": "https://crests.football-data.org/586.png",
-    "away_crest": "https://crests.football-data.org/450.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "PENDING"
-  },
-  {
-    "utcDate": "2026-04-12T00:00:00Z",
-    "home": "Parma Calcio 1913",
-    "away": "SSC Napoli",
-    "home_crest": "https://crests.football-data.org/112.png",
-    "away_crest": "https://crests.football-data.org/113.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "PENDING"
-  },
-  {
-    "utcDate": "2026-02-23T19:45:00Z",
-    "home": "Bologna FC 1909",
-    "away": "Udinese Calcio",
-    "home_crest": "https://crests.football-data.org/103.png",
-    "away_crest": "https://crests.football-data.org/115.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "WIN"
-  },
-  {
-    "utcDate": "2026-02-22T11:30:00Z",
-    "home": "Genoa CFC",
-    "away": "Torino FC",
-    "home_crest": "https://crests.football-data.org/107.png",
-    "away_crest": "https://crests.football-data.org/586.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "WIN"
-  },
-  {
-    "utcDate": "2026-02-22T14:00:00Z",
-    "home": "Atalanta BC",
-    "away": "SSC Napoli",
-    "home_crest": "https://crests.football-data.org/102.png",
-    "away_crest": "https://crests.football-data.org/113.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "WIN"
-  },
-  {
-    "utcDate": "2026-02-22T17:00:00Z",
-    "home": "AC Milan",
-    "away": "Parma Calcio 1913",
-    "home_crest": "https://crests.football-data.org/98.png",
-    "away_crest": "https://crests.football-data.org/112.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "WIN"
-  },
-  {
-    "utcDate": "2026-02-22T19:45:00Z",
-    "home": "AS Roma",
-    "away": "US Cremonese",
-    "home_crest": "https://crests.football-data.org/100.png",
-    "away_crest": "https://crests.football-data.org/457.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "WIN"
   }
 ]

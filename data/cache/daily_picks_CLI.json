@@ -1,0 +1,474 @@
+[
+  {
+    "utcDate": "2026-02-24T22:00:00Z",
+    "home": "CD Huachipato",
+    "away": "Carabobo FC",
+    "home_crest": "https://crests.football-data.org/4457.png",
+    "away_crest": "https://crests.football-data.org/5166.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-25T00:30:00Z",
+    "home": "CS Cristal",
+    "away": "2 de Mayo",
+    "home_crest": "https://crests.football-data.org/5347.png",
+    "away_crest": "https://crests.football-data.org/11242.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-25T00:30:00Z",
+    "home": "CD Independiente Medellín",
+    "away": "Liverpool FC",
+    "home_crest": "https://crests.football-data.org/7119.png",
+    "away_crest": "https://crests.football-data.org/7118.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-25T22:00:00Z",
+    "home": "EC Bahia",
+    "away": "O'Higgins FC",
+    "home_crest": "https://crests.football-data.org/1777.png",
+    "away_crest": "https://crests.football-data.org/4459.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-26T00:30:00Z",
+    "home": "AA Argentinos Juniors",
+    "away": "Barcelona SC",
+    "home_crest": "https://crests.football-data.org/2058.png",
+    "away_crest": "https://crests.football-data.org/4520.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-26T00:30:00Z",
+    "home": "Botafogo FR",
+    "away": "Club Nacional Potosí",
+    "home_crest": "https://crests.football-data.org/1770.png",
+    "away_crest": "https://crests.football-data.org/4265.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-26T22:00:00Z",
+    "home": "Club Guaraní",
+    "away": "Juventud de Las Piedras",
+    "home_crest": "https://crests.football-data.org/7868.png",
+    "away_crest": "https://crests.football-data.org/11246.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  },
+  {
+    "utcDate": "2026-02-27T00:30:00Z",
+    "home": "CD Tolima",
+    "away": "Deportivo Táchira FC",
+    "home_crest": "https://crests.football-data.org/4437.png",
+    "away_crest": "https://crests.football-data.org/5171.png",
+    "xg_home": 1.45,
+    "xg_away": 1.15,
+    "xg_total": 2.6,
+    "probs": {
+      "home": 0.4398,
+      "draw": 0.2604,
+      "away": 0.2998,
+      "1x": 0.7002,
+      "x2": 0.5602,
+      "12": 0.7396,
+      "under_25": 0.5184,
+      "over_25": 0.4816,
+      "over_15": 0.7326,
+      "btts_yes": 0.5231,
+      "btts_no": 0.4769
+    },
+    "candidates": [
+      {
+        "market": "12",
+        "prob": 0.7396,
+        "fair": 1.35
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.7326,
+        "fair": 1.37
+      },
+      {
+        "market": "1X",
+        "prob": 0.7002,
+        "fair": 1.43
+      },
+      {
+        "market": "X2",
+        "prob": 0.5602,
+        "fair": 1.79
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5231,
+        "fair": 1.91
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.5184,
+        "fair": 1.93
+      }
+    ],
+    "best_market": "12",
+    "best_prob": 0.7396,
+    "best_fair": 1.35,
+    "result": "PENDING"
+  }
+]

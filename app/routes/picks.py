@@ -7,6 +7,44 @@ from fastapi import APIRouter, Query
 from config.settings import settings
 from data.cache import read_json
 
+def summary_from_json(league: str) -> dict:
+    picks = read_json(f"daily_picks_{league}.json") or []
+
+    wins = sum(1 for p in picks if (p.get("result") == "WIN"))
+    losses = sum(1 for p in picks if (p.get("result") == "LOSS"))
+    push = sum(1 for p in picks if (p.get("result") == "PUSH"))
+    pending = sum(1 for p in picks if (p.get("result") in (None, "", "PENDING")))
+
+    settled = wins + losses + push
+
+    # Unidades aproximadas (si no hay odds reales):
+    # WIN = best_fair - 1, LOSS = -1, PUSH = 0
+    net_units = 0.0
+    for p in picks:
+        res = p.get("result")
+        fair = float(p.get("best_fair") or 0.0)
+        if res == "WIN":
+            net_units += max(fair - 1.0, 0.0)
+        elif res == "LOSS":
+            net_units -= 1.0
+
+    roi = (net_units / settled * 100.0) if settled > 0 else 0.0
+    winrate = (wins / settled * 100.0) if settled > 0 else 0.0
+
+    return {
+        "league": league,
+        "source": "json",
+        "total_picks": len(picks),
+        "wins": wins,
+        "losses": losses,
+        "push": push,
+        "pending": pending,
+        "winrate": round(winrate, 2),
+        "roi": round(roi, 2),
+        "yield": round(roi, 2),
+        "net_units": round(net_units, 2),
+    }
+
 router = APIRouter()
 
 
@@ -14,7 +52,6 @@ router = APIRouter()
 def get_picks(league: str = Query(settings.default_league)):
     league = league if settings.is_valid_league(league) else settings.default_league
     return read_json(f"daily_picks_{league}.json")
-
 
 def _safe_odds(fair: float | None, prob: float | None) -> float | None:
     if fair and fair > 1:
@@ -92,11 +129,13 @@ def _compute_metrics(rows: Iterable[sqlite3.Row]) -> dict[str, float | int]:
         "net_units": round(net_units, 2),
     }
 
+from fastapi import Query
+from config.settings import settings
 
 @router.get("/stats/summary")
 def get_stats_summary(league: str = Query(settings.default_league)):
     league = league if settings.is_valid_league(league) else settings.default_league
-    db_path = settings.db_path
+    return summary_from_json(league)
 
     rows, source = _read_pick_rows(league, db_path)
     metrics = _compute_metrics(rows)

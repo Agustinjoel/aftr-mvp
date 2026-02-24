@@ -11,8 +11,24 @@ if __package__ in (None, ""):
 from data.providers.football_data import get_team_crest, get_upcoming_matches
 from data.cache import read_json, write_json
 from models.enums import LEAGUES
+from core.evaluation import evaluate_market
 
 TEAM_CRESTS_FILE = "team_crests.json"
+
+def _apply_results_by_match_id(picks:[dict], finished_lookup: dict[int, tuple[int,int]]) -> list[dict]:  
+    for p in picks:
+        if p.get("result") not in (None,"", "PENDING"):
+            continue
+    mid = p.get("match_id")
+    if not mid:
+        continue
+    if int(mid) in finished_lookup:
+        hg, ag = finished_lookup[int(mid)]
+        market = p.get ("best_market") or """
+        res, _reason = evaluate_market(market, hg, ag)
+        p["result"] = res
+    
+    return picks
 
 
 def _load_team_crests_cache() -> dict[str, str]:
@@ -36,6 +52,17 @@ def _fill_missing_crests(matches: list[dict], crest_cache: dict[str, str]) -> li
             if crest:
                 crest_cache[_cache_key(team_name, team_id)] = crest
                 crest_cache[_cache_key(team_name)] = crest
+            
+def _build_finished_lookup(get_finished_matches: list[dict]) -> dict[int, tuple[int, int]]:lookup = {}
+        for m in finished_matches:
+            mid = m.get("match_id")
+            hg = m.get("home_goals")
+            ag = m.get("away_goals")
+            if min and hg is not None and ag is not None:
+                lookup[int(mid)] = (int (hg), int(ag))
+        return lookup
+
+    
 
     # Second pass: fill missing from cache or provider details endpoint.
     for m in matches:
@@ -70,9 +97,10 @@ def make_basic_picks(matches: list[dict]) -> list[dict]:
     picks = []
     for m in matches:
         picks.append({
-            "utcDate": m["utcDate"],
-            "home": m["home"],
-            "away": m["away"],
+            "match_id": m.get ("match_id"),
+            "utcDate": m.get["utcDate"],
+            "home": m.get["home"],
+            "away": m.get["away"],
             "candidates": [
                 {"market": "Over 1.5", "prob": 0.62},
                 {"market": "BTTS Yes", "prob": 0.53},
@@ -85,10 +113,15 @@ def make_basic_picks(matches: list[dict]) -> list[dict]:
                 "away": m["away"],
                 "home_crest": m.get("home_crest"),
                 "away_crest": m.get("away_crest"),
-                "candidates": [
-                    {"market": "Over 1.5", "prob": 0.62},
-                    {"market": "BTTS Yes", "prob": 0.53},
-                ],
+                
+                "best_market": best_market,
+                "best_prob": best_prob,
+                "best_fair": best_fair,
+                "candidates": candidates,
+                "result": "PENDING",
+                "candidates": 
+                   
+                
             }
         )
     return picks

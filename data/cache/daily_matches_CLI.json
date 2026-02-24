@@ -1,0 +1,90 @@
+[
+  {
+    "match_id": 553222,
+    "utcDate": "2026-02-24T22:00:00Z",
+    "home": "CD Huachipato",
+    "away": "Carabobo FC",
+    "league": "CLI",
+    "home_team_id": 4457,
+    "away_team_id": 5166,
+    "home_crest": "https://crests.football-data.org/4457.png",
+    "away_crest": "https://crests.football-data.org/5166.png"
+  },
+  {
+    "match_id": 553219,
+    "utcDate": "2026-02-25T00:30:00Z",
+    "home": "CS Cristal",
+    "away": "2 de Mayo",
+    "league": "CLI",
+    "home_team_id": 5347,
+    "away_team_id": 11242,
+    "home_crest": "https://crests.football-data.org/5347.png",
+    "away_crest": "https://crests.football-data.org/11242.png"
+  },
+  {
+    "match_id": 553224,
+    "utcDate": "2026-02-25T00:30:00Z",
+    "home": "CD Independiente Medellín",
+    "away": "Liverpool FC",
+    "league": "CLI",
+    "home_team_id": 7119,
+    "away_team_id": 7118,
+    "home_crest": "https://crests.football-data.org/7119.png",
+    "away_crest": "https://crests.football-data.org/7118.png"
+  },
+  {
+    "match_id": 553223,
+    "utcDate": "2026-02-25T22:00:00Z",
+    "home": "EC Bahia",
+    "away": "O'Higgins FC",
+    "league": "CLI",
+    "home_team_id": 1777,
+    "away_team_id": 4459,
+    "home_crest": "https://crests.football-data.org/1777.png",
+    "away_crest": "https://crests.football-data.org/4459.png"
+  },
+  {
+    "match_id": 553220,
+    "utcDate": "2026-02-26T00:30:00Z",
+    "home": "AA Argentinos Juniors",
+    "away": "Barcelona SC",
+    "league": "CLI",
+    "home_team_id": 2058,
+    "away_team_id": 4520,
+    "home_crest": "https://crests.football-data.org/2058.png",
+    "away_crest": "https://crests.football-data.org/4520.png"
+  },
+  {
+    "match_id": 553221,
+    "utcDate": "2026-02-26T00:30:00Z",
+    "home": "Botafogo FR",
+    "away": "Club Nacional Potosí",
+    "league": "CLI",
+    "home_team_id": 1770,
+    "away_team_id": 4265,
+    "home_crest": "https://crests.football-data.org/1770.png",
+    "away_crest": "https://crests.football-data.org/4265.png"
+  },
+  {
+    "match_id": 553217,
+    "utcDate": "2026-02-26T22:00:00Z",
+    "home": "Club Guaraní",
+    "away": "Juventud de Las Piedras",
+    "league": "CLI",
+    "home_team_id": 7868,
+    "away_team_id": 11246,
+    "home_crest": "https://crests.football-data.org/7868.png",
+    "away_crest": "https://crests.football-data.org/11246.png"
+  },
+  {
+    "match_id": 553218,
+    "utcDate": "2026-02-27T00:30:00Z",
+    "home": "CD Tolima",
+    "away": "Deportivo Táchira FC",
+    "league": "CLI",
+    "home_team_id": 4437,
+    "away_team_id": 5171,
+    "home_crest": "https://crests.football-data.org/4437.png",
+    "away_crest": "https://crests.football-data.org/5171.png"
+  }
+]
