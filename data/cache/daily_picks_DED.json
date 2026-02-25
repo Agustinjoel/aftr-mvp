@@ -5,57 +5,50 @@
     "away": "NAC Breda",
     "home_crest": "https://crests.football-data.org/1912.png",
     "away_crest": "https://crests.football-data.org/681.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 1912,
+    "away_team_id": 681,
+    "xg_home": 0.53,
+    "xg_away": 1.04,
+    "xg_total": 1.56,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.1841,
+      "draw": 0.3403,
+      "away": 0.4757,
+      "1x": 0.5243,
+      "x2": 0.8159,
+      "12": 0.6597,
+      "under_25": 0.7929,
+      "over_25": 0.2071,
+      "over_15": 0.4629,
+      "btts_yes": 0.2638,
+      "btts_no": 0.7362
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.8159,
+        "fair": 1.23
       },
       {
         "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.7929,
+        "fair": 1.26
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.7362,
+        "fair": 1.36
+      },
+      {
+        "market": "12",
+        "prob": 0.6597,
+        "fair": 1.52
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "X2",
+    "best_prob": 0.8159,
+    "best_fair": 1.23,
     "result": "PENDING"
   },
   {
@@ -64,57 +57,55 @@
     "away": "Sparta Rotterdam",
     "home_crest": "https://crests.football-data.org/673.png",
     "away_crest": "https://crests.football-data.org/6806.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 673,
+    "away_team_id": 6806,
+    "xg_home": 1.79,
+    "xg_away": 1.32,
+    "xg_total": 3.11,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.4849,
+      "draw": 0.2312,
+      "away": 0.2839,
+      "1x": 0.7161,
+      "x2": 0.5151,
+      "12": 0.7688,
+      "under_25": 0.3985,
+      "over_25": 0.6015,
+      "over_15": 0.8169,
+      "btts_yes": 0.611,
+      "btts_no": 0.389
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "market": "Over 1.5",
+        "prob": 0.8169,
+        "fair": 1.22
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "market": "12",
+        "prob": 0.7688,
+        "fair": 1.3
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.7161,
+        "fair": 1.4
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.611,
+        "fair": 1.64
       },
       {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 2.5",
+        "prob": 0.6015,
+        "fair": 1.66
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "Over 1.5",
+    "best_prob": 0.8169,
+    "best_fair": 1.22,
     "result": "PENDING"
   },
   {
@@ -123,57 +114,50 @@
     "away": "PSV",
     "home_crest": "https://crests.football-data.org/671.png",
     "away_crest": "https://crests.football-data.org/674.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 671,
+    "away_team_id": 674,
+    "xg_home": 1.32,
+    "xg_away": 1.23,
+    "xg_total": 2.55,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.3879,
+      "draw": 0.2663,
+      "away": 0.3458,
+      "1x": 0.6542,
+      "x2": 0.6121,
+      "12": 0.7337,
+      "under_25": 0.5298,
+      "over_25": 0.4702,
+      "over_15": 0.7238,
+      "btts_yes": 0.5197,
+      "btts_no": 0.4803
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.7337,
+        "fair": 1.36
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.7238,
+        "fair": 1.38
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.6542,
+        "fair": 1.53
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.6121,
+        "fair": 1.63
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.7337,
+    "best_fair": 1.36,
     "result": "PENDING"
   },
   {
@@ -182,57 +166,55 @@
     "away": "Fortuna Sittard",
     "home_crest": "https://crests.football-data.org/1915.png",
     "away_crest": "https://crests.football-data.org/1920.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 1915,
+    "away_team_id": 1920,
+    "xg_home": 2.15,
+    "xg_away": 1.54,
+    "xg_total": 3.69,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.5164,
+      "draw": 0.2075,
+      "away": 0.2761,
+      "1x": 0.7239,
+      "x2": 0.4836,
+      "12": 0.7925,
+      "under_25": 0.288,
+      "over_25": 0.712,
+      "over_15": 0.882,
+      "btts_yes": 0.6935,
+      "btts_no": 0.3065
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "market": "Over 1.5",
+        "prob": 0.882,
+        "fair": 1.13
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "market": "12",
+        "prob": 0.7925,
+        "fair": 1.26
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.7239,
+        "fair": 1.38
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "market": "Over 2.5",
+        "prob": 0.712,
+        "fair": 1.4
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.6935,
+        "fair": 1.44
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "Over 1.5",
+    "best_prob": 0.882,
+    "best_fair": 1.13,
     "result": "PENDING"
   },
   {
@@ -241,57 +223,55 @@
     "away": "AFC Ajax",
     "home_crest": "https://crests.football-data.org/684.png",
     "away_crest": "https://crests.football-data.org/678.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 684,
+    "away_team_id": 678,
+    "xg_home": 1.9,
+    "xg_away": 1.41,
+    "xg_total": 3.31,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.4905,
+      "draw": 0.2231,
+      "away": 0.2864,
+      "1x": 0.7136,
+      "x2": 0.5095,
+      "12": 0.7769,
+      "under_25": 0.3577,
+      "over_25": 0.6423,
+      "over_15": 0.8423,
+      "btts_yes": 0.6427,
+      "btts_no": 0.3573
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "market": "Over 1.5",
+        "prob": 0.8423,
+        "fair": 1.19
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "market": "12",
+        "prob": 0.7769,
+        "fair": 1.29
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.7136,
+        "fair": 1.4
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.6427,
+        "fair": 1.56
       },
       {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 2.5",
+        "prob": 0.6423,
+        "fair": 1.56
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "Over 1.5",
+    "best_prob": 0.8423,
+    "best_fair": 1.19,
     "result": "PENDING"
   },
   {
@@ -300,57 +280,50 @@
     "away": "FC Groningen",
     "home_crest": "https://crests.football-data.org/1919.png",
     "away_crest": "https://crests.football-data.org/677.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 1919,
+    "away_team_id": 677,
+    "xg_home": 1.66,
+    "xg_away": 0.83,
+    "xg_total": 2.49,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.57,
+      "draw": 0.2433,
+      "away": 0.1867,
+      "1x": 0.8133,
+      "x2": 0.43,
+      "12": 0.7567,
+      "under_25": 0.5467,
+      "over_25": 0.4533,
+      "over_15": 0.7103,
+      "btts_yes": 0.4568,
+      "btts_no": 0.5432
     },
     "candidates": [
       {
+        "market": "1X",
+        "prob": 0.8133,
+        "fair": 1.23
+      },
+      {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.7567,
+        "fair": 1.32
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.7103,
+        "fair": 1.41
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "HOME WIN",
+        "prob": 0.57,
+        "fair": 1.75
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "1X",
+    "best_prob": 0.8133,
+    "best_fair": 1.23,
     "result": "PENDING"
   },
   {
@@ -359,57 +332,60 @@
     "away": "Feyenoord Rotterdam",
     "home_crest": "https://crests.football-data.org/666.png",
     "away_crest": "https://crests.football-data.org/675.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 666,
+    "away_team_id": 675,
+    "xg_home": 2.3,
+    "xg_away": 0.64,
+    "xg_total": 2.94,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.7493,
+      "draw": 0.1642,
+      "away": 0.0866,
+      "1x": 0.9134,
+      "x2": 0.2507,
+      "12": 0.8358,
+      "under_25": 0.436,
+      "over_25": 0.564,
+      "over_15": 0.7917,
+      "btts_yes": 0.4256,
+      "btts_no": 0.5744
     },
     "candidates": [
       {
+        "market": "1X",
+        "prob": 0.9134,
+        "fair": 1.09
+      },
+      {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.8358,
+        "fair": 1.2
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.7917,
+        "fair": 1.26
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "HOME WIN",
+        "prob": 0.7493,
+        "fair": 1.33
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "market": "BTTS No",
+        "prob": 0.5744,
+        "fair": 1.74
       },
       {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 2.5",
+        "prob": 0.564,
+        "fair": 1.77
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "1X",
+    "best_prob": 0.9134,
+    "best_fair": 1.09,
     "result": "PENDING"
   },
   {
@@ -418,57 +394,50 @@
     "away": "AZ",
     "home_crest": "https://crests.football-data.org/676.png",
     "away_crest": "https://crests.football-data.org/682.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 676,
+    "away_team_id": 682,
+    "xg_home": 0.63,
+    "xg_away": 1.2,
+    "xg_total": 1.83,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.1941,
+      "draw": 0.3066,
+      "away": 0.4993,
+      "1x": 0.5007,
+      "x2": 0.8059,
+      "12": 0.6934,
+      "under_25": 0.7228,
+      "over_25": 0.2772,
+      "over_15": 0.5458,
+      "btts_yes": 0.3262,
+      "btts_no": 0.6738
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.8059,
+        "fair": 1.24
       },
       {
         "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.7228,
+        "fair": 1.38
+      },
+      {
+        "market": "12",
+        "prob": 0.6934,
+        "fair": 1.44
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.6738,
+        "fair": 1.48
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "X2",
+    "best_prob": 0.8059,
+    "best_fair": 1.24,
     "result": "PENDING"
   },
   {
@@ -477,57 +446,50 @@
     "away": "Go Ahead Eagles",
     "home_crest": "https://crests.football-data.org/670.png",
     "away_crest": "https://crests.football-data.org/718.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 670,
+    "away_team_id": 718,
+    "xg_home": 1.32,
+    "xg_away": 1.25,
+    "xg_total": 2.57,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.383,
+      "draw": 0.2657,
+      "away": 0.3513,
+      "1x": 0.6487,
+      "x2": 0.617,
+      "12": 0.7343,
+      "under_25": 0.5268,
+      "over_25": 0.4732,
+      "over_15": 0.7261,
+      "btts_yes": 0.5223,
+      "btts_no": 0.4777
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.7343,
+        "fair": 1.36
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.7261,
+        "fair": 1.38
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.6487,
+        "fair": 1.54
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.617,
+        "fair": 1.62
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.7343,
+    "best_fair": 1.36,
     "result": "PENDING"
   },
   {
@@ -536,57 +498,50 @@
     "away": "FC Utrecht",
     "home_crest": "https://crests.football-data.org/671.png",
     "away_crest": "https://crests.football-data.org/676.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 671,
+    "away_team_id": 676,
+    "xg_home": 1.14,
+    "xg_away": 1.39,
+    "xg_total": 2.53,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.3084,
+      "draw": 0.2654,
+      "away": 0.4262,
+      "1x": 0.5738,
+      "x2": 0.6916,
+      "12": 0.7346,
+      "under_25": 0.5351,
+      "over_25": 0.4649,
+      "over_15": 0.7196,
+      "btts_yes": 0.5116,
+      "btts_no": 0.4884
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.7346,
+        "fair": 1.36
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.7196,
+        "fair": 1.39
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.6916,
+        "fair": 1.45
       },
       {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "1X",
+        "prob": 0.5738,
+        "fair": 1.74
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.7346,
+    "best_fair": 1.36,
     "result": "PENDING"
   },
   {
@@ -595,57 +550,60 @@
     "away": "AFC Ajax",
     "home_crest": "https://crests.football-data.org/677.png",
     "away_crest": "https://crests.football-data.org/678.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 677,
+    "away_team_id": 678,
+    "xg_home": 1.31,
+    "xg_away": 1.61,
+    "xg_total": 2.91,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.3114,
+      "draw": 0.244,
+      "away": 0.4446,
+      "1x": 0.5554,
+      "x2": 0.6886,
+      "12": 0.756,
+      "under_25": 0.4427,
+      "over_25": 0.5573,
+      "over_15": 0.7876,
+      "btts_yes": 0.5832,
+      "btts_no": 0.4168
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.7876,
+        "fair": 1.27
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "12",
+        "prob": 0.756,
+        "fair": 1.32
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.6886,
+        "fair": 1.45
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.5832,
+        "fair": 1.71
       },
       {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 2.5",
+        "prob": 0.5573,
+        "fair": 1.79
+      },
+      {
+        "market": "1X",
+        "prob": 0.5554,
+        "fair": 1.8
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "Over 1.5",
+    "best_prob": 0.7876,
+    "best_fair": 1.27,
     "result": "PENDING"
   },
   {
@@ -654,57 +612,50 @@
     "away": "AZ",
     "home_crest": "https://crests.football-data.org/674.png",
     "away_crest": "https://crests.football-data.org/682.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 674,
+    "away_team_id": 682,
+    "xg_home": 1.37,
+    "xg_away": 1.21,
+    "xg_total": 2.58,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.4033,
+      "draw": 0.2642,
+      "away": 0.3324,
+      "1x": 0.6676,
+      "x2": 0.5967,
+      "12": 0.7358,
+      "under_25": 0.5235,
+      "over_25": 0.4765,
+      "over_15": 0.7287,
+      "btts_yes": 0.5236,
+      "btts_no": 0.4764
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.7358,
+        "fair": 1.36
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
+        "prob": 0.7287,
         "fair": 1.37
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.6676,
+        "fair": 1.5
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.5967,
+        "fair": 1.68
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.7358,
+    "best_fair": 1.36,
     "result": "PENDING"
   },
   {
@@ -713,9 +664,12 @@
     "away": "SC Heerenveen",
     "home_crest": "https://crests.football-data.org/670.png",
     "away_crest": "https://crests.football-data.org/673.png",
+    "home_team_id": 670,
+    "away_team_id": 673,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -749,16 +703,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -772,9 +716,12 @@
     "away": "PEC Zwolle",
     "home_crest": "https://crests.football-data.org/6806.png",
     "away_crest": "https://crests.football-data.org/684.png",
+    "home_team_id": 6806,
+    "away_team_id": 684,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -808,16 +755,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -831,9 +768,12 @@
     "away": "Telstar 1963",
     "home_crest": "https://crests.football-data.org/1920.png",
     "away_crest": "https://crests.football-data.org/1912.png",
+    "home_team_id": 1920,
+    "away_team_id": 1912,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -867,16 +807,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -890,9 +820,12 @@
     "away": "FC Twente '65",
     "home_crest": "https://crests.football-data.org/718.png",
     "away_crest": "https://crests.football-data.org/666.png",
+    "home_team_id": 718,
+    "away_team_id": 666,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -926,16 +859,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -949,9 +872,12 @@
     "away": "Feyenoord Rotterdam",
     "home_crest": "https://crests.football-data.org/681.png",
     "away_crest": "https://crests.football-data.org/675.png",
+    "home_team_id": 681,
+    "away_team_id": 675,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -985,16 +911,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1008,9 +924,12 @@
     "away": "FC Volendam",
     "home_crest": "https://crests.football-data.org/1915.png",
     "away_crest": "https://crests.football-data.org/1919.png",
+    "home_team_id": 1915,
+    "away_team_id": 1919,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1044,16 +963,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1067,9 +976,12 @@
     "away": "FC Groningen",
     "home_crest": "https://crests.football-data.org/684.png",
     "away_crest": "https://crests.football-data.org/677.png",
+    "home_team_id": 684,
+    "away_team_id": 677,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1103,16 +1015,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1126,9 +1028,12 @@
     "away": "Fortuna Sittard",
     "home_crest": "https://crests.football-data.org/1919.png",
     "away_crest": "https://crests.football-data.org/1920.png",
+    "home_team_id": 1919,
+    "away_team_id": 1920,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1162,16 +1067,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1185,9 +1080,12 @@
     "away": "NEC",
     "home_crest": "https://crests.football-data.org/674.png",
     "away_crest": "https://crests.football-data.org/1915.png",
+    "home_team_id": 674,
+    "away_team_id": 1915,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1221,16 +1119,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1244,9 +1132,12 @@
     "away": "Telstar 1963",
     "home_crest": "https://crests.football-data.org/673.png",
     "away_crest": "https://crests.football-data.org/1912.png",
+    "home_team_id": 673,
+    "away_team_id": 1912,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1280,16 +1171,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1303,9 +1184,12 @@
     "away": "Sparta Rotterdam",
     "home_crest": "https://crests.football-data.org/678.png",
     "away_crest": "https://crests.football-data.org/6806.png",
+    "home_team_id": 678,
+    "away_team_id": 6806,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1339,16 +1223,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1362,9 +1236,12 @@
     "away": "FC Utrecht",
     "home_crest": "https://crests.football-data.org/666.png",
     "away_crest": "https://crests.football-data.org/676.png",
+    "home_team_id": 666,
+    "away_team_id": 676,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1398,16 +1275,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1421,9 +1288,12 @@
     "away": "Heracles Almelo",
     "home_crest": "https://crests.football-data.org/682.png",
     "away_crest": "https://crests.football-data.org/671.png",
+    "home_team_id": 682,
+    "away_team_id": 671,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1457,16 +1327,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1480,9 +1340,12 @@
     "away": "SBV Excelsior",
     "home_crest": "https://crests.football-data.org/675.png",
     "away_crest": "https://crests.football-data.org/670.png",
+    "home_team_id": 675,
+    "away_team_id": 670,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1516,16 +1379,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1539,9 +1392,12 @@
     "away": "NAC Breda",
     "home_crest": "https://crests.football-data.org/718.png",
     "away_crest": "https://crests.football-data.org/681.png",
+    "home_team_id": 718,
+    "away_team_id": 681,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1575,16 +1431,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1598,9 +1444,12 @@
     "away": "SBV Excelsior",
     "home_crest": "https://crests.football-data.org/671.png",
     "away_crest": "https://crests.football-data.org/670.png",
+    "home_team_id": 671,
+    "away_team_id": 670,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1634,16 +1483,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1657,9 +1496,12 @@
     "away": "FC Twente '65",
     "home_crest": "https://crests.football-data.org/1920.png",
     "away_crest": "https://crests.football-data.org/666.png",
+    "home_team_id": 1920,
+    "away_team_id": 666,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1693,16 +1535,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1716,9 +1548,12 @@
     "away": "FC Volendam",
     "home_crest": "https://crests.football-data.org/6806.png",
     "away_crest": "https://crests.football-data.org/1919.png",
+    "home_team_id": 6806,
+    "away_team_id": 1919,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1752,16 +1587,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1775,9 +1600,12 @@
     "away": "NAC Breda",
     "home_crest": "https://crests.football-data.org/684.png",
     "away_crest": "https://crests.football-data.org/681.png",
+    "home_team_id": 684,
+    "away_team_id": 681,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1811,16 +1639,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1834,9 +1652,12 @@
     "away": "SC Heerenveen",
     "home_crest": "https://crests.football-data.org/1915.png",
     "away_crest": "https://crests.football-data.org/673.png",
+    "home_team_id": 1915,
+    "away_team_id": 673,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1870,16 +1691,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1893,9 +1704,12 @@
     "away": "Go Ahead Eagles",
     "home_crest": "https://crests.football-data.org/676.png",
     "away_crest": "https://crests.football-data.org/718.png",
+    "home_team_id": 676,
+    "away_team_id": 718,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1929,16 +1743,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1952,9 +1756,12 @@
     "away": "AFC Ajax",
     "home_crest": "https://crests.football-data.org/675.png",
     "away_crest": "https://crests.football-data.org/678.png",
+    "home_team_id": 675,
+    "away_team_id": 678,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1988,16 +1795,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2011,9 +1808,12 @@
     "away": "AZ",
     "home_crest": "https://crests.football-data.org/677.png",
     "away_crest": "https://crests.football-data.org/682.png",
+    "home_team_id": 677,
+    "away_team_id": 682,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2047,16 +1847,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2070,9 +1860,12 @@
     "away": "PSV",
     "home_crest": "https://crests.football-data.org/1912.png",
     "away_crest": "https://crests.football-data.org/674.png",
+    "home_team_id": 1912,
+    "away_team_id": 674,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2106,16 +1899,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2129,9 +1912,12 @@
     "away": "FC Utrecht",
     "home_crest": "https://crests.football-data.org/674.png",
     "away_crest": "https://crests.football-data.org/676.png",
+    "home_team_id": 674,
+    "away_team_id": 676,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2165,16 +1951,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2188,9 +1964,12 @@
     "away": "Fortuna Sittard",
     "home_crest": "https://crests.football-data.org/682.png",
     "away_crest": "https://crests.football-data.org/1920.png",
+    "home_team_id": 682,
+    "away_team_id": 1920,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2224,16 +2003,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2247,9 +2016,12 @@
     "away": "FC Groningen",
     "home_crest": "https://crests.football-data.org/1912.png",
     "away_crest": "https://crests.football-data.org/677.png",
+    "home_team_id": 1912,
+    "away_team_id": 677,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2283,16 +2055,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2306,9 +2068,12 @@
     "away": "FC Twente '65",
     "home_crest": "https://crests.football-data.org/678.png",
     "away_crest": "https://crests.football-data.org/666.png",
+    "home_team_id": 678,
+    "away_team_id": 666,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2342,16 +2107,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2365,9 +2120,12 @@
     "away": "NEC",
     "home_crest": "https://crests.football-data.org/670.png",
     "away_crest": "https://crests.football-data.org/1915.png",
+    "home_team_id": 670,
+    "away_team_id": 1915,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2401,16 +2159,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2424,9 +2172,12 @@
     "away": "PEC Zwolle",
     "home_crest": "https://crests.football-data.org/718.png",
     "away_crest": "https://crests.football-data.org/684.png",
+    "home_team_id": 718,
+    "away_team_id": 684,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2460,16 +2211,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2483,9 +2224,12 @@
     "away": "Feyenoord Rotterdam",
     "home_crest": "https://crests.football-data.org/1919.png",
     "away_crest": "https://crests.football-data.org/675.png",
+    "home_team_id": 1919,
+    "away_team_id": 675,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2519,16 +2263,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2542,9 +2276,12 @@
     "away": "Heracles Almelo",
     "home_crest": "https://crests.football-data.org/673.png",
     "away_crest": "https://crests.football-data.org/671.png",
+    "home_team_id": 673,
+    "away_team_id": 671,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2578,16 +2315,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2601,9 +2328,12 @@
     "away": "Sparta Rotterdam",
     "home_crest": "https://crests.football-data.org/681.png",
     "away_crest": "https://crests.football-data.org/6806.png",
+    "home_team_id": 681,
+    "away_team_id": 6806,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2637,16 +2367,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2660,9 +2380,12 @@
     "away": "FC Volendam",
     "home_crest": "https://crests.football-data.org/666.png",
     "away_crest": "https://crests.football-data.org/1919.png",
+    "home_team_id": 666,
+    "away_team_id": 1919,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2696,16 +2419,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2719,9 +2432,12 @@
     "away": "Telstar 1963",
     "home_crest": "https://crests.football-data.org/676.png",
     "away_crest": "https://crests.football-data.org/1912.png",
+    "home_team_id": 676,
+    "away_team_id": 1912,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2755,16 +2471,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2778,9 +2484,12 @@
     "away": "PSV",
     "home_crest": "https://crests.football-data.org/6806.png",
     "away_crest": "https://crests.football-data.org/674.png",
+    "home_team_id": 6806,
+    "away_team_id": 674,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2814,16 +2523,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2837,9 +2536,12 @@
     "away": "Go Ahead Eagles",
     "home_crest": "https://crests.football-data.org/677.png",
     "away_crest": "https://crests.football-data.org/718.png",
+    "home_team_id": 677,
+    "away_team_id": 718,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2873,16 +2575,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2896,9 +2588,12 @@
     "away": "AFC Ajax",
     "home_crest": "https://crests.football-data.org/671.png",
     "away_crest": "https://crests.football-data.org/678.png",
+    "home_team_id": 671,
+    "away_team_id": 678,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2932,16 +2627,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2955,9 +2640,12 @@
     "away": "NAC Breda",
     "home_crest": "https://crests.football-data.org/1920.png",
     "away_crest": "https://crests.football-data.org/681.png",
+    "home_team_id": 1920,
+    "away_team_id": 681,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2991,16 +2679,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3014,9 +2692,12 @@
     "away": "Feyenoord Rotterdam",
     "home_crest": "https://crests.football-data.org/1915.png",
     "away_crest": "https://crests.football-data.org/675.png",
+    "home_team_id": 1915,
+    "away_team_id": 675,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3050,16 +2731,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3073,9 +2744,12 @@
     "away": "SBV Excelsior",
     "home_crest": "https://crests.football-data.org/684.png",
     "away_crest": "https://crests.football-data.org/670.png",
+    "home_team_id": 684,
+    "away_team_id": 670,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3109,16 +2783,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3132,9 +2796,12 @@
     "away": "SC Heerenveen",
     "home_crest": "https://crests.football-data.org/682.png",
     "away_crest": "https://crests.football-data.org/673.png",
+    "home_team_id": 682,
+    "away_team_id": 673,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3168,16 +2835,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3191,9 +2848,12 @@
     "away": "Sparta Rotterdam",
     "home_crest": "https://crests.football-data.org/1912.png",
     "away_crest": "https://crests.football-data.org/6806.png",
+    "home_team_id": 1912,
+    "away_team_id": 6806,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3227,16 +2887,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3250,9 +2900,12 @@
     "away": "FC Utrecht",
     "home_crest": "https://crests.football-data.org/670.png",
     "away_crest": "https://crests.football-data.org/676.png",
+    "home_team_id": 670,
+    "away_team_id": 676,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3286,16 +2939,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3309,9 +2952,12 @@
     "away": "FC Groningen",
     "home_crest": "https://crests.football-data.org/675.png",
     "away_crest": "https://crests.football-data.org/677.png",
+    "home_team_id": 675,
+    "away_team_id": 677,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3345,16 +2991,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3368,9 +3004,12 @@
     "away": "FC Volendam",
     "home_crest": "https://crests.football-data.org/671.png",
     "away_crest": "https://crests.football-data.org/1919.png",
+    "home_team_id": 671,
+    "away_team_id": 1919,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3404,16 +3043,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3427,9 +3056,12 @@
     "away": "AFC Ajax",
     "home_crest": "https://crests.football-data.org/681.png",
     "away_crest": "https://crests.football-data.org/678.png",
+    "home_team_id": 681,
+    "away_team_id": 678,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3463,16 +3095,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3486,9 +3108,12 @@
     "away": "Fortuna Sittard",
     "home_crest": "https://crests.football-data.org/673.png",
     "away_crest": "https://crests.football-data.org/1920.png",
+    "home_team_id": 673,
+    "away_team_id": 1920,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3522,16 +3147,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",

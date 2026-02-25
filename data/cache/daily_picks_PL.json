@@ -1,721 +1,726 @@
 [
   {
+    "match_id": 538064,
     "utcDate": "2026-02-27T20:00:00Z",
     "home": "Wolverhampton Wanderers FC",
     "away": "Aston Villa FC",
     "home_crest": "https://crests.football-data.org/76.png",
     "away_crest": "https://crests.football-data.org/58.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 76,
+    "away_team_id": 58,
+    "xg_home": 0.88,
+    "xg_away": 1.74,
+    "xg_total": 2.62,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.1863,
+      "draw": 0.2345,
+      "away": 0.5792,
+      "1x": 0.4208,
+      "x2": 0.8137,
+      "12": 0.7655,
+      "under_25": 0.5138,
+      "over_25": 0.4862,
+      "over_15": 0.7361,
+      "btts_yes": 0.4812,
+      "btts_no": 0.5188
     },
     "candidates": [
       {
+        "market": "X2",
+        "prob": 0.8137,
+        "fair": 1.23
+      },
+      {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.7655,
+        "fair": 1.31
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.7361,
+        "fair": 1.36
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "AWAY WIN",
+        "prob": 0.5792,
+        "fair": 1.73
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "X2",
+    "best_prob": 0.8137,
+    "best_fair": 1.23,
+    "second_market": "12",
+    "second_prob": 0.7655,
+    "edge": 0.0482,
+    "confidence": 10,
     "result": "PENDING"
   },
   {
+    "match_id": 538055,
     "utcDate": "2026-02-28T12:30:00Z",
     "home": "AFC Bournemouth",
     "away": "Sunderland AFC",
     "home_crest": "https://crests.football-data.org/1044.png",
     "away_crest": "https://crests.football-data.org/71.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 1044,
+    "away_team_id": 71,
+    "xg_home": 1.86,
+    "xg_away": 0.66,
+    "xg_total": 2.52,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.6607,
+      "draw": 0.2139,
+      "away": 0.1254,
+      "1x": 0.8746,
+      "x2": 0.3393,
+      "12": 0.7861,
+      "under_25": 0.5375,
+      "over_25": 0.4625,
+      "over_15": 0.7177,
+      "btts_yes": 0.4092,
+      "btts_no": 0.5908
     },
     "candidates": [
       {
+        "market": "1X",
+        "prob": 0.8746,
+        "fair": 1.14
+      },
+      {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.7861,
+        "fair": 1.27
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.7177,
+        "fair": 1.39
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "HOME WIN",
+        "prob": 0.6607,
+        "fair": 1.51
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "BTTS No",
+        "prob": 0.5908,
+        "fair": 1.69
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "1X",
+    "best_prob": 0.8746,
+    "best_fair": 1.14,
+    "second_market": "12",
+    "second_prob": 0.7861,
+    "edge": 0.0885,
+    "confidence": 10,
     "result": "PENDING"
   },
   {
+    "match_id": 538058,
     "utcDate": "2026-02-28T15:00:00Z",
     "home": "Burnley FC",
     "away": "Brentford FC",
     "home_crest": "https://crests.football-data.org/328.png",
     "away_crest": "https://crests.football-data.org/402.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 328,
+    "away_team_id": 402,
+    "xg_home": 0.72,
+    "xg_away": 1.77,
+    "xg_total": 2.5,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.1477,
+      "draw": 0.2272,
+      "away": 0.6251,
+      "1x": 0.3749,
+      "x2": 0.8523,
+      "12": 0.7728,
+      "under_25": 0.5449,
+      "over_25": 0.4551,
+      "over_15": 0.7118,
+      "btts_yes": 0.4273,
+      "btts_no": 0.5727
     },
     "candidates": [
       {
+        "market": "X2",
+        "prob": 0.8523,
+        "fair": 1.17
+      },
+      {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.7728,
+        "fair": 1.29
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.7118,
+        "fair": 1.4
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "AWAY WIN",
+        "prob": 0.6251,
+        "fair": 1.6
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "BTTS No",
+        "prob": 0.5727,
+        "fair": 1.75
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "X2",
+    "best_prob": 0.8523,
+    "best_fair": 1.17,
+    "second_market": "12",
+    "second_prob": 0.7728,
+    "edge": 0.0795,
+    "confidence": 10,
     "result": "PENDING"
   },
   {
+    "match_id": 538060,
     "utcDate": "2026-02-28T15:00:00Z",
     "home": "Liverpool FC",
     "away": "West Ham United FC",
     "home_crest": "https://crests.football-data.org/64.png",
     "away_crest": "https://crests.football-data.org/563.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 64,
+    "away_team_id": 563,
+    "xg_home": 2.39,
+    "xg_away": 1.39,
+    "xg_total": 3.78,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.5953,
+      "draw": 0.1908,
+      "away": 0.2139,
+      "1x": 0.7861,
+      "x2": 0.4047,
+      "12": 0.8092,
+      "under_25": 0.2731,
+      "over_25": 0.7269,
+      "over_15": 0.8897,
+      "btts_yes": 0.6817,
+      "btts_no": 0.3183
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "market": "Over 1.5",
+        "prob": 0.8897,
+        "fair": 1.12
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "market": "12",
+        "prob": 0.8092,
+        "fair": 1.24
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.7861,
+        "fair": 1.27
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "market": "Over 2.5",
+        "prob": 0.7269,
+        "fair": 1.38
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.6817,
+        "fair": 1.47
       },
       {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "HOME WIN",
+        "prob": 0.5953,
+        "fair": 1.68
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "Over 1.5",
+    "best_prob": 0.8897,
+    "best_fair": 1.12,
+    "second_market": "12",
+    "second_prob": 0.8092,
+    "edge": 0.0805,
+    "confidence": 10,
     "result": "PENDING"
   },
   {
+    "match_id": 538063,
     "utcDate": "2026-02-28T15:00:00Z",
     "home": "Newcastle United FC",
     "away": "Everton FC",
     "home_crest": "https://crests.football-data.org/67.png",
     "away_crest": "https://crests.football-data.org/62.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 67,
+    "away_team_id": 62,
+    "xg_home": 1.06,
+    "xg_away": 1.76,
+    "xg_total": 2.82,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.2288,
+      "draw": 0.2352,
+      "away": 0.536,
+      "1x": 0.464,
+      "x2": 0.7712,
+      "12": 0.7648,
+      "under_25": 0.4651,
+      "over_25": 0.5349,
+      "over_15": 0.772,
+      "btts_yes": 0.5414,
+      "btts_no": 0.4586
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.772,
+        "fair": 1.3
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.7712,
+        "fair": 1.3
       },
       {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "12",
+        "prob": 0.7648,
+        "fair": 1.31
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "Over 1.5",
+    "best_prob": 0.772,
+    "best_fair": 1.3,
+    "second_market": "X2",
+    "second_prob": 0.7712,
+    "edge": 0.0008,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538061,
     "utcDate": "2026-02-28T17:30:00Z",
     "home": "Leeds United FC",
     "away": "Manchester City FC",
     "home_crest": "https://crests.football-data.org/341.png",
     "away_crest": "https://crests.football-data.org/65.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 341,
+    "away_team_id": 65,
+    "xg_home": 1.47,
+    "xg_away": 2.0,
+    "xg_total": 3.47,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.285,
+      "draw": 0.2166,
+      "away": 0.4984,
+      "1x": 0.5016,
+      "x2": 0.715,
+      "12": 0.7834,
+      "under_25": 0.3266,
+      "over_25": 0.6734,
+      "over_15": 0.8606,
+      "btts_yes": 0.6661,
+      "btts_no": 0.3339
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.8606,
+        "fair": 1.16
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "12",
+        "prob": 0.7834,
+        "fair": 1.28
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.715,
+        "fair": 1.4
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.6734,
+        "fair": 1.49
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.6661,
+        "fair": 1.5
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "Over 1.5",
+    "best_prob": 0.8606,
+    "best_fair": 1.16,
+    "second_market": "12",
+    "second_prob": 0.7834,
+    "edge": 0.0772,
+    "confidence": 10,
     "result": "PENDING"
   },
   {
+    "match_id": 538056,
     "utcDate": "2026-03-01T14:00:00Z",
     "home": "Brighton & Hove Albion FC",
     "away": "Nottingham Forest FC",
     "home_crest": "https://crests.football-data.org/397.png",
     "away_crest": "https://crests.football-data.org/351.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 397,
+    "away_team_id": 351,
+    "xg_home": 1.07,
+    "xg_away": 1.24,
+    "xg_total": 2.31,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.3173,
+      "draw": 0.2814,
+      "away": 0.4013,
+      "1x": 0.5987,
+      "x2": 0.6827,
+      "12": 0.7186,
+      "under_25": 0.5925,
+      "over_25": 0.4075,
+      "over_15": 0.6722,
+      "btts_yes": 0.4676,
+      "btts_no": 0.5324
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.7186,
+        "fair": 1.39
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.6827,
+        "fair": 1.46
       },
       {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "market": "Over 1.5",
+        "prob": 0.6722,
+        "fair": 1.49
+      },
+      {
+        "market": "1X",
+        "prob": 0.5987,
+        "fair": 1.67
       },
       {
         "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.5925,
+        "fair": 1.69
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.7186,
+    "best_fair": 1.39,
+    "second_market": "X2",
+    "second_prob": 0.6827,
+    "edge": 0.0359,
+    "confidence": 9,
     "result": "PENDING"
   },
   {
+    "match_id": 538059,
     "utcDate": "2026-03-01T14:00:00Z",
     "home": "Fulham FC",
     "away": "Tottenham Hotspur FC",
     "home_crest": "https://crests.football-data.org/63.png",
     "away_crest": "https://crests.football-data.org/73.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 63,
+    "away_team_id": 73,
+    "xg_home": 1.08,
+    "xg_away": 1.45,
+    "xg_total": 2.53,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.2817,
+      "draw": 0.263,
+      "away": 0.4554,
+      "1x": 0.5446,
+      "x2": 0.7183,
+      "12": 0.737,
+      "under_25": 0.5374,
+      "over_25": 0.4626,
+      "over_15": 0.7178,
+      "btts_yes": 0.5045,
+      "btts_no": 0.4955
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.737,
+        "fair": 1.36
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.7183,
+        "fair": 1.39
       },
       {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 1.5",
+        "prob": 0.7178,
+        "fair": 1.39
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.737,
+    "best_fair": 1.39,
+    "second_market": "X2",
+    "second_prob": 0.7183,
+    "edge": 0.0187,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538062,
     "utcDate": "2026-03-01T14:00:00Z",
     "home": "Manchester United FC",
     "away": "Crystal Palace FC",
     "home_crest": "https://crests.football-data.org/66.png",
     "away_crest": "https://crests.football-data.org/354.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 66,
+    "away_team_id": 354,
+    "xg_home": 1.5,
+    "xg_away": 1.05,
+    "xg_total": 2.55,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.476,
+      "draw": 0.2586,
+      "away": 0.2654,
+      "1x": 0.7346,
+      "x2": 0.524,
+      "12": 0.7414,
+      "under_25": 0.5301,
+      "over_25": 0.4699,
+      "over_15": 0.7235,
+      "btts_yes": 0.5058,
+      "btts_no": 0.4942
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
+        "prob": 0.7414,
         "fair": 1.35
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.7346,
+        "fair": 1.36
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 1.5",
+        "prob": 0.7235,
+        "fair": 1.38
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.7414,
+    "best_fair": 1.36,
+    "second_market": "1X",
+    "second_prob": 0.7346,
+    "edge": 0.0068,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538057,
     "utcDate": "2026-03-01T16:30:00Z",
     "home": "Arsenal FC",
     "away": "Chelsea FC",
     "home_crest": "https://crests.football-data.org/57.png",
     "away_crest": "https://crests.football-data.org/61.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 57,
+    "away_team_id": 61,
+    "xg_home": 1.85,
+    "xg_away": 2.09,
+    "xg_total": 3.94,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.3499,
+      "draw": 0.2076,
+      "away": 0.4425,
+      "1x": 0.5575,
+      "x2": 0.6501,
+      "12": 0.7924,
+      "under_25": 0.2478,
+      "over_25": 0.7522,
+      "over_15": 0.9032,
+      "btts_yes": 0.738,
+      "btts_no": 0.262
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.9032,
+        "fair": 1.11
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "12",
+        "prob": 0.7924,
+        "fair": 1.26
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "market": "Over 2.5",
+        "prob": 0.7522,
+        "fair": 1.33
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.738,
+        "fair": 1.36
       },
       {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "X2",
+        "prob": 0.6501,
+        "fair": 1.54
+      },
+      {
+        "market": "1X",
+        "prob": 0.5575,
+        "fair": 1.79
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "Over 1.5",
+    "best_prob": 0.9032,
+    "best_fair": 1.11,
+    "second_market": "12",
+    "second_prob": 0.7924,
+    "edge": 0.1108,
+    "confidence": 10,
     "result": "PENDING"
   },
   {
+    "match_id": 538065,
     "utcDate": "2026-03-03T19:30:00Z",
     "home": "AFC Bournemouth",
     "away": "Brentford FC",
     "home_crest": "https://crests.football-data.org/1044.png",
     "away_crest": "https://crests.football-data.org/402.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 1044,
+    "away_team_id": 402,
+    "xg_home": 1.1,
+    "xg_away": 1.4,
+    "xg_total": 2.5,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.2954,
+      "draw": 0.2666,
+      "away": 0.438,
+      "1x": 0.562,
+      "x2": 0.7046,
+      "12": 0.7334,
+      "under_25": 0.5448,
+      "over_25": 0.4552,
+      "over_15": 0.7119,
+      "btts_yes": 0.5018,
+      "btts_no": 0.4982
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.7334,
+        "fair": 1.36
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.7119,
+        "fair": 1.4
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.7046,
+        "fair": 1.42
       },
       {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "1X",
+        "prob": 0.562,
+        "fair": 1.78
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.7334,
+    "best_fair": 1.42,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7119,
+    "edge": 0.0215,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538068,
     "utcDate": "2026-03-03T19:30:00Z",
     "home": "Everton FC",
     "away": "Burnley FC",
     "home_crest": "https://crests.football-data.org/62.png",
     "away_crest": "https://crests.football-data.org/328.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 62,
+    "away_team_id": 328,
+    "xg_home": 1.41,
+    "xg_away": 1.25,
+    "xg_total": 2.66,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.4079,
+      "draw": 0.2594,
+      "away": 0.3326,
+      "1x": 0.6674,
+      "x2": 0.5921,
+      "12": 0.7406,
+      "under_25": 0.5035,
+      "over_25": 0.4965,
+      "over_15": 0.7439,
+      "btts_yes": 0.5392,
+      "btts_no": 0.4608
     },
     "candidates": [
       {
+        "market": "Over 1.5",
+        "prob": 0.7439,
+        "fair": 1.34
+      },
+      {
         "market": "12",
-        "prob": 0.7396,
+        "prob": 0.7406,
         "fair": 1.35
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.6674,
+        "fair": 1.5
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.5921,
+        "fair": 1.69
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
+    "best_market": "Over 1.5",
+    "best_prob": 0.7439,
     "best_fair": 1.35,
+    "second_market": "12",
+    "second_prob": 0.7406,
+    "edge": 0.0033,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538070,
     "utcDate": "2026-03-03T19:30:00Z",
     "home": "Leeds United FC",
     "away": "Sunderland AFC",
     "home_crest": "https://crests.football-data.org/341.png",
     "away_crest": "https://crests.football-data.org/71.png",
+    "home_team_id": 341,
+    "away_team_id": 71,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -749,32 +754,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538074,
     "utcDate": "2026-03-03T20:15:00Z",
     "home": "Wolverhampton Wanderers FC",
     "away": "Liverpool FC",
     "home_crest": "https://crests.football-data.org/76.png",
     "away_crest": "https://crests.football-data.org/64.png",
+    "home_team_id": 76,
+    "away_team_id": 64,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -808,32 +811,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538066,
     "utcDate": "2026-03-04T19:30:00Z",
     "home": "Aston Villa FC",
     "away": "Chelsea FC",
     "home_crest": "https://crests.football-data.org/58.png",
     "away_crest": "https://crests.football-data.org/61.png",
+    "home_team_id": 58,
+    "away_team_id": 61,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -867,32 +868,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538067,
     "utcDate": "2026-03-04T19:30:00Z",
     "home": "Brighton & Hove Albion FC",
     "away": "Arsenal FC",
     "home_crest": "https://crests.football-data.org/397.png",
     "away_crest": "https://crests.football-data.org/57.png",
+    "home_team_id": 397,
+    "away_team_id": 57,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -926,32 +925,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538069,
     "utcDate": "2026-03-04T19:30:00Z",
     "home": "Fulham FC",
     "away": "West Ham United FC",
     "home_crest": "https://crests.football-data.org/63.png",
     "away_crest": "https://crests.football-data.org/563.png",
+    "home_team_id": 63,
+    "away_team_id": 563,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -985,32 +982,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538071,
     "utcDate": "2026-03-04T19:30:00Z",
     "home": "Manchester City FC",
     "away": "Nottingham Forest FC",
     "home_crest": "https://crests.football-data.org/65.png",
     "away_crest": "https://crests.football-data.org/351.png",
+    "home_team_id": 65,
+    "away_team_id": 351,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1044,32 +1039,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538072,
     "utcDate": "2026-03-04T20:15:00Z",
     "home": "Newcastle United FC",
     "away": "Manchester United FC",
     "home_crest": "https://crests.football-data.org/67.png",
     "away_crest": "https://crests.football-data.org/66.png",
+    "home_team_id": 67,
+    "away_team_id": 66,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1103,32 +1096,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538073,
     "utcDate": "2026-03-05T20:00:00Z",
     "home": "Tottenham Hotspur FC",
     "away": "Crystal Palace FC",
     "home_crest": "https://crests.football-data.org/73.png",
     "away_crest": "https://crests.football-data.org/354.png",
+    "home_team_id": 73,
+    "away_team_id": 354,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1162,32 +1153,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538084,
     "utcDate": "2026-03-14T12:30:00Z",
     "home": "West Ham United FC",
     "away": "Manchester City FC",
     "home_crest": "https://crests.football-data.org/563.png",
     "away_crest": "https://crests.football-data.org/65.png",
+    "home_team_id": 563,
+    "away_team_id": 65,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1221,32 +1210,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538075,
     "utcDate": "2026-03-14T15:00:00Z",
     "home": "Sunderland AFC",
     "away": "Brighton & Hove Albion FC",
     "home_crest": "https://crests.football-data.org/71.png",
     "away_crest": "https://crests.football-data.org/397.png",
+    "home_team_id": 71,
+    "away_team_id": 397,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1280,32 +1267,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538076,
     "utcDate": "2026-03-14T15:00:00Z",
     "home": "Crystal Palace FC",
     "away": "Leeds United FC",
     "home_crest": "https://crests.football-data.org/354.png",
     "away_crest": "https://crests.football-data.org/341.png",
+    "home_team_id": 354,
+    "away_team_id": 341,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1339,32 +1324,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538079,
     "utcDate": "2026-03-14T15:00:00Z",
     "home": "Burnley FC",
     "away": "AFC Bournemouth",
     "home_crest": "https://crests.football-data.org/328.png",
     "away_crest": "https://crests.football-data.org/1044.png",
+    "home_team_id": 328,
+    "away_team_id": 1044,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1398,32 +1381,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538080,
     "utcDate": "2026-03-14T17:30:00Z",
     "home": "Chelsea FC",
     "away": "Newcastle United FC",
     "home_crest": "https://crests.football-data.org/61.png",
     "away_crest": "https://crests.football-data.org/67.png",
+    "home_team_id": 61,
+    "away_team_id": 67,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1457,32 +1438,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538077,
     "utcDate": "2026-03-15T14:00:00Z",
     "home": "Arsenal FC",
     "away": "Everton FC",
     "home_crest": "https://crests.football-data.org/57.png",
     "away_crest": "https://crests.football-data.org/62.png",
+    "home_team_id": 57,
+    "away_team_id": 62,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1516,32 +1495,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538082,
     "utcDate": "2026-03-15T14:00:00Z",
     "home": "Manchester United FC",
     "away": "Aston Villa FC",
     "home_crest": "https://crests.football-data.org/66.png",
     "away_crest": "https://crests.football-data.org/58.png",
+    "home_team_id": 66,
+    "away_team_id": 58,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1575,32 +1552,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538083,
     "utcDate": "2026-03-15T14:00:00Z",
     "home": "Nottingham Forest FC",
     "away": "Fulham FC",
     "home_crest": "https://crests.football-data.org/351.png",
     "away_crest": "https://crests.football-data.org/63.png",
+    "home_team_id": 351,
+    "away_team_id": 63,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1634,32 +1609,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538081,
     "utcDate": "2026-03-15T16:30:00Z",
     "home": "Liverpool FC",
     "away": "Tottenham Hotspur FC",
     "home_crest": "https://crests.football-data.org/64.png",
     "away_crest": "https://crests.football-data.org/73.png",
+    "home_team_id": 64,
+    "away_team_id": 73,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1693,32 +1666,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538078,
     "utcDate": "2026-03-16T20:00:00Z",
     "home": "Brentford FC",
     "away": "Wolverhampton Wanderers FC",
     "home_crest": "https://crests.football-data.org/402.png",
     "away_crest": "https://crests.football-data.org/76.png",
+    "home_team_id": 402,
+    "away_team_id": 76,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1752,32 +1723,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538085,
     "utcDate": "2026-03-20T20:00:00Z",
     "home": "AFC Bournemouth",
     "away": "Manchester United FC",
     "home_crest": "https://crests.football-data.org/1044.png",
     "away_crest": "https://crests.football-data.org/66.png",
+    "home_team_id": 1044,
+    "away_team_id": 66,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1811,32 +1780,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538087,
     "utcDate": "2026-03-21T12:30:00Z",
     "home": "Brighton & Hove Albion FC",
     "away": "Liverpool FC",
     "home_crest": "https://crests.football-data.org/397.png",
     "away_crest": "https://crests.football-data.org/64.png",
+    "home_team_id": 397,
+    "away_team_id": 64,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1870,32 +1837,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538089,
     "utcDate": "2026-03-21T15:00:00Z",
     "home": "Fulham FC",
     "away": "Burnley FC",
     "home_crest": "https://crests.football-data.org/63.png",
     "away_crest": "https://crests.football-data.org/328.png",
+    "home_team_id": 63,
+    "away_team_id": 328,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1929,32 +1894,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538088,
     "utcDate": "2026-03-21T17:30:00Z",
     "home": "Everton FC",
     "away": "Chelsea FC",
     "home_crest": "https://crests.football-data.org/62.png",
     "away_crest": "https://crests.football-data.org/61.png",
+    "home_team_id": 62,
+    "away_team_id": 61,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1988,32 +1951,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538090,
     "utcDate": "2026-03-21T20:00:00Z",
     "home": "Leeds United FC",
     "away": "Brentford FC",
     "home_crest": "https://crests.football-data.org/341.png",
     "away_crest": "https://crests.football-data.org/402.png",
+    "home_team_id": 341,
+    "away_team_id": 402,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2047,32 +2008,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538092,
     "utcDate": "2026-03-22T12:00:00Z",
     "home": "Newcastle United FC",
     "away": "Sunderland AFC",
     "home_crest": "https://crests.football-data.org/67.png",
     "away_crest": "https://crests.football-data.org/71.png",
+    "home_team_id": 67,
+    "away_team_id": 71,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2106,32 +2065,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538086,
     "utcDate": "2026-03-22T14:15:00Z",
     "home": "Aston Villa FC",
     "away": "West Ham United FC",
     "home_crest": "https://crests.football-data.org/58.png",
     "away_crest": "https://crests.football-data.org/563.png",
+    "home_team_id": 58,
+    "away_team_id": 563,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2165,32 +2122,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538093,
     "utcDate": "2026-03-22T14:15:00Z",
     "home": "Tottenham Hotspur FC",
     "away": "Nottingham Forest FC",
     "home_crest": "https://crests.football-data.org/73.png",
     "away_crest": "https://crests.football-data.org/351.png",
+    "home_team_id": 73,
+    "away_team_id": 351,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2224,32 +2179,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538095,
     "utcDate": "2026-04-11T14:00:00Z",
     "home": "Sunderland AFC",
     "away": "Tottenham Hotspur FC",
     "home_crest": "https://crests.football-data.org/71.png",
     "away_crest": "https://crests.football-data.org/73.png",
+    "home_team_id": 71,
+    "away_team_id": 73,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2283,32 +2236,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538096,
     "utcDate": "2026-04-11T14:00:00Z",
     "home": "Crystal Palace FC",
     "away": "Newcastle United FC",
     "home_crest": "https://crests.football-data.org/354.png",
     "away_crest": "https://crests.football-data.org/67.png",
+    "home_team_id": 354,
+    "away_team_id": 67,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2342,32 +2293,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538097,
     "utcDate": "2026-04-11T14:00:00Z",
     "home": "Arsenal FC",
     "away": "AFC Bournemouth",
     "home_crest": "https://crests.football-data.org/57.png",
     "away_crest": "https://crests.football-data.org/1044.png",
+    "home_team_id": 57,
+    "away_team_id": 1044,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2401,32 +2350,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538098,
     "utcDate": "2026-04-11T14:00:00Z",
     "home": "Brentford FC",
     "away": "Everton FC",
     "home_crest": "https://crests.football-data.org/402.png",
     "away_crest": "https://crests.football-data.org/62.png",
+    "home_team_id": 402,
+    "away_team_id": 62,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2460,32 +2407,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538099,
     "utcDate": "2026-04-11T14:00:00Z",
     "home": "Burnley FC",
     "away": "Brighton & Hove Albion FC",
     "home_crest": "https://crests.football-data.org/328.png",
     "away_crest": "https://crests.football-data.org/397.png",
+    "home_team_id": 328,
+    "away_team_id": 397,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2519,32 +2464,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538100,
     "utcDate": "2026-04-11T14:00:00Z",
     "home": "Chelsea FC",
     "away": "Manchester City FC",
     "home_crest": "https://crests.football-data.org/61.png",
     "away_crest": "https://crests.football-data.org/65.png",
+    "home_team_id": 61,
+    "away_team_id": 65,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2578,32 +2521,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538101,
     "utcDate": "2026-04-11T14:00:00Z",
     "home": "Liverpool FC",
     "away": "Fulham FC",
     "home_crest": "https://crests.football-data.org/64.png",
     "away_crest": "https://crests.football-data.org/63.png",
+    "home_team_id": 64,
+    "away_team_id": 63,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2637,32 +2578,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538102,
     "utcDate": "2026-04-11T14:00:00Z",
     "home": "Manchester United FC",
     "away": "Leeds United FC",
     "home_crest": "https://crests.football-data.org/66.png",
     "away_crest": "https://crests.football-data.org/341.png",
+    "home_team_id": 66,
+    "away_team_id": 341,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2696,32 +2635,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538103,
     "utcDate": "2026-04-11T14:00:00Z",
     "home": "Nottingham Forest FC",
     "away": "Aston Villa FC",
     "home_crest": "https://crests.football-data.org/351.png",
     "away_crest": "https://crests.football-data.org/58.png",
+    "home_team_id": 351,
+    "away_team_id": 58,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2755,32 +2692,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538104,
     "utcDate": "2026-04-11T14:00:00Z",
     "home": "West Ham United FC",
     "away": "Wolverhampton Wanderers FC",
     "home_crest": "https://crests.football-data.org/563.png",
     "away_crest": "https://crests.football-data.org/76.png",
+    "home_team_id": 563,
+    "away_team_id": 76,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2814,32 +2749,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538112,
     "utcDate": "2026-04-18T14:00:00Z",
     "home": "Newcastle United FC",
     "away": "AFC Bournemouth",
     "home_crest": "https://crests.football-data.org/67.png",
     "away_crest": "https://crests.football-data.org/1044.png",
+    "home_team_id": 67,
+    "away_team_id": 1044,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2873,32 +2806,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538113,
     "utcDate": "2026-04-18T14:00:00Z",
     "home": "Nottingham Forest FC",
     "away": "Burnley FC",
     "home_crest": "https://crests.football-data.org/351.png",
     "away_crest": "https://crests.football-data.org/328.png",
+    "home_team_id": 351,
+    "away_team_id": 328,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2932,32 +2863,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538114,
     "utcDate": "2026-04-18T14:00:00Z",
     "home": "Tottenham Hotspur FC",
     "away": "Brighton & Hove Albion FC",
     "home_crest": "https://crests.football-data.org/73.png",
     "away_crest": "https://crests.football-data.org/397.png",
+    "home_team_id": 73,
+    "away_team_id": 397,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2991,32 +2920,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538105,
     "utcDate": "2026-04-18T14:00:00Z",
     "home": "Aston Villa FC",
     "away": "Sunderland AFC",
     "home_crest": "https://crests.football-data.org/58.png",
     "away_crest": "https://crests.football-data.org/71.png",
+    "home_team_id": 58,
+    "away_team_id": 71,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3050,32 +2977,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538106,
     "utcDate": "2026-04-18T14:00:00Z",
     "home": "Crystal Palace FC",
     "away": "West Ham United FC",
     "home_crest": "https://crests.football-data.org/354.png",
     "away_crest": "https://crests.football-data.org/563.png",
+    "home_team_id": 354,
+    "away_team_id": 563,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3109,32 +3034,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538107,
     "utcDate": "2026-04-18T14:00:00Z",
     "home": "Brentford FC",
     "away": "Fulham FC",
     "home_crest": "https://crests.football-data.org/402.png",
     "away_crest": "https://crests.football-data.org/63.png",
+    "home_team_id": 402,
+    "away_team_id": 63,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3168,32 +3091,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538108,
     "utcDate": "2026-04-18T14:00:00Z",
     "home": "Chelsea FC",
     "away": "Manchester United FC",
     "home_crest": "https://crests.football-data.org/61.png",
     "away_crest": "https://crests.football-data.org/66.png",
+    "home_team_id": 61,
+    "away_team_id": 66,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3227,32 +3148,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538109,
     "utcDate": "2026-04-18T14:00:00Z",
     "home": "Everton FC",
     "away": "Liverpool FC",
     "home_crest": "https://crests.football-data.org/62.png",
     "away_crest": "https://crests.football-data.org/64.png",
+    "home_team_id": 62,
+    "away_team_id": 64,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3286,32 +3205,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538110,
     "utcDate": "2026-04-18T14:00:00Z",
     "home": "Leeds United FC",
     "away": "Wolverhampton Wanderers FC",
     "home_crest": "https://crests.football-data.org/341.png",
     "away_crest": "https://crests.football-data.org/76.png",
+    "home_team_id": 341,
+    "away_team_id": 76,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3345,32 +3262,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538111,
     "utcDate": "2026-04-18T14:00:00Z",
     "home": "Manchester City FC",
     "away": "Arsenal FC",
     "home_crest": "https://crests.football-data.org/65.png",
     "away_crest": "https://crests.football-data.org/57.png",
+    "home_team_id": 65,
+    "away_team_id": 57,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3404,32 +3319,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538115,
     "utcDate": "2026-04-25T14:00:00Z",
     "home": "AFC Bournemouth",
     "away": "Leeds United FC",
     "home_crest": "https://crests.football-data.org/1044.png",
     "away_crest": "https://crests.football-data.org/341.png",
+    "home_team_id": 1044,
+    "away_team_id": 341,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3463,32 +3376,30 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
+    "match_id": 538116,
     "utcDate": "2026-04-25T14:00:00Z",
     "home": "Sunderland AFC",
     "away": "Nottingham Forest FC",
     "home_crest": "https://crests.football-data.org/71.png",
     "away_crest": "https://crests.football-data.org/351.png",
+    "home_team_id": 71,
+    "away_team_id": 351,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3522,375 +3433,707 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
+    "second_market": "Over 1.5",
+    "second_prob": 0.7326,
+    "edge": 0.007,
+    "confidence": 8,
     "result": "PENDING"
   },
   {
-    "utcDate": "2026-02-23T20:00:00Z",
-    "home": "Everton FC",
-    "away": "Manchester United FC",
-    "home_crest": "https://crests.football-data.org/62.png",
-    "away_crest": "https://crests.football-data.org/66.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "match_id": 538094,
+    "utcDate": "2026-02-18T20:00:00Z",
+    "home": "Wolverhampton Wanderers FC",
+    "away": "Arsenal FC",
+    "home_crest": "https://crests.football-data.org/76.png",
+    "away_crest": "https://crests.football-data.org/57.png",
+    "home_team_id": 76,
+    "away_team_id": 57,
+    "xg_home": 1.06,
+    "xg_away": 2.2,
+    "xg_total": 3.27,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.172,
+      "draw": 0.1956,
+      "away": 0.6323,
+      "1x": 0.3677,
+      "x2": 0.828,
+      "12": 0.8044,
+      "under_25": 0.3664,
+      "over_25": 0.6336,
+      "over_15": 0.8368,
+      "btts_yes": 0.5822,
+      "btts_no": 0.4178
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.8368,
+        "fair": 1.2
+      },
+      {
+        "market": "X2",
+        "prob": 0.828,
+        "fair": 1.21
+      },
+      {
+        "market": "12",
+        "prob": 0.8044,
+        "fair": 1.24
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.6336,
+        "fair": 1.58
+      },
+      {
+        "market": "AWAY WIN",
+        "prob": 0.6323,
+        "fair": 1.58
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.5822,
+        "fair": 1.72
+      }
+    ],
+    "best_market": "Over 1.5",
+    "best_prob": 0.8368,
+    "best_fair": 1.21,
+    "second_market": "X2",
+    "second_prob": 0.828,
+    "edge": 0.0088,
+    "confidence": 10,
+    "result": "PUSH"
+  },
+  {
+    "match_id": 538046,
+    "utcDate": "2026-02-21T15:00:00Z",
+    "home": "Aston Villa FC",
+    "away": "Leeds United FC",
+    "home_crest": "https://crests.football-data.org/58.png",
+    "away_crest": "https://crests.football-data.org/341.png",
+    "home_team_id": 58,
+    "away_team_id": 341,
+    "xg_home": 1.09,
+    "xg_away": 1.03,
+    "xg_total": 2.12,
+    "model": "B",
+    "probs": {
+      "home": 0.365,
+      "draw": 0.2977,
+      "away": 0.3373,
+      "1x": 0.6627,
+      "x2": 0.635,
+      "12": 0.7023,
+      "under_25": 0.6443,
+      "over_25": 0.3557,
+      "over_15": 0.6254,
+      "btts_yes": 0.4268,
+      "btts_no": 0.5732
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.7023,
+        "fair": 1.42
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.6627,
+        "fair": 1.51
       },
       {
         "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.6443,
+        "fair": 1.55
+      },
+      {
+        "market": "X2",
+        "prob": 0.635,
+        "fair": 1.57
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.6254,
+        "fair": 1.6
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.5732,
+        "fair": 1.74
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.7023,
+    "best_fair": 1.42,
+    "second_market": "1X",
+    "second_prob": 0.6627,
+    "edge": 0.0396,
+    "confidence": 8,
+    "result": "LOSS"
+  },
+  {
+    "match_id": 538048,
+    "utcDate": "2026-02-21T15:00:00Z",
+    "home": "Brentford FC",
+    "away": "Brighton & Hove Albion FC",
+    "home_crest": "https://crests.football-data.org/402.png",
+    "away_crest": "https://crests.football-data.org/397.png",
+    "home_team_id": 402,
+    "away_team_id": 397,
+    "xg_home": 0.67,
+    "xg_away": 1.28,
+    "xg_total": 1.95,
+    "model": "B",
+    "probs": {
+      "home": 0.1956,
+      "draw": 0.2927,
+      "away": 0.5117,
+      "1x": 0.4883,
+      "x2": 0.8044,
+      "12": 0.7073,
+      "under_25": 0.6889,
+      "over_25": 0.3111,
+      "over_15": 0.5816,
+      "btts_yes": 0.3538,
+      "btts_no": 0.6462
+    },
+    "candidates": [
+      {
+        "market": "X2",
+        "prob": 0.8044,
+        "fair": 1.24
+      },
+      {
+        "market": "12",
+        "prob": 0.7073,
+        "fair": 1.41
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.6889,
+        "fair": 1.45
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.6462,
+        "fair": 1.55
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.5816,
+        "fair": 1.72
+      }
+    ],
+    "best_market": "X2",
+    "best_prob": 0.8044,
+    "best_fair": 1.24,
+    "second_market": "12",
+    "second_prob": 0.7073,
+    "edge": 0.0971,
+    "confidence": 10,
     "result": "WIN"
   },
   {
+    "match_id": 538049,
+    "utcDate": "2026-02-21T15:00:00Z",
+    "home": "Chelsea FC",
+    "away": "Burnley FC",
+    "home_crest": "https://crests.football-data.org/61.png",
+    "away_crest": "https://crests.football-data.org/328.png",
+    "home_team_id": 61,
+    "away_team_id": 328,
+    "xg_home": 1.92,
+    "xg_away": 1.39,
+    "xg_total": 3.31,
+    "model": "B",
+    "probs": {
+      "home": 0.4983,
+      "draw": 0.222,
+      "away": 0.2797,
+      "1x": 0.7203,
+      "x2": 0.5017,
+      "12": 0.778,
+      "under_25": 0.3573,
+      "over_25": 0.6427,
+      "over_15": 0.8426,
+      "btts_yes": 0.6412,
+      "btts_no": 0.3588
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.8426,
+        "fair": 1.19
+      },
+      {
+        "market": "12",
+        "prob": 0.778,
+        "fair": 1.29
+      },
+      {
+        "market": "1X",
+        "prob": 0.7203,
+        "fair": 1.39
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.6427,
+        "fair": 1.56
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.6412,
+        "fair": 1.56
+      }
+    ],
+    "best_market": "Over 1.5",
+    "best_prob": 0.8426,
+    "best_fair": 1.19,
+    "second_market": "12",
+    "second_prob": 0.778,
+    "edge": 0.0646,
+    "confidence": 10,
+    "result": "PUSH"
+  },
+  {
+    "match_id": 538054,
+    "utcDate": "2026-02-21T17:30:00Z",
+    "home": "West Ham United FC",
+    "away": "AFC Bournemouth",
+    "home_crest": "https://crests.football-data.org/563.png",
+    "away_crest": "https://crests.football-data.org/1044.png",
+    "home_team_id": 563,
+    "away_team_id": 1044,
+    "xg_home": 0.68,
+    "xg_away": 1.01,
+    "xg_total": 1.69,
+    "model": "B",
+    "probs": {
+      "home": 0.2397,
+      "draw": 0.3346,
+      "away": 0.4256,
+      "1x": 0.5744,
+      "x2": 0.7603,
+      "12": 0.6654,
+      "under_25": 0.76,
+      "over_25": 0.24,
+      "over_15": 0.5035,
+      "btts_yes": 0.3133,
+      "btts_no": 0.6867
+    },
+    "candidates": [
+      {
+        "market": "X2",
+        "prob": 0.7603,
+        "fair": 1.32
+      },
+      {
+        "market": "Under 2.5",
+        "prob": 0.76,
+        "fair": 1.32
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.6867,
+        "fair": 1.46
+      },
+      {
+        "market": "12",
+        "prob": 0.6654,
+        "fair": 1.5
+      },
+      {
+        "market": "1X",
+        "prob": 0.5744,
+        "fair": 1.74
+      }
+    ],
+    "best_market": "X2",
+    "best_prob": 0.7603,
+    "best_fair": 1.32,
+    "second_market": "Under 2.5",
+    "second_prob": 0.76,
+    "edge": 0.0003,
+    "confidence": 7,
+    "result": "WIN"
+  },
+  {
+    "match_id": 538051,
     "utcDate": "2026-02-21T20:00:00Z",
     "home": "Manchester City FC",
     "away": "Newcastle United FC",
     "home_crest": "https://crests.football-data.org/65.png",
     "away_crest": "https://crests.football-data.org/67.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 65,
+    "away_team_id": 67,
+    "xg_home": 1.91,
+    "xg_away": 1.19,
+    "xg_total": 3.1,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.5429,
+      "draw": 0.2224,
+      "away": 0.2347,
+      "1x": 0.7653,
+      "x2": 0.4571,
+      "12": 0.7776,
+      "under_25": 0.4015,
+      "over_25": 0.5985,
+      "over_15": 0.815,
+      "btts_yes": 0.5921,
+      "btts_no": 0.4079
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "market": "Over 1.5",
+        "prob": 0.815,
+        "fair": 1.23
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "market": "12",
+        "prob": 0.7776,
+        "fair": 1.29
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.7653,
+        "fair": 1.31
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "market": "Over 2.5",
+        "prob": 0.5985,
+        "fair": 1.67
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.5921,
+        "fair": 1.69
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "WIN"
+    "best_market": "Over 1.5",
+    "best_prob": 0.815,
+    "best_fair": 1.23,
+    "second_market": "12",
+    "second_prob": 0.7776,
+    "edge": 0.0374,
+    "confidence": 9,
+    "result": "PUSH"
   },
   {
+    "match_id": 538045,
     "utcDate": "2026-02-22T14:00:00Z",
     "home": "Sunderland AFC",
     "away": "Fulham FC",
     "home_crest": "https://crests.football-data.org/71.png",
     "away_crest": "https://crests.football-data.org/63.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 71,
+    "away_team_id": 63,
+    "xg_home": 1.81,
+    "xg_away": 1.36,
+    "xg_total": 3.17,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.4811,
+      "draw": 0.2295,
+      "away": 0.2895,
+      "1x": 0.7105,
+      "x2": 0.5189,
+      "12": 0.7705,
+      "under_25": 0.3864,
+      "over_25": 0.6136,
+      "over_15": 0.8246,
+      "btts_yes": 0.6215,
+      "btts_no": 0.3785
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "market": "Over 1.5",
+        "prob": 0.8246,
+        "fair": 1.21
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "market": "12",
+        "prob": 0.7705,
+        "fair": 1.3
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.7105,
+        "fair": 1.41
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.6215,
+        "fair": 1.61
       },
       {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 2.5",
+        "prob": 0.6136,
+        "fair": 1.63
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "WIN"
+    "best_market": "Over 1.5",
+    "best_prob": 0.8246,
+    "best_fair": 1.21,
+    "second_market": "12",
+    "second_prob": 0.7705,
+    "edge": 0.0541,
+    "confidence": 10,
+    "result": "PUSH"
   },
   {
+    "match_id": 538047,
     "utcDate": "2026-02-22T14:00:00Z",
     "home": "Crystal Palace FC",
     "away": "Wolverhampton Wanderers FC",
     "home_crest": "https://crests.football-data.org/354.png",
     "away_crest": "https://crests.football-data.org/76.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 354,
+    "away_team_id": 76,
+    "xg_home": 1.03,
+    "xg_away": 1.08,
+    "xg_total": 2.11,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.3368,
+      "draw": 0.2985,
+      "away": 0.3647,
+      "1x": 0.6353,
+      "x2": 0.6632,
+      "12": 0.7015,
+      "under_25": 0.6468,
+      "over_25": 0.3532,
+      "over_15": 0.6231,
+      "btts_yes": 0.4247,
+      "btts_no": 0.5753
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
+        "prob": 0.7015,
         "fair": 1.43
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.6632,
+        "fair": 1.51
       },
       {
         "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.6468,
+        "fair": 1.55
+      },
+      {
+        "market": "1X",
+        "prob": 0.6353,
+        "fair": 1.57
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.6231,
+        "fair": 1.6
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.5753,
+        "fair": 1.74
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.7015,
+    "best_fair": 1.43,
+    "second_market": "X2",
+    "second_prob": 0.6632,
+    "edge": 0.0383,
+    "confidence": 8,
     "result": "WIN"
   },
   {
+    "match_id": 538052,
     "utcDate": "2026-02-22T14:00:00Z",
     "home": "Nottingham Forest FC",
     "away": "Liverpool FC",
     "home_crest": "https://crests.football-data.org/351.png",
     "away_crest": "https://crests.football-data.org/64.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 351,
+    "away_team_id": 64,
+    "xg_home": 0.5,
+    "xg_away": 0.92,
+    "xg_total": 1.42,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.1939,
+      "draw": 0.3666,
+      "away": 0.4395,
+      "1x": 0.5605,
+      "x2": 0.8061,
+      "12": 0.6334,
+      "under_25": 0.8284,
+      "over_25": 0.1716,
+      "over_15": 0.4153,
+      "btts_yes": 0.2374,
+      "btts_no": 0.7626
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "Under 2.5",
+        "prob": 0.8284,
+        "fair": 1.21
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.8061,
+        "fair": 1.24
       },
       {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "market": "BTTS No",
+        "prob": 0.7626,
+        "fair": 1.31
       },
       {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "12",
+        "prob": 0.6334,
+        "fair": 1.58
+      },
+      {
+        "market": "1X",
+        "prob": 0.5605,
+        "fair": 1.78
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "Under 2.5",
+    "best_prob": 0.8284,
+    "best_fair": 1.24,
+    "second_market": "X2",
+    "second_prob": 0.8061,
+    "edge": 0.0223,
+    "confidence": 8,
     "result": "WIN"
   },
   {
+    "match_id": 538053,
     "utcDate": "2026-02-22T16:30:00Z",
     "home": "Tottenham Hotspur FC",
     "away": "Arsenal FC",
     "home_crest": "https://crests.football-data.org/73.png",
     "away_crest": "https://crests.football-data.org/57.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 73,
+    "away_team_id": 57,
+    "xg_home": 1.24,
+    "xg_away": 2.31,
+    "xg_total": 3.54,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.194,
+      "draw": 0.1927,
+      "away": 0.6133,
+      "1x": 0.3867,
+      "x2": 0.806,
+      "12": 0.8073,
+      "under_25": 0.3133,
+      "over_25": 0.6867,
+      "over_15": 0.8679,
+      "btts_yes": 0.6388,
+      "btts_no": 0.3612
+    },
+    "candidates": [
+      {
+        "market": "Over 1.5",
+        "prob": 0.8679,
+        "fair": 1.15
+      },
+      {
+        "market": "12",
+        "prob": 0.8073,
+        "fair": 1.24
+      },
+      {
+        "market": "X2",
+        "prob": 0.806,
+        "fair": 1.24
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.6867,
+        "fair": 1.46
+      },
+      {
+        "market": "BTTS Yes",
+        "prob": 0.6388,
+        "fair": 1.57
+      },
+      {
+        "market": "AWAY WIN",
+        "prob": 0.6133,
+        "fair": 1.63
+      }
+    ],
+    "best_market": "Over 1.5",
+    "best_prob": 0.8679,
+    "best_fair": 1.15,
+    "second_market": "12",
+    "second_prob": 0.8073,
+    "edge": 0.0606,
+    "confidence": 10,
+    "result": "PUSH"
+  },
+  {
+    "match_id": 538050,
+    "utcDate": "2026-02-23T20:00:00Z",
+    "home": "Everton FC",
+    "away": "Manchester United FC",
+    "home_crest": "https://crests.football-data.org/62.png",
+    "away_crest": "https://crests.football-data.org/66.png",
+    "home_team_id": 62,
+    "away_team_id": 66,
+    "xg_home": 1.04,
+    "xg_away": 1.45,
+    "xg_total": 2.5,
+    "model": "B",
+    "probs": {
+      "home": 0.2712,
+      "draw": 0.2635,
+      "away": 0.4653,
+      "1x": 0.5347,
+      "x2": 0.7288,
+      "12": 0.7365,
+      "under_25": 0.5451,
+      "over_25": 0.4549,
+      "over_15": 0.7117,
+      "btts_yes": 0.4959,
+      "btts_no": 0.5041
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.7365,
+        "fair": 1.36
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.7288,
+        "fair": 1.37
       },
       {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 1.5",
+        "prob": 0.7117,
+        "fair": 1.41
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.7365,
+    "best_fair": 1.37,
+    "second_market": "X2",
+    "second_prob": 0.7288,
+    "edge": 0.0077,
+    "confidence": 8,
     "result": "WIN"
   }
 ]

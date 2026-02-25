@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "team_id": 349,
+    "days_back": 30,
+    "limit": 8,
+    "fetched_at": "2026-02-24T20:07:22.856157+00:00",
+    "ttl_seconds": 43200
+  },
+  "matches": [
+    {
+      "utcDate": "2026-01-31T15:00:00Z",
+      "home_id": 349,
+      "away_id": 1081,
+      "home_goals": 1,
+      "away_goals": 1
+    },
+    {
+      "utcDate": "2026-02-07T12:31:00Z",
+      "home_id": 342,
+      "away_id": 349,
+      "home_goals": 1,
+      "away_goals": 2
+    },
+    {
+      "utcDate": "2026-02-21T15:00:00Z",
+      "home_id": 404,
+      "away_id": 349,
+      "home_goals": 5,
+      "away_goals": 3
+    }
+  ]
+}

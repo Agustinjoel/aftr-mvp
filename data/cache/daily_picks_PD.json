@@ -5,57 +5,55 @@
     "away": "Deportivo Alavés",
     "home_crest": "https://crests.football-data.org/88.png",
     "away_crest": "https://crests.football-data.org/263.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 88,
+    "away_team_id": 263,
+    "xg_home": 0.74,
+    "xg_away": 1.22,
+    "xg_total": 1.95,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.2247,
+      "draw": 0.3004,
+      "away": 0.4749,
+      "1x": 0.5251,
+      "x2": 0.7753,
+      "12": 0.6996,
+      "under_25": 0.6893,
+      "over_25": 0.3107,
+      "over_15": 0.5812,
+      "btts_yes": 0.367,
+      "btts_no": 0.633
     },
     "candidates": [
       {
+        "market": "X2",
+        "prob": 0.7753,
+        "fair": 1.29
+      },
+      {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
+        "prob": 0.6996,
         "fair": 1.43
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
         "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.6893,
+        "fair": 1.45
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.633,
+        "fair": 1.58
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.5812,
+        "fair": 1.72
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "X2",
+    "best_prob": 0.7753,
+    "best_fair": 1.29,
     "result": "PENDING"
   },
   {
@@ -64,57 +62,55 @@
     "away": "Athletic Club",
     "home_crest": "https://crests.football-data.org/87.png",
     "away_crest": "https://crests.football-data.org/77.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 87,
+    "away_team_id": 77,
+    "xg_home": 1.86,
+    "xg_away": 1.04,
+    "xg_total": 2.9,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.5666,
+      "draw": 0.2252,
+      "away": 0.2081,
+      "1x": 0.7919,
+      "x2": 0.4334,
+      "12": 0.7748,
+      "under_25": 0.446,
+      "over_25": 0.554,
+      "over_15": 0.7853,
+      "btts_yes": 0.5454,
+      "btts_no": 0.4546
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "market": "1X",
+        "prob": 0.7919,
+        "fair": 1.26
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.7853,
+        "fair": 1.27
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "12",
+        "prob": 0.7748,
+        "fair": 1.29
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "market": "HOME WIN",
+        "prob": 0.5666,
+        "fair": 1.76
       },
       {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 2.5",
+        "prob": 0.554,
+        "fair": 1.81
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "1X",
+    "best_prob": 0.7919,
+    "best_fair": 1.26,
     "result": "PENDING"
   },
   {
@@ -123,57 +119,55 @@
     "away": "Villarreal CF",
     "home_crest": "https://crests.football-data.org/81.png",
     "away_crest": "https://crests.football-data.org/94.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 81,
+    "away_team_id": 94,
+    "xg_home": 2.29,
+    "xg_away": 0.75,
+    "xg_total": 3.04,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.72,
+      "draw": 0.1733,
+      "away": 0.1066,
+      "1x": 0.8934,
+      "x2": 0.28,
+      "12": 0.8267,
+      "under_25": 0.415,
+      "over_25": 0.585,
+      "over_15": 0.8058,
+      "btts_yes": 0.4747,
+      "btts_no": 0.5253
     },
     "candidates": [
       {
+        "market": "1X",
+        "prob": 0.8934,
+        "fair": 1.12
+      },
+      {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.8267,
+        "fair": 1.21
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.8058,
+        "fair": 1.24
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "HOME WIN",
+        "prob": 0.72,
+        "fair": 1.39
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 2.5",
+        "prob": 0.585,
+        "fair": 1.71
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "1X",
+    "best_prob": 0.8934,
+    "best_fair": 1.12,
     "result": "PENDING"
   },
   {
@@ -182,57 +176,60 @@
     "away": "Real Sociedad de Fútbol",
     "home_crest": "https://crests.football-data.org/89.png",
     "away_crest": "https://crests.football-data.org/92.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 89,
+    "away_team_id": 92,
+    "xg_home": 2.24,
+    "xg_away": 1.21,
+    "xg_total": 3.45,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.6056,
+      "draw": 0.1973,
+      "away": 0.1971,
+      "1x": 0.8029,
+      "x2": 0.3944,
+      "12": 0.8027,
+      "under_25": 0.3308,
+      "over_25": 0.6692,
+      "over_15": 0.8579,
+      "btts_yes": 0.6269,
+      "btts_no": 0.3731
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.8579,
+        "fair": 1.17
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.8029,
+        "fair": 1.25
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "market": "12",
+        "prob": 0.8027,
+        "fair": 1.25
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.6692,
+        "fair": 1.49
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.6269,
+        "fair": 1.6
       },
       {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "HOME WIN",
+        "prob": 0.6056,
+        "fair": 1.65
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "Over 1.5",
+    "best_prob": 0.8579,
+    "best_fair": 1.17,
     "result": "PENDING"
   },
   {
@@ -241,56 +238,49 @@
     "away": "Club Atlético de Madrid",
     "home_crest": "https://crests.football-data.org/1048.png",
     "away_crest": "https://crests.football-data.org/78.png",
+    "home_team_id": 1048,
+    "away_team_id": 78,
     "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "xg_away": 1.0,
+    "xg_total": 2.44,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.4756,
+      "draw": 0.265,
+      "away": 0.2594,
+      "1x": 0.7406,
+      "x2": 0.5244,
+      "12": 0.735,
+      "under_25": 0.5582,
+      "over_25": 0.4418,
+      "over_15": 0.7011,
+      "btts_yes": 0.4824,
+      "btts_no": 0.5176
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
+        "market": "1X",
+        "prob": 0.7406,
         "fair": 1.35
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "market": "12",
+        "prob": 0.735,
+        "fair": 1.36
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
+        "market": "Over 1.5",
+        "prob": 0.7011,
         "fair": 1.43
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
         "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.5582,
+        "fair": 1.79
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
+    "best_market": "1X",
+    "best_prob": 0.7406,
     "best_fair": 1.35,
     "result": "PENDING"
   },
@@ -300,57 +290,55 @@
     "away": "RCD Espanyol de Barcelona",
     "home_crest": "https://crests.football-data.org/285.png",
     "away_crest": "https://crests.football-data.org/80.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 285,
+    "away_team_id": 80,
+    "xg_home": 2.07,
+    "xg_away": 1.45,
+    "xg_total": 3.52,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.5186,
+      "draw": 0.2123,
+      "away": 0.269,
+      "1x": 0.731,
+      "x2": 0.4814,
+      "12": 0.7877,
+      "under_25": 0.3181,
+      "over_25": 0.6819,
+      "over_15": 0.8654,
+      "btts_yes": 0.6682,
+      "btts_no": 0.3318
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "market": "Over 1.5",
+        "prob": 0.8654,
+        "fair": 1.16
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "market": "12",
+        "prob": 0.7877,
+        "fair": 1.27
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.731,
+        "fair": 1.37
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "market": "Over 2.5",
+        "prob": 0.6819,
+        "fair": 1.47
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.6682,
+        "fair": 1.5
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "Over 1.5",
+    "best_prob": 0.8654,
+    "best_fair": 1.16,
     "result": "PENDING"
   },
   {
@@ -359,57 +347,60 @@
     "away": "CA Osasuna",
     "home_crest": "https://crests.football-data.org/95.png",
     "away_crest": "https://crests.football-data.org/79.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 95,
+    "away_team_id": 79,
+    "xg_home": 0.56,
+    "xg_away": 1.43,
+    "xg_total": 1.98,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.1445,
+      "draw": 0.2706,
+      "away": 0.5849,
+      "1x": 0.4151,
+      "x2": 0.8555,
+      "12": 0.7294,
+      "under_25": 0.681,
+      "over_25": 0.319,
+      "over_15": 0.5897,
+      "btts_yes": 0.3246,
+      "btts_no": 0.6754
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "market": "X2",
+        "prob": 0.8555,
+        "fair": 1.17
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
+        "market": "12",
+        "prob": 0.7294,
         "fair": 1.37
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
         "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.681,
+        "fair": 1.47
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.6754,
+        "fair": 1.48
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.5897,
+        "fair": 1.7
+      },
+      {
+        "market": "AWAY WIN",
+        "prob": 0.5849,
+        "fair": 1.71
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "X2",
+    "best_prob": 0.8555,
+    "best_fair": 1.17,
     "result": "PENDING"
   },
   {
@@ -418,57 +409,50 @@
     "away": "Sevilla FC",
     "home_crest": "https://crests.football-data.org/90.png",
     "away_crest": "https://crests.football-data.org/559.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 90,
+    "away_team_id": 559,
+    "xg_home": 1.79,
+    "xg_away": 1.04,
+    "xg_total": 2.83,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.5508,
+      "draw": 0.2316,
+      "away": 0.2176,
+      "1x": 0.7824,
+      "x2": 0.4492,
+      "12": 0.7684,
+      "under_25": 0.4622,
+      "over_25": 0.5378,
+      "over_15": 0.774,
+      "btts_yes": 0.5382,
+      "btts_no": 0.4618
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "market": "1X",
+        "prob": 0.7824,
+        "fair": 1.28
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.774,
+        "fair": 1.29
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "12",
+        "prob": 0.7684,
+        "fair": 1.3
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "HOME WIN",
+        "prob": 0.5508,
+        "fair": 1.82
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "1X",
+    "best_prob": 0.7824,
+    "best_fair": 1.28,
     "result": "PENDING"
   },
   {
@@ -477,57 +461,45 @@
     "away": "RC Celta de Vigo",
     "home_crest": "https://crests.football-data.org/298.png",
     "away_crest": "https://crests.football-data.org/558.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 298,
+    "away_team_id": 558,
+    "xg_home": 1.54,
+    "xg_away": 1.02,
+    "xg_total": 2.56,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.4931,
+      "draw": 0.2559,
+      "away": 0.251,
+      "1x": 0.749,
+      "x2": 0.5069,
+      "12": 0.7441,
+      "under_25": 0.5294,
+      "over_25": 0.4706,
+      "over_15": 0.7241,
+      "btts_yes": 0.5017,
+      "btts_no": 0.4983
     },
     "candidates": [
       {
+        "market": "1X",
+        "prob": 0.749,
+        "fair": 1.34
+      },
+      {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.7441,
+        "fair": 1.34
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.7241,
+        "fair": 1.38
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "1X",
+    "best_prob": 0.749,
+    "best_fair": 1.34,
     "result": "PENDING"
   },
   {
@@ -536,57 +508,50 @@
     "away": "Getafe CF",
     "home_crest": "https://crests.football-data.org/86.png",
     "away_crest": "https://crests.football-data.org/82.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 86,
+    "away_team_id": 82,
+    "xg_home": 1.66,
+    "xg_away": 1.21,
+    "xg_total": 2.87,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.4799,
+      "draw": 0.2422,
+      "away": 0.2779,
+      "1x": 0.7221,
+      "x2": 0.5201,
+      "12": 0.7578,
+      "under_25": 0.453,
+      "over_25": 0.547,
+      "over_15": 0.7805,
+      "btts_yes": 0.5681,
+      "btts_no": 0.4319
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "market": "Over 1.5",
+        "prob": 0.7805,
+        "fair": 1.28
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "market": "12",
+        "prob": 0.7578,
+        "fair": 1.32
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.7221,
+        "fair": 1.38
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.5681,
+        "fair": 1.76
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.7578,
+    "best_fair": 1.32,
     "result": "PENDING"
   },
   {
@@ -595,57 +560,55 @@
     "away": "Real Oviedo",
     "home_crest": "https://crests.football-data.org/87.png",
     "away_crest": "https://crests.football-data.org/1048.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 87,
+    "away_team_id": 1048,
+    "xg_home": 2.61,
+    "xg_away": 0.78,
+    "xg_total": 3.39,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.7663,
+      "draw": 0.146,
+      "away": 0.0877,
+      "1x": 0.9123,
+      "x2": 0.2337,
+      "12": 0.854,
+      "under_25": 0.3425,
+      "over_25": 0.6575,
+      "over_15": 0.8503,
+      "btts_yes": 0.5,
+      "btts_no": 0.5
     },
     "candidates": [
       {
+        "market": "1X",
+        "prob": 0.9123,
+        "fair": 1.1
+      },
+      {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.854,
+        "fair": 1.17
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.8503,
+        "fair": 1.18
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "HOME WIN",
+        "prob": 0.7663,
+        "fair": 1.3
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 2.5",
+        "prob": 0.6575,
+        "fair": 1.52
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "1X",
+    "best_prob": 0.9123,
+    "best_fair": 1.1,
     "result": "PENDING"
   },
   {
@@ -654,57 +617,55 @@
     "away": "RCD Mallorca",
     "home_crest": "https://crests.football-data.org/79.png",
     "away_crest": "https://crests.football-data.org/89.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 79,
+    "away_team_id": 89,
+    "xg_home": 2.13,
+    "xg_away": 0.87,
+    "xg_total": 3.01,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.6621,
+      "draw": 0.1949,
+      "away": 0.143,
+      "1x": 0.857,
+      "x2": 0.3379,
+      "12": 0.8051,
+      "under_25": 0.4222,
+      "over_25": 0.5778,
+      "over_15": 0.8012,
+      "btts_yes": 0.5138,
+      "btts_no": 0.4862
     },
     "candidates": [
       {
+        "market": "1X",
+        "prob": 0.857,
+        "fair": 1.17
+      },
+      {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.8051,
+        "fair": 1.24
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.8012,
+        "fair": 1.25
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "HOME WIN",
+        "prob": 0.6621,
+        "fair": 1.51
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 2.5",
+        "prob": 0.5778,
+        "fair": 1.73
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "1X",
+    "best_prob": 0.857,
+    "best_fair": 1.17,
     "result": "PENDING"
   },
   {
@@ -713,57 +674,60 @@
     "away": "Real Betis Balompié",
     "home_crest": "https://crests.football-data.org/82.png",
     "away_crest": "https://crests.football-data.org/90.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 82,
+    "away_team_id": 90,
+    "xg_home": 1.0,
+    "xg_away": 1.01,
+    "xg_total": 2.01,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.3445,
+      "draw": 0.3077,
+      "away": 0.3478,
+      "1x": 0.6522,
+      "x2": 0.6555,
+      "12": 0.6923,
+      "under_25": 0.6744,
+      "over_25": 0.3256,
+      "over_15": 0.5963,
+      "btts_yes": 0.4016,
+      "btts_no": 0.5984
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.6923,
+        "fair": 1.44
       },
       {
         "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.6744,
+        "fair": 1.48
+      },
+      {
+        "market": "X2",
+        "prob": 0.6555,
+        "fair": 1.53
+      },
+      {
+        "market": "1X",
+        "prob": 0.6522,
+        "fair": 1.53
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.5984,
+        "fair": 1.67
+      },
+      {
+        "market": "Over 1.5",
+        "prob": 0.5963,
+        "fair": 1.68
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.6923,
+    "best_fair": 1.44,
     "result": "PENDING"
   },
   {
@@ -772,57 +736,55 @@
     "away": "Girona FC",
     "home_crest": "https://crests.football-data.org/88.png",
     "away_crest": "https://crests.football-data.org/298.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 88,
+    "away_team_id": 298,
+    "xg_home": 0.85,
+    "xg_away": 0.99,
+    "xg_total": 1.84,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.3005,
+      "draw": 0.3237,
+      "away": 0.3758,
+      "1x": 0.6242,
+      "x2": 0.6995,
+      "12": 0.6763,
+      "under_25": 0.7207,
+      "over_25": 0.2793,
+      "over_15": 0.5481,
+      "btts_yes": 0.3592,
+      "btts_no": 0.6408
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "market": "Under 2.5",
+        "prob": 0.7207,
+        "fair": 1.39
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.6995,
+        "fair": 1.43
       },
       {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "market": "12",
+        "prob": 0.6763,
+        "fair": 1.48
       },
       {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "BTTS No",
+        "prob": 0.6408,
+        "fair": 1.56
+      },
+      {
+        "market": "1X",
+        "prob": 0.6242,
+        "fair": 1.6
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "X2",
+    "best_prob": 0.6995,
+    "best_fair": 1.43,
     "result": "PENDING"
   },
   {
@@ -831,57 +793,60 @@
     "away": "Real Sociedad de Fútbol",
     "home_crest": "https://crests.football-data.org/78.png",
     "away_crest": "https://crests.football-data.org/92.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 78,
+    "away_team_id": 92,
+    "xg_home": 2.12,
+    "xg_away": 1.09,
+    "xg_total": 3.21,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.6093,
+      "draw": 0.2036,
+      "away": 0.1871,
+      "1x": 0.8129,
+      "x2": 0.3907,
+      "12": 0.7964,
+      "under_25": 0.3777,
+      "over_25": 0.6223,
+      "over_15": 0.8299,
+      "btts_yes": 0.5843,
+      "btts_no": 0.4157
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.8299,
+        "fair": 1.2
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.8129,
+        "fair": 1.23
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "market": "12",
+        "prob": 0.7964,
+        "fair": 1.26
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.6223,
+        "fair": 1.61
+      },
+      {
+        "market": "HOME WIN",
+        "prob": 0.6093,
+        "fair": 1.64
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.5843,
+        "fair": 1.71
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "1X",
+    "best_prob": 0.8129,
+    "best_fair": 1.23,
     "result": "PENDING"
   },
   {
@@ -890,57 +855,55 @@
     "away": "Real Madrid CF",
     "home_crest": "https://crests.football-data.org/558.png",
     "away_crest": "https://crests.football-data.org/86.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 558,
+    "away_team_id": 86,
+    "xg_home": 1.53,
+    "xg_away": 1.27,
+    "xg_total": 2.8,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.4339,
+      "draw": 0.2501,
+      "away": 0.316,
+      "1x": 0.684,
+      "x2": 0.5661,
+      "12": 0.7499,
+      "under_25": 0.4683,
+      "over_25": 0.5317,
+      "over_15": 0.7697,
+      "btts_yes": 0.5643,
+      "btts_no": 0.4357
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "market": "Over 1.5",
+        "prob": 0.7697,
+        "fair": 1.3
       },
       {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "market": "12",
+        "prob": 0.7499,
+        "fair": 1.33
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.684,
+        "fair": 1.46
       },
       {
         "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "prob": 0.5661,
+        "fair": 1.77
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.5643,
+        "fair": 1.77
       }
     ],
     "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_prob": 0.7499,
+    "best_fair": 1.33,
     "result": "PENDING"
   },
   {
@@ -949,57 +912,60 @@
     "away": "Elche CF",
     "home_crest": "https://crests.football-data.org/94.png",
     "away_crest": "https://crests.football-data.org/285.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 94,
+    "away_team_id": 285,
+    "xg_home": 2.47,
+    "xg_away": 1.04,
+    "xg_total": 3.51,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.6872,
+      "draw": 0.1725,
+      "away": 0.1403,
+      "1x": 0.8597,
+      "x2": 0.3128,
+      "12": 0.8275,
+      "under_25": 0.3193,
+      "over_25": 0.6807,
+      "over_15": 0.8641,
+      "btts_yes": 0.5911,
+      "btts_no": 0.4089
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.8641,
+        "fair": 1.16
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.8597,
+        "fair": 1.16
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "market": "12",
+        "prob": 0.8275,
+        "fair": 1.21
+      },
+      {
+        "market": "HOME WIN",
+        "prob": 0.6872,
+        "fair": 1.46
+      },
+      {
+        "market": "Over 2.5",
+        "prob": 0.6807,
+        "fair": 1.47
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.5911,
+        "fair": 1.69
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "1X",
+    "best_prob": 0.8597,
+    "best_fair": 1.16,
     "result": "PENDING"
   },
   {
@@ -1008,57 +974,60 @@
     "away": "FC Barcelona",
     "home_crest": "https://crests.football-data.org/77.png",
     "away_crest": "https://crests.football-data.org/81.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 77,
+    "away_team_id": 81,
+    "xg_home": 1.75,
+    "xg_away": 1.74,
+    "xg_total": 3.49,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.389,
+      "draw": 0.2232,
+      "away": 0.3878,
+      "1x": 0.6122,
+      "x2": 0.611,
+      "12": 0.7768,
+      "under_25": 0.323,
+      "over_25": 0.677,
+      "over_15": 0.8628,
+      "btts_yes": 0.681,
+      "btts_no": 0.319
     },
     "candidates": [
       {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.8628,
+        "fair": 1.16
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
+        "market": "12",
+        "prob": 0.7768,
+        "fair": 1.29
       },
       {
         "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "prob": 0.681,
+        "fair": 1.47
       },
       {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "market": "Over 2.5",
+        "prob": 0.677,
+        "fair": 1.48
+      },
+      {
+        "market": "1X",
+        "prob": 0.6122,
+        "fair": 1.63
+      },
+      {
+        "market": "X2",
+        "prob": 0.611,
+        "fair": 1.64
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "Over 1.5",
+    "best_prob": 0.8628,
+    "best_fair": 1.16,
     "result": "PENDING"
   },
   {
@@ -1067,57 +1036,55 @@
     "away": "Rayo Vallecano de Madrid",
     "home_crest": "https://crests.football-data.org/559.png",
     "away_crest": "https://crests.football-data.org/87.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 559,
+    "away_team_id": 87,
+    "xg_home": 1.32,
+    "xg_away": 1.04,
+    "xg_total": 2.35,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.43,
+      "draw": 0.2763,
+      "away": 0.2937,
+      "1x": 0.7063,
+      "x2": 0.57,
+      "12": 0.7237,
+      "under_25": 0.5816,
+      "over_25": 0.4184,
+      "over_15": 0.6815,
+      "btts_yes": 0.4727,
+      "btts_no": 0.5273
     },
     "candidates": [
       {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.7237,
+        "fair": 1.38
       },
       {
         "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
+        "prob": 0.7063,
+        "fair": 1.42
       },
       {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "market": "Over 1.5",
+        "prob": 0.6815,
+        "fair": 1.47
       },
       {
         "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.5816,
+        "fair": 1.72
+      },
+      {
+        "market": "X2",
+        "prob": 0.57,
+        "fair": 1.75
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "1X",
+    "best_prob": 0.7063,
+    "best_fair": 1.42,
     "result": "PENDING"
   },
   {
@@ -1126,57 +1093,60 @@
     "away": "Deportivo Alavés",
     "home_crest": "https://crests.football-data.org/95.png",
     "away_crest": "https://crests.football-data.org/263.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
+    "home_team_id": 95,
+    "away_team_id": 263,
+    "xg_home": 0.74,
+    "xg_away": 1.62,
+    "xg_total": 2.35,
+    "model": "B",
     "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
+      "home": 0.1691,
+      "draw": 0.247,
+      "away": 0.5839,
+      "1x": 0.4161,
+      "x2": 0.8309,
+      "12": 0.753,
+      "under_25": 0.5822,
+      "over_25": 0.4178,
+      "over_15": 0.681,
+      "btts_yes": 0.4179,
+      "btts_no": 0.5821
     },
     "candidates": [
       {
+        "market": "X2",
+        "prob": 0.8309,
+        "fair": 1.2
+      },
+      {
         "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
+        "prob": 0.753,
+        "fair": 1.33
       },
       {
         "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
+        "prob": 0.681,
+        "fair": 1.47
       },
       {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
+        "market": "AWAY WIN",
+        "prob": 0.5839,
+        "fair": 1.71
       },
       {
         "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
+        "prob": 0.5822,
+        "fair": 1.72
+      },
+      {
+        "market": "BTTS No",
+        "prob": 0.5821,
+        "fair": 1.72
       }
     ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
+    "best_market": "X2",
+    "best_prob": 0.8309,
+    "best_fair": 1.2,
     "result": "PENDING"
   },
   {
@@ -1185,9 +1155,12 @@
     "away": "Real Oviedo",
     "home_crest": "https://crests.football-data.org/80.png",
     "away_crest": "https://crests.football-data.org/1048.png",
+    "home_team_id": 80,
+    "away_team_id": 1048,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1221,16 +1194,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1244,9 +1207,12 @@
     "away": "Villarreal CF",
     "home_crest": "https://crests.football-data.org/263.png",
     "away_crest": "https://crests.football-data.org/94.png",
+    "home_team_id": 263,
+    "away_team_id": 94,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1280,16 +1246,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1303,9 +1259,12 @@
     "away": "Athletic Club",
     "home_crest": "https://crests.football-data.org/298.png",
     "away_crest": "https://crests.football-data.org/77.png",
+    "home_team_id": 298,
+    "away_team_id": 77,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1339,16 +1298,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1362,9 +1311,12 @@
     "away": "Getafe CF",
     "home_crest": "https://crests.football-data.org/78.png",
     "away_crest": "https://crests.football-data.org/82.png",
+    "home_team_id": 78,
+    "away_team_id": 82,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1398,16 +1350,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1421,9 +1363,12 @@
     "away": "Valencia CF",
     "home_crest": "https://crests.football-data.org/1048.png",
     "away_crest": "https://crests.football-data.org/95.png",
+    "home_team_id": 1048,
+    "away_team_id": 95,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1457,16 +1402,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1480,9 +1415,12 @@
     "away": "Elche CF",
     "home_crest": "https://crests.football-data.org/86.png",
     "away_crest": "https://crests.football-data.org/285.png",
+    "home_team_id": 86,
+    "away_team_id": 285,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1516,16 +1454,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1539,9 +1467,12 @@
     "away": "RCD Espanyol de Barcelona",
     "home_crest": "https://crests.football-data.org/89.png",
     "away_crest": "https://crests.football-data.org/80.png",
+    "home_team_id": 89,
+    "away_team_id": 80,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1575,16 +1506,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1598,9 +1519,12 @@
     "away": "Sevilla FC",
     "home_crest": "https://crests.football-data.org/81.png",
     "away_crest": "https://crests.football-data.org/559.png",
+    "home_team_id": 81,
+    "away_team_id": 559,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1634,16 +1558,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1657,9 +1571,12 @@
     "away": "RC Celta de Vigo",
     "home_crest": "https://crests.football-data.org/90.png",
     "away_crest": "https://crests.football-data.org/558.png",
+    "home_team_id": 90,
+    "away_team_id": 558,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1693,16 +1610,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1716,9 +1623,12 @@
     "away": "CA Osasuna",
     "home_crest": "https://crests.football-data.org/92.png",
     "away_crest": "https://crests.football-data.org/79.png",
+    "home_team_id": 92,
+    "away_team_id": 79,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1752,16 +1662,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1775,9 +1675,12 @@
     "away": "Levante UD",
     "home_crest": "https://crests.football-data.org/87.png",
     "away_crest": "https://crests.football-data.org/88.png",
+    "home_team_id": 87,
+    "away_team_id": 88,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1811,16 +1714,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1834,9 +1727,12 @@
     "away": "CA Osasuna",
     "home_crest": "https://crests.football-data.org/263.png",
     "away_crest": "https://crests.football-data.org/79.png",
+    "home_team_id": 263,
+    "away_team_id": 79,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1870,16 +1766,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1893,9 +1779,12 @@
     "away": "FC Barcelona",
     "home_crest": "https://crests.football-data.org/78.png",
     "away_crest": "https://crests.football-data.org/81.png",
+    "home_team_id": 78,
+    "away_team_id": 81,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1929,16 +1818,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -1952,9 +1831,12 @@
     "away": "RCD Espanyol de Barcelona",
     "home_crest": "https://crests.football-data.org/90.png",
     "away_crest": "https://crests.football-data.org/80.png",
+    "home_team_id": 90,
+    "away_team_id": 80,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -1988,16 +1870,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2011,9 +1883,12 @@
     "away": "Villarreal CF",
     "home_crest": "https://crests.football-data.org/298.png",
     "away_crest": "https://crests.football-data.org/94.png",
+    "home_team_id": 298,
+    "away_team_id": 94,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2047,16 +1922,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2070,9 +1935,12 @@
     "away": "Real Madrid CF",
     "home_crest": "https://crests.football-data.org/89.png",
     "away_crest": "https://crests.football-data.org/86.png",
+    "home_team_id": 89,
+    "away_team_id": 86,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2106,16 +1974,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2129,9 +1987,12 @@
     "away": "Sevilla FC",
     "home_crest": "https://crests.football-data.org/1048.png",
     "away_crest": "https://crests.football-data.org/559.png",
+    "home_team_id": 1048,
+    "away_team_id": 559,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2165,16 +2026,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2188,9 +2039,12 @@
     "away": "Athletic Club",
     "home_crest": "https://crests.football-data.org/82.png",
     "away_crest": "https://crests.football-data.org/77.png",
+    "home_team_id": 82,
+    "away_team_id": 77,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2224,16 +2078,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2247,9 +2091,12 @@
     "away": "RC Celta de Vigo",
     "home_crest": "https://crests.football-data.org/95.png",
     "away_crest": "https://crests.football-data.org/558.png",
+    "home_team_id": 95,
+    "away_team_id": 558,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2283,16 +2130,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2306,9 +2143,12 @@
     "away": "Elche CF",
     "home_crest": "https://crests.football-data.org/87.png",
     "away_crest": "https://crests.football-data.org/285.png",
+    "home_team_id": 87,
+    "away_team_id": 285,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2342,16 +2182,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2365,9 +2195,12 @@
     "away": "Levante UD",
     "home_crest": "https://crests.football-data.org/92.png",
     "away_crest": "https://crests.football-data.org/88.png",
+    "home_team_id": 92,
+    "away_team_id": 88,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2401,16 +2234,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2424,9 +2247,12 @@
     "away": "RCD Espanyol de Barcelona",
     "home_crest": "https://crests.football-data.org/81.png",
     "away_crest": "https://crests.football-data.org/80.png",
+    "home_team_id": 81,
+    "away_team_id": 80,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2460,16 +2286,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2483,9 +2299,12 @@
     "away": "Real Oviedo",
     "home_crest": "https://crests.football-data.org/558.png",
     "away_crest": "https://crests.football-data.org/1048.png",
+    "home_team_id": 558,
+    "away_team_id": 1048,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2519,16 +2338,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2542,9 +2351,12 @@
     "away": "Valencia CF",
     "home_crest": "https://crests.football-data.org/285.png",
     "away_crest": "https://crests.football-data.org/95.png",
+    "home_team_id": 285,
+    "away_team_id": 95,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2578,16 +2390,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2601,9 +2403,12 @@
     "away": "Rayo Vallecano de Madrid",
     "home_crest": "https://crests.football-data.org/89.png",
     "away_crest": "https://crests.football-data.org/87.png",
+    "home_team_id": 89,
+    "away_team_id": 87,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2637,16 +2442,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2660,9 +2455,12 @@
     "away": "Deportivo Alavés",
     "home_crest": "https://crests.football-data.org/92.png",
     "away_crest": "https://crests.football-data.org/263.png",
+    "home_team_id": 92,
+    "away_team_id": 263,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2696,16 +2494,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2719,9 +2507,12 @@
     "away": "Club Atlético de Madrid",
     "home_crest": "https://crests.football-data.org/559.png",
     "away_crest": "https://crests.football-data.org/78.png",
+    "home_team_id": 559,
+    "away_team_id": 78,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2755,16 +2546,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2778,9 +2559,12 @@
     "away": "Real Betis Balompié",
     "home_crest": "https://crests.football-data.org/79.png",
     "away_crest": "https://crests.football-data.org/90.png",
+    "home_team_id": 79,
+    "away_team_id": 90,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2814,16 +2598,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2837,9 +2611,12 @@
     "away": "Getafe CF",
     "home_crest": "https://crests.football-data.org/88.png",
     "away_crest": "https://crests.football-data.org/82.png",
+    "home_team_id": 88,
+    "away_team_id": 82,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2873,16 +2650,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2896,9 +2663,12 @@
     "away": "Girona FC",
     "home_crest": "https://crests.football-data.org/86.png",
     "away_crest": "https://crests.football-data.org/298.png",
+    "home_team_id": 86,
+    "away_team_id": 298,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2932,16 +2702,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -2955,9 +2715,12 @@
     "away": "Villarreal CF",
     "home_crest": "https://crests.football-data.org/77.png",
     "away_crest": "https://crests.football-data.org/94.png",
+    "home_team_id": 77,
+    "away_team_id": 94,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -2991,16 +2754,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3014,9 +2767,12 @@
     "away": "CA Osasuna",
     "home_crest": "https://crests.football-data.org/77.png",
     "away_crest": "https://crests.football-data.org/79.png",
+    "home_team_id": 77,
+    "away_team_id": 79,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3050,16 +2806,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3073,9 +2819,12 @@
     "away": "RC Celta de Vigo",
     "home_crest": "https://crests.football-data.org/81.png",
     "away_crest": "https://crests.football-data.org/558.png",
+    "home_team_id": 81,
+    "away_team_id": 558,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3109,16 +2858,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3132,9 +2871,12 @@
     "away": "Sevilla FC",
     "home_crest": "https://crests.football-data.org/88.png",
     "away_crest": "https://crests.football-data.org/559.png",
+    "home_team_id": 88,
+    "away_team_id": 559,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3168,16 +2910,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3191,9 +2923,12 @@
     "away": "Valencia CF",
     "home_crest": "https://crests.football-data.org/89.png",
     "away_crest": "https://crests.football-data.org/95.png",
+    "home_team_id": 89,
+    "away_team_id": 95,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3227,16 +2962,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3250,9 +2975,12 @@
     "away": "Villarreal CF",
     "home_crest": "https://crests.football-data.org/1048.png",
     "away_crest": "https://crests.football-data.org/94.png",
+    "home_team_id": 1048,
+    "away_team_id": 94,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3286,16 +3014,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3309,9 +3027,12 @@
     "away": "Deportivo Alavés",
     "home_crest": "https://crests.football-data.org/86.png",
     "away_crest": "https://crests.football-data.org/263.png",
+    "home_team_id": 86,
+    "away_team_id": 263,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3345,16 +3066,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3368,9 +3079,12 @@
     "away": "Club Atlético de Madrid",
     "home_crest": "https://crests.football-data.org/285.png",
     "away_crest": "https://crests.football-data.org/78.png",
+    "home_team_id": 285,
+    "away_team_id": 78,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3404,16 +3118,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3427,9 +3131,12 @@
     "away": "Real Betis Balompié",
     "home_crest": "https://crests.football-data.org/298.png",
     "away_crest": "https://crests.football-data.org/90.png",
+    "home_team_id": 298,
+    "away_team_id": 90,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3463,16 +3170,6 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
@@ -3486,9 +3183,12 @@
     "away": "RCD Espanyol de Barcelona",
     "home_crest": "https://crests.football-data.org/87.png",
     "away_crest": "https://crests.football-data.org/80.png",
+    "home_team_id": 87,
+    "away_team_id": 80,
     "xg_home": 1.45,
     "xg_away": 1.15,
     "xg_total": 2.6,
+    "model": "A",
     "probs": {
       "home": 0.4398,
       "draw": 0.2604,
@@ -3522,375 +3222,11 @@
         "market": "X2",
         "prob": 0.5602,
         "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
       }
     ],
     "best_market": "12",
     "best_prob": 0.7396,
     "best_fair": 1.35,
     "result": "PENDING"
-  },
-  {
-    "utcDate": "2026-02-23T20:00:00Z",
-    "home": "Deportivo Alavés",
-    "away": "Girona FC",
-    "home_crest": "https://crests.football-data.org/263.png",
-    "away_crest": "https://crests.football-data.org/298.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "LOSS"
-  },
-  {
-    "utcDate": "2026-02-21T20:00:00Z",
-    "home": "Club Atlético de Madrid",
-    "away": "RCD Espanyol de Barcelona",
-    "home_crest": "https://crests.football-data.org/78.png",
-    "away_crest": "https://crests.football-data.org/80.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "WIN"
-  },
-  {
-    "utcDate": "2026-02-22T13:00:00Z",
-    "home": "Getafe CF",
-    "away": "Sevilla FC",
-    "home_crest": "https://crests.football-data.org/82.png",
-    "away_crest": "https://crests.football-data.org/559.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "WIN"
-  },
-  {
-    "utcDate": "2026-02-22T15:15:00Z",
-    "home": "FC Barcelona",
-    "away": "Levante UD",
-    "home_crest": "https://crests.football-data.org/81.png",
-    "away_crest": "https://crests.football-data.org/88.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "WIN"
-  },
-  {
-    "utcDate": "2026-02-22T17:30:00Z",
-    "home": "RC Celta de Vigo",
-    "away": "RCD Mallorca",
-    "home_crest": "https://crests.football-data.org/558.png",
-    "away_crest": "https://crests.football-data.org/89.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "WIN"
-  },
-  {
-    "utcDate": "2026-02-22T20:00:00Z",
-    "home": "Villarreal CF",
-    "away": "Valencia CF",
-    "home_crest": "https://crests.football-data.org/94.png",
-    "away_crest": "https://crests.football-data.org/95.png",
-    "xg_home": 1.45,
-    "xg_away": 1.15,
-    "xg_total": 2.6,
-    "probs": {
-      "home": 0.4398,
-      "draw": 0.2604,
-      "away": 0.2998,
-      "1x": 0.7002,
-      "x2": 0.5602,
-      "12": 0.7396,
-      "under_25": 0.5184,
-      "over_25": 0.4816,
-      "over_15": 0.7326,
-      "btts_yes": 0.5231,
-      "btts_no": 0.4769
-    },
-    "candidates": [
-      {
-        "market": "12",
-        "prob": 0.7396,
-        "fair": 1.35
-      },
-      {
-        "market": "Over 1.5",
-        "prob": 0.7326,
-        "fair": 1.37
-      },
-      {
-        "market": "1X",
-        "prob": 0.7002,
-        "fair": 1.43
-      },
-      {
-        "market": "X2",
-        "prob": 0.5602,
-        "fair": 1.79
-      },
-      {
-        "market": "BTTS Yes",
-        "prob": 0.5231,
-        "fair": 1.91
-      },
-      {
-        "market": "Under 2.5",
-        "prob": 0.5184,
-        "fair": 1.93
-      }
-    ],
-    "best_market": "12",
-    "best_prob": 0.7396,
-    "best_fair": 1.35,
-    "result": "WIN"
   }
 ]

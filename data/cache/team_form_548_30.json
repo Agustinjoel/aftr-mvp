@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "team_id": 548,
+    "days_back": 30,
+    "limit": 8,
+    "fetched_at": "2026-02-25T02:13:01.282318+00:00",
+    "ttl_seconds": 43200
+  },
+  "matches": [
+    {
+      "utcDate": "2026-01-28T20:00:00Z",
+      "home_id": 548,
+      "away_id": 109,
+      "home_goals": 0,
+      "away_goals": 0
+    },
+    {
+      "utcDate": "2026-01-31T20:05:00Z",
+      "home_id": 548,
+      "away_id": 529,
+      "home_goals": 4,
+      "away_goals": 0
+    },
+    {
+      "utcDate": "2026-02-08T14:00:00Z",
+      "home_id": 522,
+      "away_id": 548,
+      "home_goals": 0,
+      "away_goals": 0
+    },
+    {
+      "utcDate": "2026-02-13T20:05:00Z",
+      "home_id": 548,
+      "away_id": 543,
+      "home_goals": 3,
+      "away_goals": 1
+    },
+    {
+      "utcDate": "2026-02-17T20:00:00Z",
+      "home_id": 548,
+      "away_id": 524,
+      "home_goals": 2,
+      "away_goals": 3
+    },
+    {
+      "utcDate": "2026-02-21T16:00:00Z",
+      "home_id": 546,
+      "away_id": 548,
+      "home_goals": 2,
+      "away_goals": 3
+    }
+  ]
+}

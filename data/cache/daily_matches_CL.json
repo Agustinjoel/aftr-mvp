@@ -1,49 +1,5 @@
 [
   {
-    "match_id": 552064,
-    "utcDate": "2026-02-24T17:45:00Z",
-    "home": "Club Atlético de Madrid",
-    "away": "Club Brugge KV",
-    "league": "CL",
-    "home_team_id": 78,
-    "away_team_id": 851,
-    "home_crest": "https://crests.football-data.org/78.png",
-    "away_crest": "https://crests.football-data.org/851.png"
-  },
-  {
-    "match_id": 552062,
-    "utcDate": "2026-02-24T20:00:00Z",
-    "home": "Newcastle United FC",
-    "away": "Qarabağ Ağdam FK",
-    "league": "CL",
-    "home_team_id": 67,
-    "away_team_id": 611,
-    "home_crest": "https://crests.football-data.org/67.png",
-    "away_crest": "https://crests.football-data.org/611.png"
-  },
-  {
-    "match_id": 552066,
-    "utcDate": "2026-02-24T20:00:00Z",
-    "home": "Bayer 04 Leverkusen",
-    "away": "PAE Olympiakos SFP",
-    "league": "CL",
-    "home_team_id": 3,
-    "away_team_id": 654,
-    "home_crest": "https://crests.football-data.org/3.png",
-    "away_crest": "https://crests.football-data.org/654.png"
-  },
-  {
-    "match_id": 552067,
-    "utcDate": "2026-02-24T20:00:00Z",
-    "home": "FC Internazionale Milano",
-    "away": "FK Bodø/Glimt",
-    "league": "CL",
-    "home_team_id": 108,
-    "away_team_id": 5721,
-    "home_crest": "https://crests.football-data.org/108.png",
-    "away_crest": "https://crests.football-data.org/5721.png"
-  },
-  {
     "match_id": 552065,
     "utcDate": "2026-02-25T17:45:00Z",
     "home": "Atalanta BC",
