@@ -3492,8 +3492,8 @@ def _simple_page(title: str, body: str) -> str:
   {body}
   <script>
     // Fallbacks so header buttons work on simple pages without ReferenceError.
-    function openLoginModal(){ window.location.href='/?auth=login'; }
-    function openSignupModal(){ window.location.href='/?auth=register'; }
+    function openLoginModal(){{ window.location.href='/?auth=login'; }}
+    function openSignupModal(){{ window.location.href='/?auth=register'; }}
   </script>
 </body>
 </html>"""
