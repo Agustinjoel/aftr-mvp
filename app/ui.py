@@ -1642,9 +1642,10 @@ def home_page(request: Request) -> str:
             f'<a class="plan-logout" href="/auth/logout">Salir</a>'
         )
     else:
+        # On home page, navigate to auth routes so the modal can open via ?auth=... param.
         auth_html = (
-            '<a class="pill" href="#" onclick="openLoginModal(); return false;">Entrar</a>'
-            '<a class="pill" href="#" onclick="openSignupModal(); return false;">Crear cuenta</a>'
+            '<a class="pill" href="/?auth=login">Entrar</a>'
+            '<a class="pill" href="/?auth=register">Crear cuenta</a>'
         )
     is_admin_user = is_admin(user, request)
     plan_badge = auth_html
@@ -2237,9 +2238,10 @@ def dashboard(request: Request, league: str):
             f'<a class="plan-logout" href="/auth/logout">Salir</a>'
         )
     else:
+        # On league dashboard, also route to auth pages so the modal logic can run via ?auth=...
         auth_html = (
-            '<a class="pill" href="#" onclick="openLoginModal(); return false;">Entrar</a>'
-            '<a class="pill" href="#" onclick="openSignupModal(); return false;">Crear cuenta</a>'
+            '<a class="pill" href="/?auth=login">Entrar</a>'
+            '<a class="pill" href="/?auth=register">Crear cuenta</a>'
         )
 
     is_admin_user = is_admin(user, request)
