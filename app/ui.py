@@ -2661,9 +2661,14 @@ def dashboard(request: Request, league: str):
       var loginForm = document.getElementById("login-form");
       if (loginForm) loginForm.action = origin + "/auth/login";
       var params = new URLSearchParams(window.location.search);
-      if (params.get("auth") === "login") openLoginModal();
-      else if (params.get("auth") === "register") openSignupModal();
-      else if (params.get("msg") === "premium_activated") showPremiumSuccess();
+      var authParam = params.get("auth");
+      if (authParam === "login" && typeof window.openLoginModal === "function") {
+        window.openLoginModal();
+      } else if (authParam === "register" && typeof window.openSignupModal === "function") {
+        window.openSignupModal();
+      } else if (params.get("msg") === "premium_activated" && typeof window.showPremiumSuccess === "function") {
+        window.showPremiumSuccess();
+      }
     })
 
     </script>
