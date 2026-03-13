@@ -3,3 +3,8 @@ uvicorn
 python-dotenv
 requests
 pytest
+passlib
+bcrypt
+python-multipart
+stripe
+itsdangerous

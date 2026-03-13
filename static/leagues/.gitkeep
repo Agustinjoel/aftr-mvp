@@ -1,0 +1,2 @@
+# League logos (see app/ui.py LEAGUE_LOGO_PATHS): pl.png, cl.png, pd.png, sa.png, nba.png.
+# Optional: fallback.svg used when league image is missing; else styled initial letter is shown.

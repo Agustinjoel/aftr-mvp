@@ -1,18 +1,19 @@
 """
-Evaluación de un pick según resultado del partido (goles).
-Devuelve (WIN | LOSS | PUSH, reason). PUSH solo si el mercado no es soportado.
+Evaluación de mercados de fútbol (goles). Devuelve (WIN | LOSS | PUSH, reason).
+Basketball usa core.basketball_evaluation.
 """
 from __future__ import annotations
 
 
 def evaluate_market(market: str, home_goals: int, away_goals: int) -> tuple[str, str]:
     """
-    Evalúa el mercado con el resultado (home_goals, away_goals).
+    Evalúa el mercado de fútbol con el resultado (home_goals, away_goals).
     Returns: (result, reason) con result in WIN | LOSS | PUSH.
     """
     m = (market or "").strip()
     m_lower = m.lower()
     hg, ag = home_goals, away_goals
+    total = hg + ag
     score = f"{hg}-{ag}"
 
     # --- 1X2 y derivados (soporte explícito) ---

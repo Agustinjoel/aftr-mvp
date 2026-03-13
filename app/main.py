@@ -7,6 +7,9 @@ from app.routes.matches import router as matches_router
 from app.routes.picks import router as picks_router
 from app.ui import router as ui_router
 from config.settings import settings
+from app.db import init_db
+from app.auth import router as auth_router
+from app.payments import router as pay_router
 
 # Logging
 logging.basicConfig(
@@ -21,6 +24,8 @@ app = FastAPI(
     version="1.0.0",
 )
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # Static (ruta absoluta para funcionar desde cualquier CWD)
 static_dir = settings.base_dir / "static"
 if static_dir.exists():
@@ -29,8 +34,11 @@ if static_dir.exists():
 app.include_router(ui_router)
 app.include_router(matches_router, prefix="/api", tags=["matches"])
 app.include_router(picks_router, prefix="/api", tags=["picks"])
-
+app.include_router(auth_router)
+app.include_router(pay_router)
 
 @app.get("/health")
 def health():
-    return {"ok": True, "debug": settings.debug}
+    return {"status": "ok"}
+
+init_db()

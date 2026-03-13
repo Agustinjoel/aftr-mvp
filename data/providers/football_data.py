@@ -5,15 +5,24 @@ Usa config.settings para API key.
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+import json
+import logging
 import os
 import time
-import logging
+from pathlib import Path
 
 import requests
 
-from config.settings import FOOTBALL_DATA_API_KEY
+from config.settings import CACHE_DIR, FOOTBALL_DATA_API_KEY
 
 logger = logging.getLogger(__name__)
+
+
+class UnsupportedCompetitionError(Exception):
+    """Raised when the API returns 403 for a competition (not in current plan)."""
+    def __init__(self, league_code: str) -> None:
+        self.league_code = league_code
+        super().__init__(f"Competition not available with current API key: {league_code}")
 
 BASE = "https://api.football-data.org/v4"
 COMPETITIONS = {
@@ -21,6 +30,7 @@ COMPETITIONS = {
     "ELC": "ELC",  # Championship
     "PL": "PL",
     "CL": "CL",
+    "EL": "EL",    # UEFA Europa League
     "EC": "EC",    # Euro
     "FL1": "FL1",
     "BL1": "BL1",
@@ -31,6 +41,45 @@ COMPETITIONS = {
     "PD": "PD",
     "WC": "WC",
 }
+
+_UNSUPPORTED_FILE: Path = CACHE_DIR / "unsupported_leagues.json"
+
+
+def _load_unsupported() -> set[str]:
+    """Load list of league codes that returned 403 (restricted with current API key)."""
+    try:
+        if _UNSUPPORTED_FILE.exists():
+            raw = _UNSUPPORTED_FILE.read_text(encoding="utf-8")
+            data = json.loads(raw)
+            return set(data) if isinstance(data, list) else set()
+    except Exception as e:
+        logger.debug("Could not load unsupported leagues: %s", e)
+    return set()
+
+
+def _save_unsupported(codes: set[str]) -> None:
+    """Persist unsupported league codes so UI and refresh can skip them."""
+    try:
+        _UNSUPPORTED_FILE.parent.mkdir(parents=True, exist_ok=True)
+        _UNSUPPORTED_FILE.write_text(json.dumps(sorted(codes)), encoding="utf-8")
+    except Exception as e:
+        logger.warning("Could not save unsupported leagues: %s", e)
+
+
+def get_unsupported_leagues() -> set[str]:
+    """Return league codes that are restricted (403) with the current API key."""
+    return _load_unsupported()
+
+
+def register_unsupported(league_code: str) -> None:
+    """Mark a league as unsupported after a 403 response. Extensible for other restricted competitions."""
+    codes = _load_unsupported()
+    if league_code in codes:
+        return
+    codes.add(league_code)
+    _save_unsupported(codes)
+    logger.info("Competition %s marked as unsupported (403) for current API key.", league_code)
+
 
 # ✅ DEV/PROD switch:
 #   AFTR_SLEEP_ON_429=0 -> no duerme, tira error rápido (ideal dev)
@@ -78,6 +127,15 @@ def _get(path: str, params: dict | None = None) -> dict:
                     time.sleep(wait)
             except ValueError:
                 pass
+
+        if r.status_code == 403:
+            # Competition restricted with current API plan; mark and raise so callers can skip gracefully.
+            parts = path.strip("/").split("/")
+            comp = parts[1] if len(parts) >= 2 and parts[0] == "competitions" else None
+            if comp:
+                register_unsupported(comp)
+                raise UnsupportedCompetitionError(comp)
+            raise RuntimeError(f"Football-Data 403: {r.text}")
 
         if r.status_code != 200:
             raise RuntimeError(f"Football-Data Error {r.status_code}: {r.text}")

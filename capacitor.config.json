@@ -1,0 +1,9 @@
+{
+  "appId": "com.aftr.app",
+  "appName": "AFTR",
+  "webDir": "www",
+  "server": {
+    "url": "http://192.168.100.11:8000",
+    "cleartext": true
+  }
+}

@@ -1,0 +1,90 @@
+"""
+AFTR user storage (no password hashes exposed outside this module/auth).
+
+- Database file: DB_PATH (default: aftr.sqlite3 in project root / CWD).
+- Table: users
+- Columns: id, email, username, password_hash, role, subscription_status,
+  subscription_start, subscription_end, created_at, updated_at,
+  stripe_customer_id, stripe_subscription_id
+"""
+from __future__ import annotations
+import sqlite3
+from pathlib import Path
+
+DB_PATH = Path("aftr.sqlite3")
+USERS_TABLE = "users"
+
+def get_conn():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL UNIQUE,
+        username TEXT UNIQUE,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'free_user',
+        subscription_status TEXT NOT NULL DEFAULT 'inactive',
+        subscription_start TEXT,
+        subscription_end TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT,
+        stripe_customer_id TEXT,
+        stripe_subscription_id TEXT
+    )
+    """)
+
+    for col_def in [
+        ("username", "TEXT"),
+        ("role", "TEXT NOT NULL DEFAULT 'free_user'"),
+        ("subscription_status", "TEXT NOT NULL DEFAULT 'inactive'"),
+        ("subscription_start", "TEXT"),
+        ("subscription_end", "TEXT"),
+        ("updated_at", "TEXT"),
+        ("stripe_customer_id", "TEXT"),
+        ("stripe_subscription_id", "TEXT"),
+    ]:
+        try:
+            cur.execute(
+                "ALTER TABLE users ADD COLUMN " + col_def[0] + " " + col_def[1]
+            )
+        except sqlite3.OperationalError:
+            pass
+
+    try:
+        cur.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username) WHERE username IS NOT NULL"
+        )
+    except sqlite3.OperationalError:
+        pass
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS subscriptions (
+        user_id INTEGER PRIMARY KEY,
+        plan TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    )
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        token_hash TEXT NOT NULL UNIQUE,
+        user_id INTEGER NOT NULL,
+        expires_at TEXT NOT NULL,
+        used_at TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    )
+    """)
+
+    conn.commit()
+    conn.close()
