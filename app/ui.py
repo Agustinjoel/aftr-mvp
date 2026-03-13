@@ -2557,6 +2557,11 @@ def dashboard(request: Request, league: str):
       var m = document.getElementById("signup-modal");
       if (m) m.style.display = "none";
     }
+    // Expose auth modal helpers on window so inline onclick handlers always work
+    window.openLoginModal = openLoginModal;
+    window.closeLoginModal = closeLoginModal;
+    window.openSignupModal = openSignupModal;
+    window.closeSignupModal = closeSignupModal;
     function openForgotModal(){
       var m = document.getElementById("forgot-modal");
       if (m) { m.style.display = "flex"; document.getElementById("forgot-error").style.display = "none"; document.getElementById("forgot-success").style.display = "none"; }
