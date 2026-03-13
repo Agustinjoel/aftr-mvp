@@ -74,10 +74,18 @@ def manual_activate(request: Request, plan: str = Query("PREMIUM")):
 def create_checkout_session(request: Request):
     uid = get_user_id(request)
     if not uid:
+        logger.info("Checkout session denied: not authenticated")
         return JSONResponse({"ok": False, "error": "need_login"}, status_code=401)
 
     if not stripe or not settings.stripe_secret_key or not settings.stripe_price_id:
-        logger.error("Stripe not configured; cannot create checkout session")
+        logger.error(
+            "Stripe not configured; cannot create checkout session",
+            extra={
+                "has_stripe": bool(stripe),
+                "has_secret": bool(settings.stripe_secret_key),
+                "has_price_id": bool(settings.stripe_price_id),
+            },
+        )
         return JSONResponse({"ok": False, "error": "stripe_not_configured"}, status_code=500)
 
     user = get_user_by_id(uid) or {}
@@ -86,6 +94,11 @@ def create_checkout_session(request: Request):
     base_url = (settings.app_base_url or str(request.base_url)).rstrip("/")
     success_url = f"{base_url}/billing/success"
     cancel_url = base_url
+
+    logger.info(
+        "Creating Stripe checkout session",
+        extra={"user_id": uid, "success_url": success_url, "cancel_url": cancel_url},
+    )
 
     try:
         session = stripe.checkout.Session.create(
@@ -96,8 +109,12 @@ def create_checkout_session(request: Request):
             client_reference_id=str(uid),
             customer_email=email,
         )
+        logger.info(
+            "Stripe checkout session created",
+            extra={"user_id": uid, "session_id": getattr(session, "id", None)},
+        )
         return JSONResponse({"ok": True, "url": session.url})
-    except Exception as e:  # pragma: no cover - network / Stripe-side
+    except Exception:  # pragma: no cover - network / Stripe-side
         logger.error("Error creating Stripe checkout session", exc_info=True)
         return JSONResponse({"ok": False, "error": "stripe_error"}, status_code=500)
 
@@ -106,6 +123,74 @@ def create_checkout_session(request: Request):
 def billing_success():
     """After Stripe Checkout success: redirect to dashboard with premium_activated so the success animation shows."""
     return RedirectResponse(url="/?msg=premium_activated", status_code=302)
+
+
+def _apply_premium_to_user(uid_int: int, expires_at_iso: str, customer_id: str | None = None, subscription_id: str | None = None) -> None:
+    """Write PREMIUM into subscriptions and users for given user_id and expiry."""
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO subscriptions(user_id, plan, expires_at, created_at)
+        VALUES (?,?,?,?)
+        ON CONFLICT(user_id) DO UPDATE SET plan=excluded.plan, expires_at=excluded.expires_at
+        """,
+        (uid_int, "PREMIUM", expires_at_iso, now_iso),
+    )
+    updates = [
+        "role = 'premium_user'",
+        "subscription_status = 'active'",
+        "subscription_start = COALESCE(subscription_start, ?)",
+        "subscription_end = ?",
+        "updated_at = ?",
+    ]
+    args = [now_iso, expires_at_iso, now_iso]
+    if customer_id is not None:
+        updates.append("stripe_customer_id = COALESCE(stripe_customer_id, ?)")
+        args.append(customer_id)
+    if subscription_id is not None:
+        updates.append("stripe_subscription_id = COALESCE(stripe_subscription_id, ?)")
+        args.append(subscription_id)
+    args.append(uid_int)
+    cur.execute(
+        "UPDATE users SET " + ", ".join(updates) + " WHERE id = ?",
+        tuple(args),
+    )
+    conn.commit()
+    conn.close()
+
+
+def _revoke_premium_for_user(uid_int: int) -> None:
+    """Set subscription to expired/inactive in DB."""
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE subscriptions SET plan = 'FREE', expires_at = ? WHERE user_id = ?",
+        (now_iso, uid_int),
+    )
+    cur.execute(
+        """
+        UPDATE users SET role = 'free_user', subscription_status = 'inactive', updated_at = ?
+        WHERE id = ?
+        """,
+        (now_iso, uid_int),
+    )
+    conn.commit()
+    conn.close()
+
+
+def _uid_from_subscription_id(stripe_subscription_id: str) -> int | None:
+    """Resolve user_id from users.stripe_subscription_id."""
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM users WHERE stripe_subscription_id = ?", (stripe_subscription_id,))
+    row = cur.fetchone()
+    conn.close()
+    return int(row["id"]) if row else None
 
 
 @router.post("/webhooks/stripe", include_in_schema=False)
@@ -128,7 +213,9 @@ async def stripe_webhook(request: Request):
         logger.warning("Invalid Stripe webhook", exc_info=True)
         return JSONResponse({"ok": False}, status_code=400)
 
-    if event["type"] == "checkout.session.completed":
+    ev_type = event["type"]
+
+    if ev_type == "checkout.session.completed":
         session = event["data"]["object"]
         uid = session.get("client_reference_id")
         customer_id = session.get("customer")
@@ -140,47 +227,34 @@ async def stripe_webhook(request: Request):
                 uid_int = None
             if uid_int:
                 now = datetime.now(timezone.utc)
-                exp = now + timedelta(days=30)
-                now_iso = now.isoformat()
-                exp_iso = exp.isoformat()
-                conn = get_conn()
-                cur = conn.cursor()
-                # update subscriptions table
-                cur.execute(
-                    """
-                  INSERT INTO subscriptions(user_id, plan, expires_at, created_at)
-                  VALUES (?,?,?,?)
-                  ON CONFLICT(user_id) DO UPDATE SET
-                    plan=excluded.plan,
-                    expires_at=excluded.expires_at
-                """,
-                    (uid_int, "PREMIUM", exp_iso, now_iso),
-                )
-                # update user flags + stripe ids
-                try:
-                    cur.execute(
-                        """
-                      UPDATE users SET
-                        role = 'premium_user',
-                        subscription_status = 'active',
-                        subscription_start = COALESCE(subscription_start, ?),
-                        subscription_end = ?,
-                        stripe_customer_id = COALESCE(stripe_customer_id, ?),
-                        stripe_subscription_id = COALESCE(stripe_subscription_id, ?),
-                        updated_at = ?
-                      WHERE id = ?
-                    """,
-                        (
-                            now_iso,
-                            exp_iso,
-                            customer_id,
-                            subscription_id,
-                            now_iso,
-                            uid_int,
-                        ),
-                    )
-                except Exception:
-                    logger.exception("Error updating user premium flags from Stripe webhook")
-                conn.commit()
-                conn.close()
+                exp_iso = (now + timedelta(days=30)).isoformat()
+                if subscription_id and wh_secret:
+                    try:
+                        sub = stripe.Subscription.retrieve(subscription_id)
+                        if getattr(sub, "current_period_end", None):
+                            exp_iso = datetime.fromtimestamp(sub.current_period_end, tz=timezone.utc).isoformat()
+                    except Exception:
+                        pass
+                _apply_premium_to_user(uid_int, exp_iso, customer_id=customer_id, subscription_id=subscription_id)
+
+    elif ev_type == "customer.subscription.updated":
+        sub = event["data"]["object"]
+        sub_id = sub.get("id")
+        status = (sub.get("status") or "").strip().lower()
+        uid_int = _uid_from_subscription_id(sub_id) if sub_id else None
+        if uid_int:
+            if status in ("active", "trialing"):
+                exp_ts = sub.get("current_period_end")
+                exp_iso = datetime.fromtimestamp(exp_ts, tz=timezone.utc).isoformat() if exp_ts else (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+                _apply_premium_to_user(uid_int, exp_iso)
+            else:
+                _revoke_premium_for_user(uid_int)
+
+    elif ev_type == "customer.subscription.deleted":
+        sub = event["data"]["object"]
+        sub_id = sub.get("id")
+        uid_int = _uid_from_subscription_id(sub_id) if sub_id else None
+        if uid_int:
+            _revoke_premium_for_user(uid_int)
+
     return JSONResponse({"ok": True})

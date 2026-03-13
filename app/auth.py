@@ -197,6 +197,7 @@ def signup_lead(payload: dict = Body(...)):
 
 @router.post("/auth/login")
 def login(email: str = Form(...), password: str = Form(...)):
+    """Form login (browser). Sets aftr_session cookie and redirects."""
     email = (email or "").strip().lower()
     if _password_too_long(password or ""):
         return RedirectResponse(url="/?msg=login_fail", status_code=302)
@@ -214,11 +215,73 @@ def login(email: str = Form(...), password: str = Form(...)):
     set_session(resp, int(row["id"]))
     return resp
 
+
+@router.post("/auth/login/json")
+def login_json(payload: dict = Body(...)):
+    """JSON login (API/Android). Sets aftr_session cookie and returns user info."""
+    email = (payload.get("email") or "").strip().lower()
+    password = payload.get("password") or ""
+    if not _email_valid(email):
+        return JSONResponse({"ok": False, "error": "email_invalido"}, status_code=400)
+    if _password_too_long(password):
+        return JSONResponse({"ok": False, "error": "password_demasiado_larga"}, status_code=400)
+
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT id,password_hash FROM users WHERE email=?", (email,))
+    row = cur.fetchone()
+    conn.close()
+
+    if not row or not bcrypt.verify(password, row["password_hash"]):
+        return JSONResponse({"ok": False, "error": "credenciales_invalidas"}, status_code=401)
+
+    uid = int(row["id"])
+    user = get_user_by_id(uid) or {}
+    from app.models import get_active_plan
+    plan = get_active_plan(uid)
+    resp = JSONResponse({
+        "ok": True,
+        "user": {
+            "id": user.get("id"),
+            "email": user.get("email"),
+            "username": user.get("username"),
+            "role": user.get("role"),
+            "subscription_status": user.get("subscription_status"),
+            "plan": plan,
+        },
+    })
+    set_session_on_response(resp, uid)
+    return resp
+
 @router.get("/auth/logout")
 def logout():
     resp = RedirectResponse(url="/?msg=bye", status_code=302)
     clear_session(resp)
     return resp
+
+
+@router.get("/auth/me")
+def me(request: Request):
+    """Current user info (id, email, username, role, plan). 401 if not logged in."""
+    uid = get_user_id(request)
+    if not uid:
+        return JSONResponse({"ok": False, "error": "not_authenticated"}, status_code=401)
+    user = get_user_by_id(uid)
+    if not user:
+        return JSONResponse({"ok": False, "error": "user_not_found"}, status_code=401)
+    from app.models import get_active_plan
+    plan = get_active_plan(uid)
+    return JSONResponse({
+        "ok": True,
+        "user": {
+            "id": user.get("id"),
+            "email": user.get("email"),
+            "username": user.get("username"),
+            "role": user.get("role"),
+            "subscription_status": user.get("subscription_status"),
+            "plan": plan,
+        },
+    })
 
 
 # ----- Forgot / Reset password (token stored in DB; email delivery can be wired later) -----

@@ -1,7 +1,7 @@
 """
 AFTR user storage (no password hashes exposed outside this module/auth).
 
-- Database file: DB_PATH (default: aftr.sqlite3 in project root / CWD).
+- Database file: from config.settings (AFTR_DB_PATH / DB_PATH env, default: base_dir/aftr.db).
 - Table: users
 - Columns: id, email, username, password_hash, role, subscription_status,
   subscription_start, subscription_end, created_at, updated_at,
@@ -9,10 +9,11 @@ AFTR user storage (no password hashes exposed outside this module/auth).
 """
 from __future__ import annotations
 import sqlite3
-from pathlib import Path
 
-DB_PATH = Path("aftr.sqlite3")
+from config.settings import DB_PATH
+
 USERS_TABLE = "users"
+
 
 def get_conn():
     conn = sqlite3.connect(DB_PATH)
