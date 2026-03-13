@@ -1,7 +1,6 @@
-const CACHE_NAME = "aftr-v1";
+const CACHE_NAME = "aftr-v2";
 
 const ASSETS = [
-  "/",
   "/static/style.css?v=10",
   "/static/logo_aftr.png",
   "/static/manifest.webmanifest",

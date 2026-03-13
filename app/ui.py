@@ -3360,7 +3360,7 @@ def _account_header(request: Request):
         )
     else:
         auth_html = (
-            '<a class="pill" href="#" onclick="openLoginModal(); return false;">Entrar</a>'
+            '<a class="pill" href="/?auth=login">Entrar</a>'
             '<a class="pill" href="/?auth=register">Crear cuenta</a>'
         )
     is_admin_user = is_admin(user, request)
