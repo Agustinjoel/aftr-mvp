@@ -4,7 +4,7 @@ python-dotenv
 requests
 pytest
 passlib
-bcrypt
+bcrypt==4.0.1
 python-multipart
 stripe
 itsdangerous

@@ -68,6 +68,8 @@ def get_user_id(request: Request) -> Optional[int]:
 def create_user(email: str, username: str, password: str) -> int:
     email = (email or "").strip().lower()
     username = (username or "").strip()
+    if len((password or "").encode("utf-8")) > 72:
+        raise ValueError("La contraseña es demasiado larga. Usa una de hasta 72 bytes.")
     pw_hash = bcrypt.hash(password)
     now = datetime.now(timezone.utc).isoformat()
 
@@ -140,38 +142,52 @@ def _password_too_long(password: str) -> bool:
 
 @router.post("/auth/register")
 def register(payload: dict = Body(...)):
-    email = (payload.get("email") or "").strip().lower()
-    username = (payload.get("username") or "").strip()
-    password = payload.get("password") or ""
-    confirm = payload.get("confirm_password") or ""
-
-    if not _email_valid(email):
-        return JSONResponse({"ok": False, "error": "email_invalido"}, status_code=400)
-    if not username:
-        return JSONResponse({"ok": False, "error": "username_requerido"}, status_code=400)
-    if not password:
-        return JSONResponse({"ok": False, "error": "password_requerido"}, status_code=400)
-    if password != confirm:
-        return JSONResponse({"ok": False, "error": "password_no_coincide"}, status_code=400)
-    if _password_too_long(password):
-        return JSONResponse({"ok": False, "error": "password_demasiado_larga"}, status_code=400)
-
-    conn = get_conn()
+    print("REGISTER PAYLOAD:", payload)
     try:
-        cur = conn.cursor()
-        cur.execute("SELECT id FROM users WHERE email=?", (email,))
-        if cur.fetchone():
-            return JSONResponse({"ok": False, "error": "email_ya_registrado"}, status_code=400)
-        cur.execute("SELECT id FROM users WHERE username=?", (username,))
-        if cur.fetchone():
-            return JSONResponse({"ok": False, "error": "username_ya_usado"}, status_code=400)
-    finally:
-        conn.close()
+        email = (payload.get("email") or "").strip().lower()
+        username = (payload.get("username") or "").strip()
+        password = payload.get("password") or ""
+        confirm = payload.get("confirm_password") or ""
 
-    uid = create_user(email, username, password)
-    resp = JSONResponse({"ok": True, "username": username})
-    set_session_on_response(resp, uid)
-    return resp
+        if not _email_valid(email):
+            return JSONResponse(content={"ok": False, "error": "email_invalido"}, status_code=400)
+        if not username:
+            return JSONResponse(content={"ok": False, "error": "username_requerido"}, status_code=400)
+        if not password:
+            return JSONResponse(content={"ok": False, "error": "password_requerido"}, status_code=400)
+        if password != confirm:
+            return JSONResponse(content={"ok": False, "error": "password_no_coincide"}, status_code=400)
+        if _password_too_long(password):
+            return JSONResponse(content={"ok": False, "error": "password_demasiado_larga"}, status_code=400)
+
+        conn = get_conn()
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM users WHERE email=?", (email,))
+            if cur.fetchone():
+                return JSONResponse(content={"ok": False, "error": "email_ya_registrado"}, status_code=400)
+            cur.execute("SELECT id FROM users WHERE username=?", (username,))
+            if cur.fetchone():
+                return JSONResponse(content={"ok": False, "error": "username_ya_usado"}, status_code=400)
+        finally:
+            conn.close()
+
+        uid = create_user(email, username, password)
+        resp = JSONResponse(content={"ok": True, "username": username})
+        set_session_on_response(resp, uid)
+        return resp
+    except ValueError as e:
+        print("REGISTER ERROR:", e)
+        return JSONResponse(
+            status_code=400,
+            content={"ok": False, "error": "La contraseña es demasiado larga. Usa una más corta."},
+        )
+    except Exception as e:
+        print("REGISTER ERROR:", e)
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": str(e)},
+        )
 
 @router.post("/auth/signup")
 def signup_lead(payload: dict = Body(...)):
