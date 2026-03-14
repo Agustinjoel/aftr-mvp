@@ -1664,6 +1664,9 @@ def home_page(request: Request) -> str:
     """Global AFTR home: summary across all leagues, top picks, combo, big matches, featured leagues, premium CTA."""
     uid = get_user_id(request)
     user = get_user_by_id(uid) if uid else None
+    auth_param = (request.query_params.get("auth") or "").strip().lower()
+    signup_modal_style = "display:flex" if auth_param == "register" else "display:none"
+    login_modal_style = "display:flex" if auth_param == "login" else "display:none"
     auth_html = ""
     if user:
         display_name = html_lib.escape((user.get("username") or user.get("email") or ""))
@@ -1998,6 +2001,52 @@ def home_page(request: Request) -> str:
           </div>
         </div>
       </div>
+      <div id="signup-modal" class="modal-backdrop" style="{signup_modal_style}">
+        <div class="modal">
+          <div class="modal-head">
+            <div class="modal-title">Crear cuenta</div>
+            <button class="modal-x" onclick="closeSignupModal()">✕</button>
+          </div>
+          <div class="modal-body">
+            <div id="signup-error" class="modal-line" style="color:#c00; display:none;"></div>
+            <div class="modal-line">
+              <input type="email" id="signup-email" class="email-input" placeholder="Email" required>
+            </div>
+            <div class="modal-line">
+              <input type="text" id="signup-username" class="email-input" placeholder="Usuario" required autocomplete="username">
+            </div>
+            <div class="modal-line">
+              <input type="password" id="signup-password" class="email-input" placeholder="Contraseña" required autocomplete="new-password">
+            </div>
+            <div class="modal-line">
+              <input type="password" id="signup-confirm" class="email-input" placeholder="Confirmar contraseña" required autocomplete="new-password">
+            </div>
+            <button class="pill modal-cta" onclick="registerSubmit()" style="width:100%;">Crear cuenta</button>
+          </div>
+        </div>
+      </div>
+      <div id="login-modal" class="modal-backdrop" style="{login_modal_style}">
+        <div class="modal">
+          <div class="modal-head">
+            <div class="modal-title">Entrar</div>
+            <button class="modal-x" onclick="closeLoginModal()">✕</button>
+          </div>
+          <div class="modal-body">
+            <form action="/auth/login" method="post" id="login-form">
+              <div class="modal-line">
+                <input type="email" name="email" class="email-input" placeholder="tu@email.com" required>
+              </div>
+              <div class="modal-line">
+                <input type="password" name="password" class="email-input" placeholder="Contraseña" required>
+              </div>
+              <button type="submit" class="pill modal-cta" style="width:100%;">Entrar</button>
+            </form>
+            <div class="modal-line" style="margin-top: 12px;">
+              <a href="#" onclick="closeLoginModal(); openForgotModal(); return false;" class="muted" style="font-size: 13px;">¿Olvidaste tu contraseña?</a>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="page">
       <header class="top top-pro home-header">
         <div class="brand">
@@ -2258,6 +2307,10 @@ def dashboard(request: Request, league: str):
     if league in unsupported_football:
         league = settings.default_league
 
+    auth_param = (request.query_params.get("auth") or "").strip().lower()
+    signup_modal_style = "display:flex" if auth_param == "register" else "display:none"
+    login_modal_style = "display:flex" if auth_param == "login" else "display:none"
+
     uid = get_user_id(request)
     user = get_user_by_id(uid) if uid else None
 
@@ -2420,7 +2473,7 @@ def dashboard(request: Request, league: str):
 
       <!-- ✅ CONTENIDO CENTRADO -->
       <div class="page">
-    <div id="signup-modal" class="modal-backdrop" style="display:none;">
+    <div id="signup-modal" class="modal-backdrop" style="{signup_modal_style}">
       <div class="modal">
         <div class="modal-head">
           <div class="modal-title">Crear cuenta</div>
@@ -2446,7 +2499,7 @@ def dashboard(request: Request, league: str):
       </div>
     </div>
 
-    <div id="login-modal" class="modal-backdrop" style="display:none;">
+    <div id="login-modal" class="modal-backdrop" style="{login_modal_style}">
       <div class="modal">
         <div class="modal-head">
           <div class="modal-title">Entrar</div>
