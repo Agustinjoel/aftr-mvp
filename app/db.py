@@ -41,6 +41,12 @@ def init_db():
     )
     """)
 
+    # Migration: ensure password_hash exists (old DBs may have been created without it)
+    table_info = cur.execute("PRAGMA table_info(users)").fetchall()
+    column_names = [row[1] for row in table_info]
+    if "password_hash" not in column_names:
+        cur.execute("ALTER TABLE users ADD COLUMN password_hash TEXT")
+
     for col_def in [
         ("username", "TEXT"),
         ("role", "TEXT NOT NULL DEFAULT 'free_user'"),
