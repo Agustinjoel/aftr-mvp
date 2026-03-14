@@ -72,35 +72,51 @@ def manual_activate(request: Request, plan: str = Query("PREMIUM")):
 
 @router.post("/billing/create-checkout-session")
 def create_checkout_session(request: Request):
-    uid = get_user_id(request)
-    if not uid:
-        logger.info("Checkout session denied: not authenticated")
-        return JSONResponse({"ok": False, "error": "need_login"}, status_code=401)
+    try:
+        uid = get_user_id(request)
+        authenticated = uid is not None
+        has_secret = bool(settings.stripe_secret_key)
+        has_price_id = bool(settings.stripe_price_id)
+        has_app_base = bool(getattr(settings, "app_base_url", None) and (settings.app_base_url or "").strip())
 
-    if not stripe or not settings.stripe_secret_key or not settings.stripe_price_id:
-        logger.error(
-            "Stripe not configured; cannot create checkout session",
+        logger.info(
+            "create-checkout-session: pre-check",
             extra={
-                "has_stripe": bool(stripe),
-                "has_secret": bool(settings.stripe_secret_key),
-                "has_price_id": bool(settings.stripe_price_id),
+                "authenticated": authenticated,
+                "STRIPE_SECRET_KEY_exists": has_secret,
+                "STRIPE_PRICE_ID_exists": has_price_id,
+                "APP_BASE_URL_exists": has_app_base,
             },
         )
-        return JSONResponse({"ok": False, "error": "stripe_not_configured"}, status_code=500)
 
-    user = get_user_by_id(uid) or {}
-    email = user.get("email") or None
+        if not uid:
+            logger.info("Checkout session denied: not authenticated")
+            return JSONResponse(content={"ok": False, "error": "need_login"}, status_code=401)
 
-    base_url = (settings.app_base_url or str(request.base_url)).rstrip("/")
-    success_url = f"{base_url}/billing/success"
-    cancel_url = base_url
+        if not stripe or not settings.stripe_secret_key or not settings.stripe_price_id:
+            logger.error(
+                "Stripe not configured; cannot create checkout session",
+                extra={
+                    "has_stripe": bool(stripe),
+                    "has_secret": has_secret,
+                    "has_price_id": has_price_id,
+                },
+            )
+            return JSONResponse(content={"ok": False, "error": "stripe_not_configured"}, status_code=500)
 
-    logger.info(
-        "Creating Stripe checkout session",
-        extra={"user_id": uid, "success_url": success_url, "cancel_url": cancel_url},
-    )
+        base_url = (getattr(settings, "app_base_url", None) or "").strip().rstrip("/") or str(request.base_url).rstrip("/")
+        success_url = f"{base_url}/billing/success"
+        cancel_url = base_url
 
-    try:
+        logger.info(
+            "create-checkout-session: resolved URLs",
+            extra={"success_url": success_url, "cancel_url": cancel_url},
+        )
+
+        stripe.api_key = settings.stripe_secret_key
+        user = get_user_by_id(uid) or {}
+        email = user.get("email") or None
+
         session = stripe.checkout.Session.create(
             mode="subscription",
             line_items=[{"price": settings.stripe_price_id, "quantity": 1}],
@@ -113,10 +129,13 @@ def create_checkout_session(request: Request):
             "Stripe checkout session created",
             extra={"user_id": uid, "session_id": getattr(session, "id", None)},
         )
-        return JSONResponse({"ok": True, "url": session.url})
-    except Exception:  # pragma: no cover - network / Stripe-side
-        logger.error("Error creating Stripe checkout session", exc_info=True)
-        return JSONResponse({"ok": False, "error": "stripe_error"}, status_code=500)
+        return JSONResponse(content={"ok": True, "url": session.url})
+    except Exception as e:
+        logger.exception("create-checkout-session failed: %s", e)
+        return JSONResponse(
+            status_code=500,
+            content={"ok": False, "error": str(e)},
+        )
 
 
 @router.get("/billing/success", include_in_schema=False)
