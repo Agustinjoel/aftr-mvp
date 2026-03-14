@@ -2178,17 +2178,17 @@ def home_page(request: Request) -> str:
             })
             .catch(function(){ alert("Error de conexión."); });
         }
-        window.registerSubmit = function(){
+        window.registerSubmit = async function(){
           var email = document.getElementById("signup-email");
           var username = document.getElementById("signup-username");
           var password = document.getElementById("signup-password");
           var confirm = document.getElementById("signup-confirm");
           var errEl = document.getElementById("signup-error");
+          if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
           var e = email ? email.value.trim() : "";
           var u = username ? username.value.trim() : "";
           var p = password ? password.value : "";
           var c = confirm ? confirm.value : "";
-          if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
           if (!e || e.indexOf("@") < 1 || e.indexOf(".") < 1) {
             if (errEl) { errEl.textContent = "Introduce un email válido."; errEl.style.display = "block"; }
             return;
@@ -2205,30 +2205,35 @@ def home_page(request: Request) -> str:
             if (errEl) { errEl.textContent = "Las contraseñas no coinciden."; errEl.style.display = "block"; }
             return;
           }
-          var registerUrl = (window.location.origin || (window.location.protocol + "//" + window.location.host)) + "/auth/register";
-          fetch(registerUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ email: e, username: u, password: p, confirm_password: c })
-          })
-          .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
-          .then(function(result){
-            if (result.ok && result.data.ok) {
+          try {
+            var res = await fetch("/auth/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({
+                email: e,
+                username: u,
+                password: p,
+                confirm_password: c
+              })
+            });
+            console.log("Register response status:", res.status);
+            var data = await res.json();
+            if (res.ok && data.ok) {
               var sm = document.getElementById("signup-modal");
               if (sm) sm.style.display = "none";
-              window.location.href = "/?msg=cuenta_creada&user=" + encodeURIComponent(result.data.username || u);
+              window.location.href = "/?msg=cuenta_creada&user=" + encodeURIComponent(data.username || u);
             } else {
-              var msg = result.data.error || "Error al crear la cuenta.";
-              if (result.data.error === "email_ya_registrado") msg = "Este email ya está registrado.";
-              else if (result.data.error === "username_ya_usado") msg = "Este usuario ya está en uso.";
-              else if (result.data.error === "password_demasiado_larga") msg = "La contraseña es demasiado larga. Usá hasta 72 caracteres.";
+              var msg = data.error || "Error al crear la cuenta.";
+              if (data.error === "email_ya_registrado") msg = "Este email ya está registrado.";
+              else if (data.error === "username_ya_usado") msg = "Este usuario ya está en uso.";
+              else if (data.error === "password_demasiado_larga") msg = "La contraseña es demasiado larga. Usá hasta 72 caracteres.";
               if (errEl) { errEl.textContent = msg; errEl.style.display = "block"; }
             }
-          })
-          .catch(function(){
+          } catch (err) {
+            console.error("Register fetch error:", err);
             if (errEl) { errEl.textContent = "Error de conexión. Intenta de nuevo."; errEl.style.display = "block"; }
-          });
+          }
         };
       </script>
       <script>
@@ -2722,61 +2727,62 @@ def dashboard(request: Request, league: str):
         .catch(function(){ errEl.textContent = "Error de conexión."; errEl.style.display = "block"; });
     }
 
-    window.registerSubmit = function(){
-      var email = document.getElementById("signup-email").value.trim();
-      var username = document.getElementById("signup-username").value.trim();
-      var password = document.getElementById("signup-password").value;
-      var confirm = document.getElementById("signup-confirm").value;
+    window.registerSubmit = async function(){
+      var email = document.getElementById("signup-email");
+      var username = document.getElementById("signup-username");
+      var password = document.getElementById("signup-password");
+      var confirm = document.getElementById("signup-confirm");
       var errEl = document.getElementById("signup-error");
-
       if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
-
-      if (!email || email.indexOf("@") < 1 || email.indexOf(".") < 1) {
+      var e = email ? email.value.trim() : "";
+      var u = username ? username.value.trim() : "";
+      var p = password ? password.value : "";
+      var c = confirm ? confirm.value : "";
+      if (!e || e.indexOf("@") < 1 || e.indexOf(".") < 1) {
         if (errEl) { errEl.textContent = "Introduce un email válido."; errEl.style.display = "block"; }
         return;
       }
-      if (!username) {
+      if (!u) {
         if (errEl) { errEl.textContent = "El usuario es obligatorio."; errEl.style.display = "block"; }
         return;
       }
-      if (!password) {
+      if (!p) {
         if (errEl) { errEl.textContent = "La contraseña es obligatoria."; errEl.style.display = "block"; }
         return;
       }
-      if (password !== confirm) {
+      if (p !== c) {
         if (errEl) { errEl.textContent = "Las contraseñas no coinciden."; errEl.style.display = "block"; }
         return;
       }
-
-      var registerUrl = (window.location.origin || (window.location.protocol + "//" + window.location.host)) + "/auth/register";
-      fetch(registerUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          email: email,
-          username: username,
-          password: password,
-          confirm_password: confirm
-        })
-      })
-      .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
-      .then(function(result){
-        if (result.ok && result.data.ok) {
+      try {
+        var res = await fetch("/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            email: e,
+            username: u,
+            password: p,
+            confirm_password: c
+          })
+        });
+        console.log("Register response status:", res.status);
+        var data = await res.json();
+        if (res.ok && data.ok) {
           var sm = document.getElementById("signup-modal");
           if (sm) sm.style.display = "none";
-          window.location.href = "/?msg=cuenta_creada&user=" + encodeURIComponent(result.data.username || username);
+          window.location.href = "/?msg=cuenta_creada&user=" + encodeURIComponent(data.username || u);
         } else {
-          var msg = result.data.error || "Error al crear la cuenta.";
-          if (result.data.error === "email_ya_registrado") msg = "Este email ya está registrado.";
-          else if (result.data.error === "username_ya_usado") msg = "Este usuario ya está en uso.";
-          else if (result.data.error === "password_demasiado_larga") msg = "La contraseña es demasiado larga. Usá hasta 72 caracteres.";
+          var msg = data.error || "Error al crear la cuenta.";
+          if (data.error === "email_ya_registrado") msg = "Este email ya está registrado.";
+          else if (data.error === "username_ya_usado") msg = "Este usuario ya está en uso.";
+          else if (data.error === "password_demasiado_larga") msg = "La contraseña es demasiado larga. Usá hasta 72 caracteres.";
           if (errEl) { errEl.textContent = msg; errEl.style.display = "block"; }
         }
-      })
-      .catch(function(){
+      } catch (err) {
+        console.error("Register fetch error:", err);
         if (errEl) { errEl.textContent = "Error de conexión. Intenta de nuevo."; errEl.style.display = "block"; }
-      });
+      }
     };
 
     function showPremiumSuccess(){
