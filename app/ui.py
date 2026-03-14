@@ -2178,6 +2178,58 @@ def home_page(request: Request) -> str:
             })
             .catch(function(){ alert("Error de conexión."); });
         }
+        window.registerSubmit = function(){
+          var email = document.getElementById("signup-email");
+          var username = document.getElementById("signup-username");
+          var password = document.getElementById("signup-password");
+          var confirm = document.getElementById("signup-confirm");
+          var errEl = document.getElementById("signup-error");
+          var e = email ? email.value.trim() : "";
+          var u = username ? username.value.trim() : "";
+          var p = password ? password.value : "";
+          var c = confirm ? confirm.value : "";
+          if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
+          if (!e || e.indexOf("@") < 1 || e.indexOf(".") < 1) {
+            if (errEl) { errEl.textContent = "Introduce un email válido."; errEl.style.display = "block"; }
+            return;
+          }
+          if (!u) {
+            if (errEl) { errEl.textContent = "El usuario es obligatorio."; errEl.style.display = "block"; }
+            return;
+          }
+          if (!p) {
+            if (errEl) { errEl.textContent = "La contraseña es obligatoria."; errEl.style.display = "block"; }
+            return;
+          }
+          if (p !== c) {
+            if (errEl) { errEl.textContent = "Las contraseñas no coinciden."; errEl.style.display = "block"; }
+            return;
+          }
+          var registerUrl = (window.location.origin || (window.location.protocol + "//" + window.location.host)) + "/auth/register";
+          fetch(registerUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ email: e, username: u, password: p, confirm_password: c })
+          })
+          .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+          .then(function(result){
+            if (result.ok && result.data.ok) {
+              var sm = document.getElementById("signup-modal");
+              if (sm) sm.style.display = "none";
+              window.location.href = "/?msg=cuenta_creada&user=" + encodeURIComponent(result.data.username || u);
+            } else {
+              var msg = result.data.error || "Error al crear la cuenta.";
+              if (result.data.error === "email_ya_registrado") msg = "Este email ya está registrado.";
+              else if (result.data.error === "username_ya_usado") msg = "Este usuario ya está en uso.";
+              else if (result.data.error === "password_demasiado_larga") msg = "La contraseña es demasiado larga. Usá hasta 72 caracteres.";
+              if (errEl) { errEl.textContent = msg; errEl.style.display = "block"; }
+            }
+          })
+          .catch(function(){
+            if (errEl) { errEl.textContent = "Error de conexión. Intenta de nuevo."; errEl.style.display = "block"; }
+          });
+        };
       </script>
       <script>
         (function(){
@@ -2670,34 +2722,29 @@ def dashboard(request: Request, league: str):
         .catch(function(){ errEl.textContent = "Error de conexión."; errEl.style.display = "block"; });
     }
 
-    function registerSubmit(){
+    window.registerSubmit = function(){
       var email = document.getElementById("signup-email").value.trim();
       var username = document.getElementById("signup-username").value.trim();
       var password = document.getElementById("signup-password").value;
       var confirm = document.getElementById("signup-confirm").value;
       var errEl = document.getElementById("signup-error");
 
-      errEl.style.display = "none";
-      errEl.textContent = "";
+      if (errEl) { errEl.style.display = "none"; errEl.textContent = ""; }
 
       if (!email || email.indexOf("@") < 1 || email.indexOf(".") < 1) {
-        errEl.textContent = "Introduce un email válido.";
-        errEl.style.display = "block";
+        if (errEl) { errEl.textContent = "Introduce un email válido."; errEl.style.display = "block"; }
         return;
       }
       if (!username) {
-        errEl.textContent = "El usuario es obligatorio.";
-        errEl.style.display = "block";
+        if (errEl) { errEl.textContent = "El usuario es obligatorio."; errEl.style.display = "block"; }
         return;
       }
       if (!password) {
-        errEl.textContent = "La contraseña es obligatoria.";
-        errEl.style.display = "block";
+        if (errEl) { errEl.textContent = "La contraseña es obligatoria."; errEl.style.display = "block"; }
         return;
       }
       if (password !== confirm) {
-        errEl.textContent = "Las contraseñas no coinciden.";
-        errEl.style.display = "block";
+        if (errEl) { errEl.textContent = "Las contraseñas no coinciden."; errEl.style.display = "block"; }
         return;
       }
 
@@ -2716,22 +2763,21 @@ def dashboard(request: Request, league: str):
       .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
       .then(function(result){
         if (result.ok && result.data.ok) {
-          document.getElementById("signup-modal").style.display = "none";
+          var sm = document.getElementById("signup-modal");
+          if (sm) sm.style.display = "none";
           window.location.href = "/?msg=cuenta_creada&user=" + encodeURIComponent(result.data.username || username);
         } else {
           var msg = result.data.error || "Error al crear la cuenta.";
           if (result.data.error === "email_ya_registrado") msg = "Este email ya está registrado.";
           else if (result.data.error === "username_ya_usado") msg = "Este usuario ya está en uso.";
           else if (result.data.error === "password_demasiado_larga") msg = "La contraseña es demasiado larga. Usá hasta 72 caracteres.";
-          errEl.textContent = msg;
-          errEl.style.display = "block";
+          if (errEl) { errEl.textContent = msg; errEl.style.display = "block"; }
         }
       })
       .catch(function(){
-        errEl.textContent = "Error de conexión. Intenta de nuevo.";
-        errEl.style.display = "block";
+        if (errEl) { errEl.textContent = "Error de conexión. Intenta de nuevo."; errEl.style.display = "block"; }
       });
-    }
+    };
 
     function showPremiumSuccess(){
       var m = document.getElementById("premium-success-modal");
