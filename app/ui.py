@@ -28,6 +28,37 @@ from fastapi import Form
 router = APIRouter()
 
 
+# Universal auth modal bootstrap: define on window so no page can throw ReferenceError.
+# Inject this script on every page before any other scripts run.
+AUTH_BOOTSTRAP_JS = r"""
+window.openLoginModal = window.openLoginModal || function () {
+  var m = document.getElementById("login-modal");
+  if (m) {
+    m.style.display = "flex";
+    return;
+  }
+  window.location.href = "/?auth=login";
+};
+window.closeLoginModal = window.closeLoginModal || function () {
+  var m = document.getElementById("login-modal");
+  if (m) m.style.display = "none";
+};
+window.openSignupModal = window.openSignupModal || function () {
+  var m = document.getElementById("signup-modal");
+  if (m) {
+    m.style.display = "flex";
+    return;
+  }
+  window.location.href = "/?auth=register";
+};
+window.closeSignupModal = window.closeSignupModal || function () {
+  var m = document.getElementById("signup-modal");
+  if (m) m.style.display = "none";
+};
+"""
+AUTH_BOOTSTRAP_SCRIPT = "<script>" + AUTH_BOOTSTRAP_JS + "</script>"
+
+
 # =========================================================
 # SaaS: cookie firmada (plan)
 # =========================================================
@@ -1947,6 +1978,7 @@ def home_page(request: Request) -> str:
       <meta name="theme-color" content="#0b0f14">
     </head>
     <body>
+    """ + AUTH_BOOTSTRAP_SCRIPT + f"""
       <div id="premium-modal" class="modal-backdrop" style="display:none;">
         <div class="modal">
           <div class="modal-head">
@@ -2350,6 +2382,7 @@ def dashboard(request: Request, league: str):
     </head>
 
     <body>
+    """ + AUTH_BOOTSTRAP_SCRIPT + f"""
 
       <!-- Premium Modal (afuera de .page) -->
       <div id="premium-modal" class="modal-backdrop" style="display:none;">
@@ -3497,11 +3530,7 @@ def _simple_page(title: str, body: str) -> str:
 </head>
 <body>
   {body}
-  <script>
-    // Fallbacks so header buttons work on simple pages without ReferenceError.
-    function openLoginModal(){{ window.location.href='/?auth=login'; }}
-    function openSignupModal(){{ window.location.href='/?auth=register'; }}
-  </script>
+  """ + AUTH_BOOTSTRAP_SCRIPT + """
 </body>
 </html>"""
 
