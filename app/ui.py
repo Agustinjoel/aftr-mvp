@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html as html_lib
 import json
+import logging
 import unicodedata
 from datetime import date, datetime, timezone, timedelta
 from typing import Any, Callable
@@ -26,6 +27,7 @@ from app.user_helpers import can_see_all_picks, is_admin, is_premium_active
 from fastapi import Form
 
 router = APIRouter()
+logger = logging.getLogger("aftr.ui")
 
 
 # Universal auth modal bootstrap: define on window so no page can throw ReferenceError.
@@ -1662,7 +1664,14 @@ def index_or_league(request: Request, league: str | None = Query(None)):
 
 def home_page(request: Request) -> str:
     """Global AFTR home: summary across all leagues, top picks, combo, big matches, featured leagues, premium CTA."""
+    cookies = getattr(request, "cookies", None) or {}
+    has_aftr_session = "aftr_session" in cookies
     uid = get_user_id(request)
+    logger.info(
+        "home_page render: request.cookies has aftr_session=%s, get_user_id(request)=%s",
+        has_aftr_session,
+        uid,
+    )
     user = get_user_by_id(uid) if uid else None
     auth_param = (request.query_params.get("auth") or "").strip().lower()
     signup_modal_style = "display:flex" if auth_param == "register" else "display:none"

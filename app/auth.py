@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import RedirectResponse
@@ -11,6 +12,7 @@ from app.db import get_conn
 import hashlib
 
 router = APIRouter()
+logger = logging.getLogger("aftr.auth")
 
 def _ser():
     return URLSafeSerializer(settings.secret_key, salt="aftr-session")
@@ -22,7 +24,8 @@ def set_session(resp: RedirectResponse, user_id: int):
         max_age=60*60*24*30,
         httponly=True,
         samesite="lax",
-        path="/"
+        path="/",
+        secure=False,
     )
 
 # auth.py
@@ -48,21 +51,42 @@ def _ser():
 
 def set_session(resp: RedirectResponse, user_id: int):
     token = _ser().dumps({"uid": user_id})
-    resp.set_cookie("aftr_session", token, max_age=60*60*24*30, httponly=True, samesite="lax", path="/")
+    resp.set_cookie(
+        "aftr_session", token,
+        max_age=60*60*24*30,
+        httponly=True,
+        samesite="lax",
+        path="/",
+        secure=False,
+    )
+    logger.info("set_session called: user_id=%s (set_cookie aftr_session)", user_id)
 
 def set_session_on_response(resp, user_id: int):
     """Set session cookie on any response (e.g. JSONResponse) for post-register login."""
     token = _ser().dumps({"uid": user_id})
-    resp.set_cookie("aftr_session", token, max_age=60*60*24*30, httponly=True, samesite="lax", path="/")
+    resp.set_cookie(
+        "aftr_session", token,
+        max_age=60*60*24*30,
+        httponly=True,
+        samesite="lax",
+        path="/",
+        secure=False,
+    )
+    logger.info("set_session_on_response called: user_id=%s (set_cookie aftr_session)", user_id)
 
 def get_user_id(request: Request) -> Optional[int]:
-    raw = request.cookies.get("aftr_session")
+    cookies = request.cookies if hasattr(request, "cookies") and request.cookies else {}
+    raw = cookies.get("aftr_session")
     if not raw:
+        logger.info("get_user_id: no aftr_session cookie; request.cookies keys=%s", list(cookies.keys()) if cookies else "None")
         return None
     try:
         data = _ser().loads(raw)
-        return int(data.get("uid"))
-    except (BadSignature, Exception):
+        uid = int(data.get("uid"))
+        logger.info("get_user_id: cookie present, decoded uid=%s", uid)
+        return uid
+    except (BadSignature, Exception) as e:
+        logger.warning("get_user_id: aftr_session cookie present but decode failed: %s", e)
         return None
 
 def create_user(email: str, username: str, password: str) -> int:
@@ -91,16 +115,6 @@ def create_user(email: str, username: str, password: str) -> int:
 
 def clear_session(resp: RedirectResponse):
     resp.delete_cookie("aftr_session", path="/")
-
-def get_user_id(request: Request) -> int | None:
-    raw = (request.cookies or {}).get("aftr_session")
-    if not raw:
-        return None
-    try:
-        data = _ser().loads(raw)
-        return int(data.get("uid"))
-    except (BadSignature, Exception):
-        return None
 
 def get_user_by_id(user_id: int) -> dict | None:
     conn = get_conn()
@@ -213,42 +227,85 @@ def signup_lead(payload: dict = Body(...)):
 
 @router.post("/auth/login")
 def login(email: str = Form(...), password: str = Form(...)):
-    """Form login (browser). Sets aftr_session cookie and redirects."""
-    email = (email or "").strip().lower()
+    """Form login (browser). Sets aftr_session cookie and redirects.
+
+    The `email` field may contain either the user's email or username.
+    """
+    identifier = (email or "").strip()
+    if not identifier:
+        return RedirectResponse(url="/?msg=login_fail", status_code=302)
     if _password_too_long(password or ""):
         return RedirectResponse(url="/?msg=login_fail", status_code=302)
 
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute("SELECT id,password_hash FROM users WHERE email=?", (email,))
-    row = cur.fetchone()
-    conn.close()
+    try:
+        conn = get_conn()
+        cur = conn.cursor()
+        # Allow login by email (normalized to lowercase) OR username.
+        cur.execute(
+            "SELECT id, password_hash FROM users WHERE email = ? OR username = ?",
+            ((identifier or "").strip().lower(), identifier),
+        )
+        row = cur.fetchone()
+    except Exception as exc:
+        logger.exception("login error while querying user: %s", exc)
+        row = None
+    finally:
+        try:
+            conn.close()  # type: ignore[has-type]
+        except Exception:
+            pass
 
-    if not row or not bcrypt.verify(password, row["password_hash"]):
+    try:
+        if not row or not row["password_hash"] or not bcrypt.verify(password, row["password_hash"]):
+            return RedirectResponse(url="/?msg=login_fail", status_code=302)
+    except Exception as exc:
+        logger.exception("login error during password verification: %s", exc)
         return RedirectResponse(url="/?msg=login_fail", status_code=302)
 
+    uid = int(row["id"])
     resp = RedirectResponse(url="/?msg=login_ok", status_code=302)
-    set_session(resp, int(row["id"]))
+    set_session(resp, uid)
+    logger.info("login success: user_id=%s, set_cookie called, redirecting to /?msg=login_ok", uid)
     return resp
 
 
 @router.post("/auth/login/json")
 def login_json(payload: dict = Body(...)):
-    """JSON login (API/Android). Sets aftr_session cookie and returns user info."""
-    email = (payload.get("email") or "").strip().lower()
+    """JSON login (API/Android). Sets aftr_session cookie and returns user info.
+
+    The `email` field may contain either the user's email or username.
+    """
+    identifier_raw = payload.get("email") or ""
+    identifier = identifier_raw.strip()
     password = payload.get("password") or ""
-    if not _email_valid(email):
+
+    if not identifier:
         return JSONResponse({"ok": False, "error": "email_invalido"}, status_code=400)
     if _password_too_long(password):
         return JSONResponse({"ok": False, "error": "password_demasiado_larga"}, status_code=400)
 
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute("SELECT id,password_hash FROM users WHERE email=?", (email,))
-    row = cur.fetchone()
-    conn.close()
+    try:
+        conn = get_conn()
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id, password_hash, email, username FROM users WHERE email = ? OR username = ?",
+            (identifier.lower(), identifier),
+        )
+        row = cur.fetchone()
+    except Exception as exc:
+        logger.exception("login_json error while querying user: %s", exc)
+        row = None
+    finally:
+        try:
+            conn.close()  # type: ignore[has-type]
+        except Exception:
+            pass
 
-    if not row or not bcrypt.verify(password, row["password_hash"]):
+    try:
+        if not row or not row["password_hash"] or not bcrypt.verify(password, row["password_hash"]):
+            return JSONResponse({"ok": False, "error": "credenciales_invalidas"}, status_code=401)
+    except Exception as exc:
+        logger.exception("login_json error during password verification: %s", exc)
         return JSONResponse({"ok": False, "error": "credenciales_invalidas"}, status_code=401)
 
     uid = int(row["id"])
