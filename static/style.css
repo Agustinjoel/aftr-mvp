@@ -39,6 +39,12 @@ a:hover{ filter: brightness(1.1); text-decoration: underline; }
 
 .muted{ color: var(--muted); }
 
+.coming-soon{
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 15px;
+}
+
 /* =========================
    LAYOUT
 ========================= */
@@ -569,6 +575,17 @@ h2::after{
   font-weight: 900;
   border: 1px solid rgba(255,255,255,.14);
   background: rgba(255,255,255,.06);
+}
+.premium-badge{
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid rgba(255,200,100,.35);
+  background: rgba(255,200,100,.12);
+  color: rgba(255,220,150,.98);
 }
 .plan-logout{ margin-left: 10px; font-size: 12px; opacity:.8; }
 .plan-logout:hover{ opacity: 1; }

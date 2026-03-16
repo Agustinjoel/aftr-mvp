@@ -379,6 +379,26 @@ def _safe_int(x, default=None):
         return default
 
 
+def _is_pick_valid(p: dict) -> bool:
+    """
+    True if pick has required data for display: probability > 0, edge not null, odds present.
+    Used to hide leagues/picks with missing or empty data.
+    """
+    if not p or not isinstance(p, dict):
+        return False
+    prob = _safe_float(p.get("best_prob"), 0)
+    if prob <= 0:
+        return False
+    if p.get("edge") is None:
+        return False
+    odds_decimal = p.get("odds_decimal")
+    odds = p.get("odds")
+    has_odds = (odds_decimal is not None) or (odds is not None and odds != "")
+    if not has_odds:
+        return False
+    return True
+
+
 def _parse_utcdate_str(s) -> datetime:
     try:
         if isinstance(s, str) and s:
@@ -481,21 +501,21 @@ def _locked_grid(n: int = 6, message: str = "Disponible en Premium") -> str:
 def _premium_unlock_card() -> str:
     """
     Single card shown after the first 3 picks for free users. Matches pick card style.
-    Explains what they are missing and offers Unlock Premium.
+    Explica qué se pierden y ofrece Obtener Premium.
     """
     return """
     <div class="card premium-unlock-card" onclick="openPremium()" role="button" tabindex="0">
       <div class="premium-unlock-inner">
-        <div class="premium-unlock-title">🔒 Unlock all AFTR picks</div>
-        <p class="premium-unlock-sub">Free users see only 3 picks per day.</p>
-        <p class="premium-unlock-sub">AFTR Premium includes:</p>
+        <div class="premium-unlock-title">🔒 Desbloqueá todos los picks AFTR</div>
+        <p class="premium-unlock-sub">Los usuarios free ven solo 3 picks por día.</p>
+        <p class="premium-unlock-sub">AFTR Premium incluye:</p>
         <ul class="premium-unlock-list">
-          <li>All daily selections</li>
-          <li>Value bets with positive edge</li>
-          <li>Picks from all leagues</li>
-          <li>Full probability breakdown</li>
+          <li>Todas las selecciones del día</li>
+          <li>Apuestas de valor con ventaja positiva</li>
+          <li>Picks de todas las ligas</li>
+          <li>Desglose de probabilidades</li>
         </ul>
-        <button class="pill premium-unlock-btn" onclick="event.stopPropagation(); openPremium();">Unlock Premium</button>
+        <button class="pill premium-unlock-btn" onclick="event.stopPropagation(); openPremium();">Obtener Premium</button>
       </div>
     </div>
     """
@@ -1051,7 +1071,7 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         try:
             ev = float(edge_val)
             sign = "+" if ev >= 0 else ""
-            odds_parts.append(f"Edge {sign}{ev * 100:.1f}%")
+            odds_parts.append(f"Ventaja {sign}{ev * 100:.1f}%")
         except (TypeError, ValueError):
             pass
     odds_line_html = ""
@@ -1435,10 +1455,10 @@ def _render_combo_of_the_day(combo: dict) -> str:
     return f"""
     <div class="card combo-card combo-of-the-day">
       <div class="combo-head">
-        <div class="combo-title">🔥 AFTR Combo of the Day</div>
+        <div class="combo-title">🔥 AFTR Combo del Día</div>
         <span class="combo-tier {risk.lower()}">{risk}</span>
       </div>
-      <div class="combo-sub">Prob total: <b>{prob_str}</b>{odds_str} • Combo score: <b>{score_str}</b></div>
+      <div class="combo-sub">Prob total: <b>{prob_str}</b>{odds_str} • Puntuación combo: <b>{score_str}</b></div>
       <div class="combo-legs">
         {''.join(rows)}
       </div>
@@ -1645,6 +1665,8 @@ def _load_all_leagues_data(
                 continue
             p = dict(p)
             p["_league"] = code
+            if not _is_pick_valid(p):
+                continue
             all_picks.append(p)
             picks_by_league.setdefault(code, []).append(p)
 
@@ -1699,6 +1721,8 @@ def home_page(request: Request) -> str:
     elif is_premium_active(user) or get_active_plan(uid) == settings.plan_premium:
         plan_badge = '<span class="plan-badge premium">PREMIUM</span>' + auth_html
 
+    user_premium = bool(uid and (is_premium_active(user) or get_active_plan(uid) == settings.plan_premium))
+
     (
         _all_picks,
         match_by_key,
@@ -1727,7 +1751,7 @@ def home_page(request: Request) -> str:
     perf_accum = last_spark.get("v", 0)
     perf_day = last_spark.get("day", 0)
 
-    # Top AI Picks Today: best by _pick_score (limited to 4 in card build below)
+    # Mejores Picks del Día: best by _pick_score (limited to 4 in card build below)
 
     # Three combos by tier (SAFE, MEDIUM, AGGRESSIVE) for home page
     combos_by_tier = _build_combos_by_tier(
@@ -1829,7 +1853,7 @@ def home_page(request: Request) -> str:
         </a>''')
     home_nav_html = "\n".join(home_nav_items)
 
-    # Top AI Picks Today: only picks scheduled for today or within near-term window (exclude far-future)
+    # Mejores Picks del Día: only picks scheduled for today or within near-term window (exclude far-future)
     today_local = datetime.now().astimezone().date()
     top_picks_max_days_ahead = 2  # today + up to 2 days ahead
     end_local = today_local + timedelta(days=top_picks_max_days_ahead)
@@ -1895,7 +1919,7 @@ def home_page(request: Request) -> str:
           <div class="home-pick-market">{market}</div>
           <div class="home-pick-meta">
             <span class="home-pick-score">AFTR {score}</span>
-            <span class="home-pick-edge{edge_class}">Edge {edge_str}</span>
+            <span class="home-pick-edge{edge_class}">Ventaja {edge_str}</span>
             <span>Conf {conf_str}</span>
             <span>Odds {odds_str}</span>
           </div>
@@ -1942,10 +1966,10 @@ def home_page(request: Request) -> str:
                 edge_str_t = "—"
             top_pick_html = f"""
           <div class="home-league-top-pick">
-            <div class="home-league-top-pick-label">Top Pick</div>
+            <div class="home-league-top-pick-label">Mejor pick</div>
             <div class="home-league-top-pick-match">{home_t} vs {away_t}</div>
             <div class="home-league-top-pick-market">{market_t}</div>
-            <div class="home-league-top-pick-meta">Prob {prob_t:.0f}% · Edge {edge_str_t}</div>
+            <div class="home-league-top-pick-meta">Prob {prob_t:.0f}% · Ventaja {edge_str_t}</div>
           </div>"""
         rp = s.get("roi_pct")
         roi_class = "pos" if (rp is not None and rp >= 0) else "neg"
@@ -1998,15 +2022,15 @@ def home_page(request: Request) -> str:
             <button class="modal-x" onclick="closePremium()">✕</button>
           </div>
           <div class="modal-body">
-            <p class="modal-subtitle">Unlock the full AI betting engine</p>
+            <p class="modal-subtitle">Desbloqueá el motor de apuestas con IA</p>
             <ul class="modal-list">
-              <li>All daily picks</li>
-              <li>High AFTR Score bets</li>
-              <li>Value bets with positive edge</li>
-              <li>Picks from all leagues</li>
+              <li>Todos los picks del día</li>
+              <li>Picks con alto AFTR Score</li>
+              <li>Apuestas de valor con ventaja positiva</li>
+              <li>Picks de todas las ligas</li>
             </ul>
-            <p style="margin:14px 0;"><span class="price-main">$9.99</span><span class="price-sub">/ month</span></p>
-            <button class="pill modal-cta" onclick="activatePremium('PREMIUM')">Start Premium</button>
+            <p style="margin:14px 0;"><span class="price-main">$9.99</span><span class="price-sub">/ mes</span></p>
+            {"<div class=\"premium-badge\">⭐ Premium activo</div>" if user_premium else '<button class="pill modal-cta" onclick="activatePremium(\'PREMIUM\')">Activar Premium</button>'}
           </div>
         </div>
       </div>
@@ -2062,7 +2086,7 @@ def home_page(request: Request) -> str:
           <img src="/static/logo_aftr.png" class="logo-aftr" alt="AFTR" />
           <div class="brand-text">
             <div class="brand-title">AFTR</div>
-            <div class="brand-tag">AI Betting Engine</div>
+            <div class="brand-tag">Motor de apuestas con IA</div>
           </div>
         </div>
         <nav class="home-header-nav" aria-label="Navegación principal">
@@ -2076,24 +2100,24 @@ def home_page(request: Request) -> str:
 
       <section class="home-hero hero">
         <div class="hero-copy">
-          <h1>AI picks, value bets y combinadas inteligentes</h1>
-          <p>Las mejores oportunidades del día, filtradas por AFTR Score, edge y confianza.</p>
+          <h1>Picks con IA, apuestas de valor y combinadas inteligentes</h1>
+          <p>Las mejores oportunidades del día, filtradas por AFTR Score, ventaja y confianza.</p>
           <div class="hero-stats">
             <div><span>ROI GLOBAL</span><strong>{roi_str}</strong></div>
-            <div><span>PROFIT NETO</span><strong>{net:+.1f}u</strong></div>
-            <div><span>WINRATE</span><strong>{winrate_str}</strong></div>
+            <div><span>GANANCIA NETA</span><strong>{net:+.1f}u</strong></div>
+            <div><span>TASA DE ACIERTO</span><strong>{winrate_str}</strong></div>
             <div><span>PICKS TOTALES</span><strong>{total_picks}</strong></div>
           </div>
           <div class="hero-buttons">
             <a href="#top-picks" class="btn-secondary">Ver picks de hoy</a>
-            <button type="button" class="btn-primary" onclick="openPremium();">Unlock Premium</button>
+            {"<div class=\"premium-badge\">⭐ Premium activo</div>" if user_premium else '<button type="button" class="btn-primary" onclick="openPremium();">Obtener Premium</button>'}
           </div>
         </div>
         <div class="hero-art"></div>
       </section>
 
       <section class="home-section" id="top-picks">
-      <h2 class="home-h2">Top AI Picks Today</h2>
+      <h2 class="home-h2">Mejores Picks del Día</h2>
       <div class="home-picks-grid">
         {''.join(top_pick_cards) if top_pick_cards else '<p class="home-empty muted">No hay picks pendientes.</p>'}
       </div>
@@ -2107,7 +2131,7 @@ def home_page(request: Request) -> str:
       </section>
 
       <section class="home-section">
-      <h2 class="home-h2">Big Matches Today</h2>
+      <h2 class="home-h2">Partidos Destacados</h2>
       <div class="home-bigmatch-grid">
         {''.join(big_match_cards) if big_match_cards else '<p class="home-empty muted">No hay partidos destacados hoy.</p>'}
       </div>
@@ -2144,11 +2168,12 @@ def home_page(request: Request) -> str:
 
       <section class="home-section home-cta-section">
         <div class="home-premium-block">
+          {"<div class=\"premium-badge\" style=\"font-size:1.1rem;\">⭐ Premium activo</div>" if user_premium else f"""
           <h2 class="home-premium-title">Desbloqueá todo con Premium</h2>
           <p class="home-premium-subtitle muted">Más picks, combos de valor y todas las ligas. Sin límites.</p>
           <div class="home-premium-compare">
             <div class="home-premium-col home-premium-free">
-              <div class="home-premium-col-title">Free</div>
+              <div class="home-premium-col-title">Gratis</div>
               <ul class="home-premium-list">
                 <li>Picks limitadas</li>
                 <li>Algunas ligas</li>
@@ -2157,15 +2182,16 @@ def home_page(request: Request) -> str:
             <div class="home-premium-col home-premium-pro">
               <div class="home-premium-col-title">Premium</div>
               <ul class="home-premium-list">
-                <li>All daily picks</li>
-                <li>High AFTR Score + value combos</li>
+                <li>Todos los picks del día</li>
+                <li>Alto AFTR Score + combinadas de valor</li>
                 <li>Todas las ligas</li>
                 <li>Sin límites</li>
               </ul>
               <div class="home-premium-price"><span class="price-main">$9.99</span><span class="price-sub">/ mes</span></div>
-              <button type="button" class="home-cta-btn" onclick="openPremium();">Unlock Premium</button>
+              <button type="button" class="home-cta-btn" onclick="openPremium();">Obtener Premium</button>
             </div>
           </div>
+          """}
         </div>
       </section>
 
@@ -2408,6 +2434,8 @@ def dashboard(request: Request, league: str):
     elif is_premium_active(user) or plan == settings.plan_premium:
         plan_badge = '<span class="plan-badge premium">PREMIUM</span>' + auth_html
 
+    user_premium = bool(uid and (is_premium_active(user) or plan == settings.plan_premium))
+
     opts = ['<option value="">Inicio</option>']
     for c, n in settings.leagues.items():
         if c in unsupported_football:
@@ -2425,7 +2453,7 @@ def dashboard(request: Request, league: str):
 
     matches = read_json(f"daily_matches_{league}.json") or []
     picks = read_json(f"daily_picks_{league}.json") or []
-    picks = [p for p in picks if isinstance(p, dict)]
+    picks = [p for p in picks if isinstance(p, dict) and _is_pick_valid(p)]
 
     match_by_id: dict[int, dict] = {}
     for m in matches:
@@ -2512,27 +2540,25 @@ def dashboard(request: Request, league: str):
           </div>
 
           <div class="modal-body">
-            <p class="modal-subtitle">Unlock the full AI betting engine</p>
-            <div class="modal-section">What you get</div>
+            <p class="modal-subtitle">Desbloqueá el motor de apuestas con IA</p>
+            <div class="modal-section">Qué incluye</div>
             <ul class="modal-list">
-              <li>All daily picks</li>
-              <li>High AFTR Score bets</li>
-              <li>Value bets with positive edge</li>
-              <li>Picks from all leagues</li>
-              <li>Advanced match analysis</li>
-              <li>Smart value combos</li>
-              <li>Early access to picks</li>
+              <li>Todos los picks del día</li>
+              <li>Picks con alto AFTR Score</li>
+              <li>Apuestas de valor con ventaja positiva</li>
+              <li>Picks de todas las ligas</li>
+              <li>Análisis avanzado de partidos</li>
+              <li>Combinadas de valor inteligentes</li>
+              <li>Acceso anticipado a picks</li>
             </ul>
 
             <div class="modal-price">
               <span class="price-main">$9.99</span>
-              <span class="price-sub">/ month</span>
+              <span class="price-sub">/ mes</span>
             </div>
-            <p class="modal-cancel">Cancel anytime</p>
+            <p class="modal-cancel">Cancelá cuando quieras</p>
 
-            <button class="pill modal-cta" onclick="activatePremium('PREMIUM')">
-              Start Premium
-            </button>
+            """ + ('<div class="premium-badge">⭐ Premium activo</div>' if user_premium else '<button class="pill modal-cta" onclick="activatePremium(\'PREMIUM\')">Activar Premium</button>') + """
           </div>
         </div>
       </div>
@@ -2611,10 +2637,10 @@ def dashboard(request: Request, league: str):
       <div class="modal premium-success-modal">
         <div class="premium-success-content">
           <div class="premium-success-icon">✨</div>
-          <h3 class="premium-success-title">Premium activated</h3>
-          <p class="premium-success-sub">Welcome to AFTR Elite</p>
-          <p class="premium-success-detail">All picks unlocked</p>
-          <button type="button" class="pill modal-cta" onclick="closePremiumSuccess()">Continue</button>
+          <h3 class="premium-success-title">Premium activado</h3>
+          <p class="premium-success-sub">Bienvenido a AFTR Elite</p>
+          <p class="premium-success-detail">Todos los picks desbloqueados</p>
+          <button type="button" class="pill modal-cta" onclick="closePremiumSuccess()">Continuar</button>
         </div>
         <button class="modal-x premium-success-x" onclick="closePremiumSuccess()" aria-label="Cerrar">✕</button>
       </div>
@@ -2635,7 +2661,7 @@ def dashboard(request: Request, league: str):
           <div class="modal-line"><b>PREMIUM:</b> todas las picks + más ligas + combinadas + más data.</div>
 
           <button class="pill modal-cta" onclick="closeWelcome()">Entendido ✅</button>
-          <button class="pill" style="width:100%; margin-top:10px;" onclick="closeWelcome(); openPremium();">Ver Premium ⭐</button>
+          """ + ('<div class="premium-badge" style="margin-top:10px;">⭐ Premium activo</div>' if user_premium else '<button class="pill" style="width:100%; margin-top:10px;" onclick="closeWelcome(); openPremium();">Ver Premium ⭐</button>') + """
         </div>
       </div>
     </div>
@@ -2647,7 +2673,7 @@ def dashboard(request: Request, league: str):
           <img src="/static/logo_aftr.png" class="logo-aftr" alt="AFTR" />
           <div class="brand-text">
             <div class="brand-title">AFTR</div>
-            <div class="brand-tag">AI Betting Engine</div>  
+            <div class="brand-tag">Motor de apuestas con IA</div>  
           </div>
           {plan_badge}
         </div>
@@ -2802,6 +2828,12 @@ def dashboard(request: Request, league: str):
       var m = document.getElementById("premium-success-modal");
       if (m) m.style.display = "none";
       if (window._premiumSuccessTimeout) { clearTimeout(window._premiumSuccessTimeout); window._premiumSuccessTimeout = null; }
+      var params = new URLSearchParams(window.location.search);
+      if (params.get("msg") === "premium_activated") {
+        params.delete("msg");
+        var qs = params.toString();
+        window.location.href = window.location.pathname + (qs ? "?" + qs : "");
+      }
     }
     document.addEventListener("DOMContentLoaded",function(){
       var origin = window.location.origin || (window.location.protocol + "//" + window.location.host);
@@ -2864,7 +2896,7 @@ def dashboard(request: Request, league: str):
 
     # Profit por mercado
     page_html += f"""
-      <h2 style="margin-top:18px;">💰 Profit por mercado</h2>
+      <h2 style="margin-top:18px;">💰 Ganancia por mercado</h2>
       <div class="market-wrap">
         {''.join([f'''
           <div class="market-row">
@@ -2900,7 +2932,9 @@ def dashboard(request: Request, league: str):
         </select>
       </div>
     """
-    if not upcoming_days:
+    if not picks:
+        page_html += '<div class="coming-soon muted">Próximamente nuevos picks</div>'
+    elif not upcoming_days:
         if not matches:
             page_html += "<p class='muted'>No hay matches JSON para esta liga (todavía).</p>"
         else:
@@ -3545,7 +3579,7 @@ def account_page(request: Request):
         <img src="/static/logo_aftr.png" class="logo-aftr" alt="AFTR" />
         <div class="brand-text">
           <div class="brand-title">AFTR</div>
-          <div class="brand-tag">AI Betting Engine</div>
+          <div class="brand-tag">Motor de apuestas con IA</div>
         </div>
         {plan_badge}
       </div>
