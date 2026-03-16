@@ -45,6 +45,15 @@ a:hover{ filter: brightness(1.1); text-decoration: underline; }
   font-size: 15px;
 }
 
+.cache-status{
+  font-size: 12px;
+  padding: 6px 14px 8px;
+  margin: 0;
+}
+.cache-status-updating{
+  color: var(--blue);
+}
+
 /* =========================
    LAYOUT
 ========================= */

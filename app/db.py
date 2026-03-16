@@ -1,7 +1,7 @@
 """
 AFTR user storage (no password hashes exposed outside this module/auth).
 
-- Database file: from config.settings (AFTR_DB_PATH / DB_PATH env, default: base_dir/aftr.db).
+- Database file: path from env AFTR_DB_PATH (fallback: DB_PATH, then base_dir/aftr.db) via config.settings.
 - Table: users
 - Columns: id, email, username, password_hash, role, subscription_status,
   subscription_start, subscription_end, created_at, updated_at,

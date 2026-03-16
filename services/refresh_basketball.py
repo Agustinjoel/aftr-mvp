@@ -11,7 +11,7 @@ from typing import Any
 from config.settings import settings
 from core.basketball_evaluation import evaluate_basketball_market
 from core.basketball_picks import build_basketball_picks
-from data.cache import read_json, write_json
+from data.cache import read_json, write_json, backup_current_to_prev
 from data.providers.api_sports_basketball import get_finished_games, get_upcoming_games
 
 from services.refresh import (
@@ -100,12 +100,13 @@ def refresh_league_basketball(league_code: str) -> tuple[int, int]:
     keep_days = getattr(settings, "daily_keep_days", None)
     picks_daily = _window_daily(picks_all, keep_days)
 
-    # 7) Matches (align with picks)
+    # 7) Matches (align with picks). Backup current to .prev before overwrite (fallback UI during refresh).
     merged_matches = _merge_by_match_id(upcoming_matches, finished_matches_norm)
     existing_matches = _read_json_list(f"daily_matches_{league_code}.json")
     merged_matches = _merge_by_match_id(merged_matches, existing_matches)
+    backup_current_to_prev(f"daily_matches_{league_code}.json")
     write_json(f"daily_matches_{league_code}.json", merged_matches)
-
+    backup_current_to_prev(f"daily_picks_{league_code}.json")
     write_json(f"daily_picks_{league_code}.json", picks_daily)
 
     # 8) History + team names

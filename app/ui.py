@@ -11,7 +11,7 @@ from fastapi import APIRouter, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from config.settings import settings
-from data.cache import read_json
+from data.cache import read_json, read_json_with_fallback, read_cache_meta
 from data.providers.football_data import get_unsupported_leagues
 from app.routes.matches import group_matches_by_day
 from core.poisson import market_priority
@@ -397,6 +397,21 @@ def _is_pick_valid(p: dict) -> bool:
     if not has_odds:
         return False
     return True
+
+
+def _format_cache_status(meta: dict) -> str:
+    """Genera HTML para la barra de estado: Última actualización / Actualizando datos."""
+    if meta.get("refresh_running"):
+        return '<div class="cache-status cache-status-updating">Actualizando datos...</div>'
+    last = meta.get("last_updated")
+    if not last:
+        return '<div class="cache-status muted">Última actualización: —</div>'
+    try:
+        dt = datetime.fromisoformat(str(last).replace("Z", "+00:00"))
+        formatted = dt.strftime("%d/%m/%Y %H:%M")
+    except Exception:
+        formatted = str(last)
+    return f'<div class="cache-status muted">Última actualización: {html_lib.escape(formatted)}</div>'
 
 
 def _parse_utcdate_str(s) -> datetime:
@@ -1647,8 +1662,8 @@ def _load_all_leagues_data(
     matches_by_league: dict[str, list[dict]] = {}
 
     for code in codes:
-        matches = read_json(f"daily_matches_{code}.json") or []
-        picks = read_json(f"daily_picks_{code}.json") or []
+        matches = read_json_with_fallback(f"daily_matches_{code}.json") or []
+        picks = read_json_with_fallback(f"daily_picks_{code}.json") or []
         if not isinstance(matches, list):
             matches = []
         if not isinstance(picks, list):
@@ -1731,6 +1746,10 @@ def home_page(request: Request) -> str:
         picks_by_league,
         matches_by_league,
     ) = _load_all_leagues_data()
+
+    # Cache status (última actualización / actualizando datos)
+    cache_meta = read_cache_meta()
+    cache_status_html = _format_cache_status(cache_meta)
 
     # Global summary
     wins = sum(1 for p in all_settled if _result_norm(p) == "WIN")
@@ -2097,6 +2116,7 @@ def home_page(request: Request) -> str:
           {'<a href="/admin/users" class="muted">Admin</a>' if is_admin_user else ''}
         </div>
       </header>
+      {cache_status_html}
 
       <section class="home-hero hero">
         <div class="hero-copy">
@@ -2451,8 +2471,11 @@ def dashboard(request: Request, league: str):
 
     admin_users_link = '<a href="/admin/users">Usuarios</a>' if is_admin_user else ''
 
-    matches = read_json(f"daily_matches_{league}.json") or []
-    picks = read_json(f"daily_picks_{league}.json") or []
+    cache_meta = read_cache_meta()
+    cache_status_html = _format_cache_status(cache_meta)
+
+    matches = read_json_with_fallback(f"daily_matches_{league}.json") or []
+    picks = read_json_with_fallback(f"daily_picks_{league}.json") or []
     picks = [p for p in picks if isinstance(p, dict) and _is_pick_valid(p)]
 
     match_by_id: dict[int, dict] = {}
@@ -2679,6 +2702,7 @@ def dashboard(request: Request, league: str):
         </div>
         </div>
         {welcome_banner}
+        {cache_status_html}
         <div class="top-actions">
           <div class="league-select">
             <span class="muted">Liga</span>

@@ -1,5 +1,5 @@
 from data.providers.football_data import get_upcoming_matches
-from data.cache import write_json
+from data.cache import write_json, backup_current_to_prev
 from models.enums import LEAGUES
 
 from core.combos import build_global_combos
@@ -32,9 +32,10 @@ def refresh_all():
 
     for code in LEAGUES.keys():
         matches = get_upcoming_matches(code)
+        backup_current_to_prev(f"daily_matches_{code}.json")
         write_json(f"daily_matches_{code}.json", matches)
-
         picks = make_basic_picks(matches)
+        backup_current_to_prev(f"daily_picks_{code}.json")
         write_json(f"daily_picks_{code}.json", picks)
 
         picks_by_league[code] = picks

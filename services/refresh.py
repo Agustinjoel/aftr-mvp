@@ -14,7 +14,13 @@ from core.poisson import build_candidates, estimate_xg, match_probs, select_best
 from core.model_b import estimate_xg_dynamic_split
 from core.combos import build_global_combos
 
-from data.cache import read_json, write_json
+from data.cache import (
+    read_json,
+    write_json,
+    read_cache_meta,
+    write_cache_meta,
+    backup_current_to_prev,
+)
 from data.providers.football_data import (
     UnsupportedCompetitionError,
     get_finished_matches,
@@ -788,12 +794,14 @@ def refresh_league(league_code: str) -> tuple[int, int]:
     keep_days = getattr(settings, "daily_keep_days", None)
     picks_daily = _window_daily(picks_all, keep_days)
 
-    # 7) Guardar matches (para score/compat UI). Merge with existing so picks always have a matching match set (e.g. NBA when date window yields 0 new matches but cache has picks).
+    # 7) Guardar matches (para score/compat UI). Backup actual a .prev antes de sobrescribir (fallback UI durante refresh).
     existing_matches = _read_json_list(f"daily_matches_{league_code}.json")
     merged_matches = _merge_by_match_id(merged_matches_for_odds, existing_matches)
+    backup_current_to_prev(f"daily_matches_{league_code}.json")
     write_json(f"daily_matches_{league_code}.json", merged_matches)
 
     # daily picks
+    backup_current_to_prev(f"daily_picks_{league_code}.json")
     write_json(f"daily_picks_{league_code}.json", picks_daily)
 
     # 8) history eterno
@@ -915,21 +923,30 @@ def _build_and_save_combos() -> None:
 
 def refresh_all() -> None:
     logger.info("Iniciando refresco para %d ligas", len(settings.league_codes()))
+    meta = read_cache_meta()
+    write_cache_meta({
+        "refresh_running": True,
+        "last_updated": meta.get("last_updated") or datetime.now(timezone.utc).isoformat(),
+    })
 
-    # 1) refrescar picks/matches por liga
-    for code in settings.league_codes():
-        try:
-            refresh_league(code)
-        except Exception as e:
-            logger.exception("Error refrescando liga %s: %s", code, e)
+    try:
+        # 1) refrescar picks/matches por liga
+        for code in settings.league_codes():
+            try:
+                refresh_league(code)
+            except Exception as e:
+                logger.exception("Error refrescando liga %s: %s", code, e)
 
-    # 2) generar combinadas globales UNA vez
-    # try:
-    #   _build_and_save_combos()
-    #except Exception as e:
-     #   logger.exception("Error generando combinadas: %s", e)
-    
-    
+        # 2) generar combinadas globales UNA vez
+        # try:
+        #   _build_and_save_combos()
+        # except Exception as e:
+        #   logger.exception("Error generando combinadas: %s", e)
+    finally:
+        write_cache_meta({
+            "refresh_running": False,
+            "last_updated": datetime.now(timezone.utc).isoformat(),
+        })
     logger.info("✅ Refresco finalizado")
 
 

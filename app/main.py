@@ -10,6 +10,7 @@ from config.settings import settings
 from app.db import init_db
 from app.auth import router as auth_router
 from app.payments import router as pay_router
+from data.cache import read_cache_meta, read_json_with_fallback
 
 # Logging
 logging.basicConfig(
@@ -40,5 +41,27 @@ app.include_router(pay_router)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/api/status", tags=["status"])
+def api_status():
+    """
+    Lightweight status: refresh state, last update, leagues with data, total picks count.
+    """
+    meta = read_cache_meta()
+    leagues_loaded: list[str] = []
+    picks_total = 0
+    for code in settings.league_codes():
+        picks = read_json_with_fallback(f"daily_picks_{code}.json")
+        if isinstance(picks, list) and len(picks) > 0:
+            leagues_loaded.append(code)
+            picks_total += len(picks)
+    return {
+        "refresh_running": meta.get("refresh_running", False),
+        "last_update": meta.get("last_updated"),
+        "leagues_loaded": leagues_loaded,
+        "picks_total": picks_total,
+    }
+
 
 init_db()

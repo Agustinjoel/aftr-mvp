@@ -27,13 +27,20 @@ PRICE_PRO_USD: str = os.getenv("AFTR_PRICE_PRO_USD", "19.99")
 # Raíz del proyecto (donde está engine/, app/, config/)
 BASE_DIR: Path = Path(__file__).resolve().parents[1]
 
-# Cache de datos (JSON por liga)
-CACHE_DIR: Path = BASE_DIR / "data" / "cache"
-# Fallback legacy
+# Cache de datos (JSON por liga). Usa AFTR_CACHE_DIR si está definido; si no, data/cache local.
+_aftr_cache_dir: str | None = os.getenv("AFTR_CACHE_DIR")
+CACHE_DIR: Path = (
+    Path(_aftr_cache_dir).resolve() if _aftr_cache_dir else (BASE_DIR / "data" / "cache")
+)
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+# Fallback legacy (solo lectura en data/cache)
 DAILY_DIR: Path = BASE_DIR / "daily"
 
-# Base de datos SQLite (opcional; si existe se usa para stats y evaluación)
-DB_PATH: str = os.getenv("AFTR_DB_PATH") or os.getenv("DB_PATH") or str(BASE_DIR / "aftr.db")
+# Base de datos SQLite. Usa AFTR_DB_PATH si está definido; si no, path local por defecto.
+DB_PATH: str = (
+    os.getenv("AFTR_DB_PATH") or os.getenv("DB_PATH") or str(BASE_DIR / "aftr.db")
+)
 
 # App base URL (para links absolutos en emails / Stripe)
 APP_BASE_URL: str = (os.getenv("APP_BASE_URL") or "").strip().rstrip("/")
