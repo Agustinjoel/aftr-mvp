@@ -4,12 +4,14 @@ Para producción: definir env vars o usar .env (python-dotenv).
 """
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 load_dotenv()
+_logger = logging.getLogger("aftr.settings")
 
 #Seguridad / SaaS
 SECRET_KEY: str = (os.getenv("AFTR_SECRET_KEY", "dev-secret-change-me") or "").strip()
@@ -27,14 +29,15 @@ PRICE_PRO_USD: str = os.getenv("AFTR_PRICE_PRO_USD", "19.99")
 # Raíz del proyecto (donde está engine/, app/, config/)
 BASE_DIR: Path = Path(__file__).resolve().parents[1]
 
-# Cache de datos (JSON por liga). Usa AFTR_CACHE_DIR si está definido; si no, data/cache local.
+# Cache de datos (JSON por liga). ÚNICA fuente: AFTR_CACHE_DIR; fallback local solo si no está definido.
 _aftr_cache_dir: str | None = os.getenv("AFTR_CACHE_DIR")
 CACHE_DIR: Path = (
-    Path(_aftr_cache_dir).resolve() if _aftr_cache_dir else (BASE_DIR / "data" / "cache")
+    Path(_aftr_cache_dir).resolve() if _aftr_cache_dir else (BASE_DIR / "data" / "cache").resolve()
 )
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
+_logger.info("AFTR cache_dir resolved: %s (AFTR_CACHE_DIR=%s)", str(CACHE_DIR), "set" if _aftr_cache_dir else "unset")
 
-# Fallback legacy (solo lectura en data/cache)
+# Fallback legacy (solo lectura; no escribir aquí)
 DAILY_DIR: Path = BASE_DIR / "daily"
 
 # Base de datos SQLite. Usa AFTR_DB_PATH si está definido; si no, path local por defecto.

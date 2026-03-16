@@ -6,8 +6,9 @@ from datetime import datetime, timezone
 # Ligas top (coinciden con tus archivos)
 LEAGUES = ["PL", "PD", "SA", "BL1", "FL1", "CL"]
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # engine/
-DAILY_DIR = os.path.join(BASE_DIR, "daily")
+# Cache: usar data.cache para daily_matches_*.json y daily_picks_*.json (una sola carpeta desde AFTR_CACHE_DIR)
+from data.cache import read_json as cache_read_json
+from data.cache import write_json as cache_write_json
 
 
 # -----------------------------
@@ -18,19 +19,6 @@ def _safe_float(x, default=0.0):
         return float(x)
     except Exception:
         return default
-
-
-def read_json(path: str):
-    if not os.path.exists(path):
-        return []
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def write_json(path: str, data):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
 
 
 def poisson_pmf(lmbda: float, k: int) -> float:
@@ -173,12 +161,12 @@ def parse_utcdate(m: dict):
 
 
 def build_for_league(code: str):
-    matches_path = os.path.join(DAILY_DIR, f"daily_matches_{code}.json")
-    picks_path = os.path.join(DAILY_DIR, f"daily_picks_{code}.json")
+    matches_filename = f"daily_matches_{code}.json"
+    picks_filename = f"daily_picks_{code}.json"
 
-    matches = read_json(matches_path)
-    if not matches:
-        write_json(picks_path, [])
+    matches = cache_read_json(matches_filename)
+    if not isinstance(matches, list) or not matches:
+        cache_write_json(picks_filename, [])
         print(f"SKIP {code}: no matches")
         return
 
@@ -207,7 +195,7 @@ def build_for_league(code: str):
             "candidates": candidates,
         })
 
-    write_json(picks_path, picks)
+    cache_write_json(picks_filename, picks)
     print(f"OK {code}: {len(picks)} picks")
 
 
