@@ -229,43 +229,73 @@ def signup_lead(payload: dict = Body(...)):
 def login(email: str = Form(...), password: str = Form(...)):
     """Form login (browser). Sets aftr_session cookie and redirects.
 
-    The `email` field may contain either the user's email or username.
+    The `email` form field may contain either the user's email or username.
     """
-    identifier = (email or "").strip()
+    identifier_raw = email or ""
+    identifier = identifier_raw.strip()
+    logger.info("login attempt: identifier_raw=%r, identifier=%r", identifier_raw, identifier)
+
     if not identifier:
+        logger.info("login: empty identifier, redirecting login_fail")
         return RedirectResponse(url="/?msg=login_fail", status_code=302)
     if _password_too_long(password or ""):
+        logger.info("login: password too long, redirecting login_fail")
         return RedirectResponse(url="/?msg=login_fail", status_code=302)
 
+    lookup_mode = "email" if "@" in identifier else "username"
+    logger.info("login: lookup_mode=%s", lookup_mode)
+
+    row = None
     try:
         conn = get_conn()
         cur = conn.cursor()
-        # Allow login by email (normalized to lowercase) OR username.
+        # Pattern: support both email and username using OR.
         cur.execute(
-            "SELECT id, password_hash FROM users WHERE email = ? OR username = ?",
-            ((identifier or "").strip().lower(), identifier),
+            "SELECT * FROM users WHERE email = ? OR username = ?",
+            (identifier.lower(), identifier),
         )
         row = cur.fetchone()
+        logger.info(
+            "login: user lookup done, found=%s",
+            bool(row),
+        )
     except Exception as exc:
         logger.exception("login error while querying user: %s", exc)
-        row = None
     finally:
         try:
             conn.close()  # type: ignore[has-type]
         except Exception:
             pass
 
-    try:
-        if not row or not row["password_hash"] or not bcrypt.verify(password, row["password_hash"]):
-            return RedirectResponse(url="/?msg=login_fail", status_code=302)
-    except Exception as exc:
-        logger.exception("login error during password verification: %s", exc)
+    if not row:
+        logger.info("login: no user found for identifier=%r, redirecting login_fail", identifier)
+        return RedirectResponse(url="/?msg=login_fail", status_code=302)
+
+    has_hash = "password_hash" in row and bool(row["password_hash"])
+    logger.info("login: password_hash_present=%s", has_hash)
+
+    verify_ok = False
+    if has_hash:
+        try:
+            verify_ok = bcrypt.verify(password, row["password_hash"])
+        except Exception as exc:
+            logger.exception("login error during password verification: %s", exc)
+            verify_ok = False
+    logger.info("login: bcrypt_verify_result=%s", verify_ok)
+
+    if not verify_ok:
+        logger.info("login: password verification failed, redirecting login_fail")
         return RedirectResponse(url="/?msg=login_fail", status_code=302)
 
     uid = int(row["id"])
     resp = RedirectResponse(url="/?msg=login_ok", status_code=302)
     set_session(resp, uid)
-    logger.info("login success: user_id=%s, set_cookie called, redirecting to /?msg=login_ok", uid)
+    logger.info(
+        "login success: user_id=%s, lookup_mode=%s, identifier=%r, redirecting to /?msg=login_ok",
+        uid,
+        lookup_mode,
+        identifier,
+    )
     return resp
 
 
