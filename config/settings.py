@@ -29,13 +29,10 @@ PRICE_PRO_USD: str = os.getenv("AFTR_PRICE_PRO_USD", "19.99")
 # Raíz del proyecto (donde está engine/, app/, config/)
 BASE_DIR: Path = Path(__file__).resolve().parents[1]
 
-# Cache de datos (JSON por liga). ÚNICA fuente: AFTR_CACHE_DIR; fallback local solo si no está definido.
-_aftr_cache_dir: str | None = os.getenv("AFTR_CACHE_DIR")
-CACHE_DIR: Path = (
-    Path(_aftr_cache_dir).resolve() if _aftr_cache_dir else (BASE_DIR / "data" / "cache").resolve()
-)
+# Cache: AFTR_CACHE_DIR (ej. /var/data/cache en Render); fallback "data/cache" local
+CACHE_DIR: Path = Path(os.getenv("AFTR_CACHE_DIR", "data/cache"))
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
-_logger.info("AFTR cache_dir resolved: %s (AFTR_CACHE_DIR=%s)", str(CACHE_DIR), "set" if _aftr_cache_dir else "unset")
+print("CACHE_DIR:", CACHE_DIR)
 
 # Fallback legacy (solo lectura; no escribir aquí)
 DAILY_DIR: Path = BASE_DIR / "daily"
