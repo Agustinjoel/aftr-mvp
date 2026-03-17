@@ -53,25 +53,30 @@ def summary_from_json(league: str) -> dict:
 
 
 # =========================
-# API: Combos globales
+# API: Combos globales  -> /api/combos (mounted with prefix /api)
 # =========================
-@router.get("/api/combos")
+@router.get("/combos")
 def api_combos():
     return read_json("daily_combos.json") or {}
 
 
 # =========================
-# API: Picks por liga
+# API: Picks por liga  -> /api/picks?league=PL and /api/picks/PL
 # =========================
-@router.get("/api/picks")
+@router.get("/picks")
 def get_picks(league: str = Query(settings.default_league)):
     league = league if settings.is_valid_league(league) else settings.default_league
     return read_json(f"daily_picks_{league}.json") or []
 
 
+@router.get("/picks/{league}")
+def get_picks_by_league(league: str):
+    league = league if settings.is_valid_league(league) else settings.default_league
+    return read_json(f"daily_picks_{league}.json") or []
+
+
 # =========================
-# API: Summary para tu KPI bar
-# (tu UI hace fetch a /api/stats/summary)
+# API: Summary para tu KPI bar  -> /api/stats/summary
 # =========================
 @router.get("/stats/summary")
 def get_stats_summary(league: str = Query(settings.default_league)):

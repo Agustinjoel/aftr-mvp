@@ -4,11 +4,16 @@ Acceso a cache JSON: todas las lecturas/escrituras usan config.settings CACHE_DI
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any
 
 from config.settings import CACHE_DIR, DAILY_DIR
 
 CACHE_META_FILENAME = "cache_meta.json"
+_logger = logging.getLogger("aftr.cache")
+
+# Debug: resolved CACHE_DIR at import (same as web/refresh process)
+_logger.info("CACHE_DIR resolved: %s", str(CACHE_DIR))
 
 
 def _is_valid_cache_data(data: Any, filename: str) -> bool:
@@ -29,11 +34,18 @@ def read_json(filename: str) -> list[Any] | dict[str, Any]:
     path = CACHE_DIR / filename
     if path.exists():
         with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+        n = len(data) if isinstance(data, list) else (len(data) if isinstance(data, dict) else 0)
+        _logger.info("read_json: %s -> %s items (from %s)", filename, n, str(path))
+        return data
     daily_path = DAILY_DIR / filename
     if daily_path.exists():
         with open(daily_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+        n = len(data) if isinstance(data, list) else (len(data) if isinstance(data, dict) else 0)
+        _logger.info("read_json: %s -> %s items (from daily fallback %s)", filename, n, str(daily_path))
+        return data
+    _logger.info("read_json: %s -> not found (checked %s and %s)", filename, str(path), str(daily_path))
     return []
 
 
@@ -44,11 +56,16 @@ def read_json_with_fallback(filename: str) -> list[Any] | dict[str, Any]:
     """
     data = read_json(filename)
     if _is_valid_cache_data(data, filename):
+        n = len(data) if isinstance(data, list) else (len(data) if isinstance(data, dict) else 0)
+        _logger.info("read_json_with_fallback: %s -> primary valid, %s items", filename, n)
         return data
     prev_name = filename + ".prev"
     data_prev = read_json(prev_name)
     if _is_valid_cache_data(data_prev, filename):
+        n = len(data_prev) if isinstance(data_prev, list) else (len(data_prev) if isinstance(data_prev, dict) else 0)
+        _logger.info("read_json_with_fallback: %s -> .prev valid, %s items", filename, n)
         return data_prev
+    _logger.info("read_json_with_fallback: %s -> empty (primary and .prev invalid or missing)", filename)
     if "daily_picks_" in filename or "daily_matches_" in filename:
         return []
     return {}

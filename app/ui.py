@@ -1662,31 +1662,53 @@ def _load_all_leagues_data(
     matches_by_league: dict[str, list[dict]] = {}
 
     for code in codes:
-        matches = read_json_with_fallback(f"daily_matches_{code}.json") or []
-        picks = read_json_with_fallback(f"daily_picks_{code}.json") or []
-        if not isinstance(matches, list):
-            matches = []
-        if not isinstance(picks, list):
-            picks = []
-        matches = [m for m in matches if isinstance(m, dict)]
+        raw_matches = read_json_with_fallback(f"daily_matches_{code}.json") or []
+        raw_picks = read_json_with_fallback(f"daily_picks_{code}.json") or []
+        if not isinstance(raw_matches, list):
+            raw_matches = []
+        if not isinstance(raw_picks, list):
+            raw_picks = []
+        matches = [m for m in raw_matches if isinstance(m, dict)]
+        picks = [p for p in raw_picks if isinstance(p, dict)]
+
+        logger.info(
+            "load_all_leagues: %s raw_matches=%s raw_picks=%s",
+            code, len(matches), len(picks),
+        )
+
         for m in matches:
             mid = _safe_int(m.get("match_id") or m.get("id"))
             if mid is not None:
                 match_by_key[(code, mid)] = m
         matches_by_league[code] = matches
 
+        filtered_for_league: list[dict] = []
         for p in picks:
-            if not isinstance(p, dict):
-                continue
             p = dict(p)
             p["_league"] = code
-            if not _is_pick_valid(p):
-                continue
+            if _is_pick_valid(p):
+                filtered_for_league.append(p)
+        if len(picks) > 0 and len(filtered_for_league) == 0:
+            logger.warning(
+                "load_all_leagues: %s had %s raw picks but 0 after _is_pick_valid; using raw picks as fallback",
+                code, len(picks),
+            )
+            for p in picks:
+                p = dict(p)
+                p["_league"] = code
+                filtered_for_league.append(p)
+        logger.info("load_all_leagues: %s after filter (or fallback) picks=%s", code, len(filtered_for_league))
+
+        for p in filtered_for_league:
             all_picks.append(p)
             picks_by_league.setdefault(code, []).append(p)
 
     all_settled = [p for p in all_picks if _result_norm(p) in ("WIN", "LOSS", "PUSH")]
     all_upcoming = [p for p in all_picks if _result_norm(p) == "PENDING"]
+    logger.info(
+        "load_all_leagues: total all_picks=%s all_settled=%s all_upcoming=%s leagues_with_picks=%s",
+        len(all_picks), len(all_settled), len(all_upcoming), list(picks_by_league.keys()),
+    )
 
     return all_picks, match_by_key, all_settled, all_upcoming, picks_by_league, matches_by_league
 
@@ -1746,6 +1768,21 @@ def home_page(request: Request) -> str:
         picks_by_league,
         matches_by_league,
     ) = _load_all_leagues_data()
+
+    # Debug: homepage data counts and reason if empty
+    n_picks = len(_all_picks)
+    n_leagues = len(picks_by_league)
+    n_upcoming = len(all_upcoming)
+    if n_picks == 0:
+        logger.warning(
+            "home_page: rendered with 0 picks. leagues_with_picks=%s; check cache path and _is_pick_valid fallback.",
+            list(picks_by_league.keys()),
+        )
+    else:
+        logger.info(
+            "home_page: picks_loaded=%s leagues_rendered=%s upcoming=%s",
+            n_picks, n_leagues, n_upcoming,
+        )
 
     # Cache status (última actualización / actualizando datos)
     cache_meta = read_cache_meta()
@@ -2474,9 +2511,25 @@ def dashboard(request: Request, league: str):
     cache_meta = read_cache_meta()
     cache_status_html = _format_cache_status(cache_meta)
 
-    matches = read_json_with_fallback(f"daily_matches_{league}.json") or []
-    picks = read_json_with_fallback(f"daily_picks_{league}.json") or []
-    picks = [p for p in picks if isinstance(p, dict) and _is_pick_valid(p)]
+    raw_matches = read_json_with_fallback(f"daily_matches_{league}.json") or []
+    raw_picks = read_json_with_fallback(f"daily_picks_{league}.json") or []
+    matches = [m for m in raw_matches if isinstance(m, dict)]
+    raw_picks_list = [p for p in raw_picks if isinstance(p, dict)]
+    picks = [p for p in raw_picks_list if _is_pick_valid(p)]
+    if len(raw_picks_list) > 0 and len(picks) == 0:
+        logger.warning(
+            "dashboard: %s had %s raw picks but 0 after _is_pick_valid; using raw picks as fallback",
+            league, len(raw_picks_list),
+        )
+        picks = raw_picks_list
+    logger.info(
+        "dashboard: league=%s raw_matches=%s raw_picks=%s after_filter_picks=%s",
+        league, len(matches), len(raw_picks_list), len(picks),
+    )
+    if len(raw_picks_list) > 0 and len(picks) == 0:
+        logger.warning("dashboard: had raw_picks but 0 after filter; fallback applied.")
+    elif len(picks) == 0:
+        logger.warning("dashboard: no picks (raw was empty for league=%s).", league)
 
     match_by_id: dict[int, dict] = {}
     for m in matches:
