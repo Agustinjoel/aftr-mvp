@@ -116,6 +116,26 @@ def create_user(email: str, username: str, password: str) -> int:
 def clear_session(resp: RedirectResponse):
     resp.delete_cookie("aftr_session", path="/")
 
+def get_user_by_email(email: str) -> dict | None:
+    """Look up user by email only. Returns row dict with id, email, password_hash, etc., or None."""
+    email = (email or "").strip().lower()
+    if not email:
+        return None
+    conn = get_conn()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "SELECT * FROM users WHERE email = ?",
+            (email,),
+        )
+        row = cur.fetchone()
+    finally:
+        conn.close()
+    if not row:
+        return None
+    return {k: row[k] for k in row.keys()}
+
+
 def get_user_by_id(user_id: int) -> dict | None:
     conn = get_conn()
     cur = conn.cursor()
@@ -227,48 +247,22 @@ def signup_lead(payload: dict = Body(...)):
 
 @router.post("/auth/login")
 def login(email: str = Form(...), password: str = Form(...)):
-    """Form login (browser). Sets aftr_session cookie and redirects.
+    """Form login (browser). Looks up user by email only. Sets aftr_session cookie and redirects."""
+    email_normalized = (email or "").strip().lower()
+    logger.info("login attempt: email=%r", email_normalized)
 
-    The `email` form field may contain either the user's email or username.
-    """
-    identifier_raw = email or ""
-    identifier = identifier_raw.strip()
-    logger.info("login attempt: identifier_raw=%r, identifier=%r", identifier_raw, identifier)
-
-    if not identifier:
-        logger.info("login: empty identifier, redirecting login_fail")
+    if not email_normalized:
+        logger.info("login: empty email, redirecting login_fail")
         return RedirectResponse(url="/?msg=login_fail", status_code=302)
     if _password_too_long(password or ""):
         logger.info("login: password too long, redirecting login_fail")
         return RedirectResponse(url="/?msg=login_fail", status_code=302)
 
-    lookup_mode = "email" if "@" in identifier else "username"
-    logger.info("login: lookup_mode=%s", lookup_mode)
-
-    row = None
-    try:
-        conn = get_conn()
-        cur = conn.cursor()
-        # Pattern: support both email and username using OR.
-        cur.execute(
-            "SELECT * FROM users WHERE email = ? OR username = ?",
-            (identifier.lower(), identifier),
-        )
-        row = cur.fetchone()
-        logger.info(
-            "login: user lookup done, found=%s",
-            bool(row),
-        )
-    except Exception as exc:
-        logger.exception("login error while querying user: %s", exc)
-    finally:
-        try:
-            conn.close()  # type: ignore[has-type]
-        except Exception:
-            pass
+    row = get_user_by_email(email_normalized)
+    logger.info("login: user lookup by email, found=%s", bool(row))
 
     if not row:
-        logger.info("login: no user found for identifier=%r, redirecting login_fail", identifier)
+        logger.info("login: no user found for email=%r, redirecting login_fail", email_normalized)
         return RedirectResponse(url="/?msg=login_fail", status_code=302)
 
     has_hash = "password_hash" in row and bool(row["password_hash"])
@@ -290,49 +284,25 @@ def login(email: str = Form(...), password: str = Form(...)):
     uid = int(row["id"])
     resp = RedirectResponse(url="/?msg=login_ok", status_code=302)
     set_session(resp, uid)
-    logger.info(
-        "login success: user_id=%s, lookup_mode=%s, identifier=%r, redirecting to /?msg=login_ok",
-        uid,
-        lookup_mode,
-        identifier,
-    )
+    logger.info("login success: user_id=%s, email=%r, redirecting to /?msg=login_ok", uid, email_normalized)
     return resp
 
 
 @router.post("/auth/login/json")
 def login_json(payload: dict = Body(...)):
-    """JSON login (API/Android). Sets aftr_session cookie and returns user info.
-
-    The `email` field may contain either the user's email or username.
-    """
-    identifier_raw = payload.get("email") or ""
-    identifier = identifier_raw.strip()
+    """JSON login (API/Android). Looks up user by email only. Sets aftr_session cookie and returns user info."""
+    email_raw = payload.get("email") or ""
+    email_normalized = email_raw.strip().lower()
     password = payload.get("password") or ""
 
-    if not identifier:
+    if not email_normalized:
         return JSONResponse({"ok": False, "error": "email_invalido"}, status_code=400)
     if _password_too_long(password):
         return JSONResponse({"ok": False, "error": "password_demasiado_larga"}, status_code=400)
 
+    row = get_user_by_email(email_normalized)
     try:
-        conn = get_conn()
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT id, password_hash, email, username FROM users WHERE email = ? OR username = ?",
-            (identifier.lower(), identifier),
-        )
-        row = cur.fetchone()
-    except Exception as exc:
-        logger.exception("login_json error while querying user: %s", exc)
-        row = None
-    finally:
-        try:
-            conn.close()  # type: ignore[has-type]
-        except Exception:
-            pass
-
-    try:
-        if not row or not row["password_hash"] or not bcrypt.verify(password, row["password_hash"]):
+        if not row or not row.get("password_hash") or not bcrypt.verify(password, row["password_hash"]):
             return JSONResponse({"ok": False, "error": "credenciales_invalidas"}, status_code=401)
     except Exception as exc:
         logger.exception("login_json error during password verification: %s", exc)
