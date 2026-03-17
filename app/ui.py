@@ -1096,17 +1096,48 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
             odds_line_html += ' <span class="pick-bookmaker">' + html_lib.escape(bookmaker_title) + "</span>"
         odds_line_html += "</div>"
 
-    aftr_score_val = _aftr_score(p)
+    # AFTR Score block: use new fields when present, else legacy _aftr_score
+    aftr_score_val = p.get("aftr_score")
+    if aftr_score_val is None:
+        aftr_score_val = _aftr_score(p)
+    else:
+        try:
+            aftr_score_val = int(round(float(aftr_score_val)))
+        except (TypeError, ValueError):
+            aftr_score_val = _aftr_score(p)
+    tier = (p.get("tier") or "pass").strip().lower() or "pass"
+    tier_colors = {"elite": "#FFD700", "strong": "#00C853", "risky": "#FF9800", "pass": "#9E9E9E"}
+    tier_color = tier_colors.get(tier, "#9E9E9E")
+    edge_display = p.get("edge")
+    if edge_display is not None:
+        try:
+            edge_str = f"{float(edge_display) * 100:.2f}%"
+        except (TypeError, ValueError):
+            edge_str = "—"
+    else:
+        edge_str = "—"
+    conf_level = (p.get("confidence_level") or "—").strip() or "—"
+    if conf_level != "—":
+        conf_level = conf_level.upper()
+    aftr_block_html = f"""
+      <div class="aftr-score-block" style="border-left: 4px solid {tier_color};">
+        <div class="aftr-score-line">
+          <span class="aftr-score-label">AFTR Score</span>
+          <span class="aftr-score-value">{aftr_score_val}</span>
+        </div>
+        <div class="aftr-score-meta">
+          <span class="aftr-tier" style="color: {tier_color};">Tier: {html_lib.escape(tier.upper())}</span>
+          <span class="aftr-value">Value: {html_lib.escape(edge_str)}</span>
+          <span class="aftr-confidence">Confidence: {html_lib.escape(conf_level)}</span>
+        </div>
+      </div>"""
     front_html = f"""
     <div class="{card_class}">
       {teams_html}
       <div class="meta" data-utc="{html_lib.escape(str(p.get('utcDate','')))}">
         {html_lib.escape(str(p.get('utcDate','')))}
       </div>
-      <div class="aftr-score-line">
-        <span class="aftr-score-label">AFTR Score</span>
-        <span class="aftr-score-value">{aftr_score_val}</span>
-      </div>
+      {aftr_block_html}
 
       <div class="pick pick-best">
         <span class="pick-main">{html_lib.escape(best_market)}</span>
@@ -1924,7 +1955,10 @@ def home_page(request: Request) -> str:
         if local_d is None or not (today_local <= local_d <= end_local):
             continue
         picks_near_term.append(p)
-    top_picks = sorted(picks_near_term, key=lambda p: -_pick_score(p))[:4]
+    top_picks = sorted(
+        picks_near_term,
+        key=lambda p: (-(p.get("aftr_score") or 0), -_pick_score(p)),
+    )[:4]
     for p in top_picks:
         if p.get("home") and p.get("away"):
             continue
@@ -1947,14 +1981,21 @@ def home_page(request: Request) -> str:
         home = html_lib.escape(str(p.get("home") or "—"))
         away = html_lib.escape(str(p.get("away") or "—"))
         market = html_lib.escape(str(p.get("best_market") or "—"))
-        score = _aftr_score(p)
+        score = p.get("aftr_score")
+        if score is None:
+            score = _aftr_score(p)
+        else:
+            try:
+                score = int(round(float(score)))
+            except (TypeError, ValueError):
+                score = _aftr_score(p)
         edge = p.get("edge")
         try:
             edge_str = f"{float(edge)*100:+.1f}%" if edge is not None else "—"
         except (TypeError, ValueError):
             edge_str = "—"
-        conf = p.get("confidence")
-        conf_str = str(conf) if conf is not None else "—"
+        conf_level = (p.get("confidence_level") or p.get("confidence") or "—")
+        conf_str = str(conf_level).upper() if conf_level != "—" else "—"
         od = p.get("odds_decimal")
         try:
             odds_str = f"{float(od):.2f}" if od is not None else "—"
@@ -1965,10 +2006,13 @@ def home_page(request: Request) -> str:
         except (TypeError, ValueError):
             edge_pos = False
         edge_class = " home-pick-edge-pos" if edge_pos else ""
+        tier = (p.get("tier") or "pass").strip().lower() or "pass"
+        tier_colors = {"elite": "#FFD700", "strong": "#00C853", "risky": "#FF9800", "pass": "#9E9E9E"}
+        tier_color = tier_colors.get(tier, "#9E9E9E")
         home_part = _team_with_crest(p.get("home_crest"), p.get("home") or "—")
         away_part = _team_with_crest(p.get("away_crest"), p.get("away") or "—")
         top_pick_cards.append(f"""
-        <div class="card home-pick-card">
+        <div class="card home-pick-card" style="border-left: 4px solid {tier_color};">
           <div class="home-pick-league">{league_name}</div>
           <div class="home-pick-match">
             {home_part}
@@ -1978,8 +2022,9 @@ def home_page(request: Request) -> str:
           <div class="home-pick-market">{market}</div>
           <div class="home-pick-meta">
             <span class="home-pick-score">AFTR {score}</span>
+            <span class="aftr-tier" style="color: {tier_color};">{html_lib.escape(tier.upper())}</span>
             <span class="home-pick-edge{edge_class}">Ventaja {edge_str}</span>
-            <span>Conf {conf_str}</span>
+            <span>Conf {html_lib.escape(conf_str)}</span>
             <span>Odds {odds_str}</span>
           </div>
         </div>""")
@@ -3047,8 +3092,12 @@ def dashboard(request: Request, league: str):
               <h4 class="muted" style="margin-bottom:8px; font-size:13px;">Selecciones</h4>
             <div class="grid">
             """
+                day_picks_sorted = sorted(
+                    day_picks,
+                    key=lambda p: (-(p.get("aftr_score") or 0), _model_rank(p), -_pick_score(p)),
+                )
                 pick_list = top_picks_with_variety(
-                    sorted(day_picks, key=lambda p: (_model_rank(p), -_pick_score(p))),
+                    day_picks_sorted,
                     top_n=20,
                     max_repeats_per_market=5,
                 )

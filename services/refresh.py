@@ -29,6 +29,7 @@ from data.providers.football_data import (
 from data.providers.team_form import get_team_recent_matches
 
 from core.odds import edge as odds_edge, get_decimal_and_implied_for_market
+from services.aftr_score import enrich_pick_with_aftr_score, filter_premium_picks
 from data.providers.odds_football import (
     ensure_odds_for_league,
     get_odds_for_match,
@@ -789,6 +790,18 @@ def refresh_league(league_code: str) -> tuple[int, int]:
     # 5b) Enrich football picks with odds (implied prob, edge)
     merged_matches_for_odds = _merge_by_match_id(upcoming_matches, finished_matches_norm)
     picks_all = _enrich_football_picks_with_odds(league_code, merged_matches_for_odds, picks_all)
+
+    # 5c) AFTR Score (model_score, value_score, form_score, xg_score, aftr_score, tier, edge, confidence, confidence_level)
+    for p in picks_all:
+        if isinstance(p, dict):
+            enrich_pick_with_aftr_score(p)
+
+    premium_picks = filter_premium_picks(picks_all)
+    logger.info("AFTR premium picks: %s / %s", len(premium_picks), len(picks_all))
+    if picks_all:
+        sample = next((p for p in picks_all if isinstance(p, dict)), None)
+        if sample:
+            logger.info("AFTR SAMPLE PICK: %s", {k: sample.get(k) for k in ("aftr_score", "tier", "edge", "confidence", "confidence_level", "home", "away", "best_market")})
 
     # 6) Save daily (ventana opcional)
     keep_days = getattr(settings, "daily_keep_days", None)
