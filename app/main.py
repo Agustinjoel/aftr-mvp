@@ -40,6 +40,14 @@ app.include_router(auth_router)
 app.include_router(pay_router)
 
 
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    """Log every incoming request method + path."""
+    async def dispatch(self, request, call_next):
+        logger.info("REQ %s %s", request.method, request.url.path)
+        response = await call_next(request)
+        return response
+
+
 class ClearInvalidSessionMiddleware(BaseHTTPMiddleware):
     """Clear aftr_session cookie when the stored uid does not exist in DB."""
     async def dispatch(self, request, call_next):
@@ -49,6 +57,7 @@ class ClearInvalidSessionMiddleware(BaseHTTPMiddleware):
 
 
 app.add_middleware(ClearInvalidSessionMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
 
 
 @app.get("/health")

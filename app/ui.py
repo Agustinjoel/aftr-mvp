@@ -2919,9 +2919,8 @@ def dashboard(request: Request, league: str):
       }
     }
     document.addEventListener("DOMContentLoaded",function(){
-      var origin = window.location.origin || (window.location.protocol + "//" + window.location.host);
       var loginForm = document.getElementById("login-form");
-      if (loginForm) loginForm.action = origin + "/auth/login";
+      if (loginForm) loginForm.action = "/auth/login";
       var params = new URLSearchParams(window.location.search);
       var authParam = params.get("auth");
       if (authParam === "login" && typeof window.openLoginModal === "function") {

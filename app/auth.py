@@ -270,6 +270,7 @@ def signup_lead(payload: dict = Body(...)):
 @router.post("/auth/login")
 def login(email: str = Form(...), password: str = Form(...)):
     """Form login (browser). Looks up user by email only. Sets aftr_session cookie and redirects."""
+    logger.info("LOGIN ENDPOINT HIT: method=POST path=/auth/login")
     # Temporary debug logs for POST /auth/login code path
     email_normalized = (email or "").strip().lower()
     logger.info("login DEBUG: submitted form email value=%r, password_len=%s", email_normalized, len(password or ""))
