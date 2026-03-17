@@ -3680,24 +3680,26 @@ def _account_header(request: Request):
     return user, auth_html, plan_badge
 
 
-@router.get("/account", response_class=HTMLResponse)
-def account_page(request: Request):
-    """Mi cuenta: show username, email, role, subscription_status, created_at (login required)."""
-    user, _, plan_badge = _account_header(request)
-    if not user:
-        return RedirectResponse(url="/?auth=login", status_code=302)
-    username = html_lib.escape(user.get("username") or "—")
-    email = html_lib.escape(user.get("email") or "—")
-    role = html_lib.escape(user.get("role") or "—")
-    sub = html_lib.escape(user.get("subscription_status") or "—")
-    created = user.get("created_at") or "—"
-    if created != "—":
+def _account_created_display(created_at) -> str:
+    """Format created_at for display (e.g. 2025-03-15 -> 15/03/2025 or 'desde 2025')."""
+    if not created_at:
+        return "—"
+    s = str(created_at).strip()[:10]
+    if len(s) >= 10:
         try:
-            created = created[:10] if isinstance(created, str) and len(created) >= 10 else created
+            y, m, d = s[:4], s[5:7], s[8:10]
+            return f"{d}/{m}/{y}"
         except Exception:
             pass
-    created = html_lib.escape(str(created))
-    body = f"""
+    return html_lib.escape(s)
+
+
+@router.get("/account", response_class=HTMLResponse)
+def account_page(request: Request):
+    """Phase 2 account dashboard: greeting, plan, stats (from /user/*), quick actions, history preview."""
+    user, _, plan_badge = _account_header(request)
+
+    header_html = f"""
     <div class="top top-pro">
       <div class="brand">
         <img src="/static/logo_aftr.png" class="logo-aftr" alt="AFTR" />
@@ -3712,20 +3714,117 @@ def account_page(request: Request):
       <div class="links">
         <a href="/">Panel</a>
       </div>
-    </div>
-    <div class="page" style="max-width: 520px; margin: 24px auto;">
-      <h2>Mi cuenta</h2>
-      <div class="card" style="padding: 20px;">
-        <table style="width:100%; border-collapse: collapse;">
-          <tr><td class="muted" style="padding: 8px 0;">Usuario</td><td style="padding: 8px 0;">{username}</td></tr>
-          <tr><td class="muted" style="padding: 8px 0;">Email</td><td style="padding: 8px 0;">{email}</td></tr>
-          <tr><td class="muted" style="padding: 8px 0;">Rol</td><td style="padding: 8px 0;">{role}</td></tr>
-          <tr><td class="muted" style="padding: 8px 0;">Suscripción</td><td style="padding: 8px 0;">{sub}</td></tr>
-          <tr><td class="muted" style="padding: 8px 0;">Cuenta desde</td><td style="padding: 8px 0;">{created}</td></tr>
-        </table>
+    </div>"""
+
+    if not user:
+        body = header_html + """
+    <div class="page account-page" style="max-width: 560px; margin: 24px auto;">
+      <div class="card account-card" style="padding: 28px; text-align: center; background: var(--card-bg, #1a1a1a); border-radius: 12px;">
+        <p class="account-greeting muted" style="font-size: 1.1rem; margin-bottom: 20px;">Iniciá sesión para ver tu cuenta</p>
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <a href="/?auth=login" class="pill" style="padding: 10px 20px;">Entrar</a>
+          <a href="/?auth=register" class="pill" style="padding: 10px 20px;">Crear cuenta</a>
+        </div>
       </div>
+    </div>"""
+        return _simple_page("Mi cuenta — AFTR", body)
+
+    display_name = (user.get("username") or user.get("email") or "Usuario").strip()
+    display_name = html_lib.escape(display_name)
+    created_display = _account_created_display(user.get("created_at"))
+    uid = user.get("id")
+    is_premium = is_premium_active(user) or (get_active_plan(uid) if uid else "") in (settings.plan_premium, settings.plan_pro)
+    plan_label = "⭐ Premium activo" if is_premium else "Free plan"
+    plan_class = "account-plan-premium" if is_premium else "account-plan-free"
+    upgrade_cta = "" if is_premium else '<p class="muted" style="margin-top: 8px; font-size: 0.9rem;"><a href="/?open=premium" style="color: var(--accent, #0b5ed7);">Mejorar a Premium</a></p>'
+
+    body = header_html + f"""
+    <div class="page account-page" style="max-width: 560px; margin: 24px auto;">
+      <h2 style="margin-bottom: 16px;">Mi cuenta</h2>
+
+      <div class="card account-hero" style="padding: 24px; margin-bottom: 20px; background: var(--card-bg, #1a1a1a); border-radius: 12px;">
+        <p class="account-greeting" style="font-size: 1.25rem; margin: 0 0 8px 0;">Hola, {display_name}</p>
+        <p class="account-plan {plan_class}" style="margin: 0; font-weight: 600;">{plan_label}</p>
+        {upgrade_cta}
+        <p class="muted" style="margin-top: 12px; font-size: 0.85rem;">Cuenta desde {created_display}</p>
+      </div>
+
+      <h3 style="margin: 20px 0 12px 0; font-size: 1rem;">Tus estadísticas</h3>
+      <div id="account-stats" class="account-stats" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-bottom: 24px;">
+        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Seguidos</span><span id="stat-followed">—</span></div>
+        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Favoritos</span><span id="stat-favorites">—</span></div>
+        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Victorias</span><span id="stat-wins">—</span></div>
+        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Pérdidas</span><span id="stat-losses">—</span></div>
+        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Pendientes</span><span id="stat-pending">—</span></div>
+        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">ROI</span><span id="stat-roi">—</span></div>
+      </div>
+
+      <h3 style="margin: 20px 0 12px 0; font-size: 1rem;">Acciones</h3>
+      <div class="account-actions" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px;">
+        <a href="#favoritos" class="pill" style="padding: 10px 18px;">Ver favoritos</a>
+        <a href="#historial" class="pill" style="padding: 10px 18px;">Ver historial</a>
+        <a href="/auth/logout" class="pill" style="padding: 10px 18px;">Cerrar sesión</a>
+      </div>
+
+      <section id="favoritos" style="margin-bottom: 24px;">
+        <h3 style="margin: 0 0 12px 0; font-size: 1rem;">Favoritos</h3>
+        <div class="card" style="padding: 16px;"><p class="muted" style="margin: 0;">Tus picks favoritos aparecerán aquí.</p></div>
+      </section>
+
+      <section id="historial">
+        <h3 style="margin: 0 0 12px 0; font-size: 1rem;">Historial reciente (seguidos)</h3>
+        <div id="account-history" class="account-history">
+          <p class="muted" style="margin: 0;">Cargando…</p>
+        </div>
+      </section>
     </div>
-    """
+    <script>
+    (function(){{
+      var base = window.location.origin || (window.location.protocol + "//" + window.location.host);
+      function esc(s) {{ if (s == null || s === "") return ""; return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }}
+      function fetchJSON(url) {{
+        return fetch(url, {{ credentials: "include" }}).then(function(r) {{ return r.json(); }});
+      }}
+      Promise.all([fetchJSON(base + "/user/stats"), fetchJSON(base + "/user/history")]).then(function(results) {{
+        var stats = results[0];
+        var history = results[1];
+        if (stats && stats.ok && stats.stats) {{
+          var s = stats.stats;
+          var el = function(id) {{ return document.getElementById(id); }};
+          if (el("stat-followed")) el("stat-followed").textContent = s.followed_picks != null ? s.followed_picks : "—";
+          if (el("stat-favorites")) el("stat-favorites").textContent = s.favorites_count != null ? s.favorites_count : "—";
+          if (el("stat-wins")) el("stat-wins").textContent = s.wins != null ? s.wins : "—";
+          if (el("stat-losses")) el("stat-losses").textContent = s.losses != null ? s.losses : "—";
+          if (el("stat-pending")) el("stat-pending").textContent = s.pending != null ? s.pending : "—";
+          if (el("stat-roi")) el("stat-roi").textContent = s.roi != null ? s.roi + "%" : "—";
+        }}
+        if (history && history.ok && Array.isArray(history.history)) {{
+          var list = history.history.slice(0, 5);
+          var container = document.getElementById("account-history");
+          if (!container) return;
+          if (list.length === 0) {{
+            container.innerHTML = "<p class=\\"muted\\" style=\\"margin: 0;\\">Aún no seguís ningún pick.</p>";
+          }} else {{
+            var html = "<ul style=\\"list-style: none; padding: 0; margin: 0;\\">";
+            list.forEach(function(item) {{
+              var result = esc(item.result || "Pendiente");
+              var date = esc((item.created_at || "").slice(0, 10));
+              var pickId = esc(item.pick_id || "—");
+              html += "<li class=\\"card\\" style=\\"padding: 10px 14px; margin-bottom: 8px;\\"><span>" + pickId + "</span> <span class=\\"muted\\">" + result + "</span> <span class=\\"muted\\" style=\\"font-size: 0.85rem;\\">" + date + "</span></li>";
+            }});
+            html += "</ul>";
+            container.innerHTML = html;
+          }}
+        }} else {{
+          var c = document.getElementById("account-history");
+          if (c) c.innerHTML = "<p class=\\"muted\\" style=\\"margin: 0;\\">No se pudo cargar el historial.</p>";
+        }}
+      }}).catch(function() {{
+        var c = document.getElementById("account-history");
+        if (c) c.innerHTML = "<p class=\\"muted\\" style=\\"margin: 0;\\">Error al cargar datos.</p>";
+      }});
+    }})();
+    </script>"""
     return _simple_page("Mi cuenta — AFTR", body)
 
 

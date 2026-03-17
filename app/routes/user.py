@@ -67,6 +67,7 @@ def user_me(request: Request):
             status_code=401,
         )
     premium_until = _premium_until(uid)
+    created_at = user.get("created_at")
     return JSONResponse({
         "ok": True,
         "user": {
@@ -76,6 +77,7 @@ def user_me(request: Request):
             "role": user.get("role"),
             "subscription_status": user.get("subscription_status"),
             "premium_until": premium_until,
+            "created_at": created_at,
         },
     })
 
