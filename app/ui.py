@@ -2124,14 +2124,10 @@ def home_page(request: Request) -> str:
             <button class="modal-x" onclick="closeLoginModal()">✕</button>
           </div>
           <div class="modal-body">
-            <form action="/auth/login" method="post" id="login-form">
-              <div class="modal-line">
-                <input type="email" name="email" class="email-input" placeholder="tu@email.com" required>
-              </div>
-              <div class="modal-line">
-                <input type="password" name="password" class="email-input" placeholder="Contraseña" required>
-              </div>
-              <button type="submit" class="pill modal-cta" style="width:100%;">Entrar</button>
+            <form action="/auth/login" method="post" onsubmit="console.log('FORM SUBMIT');">
+              <input type="email" name="email" required>
+              <input type="password" name="password" required>
+              <button type="submit">Entrar</button>
             </form>
             <div class="modal-line" style="margin-top: 12px;">
               <a href="#" onclick="closeLoginModal(); openForgotModal(); return false;" class="muted" style="font-size: 13px;">¿Olvidaste tu contraseña?</a>
@@ -2681,14 +2677,10 @@ def dashboard(request: Request, league: str):
         </div>
 
         <div class="modal-body">
-          <form action="/auth/login" method="post" id="login-form">
-            <div class="modal-line">
-              <input type="email" name="email" class="email-input" placeholder="tu@email.com" required>
-            </div>
-            <div class="modal-line">
-              <input type="password" name="password" class="email-input" placeholder="Contraseña" required>
-            </div>
-            <button type="submit" class="pill modal-cta" style="width:100%;">Entrar</button>
+          <form action="/auth/login" method="post" onsubmit="console.log('FORM SUBMIT');">
+            <input type="email" name="email" required>
+            <input type="password" name="password" required>
+            <button type="submit">Entrar</button>
           </form>
           <div class="modal-line" style="margin-top: 12px;">
             <a href="#" onclick="closeLoginModal(); openForgotModal(); return false;" class="muted" style="font-size: 13px;">¿Olvidaste tu contraseña?</a>
@@ -2919,8 +2911,6 @@ def dashboard(request: Request, league: str):
       }
     }
     document.addEventListener("DOMContentLoaded",function(){
-      var loginForm = document.getElementById("login-form");
-      if (loginForm) loginForm.action = "/auth/login";
       var params = new URLSearchParams(window.location.search);
       var authParam = params.get("auth");
       if (authParam === "login" && typeof window.openLoginModal === "function") {
