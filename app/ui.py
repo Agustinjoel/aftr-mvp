@@ -1732,6 +1732,9 @@ def home_page(request: Request) -> str:
         uid,
     )
     user = get_user_by_id(uid) if uid else None
+    if uid and not user:
+        # broken cookie: uid not in DB; treat as logged out (middleware clears cookie)
+        uid, user = None, None
     auth_param = (request.query_params.get("auth") or "").strip().lower()
     signup_modal_style = "display:flex" if auth_param == "register" else "display:none"
     login_modal_style = "display:flex" if auth_param == "login" else "display:none"
@@ -2462,6 +2465,9 @@ def dashboard(request: Request, league: str):
 
     uid = get_user_id(request)
     user = get_user_by_id(uid) if uid else None
+    if uid and not user:
+        # broken cookie: uid not in DB; treat as logged out (middleware clears cookie)
+        uid, user = None, None
 
     auth_html = ""
     if user:
@@ -3613,6 +3619,9 @@ def _account_header(request: Request):
     """Build (user, auth_html, plan_badge) for account/admin pages."""
     uid = get_user_id(request)
     user = get_user_by_id(uid) if uid else None
+    if uid and not user:
+        # broken cookie: uid not in DB; treat as logged out (middleware clears cookie)
+        uid, user = None, None
     auth_html = ""
     if user:
         display_name = html_lib.escape((user.get("username") or user.get("email") or ""))

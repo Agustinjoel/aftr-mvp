@@ -8,8 +8,9 @@ from app.routes.picks import router as picks_router
 from app.ui import router as ui_router
 from config.settings import settings
 from app.db import init_db
-from app.auth import router as auth_router
+from app.auth import router as auth_router, clear_session_if_invalid
 from app.payments import router as pay_router
+from starlette.middleware.base import BaseHTTPMiddleware
 from data.cache import read_cache_meta, read_json_with_fallback
 
 # Logging
@@ -37,6 +38,18 @@ app.include_router(matches_router, prefix="/api", tags=["matches"])
 app.include_router(picks_router, prefix="/api", tags=["picks"])
 app.include_router(auth_router)
 app.include_router(pay_router)
+
+
+class ClearInvalidSessionMiddleware(BaseHTTPMiddleware):
+    """Clear aftr_session cookie when the stored uid does not exist in DB."""
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        clear_session_if_invalid(request, response)
+        return response
+
+
+app.add_middleware(ClearInvalidSessionMiddleware)
+
 
 @app.get("/health")
 def health():

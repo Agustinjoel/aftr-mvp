@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse
 from itsdangerous import URLSafeSerializer, BadSignature
 from passlib.hash import bcrypt
 
-from config.settings import settings
+from config.settings import settings, DB_PATH
 from app.db import get_conn
 import hashlib
 
@@ -84,10 +84,29 @@ def get_user_id(request: Request) -> Optional[int]:
         data = _ser().loads(raw)
         uid = int(data.get("uid"))
         logger.info("get_user_id: cookie present, decoded uid=%s", uid)
+        if get_user_by_id(uid) is None:
+            logger.warning("get_user_id: uid=%s not found in DB, treating as no session (caller should clear cookie)", uid)
+            return None
         return uid
     except (BadSignature, Exception) as e:
         logger.warning("get_user_id: aftr_session cookie present but decode failed: %s", e)
         return None
+
+
+def clear_session_if_invalid(request: Request, response) -> None:
+    """If request has aftr_session cookie but the decoded uid is not in DB, clear the cookie on response."""
+    raw = (request.cookies or {}).get("aftr_session")
+    if not raw:
+        return
+    try:
+        data = _ser().loads(raw)
+        uid = int(data.get("uid"))
+    except Exception:
+        return
+    if get_user_by_id(uid) is None:
+        response.delete_cookie("aftr_session", path="/")
+        logger.info("clear_session_if_invalid: cleared invalid session cookie for uid=%s", uid)
+
 
 def create_user(email: str, username: str, password: str) -> int:
     email = (email or "").strip().lower()
@@ -109,7 +128,9 @@ def create_user(email: str, username: str, password: str) -> int:
         )
         uid = cur.lastrowid
         conn.commit()
-        return int(uid)
+        uid_int = int(uid)
+        logger.info("create_user: INSERT done, lastrowid=%s (returning this uid)", uid_int)
+        return uid_int
     finally:
         conn.close()
 
@@ -207,6 +228,7 @@ def register(payload: dict = Body(...)):
             conn.close()
 
         uid = create_user(email, username, password)
+        logger.info("register: create_user returned uid=%s, passing to set_session_on_response", uid)
         resp = JSONResponse(content={"ok": True, "username": username})
         set_session_on_response(resp, uid)
         return resp
@@ -248,8 +270,10 @@ def signup_lead(payload: dict = Body(...)):
 @router.post("/auth/login")
 def login(email: str = Form(...), password: str = Form(...)):
     """Form login (browser). Looks up user by email only. Sets aftr_session cookie and redirects."""
+    # Temporary debug logs for POST /auth/login code path
     email_normalized = (email or "").strip().lower()
-    logger.info("login attempt: email=%r", email_normalized)
+    logger.info("login DEBUG: submitted form email value=%r, password_len=%s", email_normalized, len(password or ""))
+    logger.info("login DEBUG: DB_PATH=%s", DB_PATH)
 
     if not email_normalized:
         logger.info("login: empty email, redirecting login_fail")
@@ -259,32 +283,38 @@ def login(email: str = Form(...), password: str = Form(...)):
         return RedirectResponse(url="/?msg=login_fail", status_code=302)
 
     row = get_user_by_email(email_normalized)
-    logger.info("login: user lookup by email, found=%s", bool(row))
+    logger.info("login DEBUG: user lookup by email only, found=%s", bool(row))
+    if row:
+        logger.info("login DEBUG: fetched row id=%s email=%r username=%r password_hash_null=%s",
+                    row.get("id"), row.get("email"), row.get("username"), row.get("password_hash") is None)
 
     if not row:
         logger.info("login: no user found for email=%r, redirecting login_fail", email_normalized)
         return RedirectResponse(url="/?msg=login_fail", status_code=302)
 
     has_hash = "password_hash" in row and bool(row["password_hash"])
-    logger.info("login: password_hash_present=%s", has_hash)
+    logger.info("login DEBUG: password_hash column present=%s", has_hash)
 
     verify_ok = False
     if has_hash:
         try:
             verify_ok = bcrypt.verify(password, row["password_hash"])
+            logger.info("login DEBUG: bcrypt.verify result=%s", verify_ok)
         except Exception as exc:
-            logger.exception("login error during password verification: %s", exc)
+            logger.exception("login DEBUG: password verification exception: %s", exc)
             verify_ok = False
-    logger.info("login: bcrypt_verify_result=%s", verify_ok)
+    else:
+        logger.info("login DEBUG: skip verify (no hash), verify_ok=False")
 
     if not verify_ok:
-        logger.info("login: password verification failed, redirecting login_fail")
+        logger.info("login: password verification failed, redirecting login_fail (branch=fail)")
         return RedirectResponse(url="/?msg=login_fail", status_code=302)
 
     uid = int(row["id"])
+    logger.info("login: set_session with uid=row[id]=%s (no reuse of any other uid)", uid)
     resp = RedirectResponse(url="/?msg=login_ok", status_code=302)
     set_session(resp, uid)
-    logger.info("login success: user_id=%s, email=%r, redirecting to /?msg=login_ok", uid, email_normalized)
+    logger.info("login success: user_id=%s, email=%r (branch=success)", uid, email_normalized)
     return resp
 
 
