@@ -788,61 +788,41 @@ def _render_back_stats(p: dict, market: str = "") -> str:
     explain = ""
     bars_html = ""
 
-    # 1) RESULTADOS (1X2 / X2 / 12)
+    # 1) RESULTADOS (1X2 / X2 / 12) — one bar only for compact back
     if mk == "RES":
         explain = """
         <div class="back-sub">
-          En picks de resultado importa más <b>ataque vs defensa</b> y <b>forma</b> que Over/BTTS.
+          Resultado: <b>ataque vs defensa</b> y forma.
         </div>
         """
-        # “ataque vs defensa” (cruzado) en texto simple (apostador lo entiende al toque)
-        try:
-            gf_h_f = float(gf_h) if gf_h != "—" else None
-            ga_h_f = float(ga_h) if ga_h != "—" else None
-            gf_a_f = float(gf_a) if gf_a != "—" else None
-            ga_a_f = float(ga_a) if ga_a != "—" else None
-        except Exception:
-            gf_h_f = ga_h_f = gf_a_f = ga_a_f = None
+        bars_html = _bar_single("BTTS", btts_h_pct, btts_a_pct) if (btts_h_pct is not None or btts_a_pct is not None) else ""
 
-        # barras que sí suman para resultado: “BTTS” no es prioridad, pero puede ser warning
-        bars_html = ""
-        if btts_h_pct is not None or btts_a_pct is not None:
-            bars_html += _bar_single("BTTS (señal secundaria)", btts_h_pct, btts_a_pct)
-
-    # 2) OVER (Over 1.5 / 2.5)
+    # 2) OVER (Over 1.5 / 2.5) — one bar only for compact back
     elif mk == "OVER":
         explain = """
         <div class="back-sub">
-          En picks de goles manda el combo <b>GF + GA</b> + % de <b>Over</b>. (BTTS ayuda a confirmar)
+          Goles: <b>GF + GA</b> y % <b>Over</b>.
         </div>
         """
-        bars_html = ""
-        bars_html += _bar_single("Over 2.5", over_h_pct, over_a_pct)
-        bars_html += _bar_single("BTTS (confirmación)", btts_h_pct, btts_a_pct)
+        bars_html = _bar_single("Over 2.5", over_h_pct, over_a_pct)
 
-    # 3) BTTS
+    # 3) BTTS — one bar only
     elif mk == "BTTS":
         explain = """
         <div class="back-sub">
-          En BTTS lo clave es: <b>GF de ambos</b>, <b>GA de ambos</b> y % <b>BTTS</b>.
+          BTTS: <b>GF/GA</b> y % <b>BTTS</b>.
         </div>
         """
-        bars_html = ""
-        bars_html += _bar_single("BTTS", btts_h_pct, btts_a_pct)
-        # Over como confirmación secundaria
-        if over_h_pct is not None or over_a_pct is not None:
-            bars_html += _bar_single("Over 2.5 (secundario)", over_h_pct, over_a_pct)
+        bars_html = _bar_single("BTTS", btts_h_pct, btts_a_pct)
 
-    # 4) fallback
+    # 4) fallback — one bar only
     else:
         explain = """
         <div class="back-sub">
-          Resumen rápido de forma y tendencias.
+          Forma y tendencias.
         </div>
         """
-        bars_html = ""
-        bars_html += _bar_single("Over 2.5", over_h_pct, over_a_pct)
-        bars_html += _bar_single("BTTS", btts_h_pct, btts_a_pct)
+        bars_html = _bar_single("Over 2.5", over_h_pct, over_a_pct)
 
     return f"""
     <div class="back-card">
@@ -851,23 +831,19 @@ def _render_back_stats(p: dict, market: str = "") -> str:
         <div class="muted">vs</div>
         <div style="text-align:right">{html_lib.escape(str(away))}</div>
       </div>
-
       {explain}
-
       <div class="back-divider"></div>
-
       <div class="back-metrics">
         <div class="metric">
-          <div class="metric-label">GF (prom)</div>
+          <div class="metric-label">GF</div>
           <div class="metric-comp">
             <div class="metric-num">{html_lib.escape(str(gf_h))}</div>
             <div class="metric-vs">vs</div>
             <div class="metric-num right">{html_lib.escape(str(gf_a))}</div>
           </div>
         </div>
-
         <div class="metric">
-          <div class="metric-label">GA (prom)</div>
+          <div class="metric-label">GA</div>
           <div class="metric-comp">
             <div class="metric-num">{html_lib.escape(str(ga_h))}</div>
             <div class="metric-vs">vs</div>
@@ -875,25 +851,8 @@ def _render_back_stats(p: dict, market: str = "") -> str:
           </div>
         </div>
       </div>
-
       <div class="back-divider"></div>
-
-      <div class="back-bars">
-        {bars_html}
-      </div>
-
-      <div class="back-divider"></div>
-
-      <div class="back-form">
-        <div class="form-col">
-          <div class="form-label">Forma</div>
-          <div class="form-chips">{_chips_from_form(str(form_h), 5)}</div>
-        </div>
-        <div class="form-col" style="text-align:right">
-          <div class="form-label">Forma</div>
-          <div class="form-chips" style="justify-content:flex-end">{_chips_from_form(str(form_a), 5)}</div>
-        </div>
-      </div>
+      <div class="back-bars">{bars_html}</div>
     </div>
     """
 
@@ -1130,20 +1089,30 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
             edge_str = "—"
     else:
         edge_str = "—"
-    conf_level = (p.get("confidence_level") or "—").strip() or "—"
-    if conf_level != "—":
-        conf_level = conf_level.upper()
+    conf_level_raw = (p.get("confidence_level") or p.get("confidence") or "").strip() or ""
+    conf_level = conf_level_raw.upper() if conf_level_raw else ""
+    tier_label = "WATCH" if tier == "pass" else tier.upper()
+    if edge_str != "—":
+        try:
+            val = float(str(edge_display).replace(",", ".")) * 100
+            edge_badge = f"+{val:.1f}%" if val >= 0 else f"{val:.1f}%"
+        except (TypeError, ValueError):
+            edge_badge = edge_str
+    else:
+        edge_badge = "—"
+    conf_badge = conf_level if conf_level else "CONF EN PROCESO"
+    show_conf = True
+    aftr_badges = []
+    aftr_badges.append(f'<span class="aftr-badge aftr-badge-tier" style="border-color:{tier_color};color:{tier_color};">{html_lib.escape(tier_label)}</span>')
+    aftr_badges.append(f'<span class="aftr-badge aftr-badge-edge">{html_lib.escape(edge_badge)} EDGE</span>')
+    if show_conf:
+        aftr_badges.append(f'<span class="aftr-badge aftr-badge-conf">{html_lib.escape(conf_badge)} CONF</span>')
+    aftr_badges_html = "".join(aftr_badges)
     aftr_block_html = f"""
       <div class="aftr-score-block" style="border-left: 4px solid {tier_color};">
-        <div class="aftr-score-line">
-          <span class="aftr-score-label">AFTR Score</span>
-          <span class="aftr-score-value">{aftr_score_val}</span>
-        </div>
-        <div class="aftr-score-meta">
-          <span class="aftr-tier" style="color: {tier_color};">Tier: {html_lib.escape(tier.upper())}</span>
-          <span class="aftr-value">Value: {html_lib.escape(edge_str)}</span>
-          <span class="aftr-confidence">Confidence: {html_lib.escape(conf_level)}</span>
-        </div>
+        <div class="aftr-score-label">AFTR Score</div>
+        <div class="aftr-score-num">{aftr_score_val}</div>
+        <div class="aftr-badges">{aftr_badges_html}</div>
       </div>"""
     pick_id_val = _pick_id_for_card(p, best)
     pick_id_attr = html_lib.escape(pick_id_val)
@@ -1154,7 +1123,7 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     pick_actions_html = f"""
       <div class="pick-actions" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
         <button type="button" class="btn-favorite-pick pill" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{aftr_score_val}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}" style="padding:6px 12px; font-size:0.85rem;">⭐ Guardar</button>
-        <button type="button" class="btn-follow-pick pill" data-pick-id="{pick_id_attr}" style="padding:6px 12px; font-size:0.85rem;">📈 Seguir pick</button>
+        <button type="button" class="btn-follow-pick pill" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{aftr_score_val}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}" style="padding:6px 12px; font-size:0.85rem;">📈 Seguir pick</button>
       </div>"""
     front_html = f"""
     <div class="{card_class}">
@@ -2037,6 +2006,12 @@ def home_page(request: Request) -> str:
         tier_color = tier_colors.get(tier, "#9E9E9E")
         home_part = _team_with_crest(p.get("home_crest"), p.get("home") or "—")
         away_part = _team_with_crest(p.get("away_crest"), p.get("away") or "—")
+        pick_id_val = _pick_id_for_card(p, {"market": p.get("best_market")})
+        pick_id_attr = html_lib.escape(pick_id_val)
+        market_raw = str(p.get("best_market") or "")
+        market_attr = html_lib.escape(market_raw)
+        edge_raw = p.get("edge")
+        edge_attr = html_lib.escape(str(edge_raw)) if edge_raw is not None else ""
         top_pick_cards.append(f"""
         <div class="card home-pick-card" style="border-left: 4px solid {tier_color};">
           <div class="home-pick-league">{league_name}</div>
@@ -2052,6 +2027,10 @@ def home_page(request: Request) -> str:
             <span class="home-pick-edge{edge_class}">Ventaja {edge_str}</span>
             <span>Conf {html_lib.escape(conf_str)}</span>
             <span>Odds {odds_str}</span>
+          </div>
+          <div class="pick-actions" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+            <button type="button" class="btn-favorite-pick pill" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}" style="padding:6px 12px; font-size:0.85rem;">⭐ Guardar</button>
+            <button type="button" class="btn-follow-pick pill" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}" style="padding:6px 12px; font-size:0.85rem;">📈 Seguir pick</button>
           </div>
         </div>""")
 
@@ -2397,6 +2376,90 @@ def home_page(request: Request) -> str:
             if (errEl) { errEl.textContent = "Error de conexión. Intenta de nuevo."; errEl.style.display = "block"; }
           }
         };
+        (function pickActions(){
+          var base = window.location.origin || (window.location.protocol + "//" + window.location.host);
+          window.__userLoggedIn = window.__userLoggedIn !== undefined ? window.__userLoggedIn : null;
+          function checkLogin(){
+            if (window.__userLoggedIn !== null) return Promise.resolve(window.__userLoggedIn);
+            return fetch(base + "/user/me", { credentials: "include" }).then(function(r){ return r.json(); }).then(function(d){
+              window.__userLoggedIn = !!(d && d.ok && d.user);
+              return window.__userLoggedIn;
+            }).catch(function(){ window.__userLoggedIn = false; return false; });
+          }
+          function toast(msg){
+            var el = document.createElement("div");
+            el.style.cssText = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card-bg,#1a1a1a);color:#fff;padding:10px 18px;border-radius:8px;font-size:0.9rem;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);";
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 2500);
+          }
+          function doFavorite(btn){
+            var pickId = btn.getAttribute("data-pick-id");
+            if (!pickId) return;
+            checkLogin().then(function(loggedIn){
+              if (!loggedIn){ alert("Iniciá sesión para usar esta función"); return; }
+              if (btn.disabled) return;
+              btn.disabled = true;
+              var payload = { pick_id: pickId };
+              var market = btn.getAttribute("data-market"); if (market) payload.market = market;
+              var aftr = btn.getAttribute("data-aftr-score"); if (aftr !== null && aftr !== "") payload.aftr_score = parseInt(aftr, 10);
+              var tier = btn.getAttribute("data-tier"); if (tier) payload.tier = tier;
+              var edge = btn.getAttribute("data-edge"); if (edge !== null && edge !== "") payload.edge = parseFloat(edge);
+              fetch(base + "/user/favorite", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(payload) })
+                .then(function(r){ return r.json(); })
+                .then(function(d){ if (d && d.ok){ btn.textContent = "Guardado ✅"; toast("Pick guardada"); } else { btn.disabled = false; toast(d && d.error || "Error"); } })
+                .catch(function(){ btn.disabled = false; toast("Error de conexión"); });
+            });
+          }
+          function doFollow(btn){
+            var pickId = btn.getAttribute("data-pick-id");
+            if (!pickId) return;
+            checkLogin().then(function(loggedIn){
+              if (!loggedIn){ alert("Iniciá sesión para usar esta función"); return; }
+              if (btn.disabled) return;
+              btn.disabled = true;
+              var payload = { pick_id: pickId };
+              var market = btn.getAttribute("data-market"); if (market) payload.market = market;
+              var aftr = btn.getAttribute("data-aftr-score"); if (aftr !== null && aftr !== "") payload.aftr_score = parseInt(aftr, 10);
+              var tier = btn.getAttribute("data-tier"); if (tier) payload.tier = tier;
+              var edge = btn.getAttribute("data-edge"); if (edge !== null && edge !== "") payload.edge = parseFloat(edge);
+              fetch(base + "/user/follow-pick", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(payload) })
+                .then(function(r){ return r.json(); })
+                .then(function(d){ if (d && d.ok){ btn.textContent = "Siguiendo 📈"; toast("Pick seguida"); } else { btn.disabled = false; toast(d && d.error || "Error"); } })
+                .catch(function(){ btn.disabled = false; toast("Error de conexión"); });
+            });
+          }
+          function applyPersistedState(){
+            checkLogin().then(function(loggedIn){
+              if (!loggedIn) return;
+              Promise.all([
+                fetch(base + "/user/favorites", { credentials: "include" }).then(function(r){ return r.json(); }),
+                fetch(base + "/user/followed-ids", { credentials: "include" }).then(function(r){ return r.json(); })
+              ]).then(function(results){
+                var favoriteIds = {};
+                var followedIds = {};
+                if (results[0] && results[0].ok && Array.isArray(results[0].favorites)) results[0].favorites.forEach(function(x){ favoriteIds[x.pick_id] = true; });
+                if (results[1] && results[1].ok && Array.isArray(results[1].pick_ids)) results[1].pick_ids.forEach(function(id){ followedIds[id] = true; });
+                document.querySelectorAll(".btn-favorite-pick").forEach(function(btn){
+                  var id = btn.getAttribute("data-pick-id");
+                  if (id && favoriteIds[id]){ btn.textContent = "Guardado ✅"; btn.disabled = true; }
+                });
+                document.querySelectorAll(".btn-follow-pick").forEach(function(btn){
+                  var id = btn.getAttribute("data-pick-id");
+                  if (id && followedIds[id]){ btn.textContent = "Siguiendo 📈"; btn.disabled = true; }
+                });
+              }).catch(function(){});
+            });
+          }
+          document.addEventListener("click", function(e){
+            var fav = e.target.closest && e.target.closest(".btn-favorite-pick");
+            if (fav){ e.preventDefault(); e.stopPropagation(); doFavorite(fav); return; }
+            var fol = e.target.closest && e.target.closest(".btn-follow-pick");
+            if (fol){ e.preventDefault(); e.stopPropagation(); doFollow(fol); return; }
+          });
+          if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", applyPersistedState);
+          else applyPersistedState();
+        })();
       </script>
       <script>
         (function(){
@@ -3342,7 +3405,7 @@ def dashboard(request: Request, league: str):
                     var edge = btn.getAttribute('data-edge'); if (edge !== null && edge !== '') payload.edge = parseFloat(edge);
                     fetch(base + '/user/favorite', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) })
                       .then(function(r){ return r.json(); })
-                      .then(function(d){ if (d && d.ok){ btn.textContent = 'Guardado ✅'; toast('Guardado ✅'); } else { btn.disabled = false; toast(d && d.error || 'Error'); } })
+                      .then(function(d){ if (d && d.ok){ btn.textContent = 'Guardado ✅'; toast('Pick guardada'); } else { btn.disabled = false; toast(d && d.error || 'Error'); } })
                       .catch(function(){ btn.disabled = false; toast('Error de conexión'); });
                   });
                 }
@@ -3353,9 +3416,14 @@ def dashboard(request: Request, league: str):
                     if (!loggedIn){ alert('Iniciá sesión para usar esta función'); return; }
                     if (btn.disabled) return;
                     btn.disabled = true;
-                    fetch(base + '/user/follow-pick', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ pick_id: pickId }) })
+                    var payload = { pick_id: pickId };
+                    var market = btn.getAttribute('data-market'); if (market) payload.market = market;
+                    var aftr = btn.getAttribute('data-aftr-score'); if (aftr !== null && aftr !== '') payload.aftr_score = parseInt(aftr, 10);
+                    var tier = btn.getAttribute('data-tier'); if (tier) payload.tier = tier;
+                    var edge = btn.getAttribute('data-edge'); if (edge !== null && edge !== '') payload.edge = parseFloat(edge);
+                    fetch(base + '/user/follow-pick', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) })
                       .then(function(r){ return r.json(); })
-                      .then(function(d){ if (d && d.ok){ btn.textContent = 'Siguiendo 📈'; toast('Siguiendo 📈'); } else { btn.disabled = false; toast(d && d.error || 'Error'); } })
+                      .then(function(d){ if (d && d.ok){ btn.textContent = 'Siguiendo 📈'; toast('Pick seguida'); } else { btn.disabled = false; toast(d && d.error || 'Error'); } })
                       .catch(function(){ btn.disabled = false; toast('Error de conexión'); });
                   });
                 }

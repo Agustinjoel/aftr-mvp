@@ -212,10 +212,13 @@ h2::after{
 ========================= */
 .grid{
   display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 14px;
   min-width: 0;
   max-width: 100%;
+}
+@media (max-width: 640px){
+  .grid{ grid-template-columns: 1fr; }
 }
 
 .card{
@@ -223,9 +226,10 @@ h2::after{
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: 0 10px 30px rgba(0,0,0,.25);
-  padding: 10px 12px;
+  padding: 12px 14px;
   transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
+.flip-front .card{ padding: 12px 14px; }
 .card:hover{
   transform: translateY(-2px);
   border-color: rgba(170,210,255,.22);
@@ -293,17 +297,50 @@ h2::after{
 .pick-loss .pick-badge { background: rgba(239,68,68,.20); border-color: rgba(239,68,68,.35); color:#ffd0d0; }
 .pick-push .pick-badge { background: rgba(234,179,8,.18); border-color: rgba(234,179,8,.35); color:#fff1b8; }
 
-.aftr-score-line{
-  display: flex; align-items: center; gap: 8px;
-  margin-top: 6px; margin-bottom: 2px;
-  font-size: 12px; font-weight: 800;
+.aftr-score-block{
+  margin-top: 10px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  padding-left: 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(170,210,255,.08);
 }
-.aftr-score-label{ color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
-.aftr-score-value{
-  color: rgba(180,220,255,.95);
-  font-size: 18px;
+.aftr-score-label{
+  font-size: 10px;
   font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted);
+  margin-bottom: 4px;
 }
+.aftr-score-num{
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1.1;
+  color: rgba(180,220,255,.98);
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+.aftr-badges{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.aftr-badge{
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(170,210,255,.2);
+  background: rgba(255,255,255,.06);
+  color: rgba(234,242,255,.9);
+}
+.aftr-badge-tier{ background: rgba(255,255,255,.05); }
+.aftr-badge-edge{ color: rgba(134,239,172,.95); border-color: rgba(34,197,94,.25); }
+.aftr-badge-conf{ color: rgba(180,220,255,.9); }
 
 /* =========================
    CONF BAR
@@ -664,10 +701,12 @@ h2::after{
 .flip-card{
   position: relative;
   width: 100%;
-  height: 360px;
-  min-height: 360px;
+  height: 380px;
+  min-height: 380px;
   perspective: 1200px;
   cursor: pointer;
+  overflow: hidden;
+  border-radius: var(--radius);
 }
 .flip-inner{
   position: absolute;
@@ -685,21 +724,22 @@ h2::after{
   height: 100%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-}
-.flip-front{
   overflow: hidden;
 }
 .flip-front .card{
   min-height: 100%;
   box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 .flip-back{
-  overflow-y: auto;
   transform: rotateY(180deg);
 }
 .flip-back .back-card{
   min-height: 100%;
   box-sizing: border-box;
+  overflow: hidden;
 }
 .flip-card.is-flipped .flip-inner{ transform: rotateY(180deg); }
 
@@ -1111,8 +1151,11 @@ body{
 ========================= */
 .home-picks-grid{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 18px;
+}
+@media (max-width: 640px){
+  .home-picks-grid{ grid-template-columns: 1fr; }
 }
 .home-pick-card{
   padding: 18px;
