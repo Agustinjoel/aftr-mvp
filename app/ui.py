@@ -4076,6 +4076,42 @@ def account_page(request: Request):
       function fetchJSON(url) {{
         return fetch(url, {{ credentials: "include" }}).then(function(r) {{ return r.json(); }});
       }}
+      function tierNice(t){{
+        var v = (t == null ? "" : String(t)).trim().toLowerCase();
+        if (!v) return "—";
+        if (v === "pass" || v === "watch") return "WATCH";
+        if (v === "elite") return "ELITE";
+        if (v === "strong") return "STRONG";
+        if (v === "risky") return "RISKY";
+        return v.toUpperCase();
+      }}
+      function edgeNice(edgeVal){{
+        if (edgeVal == null || edgeVal === "") return "—";
+        var n = Number(edgeVal);
+        if (isNaN(n)) return "—";
+        var pct = n * 100;
+        var sign = pct >= 0 ? "+" : "";
+        return sign + pct.toFixed(1) + "%";
+      }}
+      function fmtDate(iso){{
+        var s = (iso || "").toString();
+        if (!s) return "—";
+        return s.slice(0,10);
+      }}
+      function timeAgo(iso){{
+        var s = (iso || "").toString();
+        if (!s) return "—";
+        var d = new Date(s);
+        if (isNaN(d.getTime())) return fmtDate(s);
+        var diffMs = Date.now() - d.getTime();
+        if (diffMs < 0) diffMs = 0;
+        var mins = Math.floor(diffMs / (60*1000));
+        var hrs = Math.floor(diffMs / (60*60*1000));
+        var days = Math.floor(diffMs / (24*60*60*1000));
+        if (mins < 60) return "hace " + mins + "m";
+        if (hrs < 24) return "hace " + hrs + "h";
+        return "hace " + days + "d";
+      }}
       Promise.all([fetchJSON(base + "/user/stats"), fetchJSON(base + "/user/history"), fetchJSON(base + "/user/favorites")]).then(function(results) {{
         var stats = results[0];
         var history = results[1];
@@ -4103,21 +4139,27 @@ def account_page(request: Request):
               list.forEach(function(item) {{
                 var market = esc(item.market || "—");
                 var aftrScore = item.aftr_score != null ? item.aftr_score : "—";
-                var tier = esc((item.tier || "—").toUpperCase());
-                var edge = item.edge != null ? (Number(item.edge) * 100).toFixed(1) + "%" : "—";
-                var dateStr = (item.created_at || "").slice(0, 10);
-                var date = esc(dateStr);
-                var pickId = esc(item.pick_id || "");
-                var subtitle = pickId ? "<div class=\\"muted\\" style=\\"font-size: 0.8rem; margin-top: 4px;\\">" + (pickId.length > 40 ? pickId.slice(0, 40) + "…" : pickId) + "</div>" : "";
-                html += "<div class=\\"card account-fav-card\\" style=\\"padding: 14px 16px; border-left: 4px solid var(--accent, #0b5ed7); border-radius: 8px;\\">";
-                html += "<div style=\\"font-weight: 600; font-size: 0.95rem;\\">" + market + "</div>";
-                html += subtitle;
-                html += "<div style=\\"display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem; color: var(--muted, #888); margin-top: 8px;\\">";
-                html += "<span>AFTR <b style=\\"color: inherit;\\">" + aftrScore + "</b></span>";
-                html += "<span>Tier " + tier + "</span>";
-                html += "<span>Edge " + edge + "</span>";
-                html += "<span>Guardado " + date + "</span>";
-                html += "</div></div>";
+                var tierTxt = tierNice(item.tier);
+                var tierKey = (item.tier || "").toString().trim().toLowerCase();
+                if (tierKey === "pass") tierKey = "watch";
+                if (!tierKey) tierKey = "watch";
+                var edgeTxt = edgeNice(item.edge);
+                var edgeNum = item.edge != null ? Number(item.edge) : null;
+                var edgeKey = edgeTxt === "—" ? "neutral" : (edgeNum >= 0 ? "pos" : "neg");
+                var home = esc(item.home || "");
+                var away = esc(item.away || "");
+                var teams = (home && away) ? (home + " vs " + away) : "—";
+                var savedWhen = timeAgo(item.created_at);
+                html += "<div class=\\"account-pick-card account-pick-fav\\">";
+                html += "<div class=\\"account-pick-title\\">" + market + "</div>";
+                html += "<div class=\\"account-pick-subtitle\\">" + teams + "</div>";
+                html += "<div class=\\"account-badge-row\\">";
+                html += "<span class=\\"account-mini-badge account-badge-aftr\\">AFTR <b>" + esc(aftrScore) + "</b></span>";
+                html += "<span class=\\"account-mini-badge account-badge-tier account-badge-tier-" + esc(tierKey) + "\\">" + esc(tierTxt) + "</span>";
+                html += "<span class=\\"account-mini-badge account-badge-edge account-badge-edge-" + esc(edgeKey) + "\\">" + esc(edgeTxt) + " EDGE</span>";
+                html += "</div>";
+                html += "<div class=\\"account-pick-bottom\\"><span class=\\"account-pick-muted\\">Guardado " + savedWhen + "</span></div>";
+                html += "</div>";
               }});
               container.innerHTML = html;
             }}
@@ -4135,24 +4177,33 @@ def account_page(request: Request):
           }} else {{
             var html = "";
             list.forEach(function(item) {{
-              var pickId = esc(item.pick_id || "—");
               var market = esc(item.market || "—");
               var aftrScore = item.aftr_score != null ? item.aftr_score : "—";
-              var tier = esc((item.tier || "—").toUpperCase());
-              var edge = item.edge != null ? (Number(item.edge) * 100).toFixed(1) + "%" : "—";
+              var tierTxt = tierNice(item.tier);
+              var tierKey = (item.tier || "").toString().trim().toLowerCase();
+              if (tierKey === "pass") tierKey = "watch";
+              if (!tierKey) tierKey = "watch";
+              var edgeTxt = edgeNice(item.edge);
+              var edgeNum = item.edge != null ? Number(item.edge) : null;
+              var edgeKey = edgeTxt === "—" ? "neutral" : (edgeNum >= 0 ? "pos" : "neg");
+              var home = esc(item.home || "");
+              var away = esc(item.away || "");
+              var teams = (home && away) ? (home + " vs " + away) : "—";
               var result = (item.result || "PENDING").toUpperCase();
-              var resultCls = result === "WIN" ? "pick-win" : (result === "LOSS" ? "pick-loss" : "");
               var date = esc((item.created_at || "").slice(0, 10));
-              html += "<div class=\\"card account-history-card\\" style=\\"padding: 12px 16px; border-radius: 8px; border-left: 4px solid var(--card-border, #333);\\">";
-              html += "<div style=\\"font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;\\">" + market + "</div>";
-              html += "<div style=\\"font-size: 0.8rem; color: var(--muted, #888); margin-bottom: 6px;\\">" + pickId + "</div>";
-              html += "<div style=\\"display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.85rem; align-items: center;\\">";
-              html += "<span class=\\"muted\\">AFTR " + aftrScore + "</span>";
-              html += "<span class=\\"muted\\">Tier " + tier + "</span>";
-              html += "<span class=\\"muted\\">Edge " + edge + "</span>";
-              html += "<span class=\\"pick-badge " + resultCls + "\\" style=\\"padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;\\">" + result + "</span>";
-              html += "<span class=\\"muted\\" style=\\"font-size: 0.8rem; margin-left: auto;\\">" + date + "</span>";
-              html += "</div></div>";
+              html += "<div class=\\"account-pick-card account-pick-history\\">";
+              html += "<div class=\\"account-pick-title\\">" + market + "</div>";
+              html += "<div class=\\"account-pick-subtitle\\">" + teams + "</div>";
+              html += "<div class=\\"account-badge-row\\">";
+              html += "<span class=\\"account-mini-badge account-badge-aftr\\">AFTR <b>" + esc(aftrScore) + "</b></span>";
+              html += "<span class=\\"account-mini-badge account-badge-tier account-badge-tier-" + esc(tierKey) + "\\">" + esc(tierTxt) + "</span>";
+              html += "<span class=\\"account-mini-badge account-badge-edge account-badge-edge-" + esc(edgeKey) + "\\">" + esc(edgeTxt) + " EDGE</span>";
+              html += "</div>";
+              html += "<div class=\\"account-pick-bottom account-history-bottom\\">";
+              html += "<span class=\\"account-status-badge account-status-" + esc(result.toLowerCase()) + "\\">" + result + "</span>";
+              html += "<span class=\\"account-pick-date\\">" + date + "</span>";
+              html += "</div>";
+              html += "</div>";
             }});
             container.innerHTML = html;
           }}

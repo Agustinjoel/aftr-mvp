@@ -199,9 +199,47 @@ def user_favorites(request: Request):
         rows = cur.fetchall()
     finally:
         conn.close()
+
+    def _parse_pick_id(pid: str):
+        if not pid or "|" not in str(pid):
+            return None
+        parts = str(pid).split("|")
+        if len(parts) < 2:
+            return None
+        league = (parts[0] or "").strip()
+        try:
+            match_id = int(parts[1])
+        except (TypeError, ValueError):
+            return None
+        if not league:
+            return None
+        return league, match_id
+
+    def _teams_for_pick_id(pid: str):
+        parsed = _parse_pick_id(pid)
+        if not parsed:
+            return ("", "")
+        league, match_id = parsed
+        c = get_conn()
+        try:
+            cur2 = c.cursor()
+            cur2.execute(
+                "SELECT home, away FROM matches WHERE league = ? AND match_id = ? LIMIT 1",
+                (league, match_id),
+            )
+            row = cur2.fetchone()
+            if not row:
+                return ("", "")
+            home = row["home"] if "home" in row.keys() else row[0]
+            away = row["away"] if "away" in row.keys() else row[1]
+            return (str(home) if home is not None else "", str(away) if away is not None else "")
+        finally:
+            c.close()
+
     items = []
     for row in rows:
         r = dict(row)
+        home, away = _teams_for_pick_id(r.get("pick_id"))
         items.append({
             "pick_id": r.get("pick_id"),
             "created_at": r.get("created_at"),
@@ -209,6 +247,8 @@ def user_favorites(request: Request):
             "aftr_score": r.get("aftr_score"),
             "tier": r.get("tier"),
             "edge": r.get("edge"),
+            "home": home,
+            "away": away,
         })
     return JSONResponse({"ok": True, "favorites": items})
 
@@ -299,9 +339,47 @@ def user_history(request: Request):
         rows = cur.fetchall()
     finally:
         conn.close()
+
+    def _parse_pick_id(pid: str):
+        if not pid or "|" not in str(pid):
+            return None
+        parts = str(pid).split("|")
+        if len(parts) < 2:
+            return None
+        league = (parts[0] or "").strip()
+        try:
+            match_id = int(parts[1])
+        except (TypeError, ValueError):
+            return None
+        if not league:
+            return None
+        return league, match_id
+
+    def _teams_for_pick_id(pid: str):
+        parsed = _parse_pick_id(pid)
+        if not parsed:
+            return ("", "")
+        league, match_id = parsed
+        c = get_conn()
+        try:
+            cur2 = c.cursor()
+            cur2.execute(
+                "SELECT home, away FROM matches WHERE league = ? AND match_id = ? LIMIT 1",
+                (league, match_id),
+            )
+            row = cur2.fetchone()
+            if not row:
+                return ("", "")
+            home = row["home"] if "home" in row.keys() else row[0]
+            away = row["away"] if "away" in row.keys() else row[1]
+            return (str(home) if home is not None else "", str(away) if away is not None else "")
+        finally:
+            c.close()
+
     items = []
     for row in rows:
         r = dict(row)
+        home, away = _teams_for_pick_id(r.get("pick_id"))
         items.append({
             "id": r.get("id"),
             "pick_id": r.get("pick_id"),
@@ -312,5 +390,7 @@ def user_history(request: Request):
             "aftr_score": r.get("aftr_score"),
             "tier": r.get("tier"),
             "edge": r.get("edge"),
+            "home": home,
+            "away": away,
         })
     return JSONResponse({"ok": True, "history": items})

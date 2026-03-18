@@ -2046,3 +2046,136 @@ canvas{
     display:none;
   }
 }
+
+/* =========================
+   ACCOUNT — Premium Picks
+========================= */
+.account-pick-card{
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 12px 36px rgba(0,0,0,.18);
+}
+.account-pick-title{
+  font-weight: 900;
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.account-pick-subtitle{
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.account-badge-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+  align-items:center;
+  margin-bottom: 10px;
+}
+.account-mini-badge{
+  display:inline-flex;
+  align-items:center;
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 900;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: rgba(234,242,255,.92);
+  white-space: nowrap;
+}
+.account-badge-aftr{
+  border-color: rgba(56,189,248,.35);
+  background: rgba(56,189,248,.12);
+  color: rgba(180,220,255,.98);
+}
+.account-badge-tier-watch{
+  border-color: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: rgba(234,242,255,.88);
+}
+.account-badge-tier-strong{
+  border-color: rgba(34,197,94,.35);
+  background: rgba(34,197,94,.12);
+  color: #86efac;
+}
+.account-badge-tier-elite{
+  border-color: rgba(234,179,8,.35);
+  background: rgba(234,179,8,.12);
+  color: #fde68a;
+}
+.account-badge-tier-risky{
+  border-color: rgba(255,152,0,.35);
+  background: rgba(255,152,0,.12);
+  color: #fdba74;
+}
+
+.account-badge-edge-pos{
+  border-color: rgba(34,197,94,.35);
+  background: rgba(34,197,94,.12);
+  color: #baffd2;
+}
+.account-badge-edge-neg{
+  border-color: rgba(239,68,68,.35);
+  background: rgba(239,68,68,.12);
+  color: #ffd0d0;
+}
+.account-badge-edge-neutral{
+  border-color: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: rgba(234,242,255,.85);
+}
+.account-pick-bottom{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+.account-history-bottom{
+  justify-content:space-between;
+}
+.account-pick-muted{
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.account-pick-date{
+  font-size: 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.account-status-badge{
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 10px;
+  font-weight: 900;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: rgba(234,242,255,.92);
+  white-space: nowrap;
+}
+.account-status-pending{
+  border-color: rgba(234,179,8,.35);
+  background: rgba(234,179,8,.14);
+  color: #fde68a;
+}
+.account-status-win{
+  border-color: rgba(34,197,94,.35);
+  background: rgba(34,197,94,.14);
+  color: #86efac;
+}
+.account-status-loss{
+  border-color: rgba(239,68,68,.35);
+  background: rgba(239,68,68,.14);
+  color: #fda4af;
+}
