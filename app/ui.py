@@ -3843,9 +3843,9 @@ def account_page(request: Request):
     created_display = _account_created_display(user.get("created_at"))
     uid = user.get("id")
     is_premium = is_premium_active(user) or (get_active_plan(uid) if uid else "") in (settings.plan_premium, settings.plan_pro)
-    plan_label = "⭐ Premium activo" if is_premium else "Free plan"
+    plan_label = "⭐ AFTR Premium activo" if is_premium else "Free plan"
     plan_class = "account-plan-premium" if is_premium else "account-plan-free"
-    upgrade_cta = "" if is_premium else '<p class="muted" style="margin-top: 8px; font-size: 0.9rem;"><a href="/?open=premium" style="color: var(--accent, #0b5ed7);">Mejorar a Premium</a></p>'
+    upgrade_cta = "" if is_premium else '<p class="muted" style="margin-top: 8px; font-size: 0.9rem;"><a href="/?open=premium" style="color: var(--accent, #0b5ed7);">Desbloquear Premium</a></p>'
 
     premium_upsell_card = ""
     if not is_premium:
@@ -3857,7 +3857,7 @@ def account_page(request: Request):
           <li>AFTR Score completo</li>
           <li>Historial y seguimiento avanzado</li>
         </ul>
-        <a href="/?open=premium" class="pill" style="display: inline-block; padding: 10px 20px; background: var(--accent, #0b5ed7); color: #fff; text-decoration: none; font-weight: 600; border-radius: 8px;">Obtener Premium</a>
+        <a href="/?open=premium" class="pill" style="display: inline-block; padding: 10px 20px; background: var(--accent, #0b5ed7); color: #fff; text-decoration: none; font-weight: 600; border-radius: 8px;">Desbloquear Premium</a>
       </div>"""
 
     body = header_html + f"""
@@ -3874,12 +3874,12 @@ def account_page(request: Request):
 
       <h3 style="margin: 20px 0 12px 0; font-size: 1rem;">Tus estadísticas</h3>
       <div id="account-stats" class="account-stats" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-bottom: 24px;">
-        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Seguidos</span><span id="stat-followed">—</span></div>
-        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Favoritos</span><span id="stat-favorites">—</span></div>
-        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Victorias</span><span id="stat-wins">—</span></div>
-        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Pérdidas</span><span id="stat-losses">—</span></div>
-        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Pendientes</span><span id="stat-pending">—</span></div>
-        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">ROI</span><span id="stat-roi">—</span></div>
+        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Seguidos</span><span id="stat-followed">0</span></div>
+        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Favoritos</span><span id="stat-favorites">0</span></div>
+        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Victorias</span><span id="stat-wins">0</span></div>
+        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Pérdidas</span><span id="stat-losses">0</span></div>
+        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Pendientes</span><span id="stat-pending">0</span></div>
+        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">ROI</span><span id="stat-roi">0%</span></div>
       </div>
 
       <h3 style="margin: 20px 0 12px 0; font-size: 1rem;">Acciones</h3>
@@ -3889,16 +3889,16 @@ def account_page(request: Request):
         <a href="/auth/logout" class="pill" style="padding: 10px 18px;">Cerrar sesión</a>
       </div>
 
-      <section id="favoritos" style="margin-bottom: 24px;">
+      <section id="favoritos" style="margin-bottom: 32px; scroll-margin-top: 16px;">
         <h3 style="margin: 0 0 12px 0; font-size: 1rem;">Favoritos</h3>
-        <div id="account-favorites" class="account-favorites">
+        <div id="account-favorites" class="account-favorites" style="display: grid; gap: 12px;">
           <p class="muted" style="margin: 0;">Cargando…</p>
         </div>
       </section>
 
-      <section id="historial">
-        <h3 style="margin: 0 0 12px 0; font-size: 1rem;">Historial reciente (últimos 10 seguidos)</h3>
-        <div id="account-history" class="account-history">
+      <section id="historial" style="scroll-margin-top: 16px;">
+        <h3 style="margin: 0 0 12px 0; font-size: 1rem;">Historial (últimos 10 seguidos)</h3>
+        <div id="account-history" class="account-history" style="display: grid; gap: 12px;">
           <p class="muted" style="margin: 0;">Cargando…</p>
         </div>
       </section>
@@ -3917,69 +3917,82 @@ def account_page(request: Request):
         if (stats && stats.ok && stats.stats) {{
           var s = stats.stats;
           var el = function(id) {{ return document.getElementById(id); }};
-          if (el("stat-followed")) el("stat-followed").textContent = s.followed_picks != null ? s.followed_picks : "—";
-          if (el("stat-favorites")) el("stat-favorites").textContent = s.favorites_count != null ? s.favorites_count : "—";
-          if (el("stat-wins")) el("stat-wins").textContent = s.wins != null ? s.wins : "—";
-          if (el("stat-losses")) el("stat-losses").textContent = s.losses != null ? s.losses : "—";
-          if (el("stat-pending")) el("stat-pending").textContent = s.pending != null ? s.pending : "—";
-          if (el("stat-roi")) el("stat-roi").textContent = s.roi != null ? s.roi + "%" : "—";
+          var num = function(v) {{ return (v != null && v !== "") ? Number(v) : 0; }};
+          var roiVal = s.roi != null ? Number(s.roi) : 0;
+          if (el("stat-followed")) el("stat-followed").textContent = num(s.followed_picks);
+          if (el("stat-favorites")) el("stat-favorites").textContent = num(s.favorites_count);
+          if (el("stat-wins")) el("stat-wins").textContent = num(s.wins);
+          if (el("stat-losses")) el("stat-losses").textContent = num(s.losses);
+          if (el("stat-pending")) el("stat-pending").textContent = num(s.pending);
+          if (el("stat-roi")) el("stat-roi").textContent = roiVal.toFixed(1) + "%";
         }}
         if (favorites && favorites.ok && Array.isArray(favorites.favorites)) {{
           var list = favorites.favorites;
           var container = document.getElementById("account-favorites");
           if (container) {{
             if (list.length === 0) {{
-              container.innerHTML = "<div class=\\"card\\" style=\\"padding: 16px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No tenés favoritos todavía.</p></div>";
+              container.innerHTML = "<div class=\\"card\\" style=\\"padding: 20px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No tenés favoritos todavía.</p></div>";
             }} else {{
-              var html = "<div style=\\"display: grid; gap: 10px;\\">";
+              var html = "";
               list.forEach(function(item) {{
                 var market = esc(item.market || "—");
                 var aftrScore = item.aftr_score != null ? item.aftr_score : "—";
                 var tier = esc((item.tier || "—").toUpperCase());
                 var edge = item.edge != null ? (Number(item.edge) * 100).toFixed(1) + "%" : "—";
-                var date = esc((item.created_at || "").slice(0, 10));
-                html += "<div class=\\"card\\" style=\\"padding: 12px 14px; border-left: 4px solid var(--accent, #0b5ed7);\\">";
-                html += "<div style=\\"font-weight: 600; margin-bottom: 6px;\\">" + market + "</div>";
-                html += "<div style=\\"display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.85rem; color: var(--muted, #888);\\">";
+                var dateStr = (item.created_at || "").slice(0, 10);
+                var date = esc(dateStr);
+                var pickId = esc(item.pick_id || "");
+                var subtitle = pickId ? "<div class=\\"muted\\" style=\\"font-size: 0.8rem; margin-top: 4px;\\">" + (pickId.length > 40 ? pickId.slice(0, 40) + "…" : pickId) + "</div>" : "";
+                html += "<div class=\\"card account-fav-card\\" style=\\"padding: 14px 16px; border-left: 4px solid var(--accent, #0b5ed7); border-radius: 8px;\\">";
+                html += "<div style=\\"font-weight: 600; font-size: 0.95rem;\\">" + market + "</div>";
+                html += subtitle;
+                html += "<div style=\\"display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.85rem; color: var(--muted, #888); margin-top: 8px;\\">";
                 html += "<span>AFTR <b style=\\"color: inherit;\\">" + aftrScore + "</b></span>";
                 html += "<span>Tier " + tier + "</span>";
                 html += "<span>Edge " + edge + "</span>";
-                html += "<span>" + date + "</span>";
+                html += "<span>Guardado " + date + "</span>";
                 html += "</div></div>";
               }});
-              html += "</div>";
               container.innerHTML = html;
             }}
           }}
         }} else {{
           var favEl = document.getElementById("account-favorites");
-          if (favEl) favEl.innerHTML = "<div class=\\"card\\" style=\\"padding: 16px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No tenés favoritos todavía.</p></div>";
+          if (favEl) favEl.innerHTML = "<div class=\\"card\\" style=\\"padding: 20px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No tenés favoritos todavía.</p></div>";
         }}
         if (history && history.ok && Array.isArray(history.history)) {{
           var list = history.history;
           var container = document.getElementById("account-history");
           if (!container) return;
           if (list.length === 0) {{
-            container.innerHTML = "<p class=\\"muted\\" style=\\"margin: 0;\\">Aún no seguís ningún pick.</p>";
+            container.innerHTML = "<div class=\\"card\\" style=\\"padding: 20px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">Todavía no seguís picks.</p></div>";
           }} else {{
-            var html = "<ul style=\\"list-style: none; padding: 0; margin: 0;\\">";
+            var html = "";
             list.forEach(function(item) {{
               var pickId = esc(item.pick_id || "—");
               var market = esc(item.market || "—");
               var aftrScore = item.aftr_score != null ? item.aftr_score : "—";
-              var tier = esc(item.tier || "—");
+              var tier = esc((item.tier || "—").toUpperCase());
               var edge = item.edge != null ? (Number(item.edge) * 100).toFixed(1) + "%" : "—";
-              var result = esc(item.result || "PENDING");
+              var result = (item.result || "PENDING").toUpperCase();
+              var resultCls = result === "WIN" ? "pick-win" : (result === "LOSS" ? "pick-loss" : "");
               var date = esc((item.created_at || "").slice(0, 10));
-              html += "<li class=\\"card\\" style=\\"padding: 10px 14px; margin-bottom: 8px;\\">";
-              html += "<span>" + pickId + "</span> · <span class=\\"muted\\">" + market + "</span> · AFTR " + aftrScore + " · " + tier + " · " + edge + " · <span class=\\"muted\\">" + result + "</span> <span class=\\"muted\\" style=\\"font-size: 0.85rem;\\">" + date + "</span></li>";
+              html += "<div class=\\"card account-history-card\\" style=\\"padding: 12px 16px; border-radius: 8px; border-left: 4px solid var(--card-border, #333);\\">";
+              html += "<div style=\\"font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;\\">" + market + "</div>";
+              html += "<div style=\\"font-size: 0.8rem; color: var(--muted, #888); margin-bottom: 6px;\\">" + pickId + "</div>";
+              html += "<div style=\\"display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.85rem; align-items: center;\\">";
+              html += "<span class=\\"muted\\">AFTR " + aftrScore + "</span>";
+              html += "<span class=\\"muted\\">Tier " + tier + "</span>";
+              html += "<span class=\\"muted\\">Edge " + edge + "</span>";
+              html += "<span class=\\"pick-badge " + resultCls + "\\" style=\\"padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;\\">" + result + "</span>";
+              html += "<span class=\\"muted\\" style=\\"font-size: 0.8rem; margin-left: auto;\\">" + date + "</span>";
+              html += "</div></div>";
             }});
-            html += "</ul>";
             container.innerHTML = html;
           }}
         }} else {{
           var c = document.getElementById("account-history");
-          if (c) c.innerHTML = "<p class=\\"muted\\" style=\\"margin: 0;\\">No se pudo cargar el historial.</p>";
+          if (c) c.innerHTML = "<div class=\\"card\\" style=\\"padding: 20px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No se pudo cargar el historial.</p></div>";
         }}
       }}).catch(function() {{
         var c = document.getElementById("account-history");
