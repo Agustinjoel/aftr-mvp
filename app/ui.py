@@ -290,18 +290,35 @@ def _aftr_score(p: dict) -> int:
 # =========================================================
 def _team_with_crest(crest: str | None, name: str) -> str:
     """Render team row: use crest URL when present (e.g. from API), else /static/teams/{slug}.png. Fallback to default.svg on 404."""
-    safe_name = html_lib.escape(name or "")
+    def _normalize_team_name(raw: str) -> str:
+        n = (raw or "").strip()
+        if not n:
+            return ""
+        # Shorten common prefixes/suffixes for a cleaner premium UI.
+        n = n.replace("Football Club", "FC")
+        n = n.replace("Club Atlético", "Atl.")
+        # Remove "Hotspur" (e.g. Tottenham Hotspur -> Tottenham) to prevent awkward wrapping.
+        words = [w for w in n.split() if w.strip().lower() != "hotspur"]
+        n = " ".join(words).strip()
+        # Collapse multiple spaces.
+        n = " ".join(n.split())
+        return n
+
+    normalized_name = _normalize_team_name(name)
+    safe_name = html_lib.escape(normalized_name or "")
+    small_name = len(normalized_name) >= 18
     if crest and isinstance(crest, str) and crest.strip():
         src = crest.strip()
     else:
         src = _team_logo_path(name or "")
     safe_src = html_lib.escape(src)
     fallback = html_lib.escape(TEAM_LOGO_FALLBACK_PATH)
+    team_name_class = "team-name team-name--small" if small_name else "team-name"
     return (
         f'<span class="team-row">'
         f'<img src="{safe_src}" alt="" class="crest" loading="lazy" width="28" height="28" '
         f'onerror="this.src=\'{fallback}\';this.onerror=null;"/>'
-        f'<span class="team-name">{safe_name}</span>'
+        f'<span class="{team_name_class}">{safe_name}</span>'
         f"</span>"
     )
 
@@ -1018,9 +1035,9 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     # Front side: decision-focused teams block (no match score).
     teams_html = f"""
     <div class="aftr-teams">
-      <div class="aftr-team">{home_part}</div>
+      <div class="aftr-team aftr-team-left">{home_part}</div>
       <div class="aftr-vs">vs</div>
-      <div class="aftr-team">{away_part}</div>
+      <div class="aftr-team aftr-team-right">{away_part}</div>
     </div>
     """
 

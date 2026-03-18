@@ -249,7 +249,7 @@ h2::after{
   flex-wrap:wrap;
   gap: 8px;
 }
-.team-row{ display:inline-flex; align-items:center; gap: 8px; min-width:0; }
+.team-row{ display:flex; align-items:flex-start; gap: 8px; min-width:0; }
 .crest{ width: 28px; height: 28px; object-fit: contain; flex-shrink:0; }
 .team-name{ font-weight: 900; }
 .vs{ color: rgba(234,242,255,.55); font-weight: 700; font-size: 12px; }
@@ -386,14 +386,29 @@ h2::after{
 }
 
 .aftr-teams{
-  display:flex;
+  display:grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items:center;
-  justify-content:space-between;
   gap: 12px;
   margin-bottom: 10px;
 }
-.aftr-team{ flex:1; min-width:0; }
+.aftr-team{ min-width:0; }
+.aftr-team-left{ justify-self:start; }
+.aftr-team-right{ justify-self:end; }
 .aftr-team .crest{ width: 26px; height: 26px; }
+
+/* AFTR premium team display: clamp to 2 lines, avoid layout break on long names. */
+.aftr-teams .team-name{
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  max-height: 2.3em;
+}
+.aftr-teams .team-name--small{ font-size: 12px; }
 .aftr-vs{
   font-size: 12px;
   font-weight: 900;
