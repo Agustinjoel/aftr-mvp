@@ -96,13 +96,14 @@ def _safe_odds(fair: float | None, prob: float | None) -> float | None:
     return None
 
 
-def _read_pick_rows(league: str, db_path: str) -> tuple[list[sqlite3.Row], str]:
+def _read_pick_rows(league: str, db_path: str | None = None) -> tuple[list[sqlite3.Row], str]:
     """
-    Returns rows + source tag.
+    Returns rows + source tag. Uses settings.db_path (AFTR persistent DB) when db_path not given.
     source: sqlite | json
     """
+    path = db_path or settings.db_path
     try:
-        with sqlite3.connect(db_path) as conn:
+        with sqlite3.connect(path) as conn:
             conn.row_factory = sqlite3.Row
             table_info = conn.execute("PRAGMA table_info(picks)").fetchall()
             if not table_info:

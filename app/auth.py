@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse
 from itsdangerous import URLSafeSerializer, BadSignature
 from passlib.hash import bcrypt
 
-from config.settings import settings, DB_PATH
+from config.settings import settings
 from app.db import get_conn
 import hashlib
 
@@ -274,7 +274,6 @@ def login(email: str = Form(...), password: str = Form(...)):
     # Temporary debug logs for POST /auth/login code path
     email_normalized = (email or "").strip().lower()
     logger.info("login DEBUG: submitted form email value=%r, password_len=%s", email_normalized, len(password or ""))
-    logger.info("login DEBUG: DB_PATH=%s", DB_PATH)
 
     if not email_normalized:
         logger.info("login: empty email, redirecting login_fail")

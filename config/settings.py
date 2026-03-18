@@ -37,9 +37,12 @@ print("CACHE_DIR:", CACHE_DIR)
 # Fallback legacy (solo lectura; no escribir aquí)
 DAILY_DIR: Path = BASE_DIR / "daily"
 
-# Base de datos SQLite. Usa AFTR_DB_PATH si está definido; si no, path local por defecto.
+# Base de datos SQLite. Siempre usa AFTR_DB_PATH si está definido y no vacío/"None"; si no, path local.
+_aftr_db_env: str = (os.getenv("AFTR_DB_PATH") or "").strip()
 DB_PATH: str = (
-    os.getenv("AFTR_DB_PATH") or os.getenv("DB_PATH") or str(BASE_DIR / "aftr.db")
+    _aftr_db_env
+    if _aftr_db_env and _aftr_db_env.upper() != "NONE"
+    else str(BASE_DIR / "aftr.db")
 )
 
 # App base URL (para links absolutos en emails / Stripe)

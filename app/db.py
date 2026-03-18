@@ -1,17 +1,17 @@
 """
 AFTR user storage (no password hashes exposed outside this module/auth).
 
-- Database file: path from env AFTR_DB_PATH (fallback: DB_PATH, then base_dir/aftr.db) via config.settings.
-- Table: users
-- Columns: id, email, username, password_hash, role, subscription_status,
-  subscription_start, subscription_end, created_at, updated_at,
-  stripe_customer_id, stripe_subscription_id
+- Database file: AFTR_DB_PATH env (or local base_dir/aftr.db) via config.settings.
+- Table: users + user_favorites, user_picks, subscriptions, password_reset_tokens.
 """
 from __future__ import annotations
+import logging
 import sqlite3
+from pathlib import Path
 
 from config.settings import DB_PATH
 
+logger = logging.getLogger("aftr.db")
 USERS_TABLE = "users"
 
 
@@ -20,7 +20,12 @@ def get_conn():
     conn.row_factory = sqlite3.Row
     return conn
 
+
 def init_db():
+    logger.info("AFTR DB PATH IN USE: %s", DB_PATH)
+    db_file = Path(DB_PATH)
+    if db_file.suffix:
+        db_file.parent.mkdir(parents=True, exist_ok=True)
     conn = get_conn()
     cur = conn.cursor()
 
