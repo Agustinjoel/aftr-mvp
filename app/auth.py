@@ -247,23 +247,47 @@ def register(payload: dict = Body(...)):
 
 @router.post("/auth/signup")
 def signup_lead(payload: dict = Body(...)):
+    """Create user account with email + password. Always stores password_hash (bcrypt)."""
     email = (payload.get("email") or "").strip().lower()
-    if not email or "@" not in email:
-        return JSONResponse({"ok": False, "error": "email_invalido"}, status_code=400)
+    password = payload.get("password") or ""
+    username = (payload.get("username") or email or "").strip() or email
 
+    if not email or "@" not in email:
+        return JSONResponse(content={"ok": False, "error": "email_invalido"}, status_code=400)
+    if not password or not str(password).strip():
+        return JSONResponse(content={"ok": False, "error": "password_requerido"}, status_code=400)
+    if _password_too_long(password):
+        return JSONResponse(content={"ok": False, "error": "password_demasiado_larga"}, status_code=400)
+
+    try:
+        pw_hash = bcrypt.hash(password)
+    except Exception as e:
+        logger.warning("signup: bcrypt hash failed: %s", e)
+        return JSONResponse(
+            content={"ok": False, "error": "Error al procesar la contraseña."},
+            status_code=500,
+        )
+
+    logger.info("signup: password_hash generated OK")
+
+    now = datetime.now(timezone.utc).isoformat()
     conn = get_conn()
     try:
         cur = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS leads (email TEXT PRIMARY KEY, created_at TEXT)")
         cur.execute(
-            "INSERT OR IGNORE INTO leads(email, created_at) VALUES (?, ?)",
-            (email, datetime.now(timezone.utc).isoformat())
+            """INSERT INTO users(
+                email, username, password_hash, role, subscription_status,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (email, username or None, pw_hash, "free_user", "inactive", now, now),
         )
         conn.commit()
+    except sqlite3.IntegrityError:
+        return JSONResponse(content={"ok": False, "error": "email_ya_registrado"}, status_code=400)
     finally:
         conn.close()
 
-    resp = JSONResponse({"ok": True})
+    resp = JSONResponse(content={"ok": True})
     resp.set_cookie("aftr_user", email, max_age=60*60*24*365, samesite="lax", path="/")
     return resp
 
