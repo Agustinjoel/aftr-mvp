@@ -753,7 +753,7 @@ def _render_back_stats(p: dict, market: str = "") -> str:
     # Basketball: same shell, no football metrics (xG, Over 2.5, BTTS, form)
     if (p.get("model") or "").strip().upper() == "BASKETBALL":
         return f"""
-    <div class="back-card">
+    <div class="back-card back-compact">
       <div class="back-topline">
         <div>{html_lib.escape(str(home))}</div>
         <div class="muted">vs</div>
@@ -771,10 +771,14 @@ def _render_back_stats(p: dict, market: str = "") -> str:
     gf_h = stats_home.get("gf", "—")
     ga_h = stats_home.get("ga", "—")
     form_h = stats_home.get("form", "—")
+    xg_h = stats_home.get("xg", None)
+    xga_h = stats_home.get("xga", stats_home.get("xg_against", None))
 
     gf_a = stats_away.get("gf", "—")
     ga_a = stats_away.get("ga", "—")
     form_a = stats_away.get("form", "—")
+    xg_a = stats_away.get("xg", None)
+    xga_a = stats_away.get("xga", stats_away.get("xg_against", None))
 
     over_h_pct = _to_pct01(stats_home.get("over25"))
     over_a_pct = _to_pct01(stats_away.get("over25"))
@@ -795,7 +799,7 @@ def _render_back_stats(p: dict, market: str = "") -> str:
           Resultado: <b>ataque vs defensa</b> y forma.
         </div>
         """
-        bars_html = _bar_single("BTTS", btts_h_pct, btts_a_pct) if (btts_h_pct is not None or btts_a_pct is not None) else ""
+        bars_html = ""
 
     # 2) OVER (Over 1.5 / 2.5) — one bar only for compact back
     elif mk == "OVER":
@@ -804,7 +808,7 @@ def _render_back_stats(p: dict, market: str = "") -> str:
           Goles: <b>GF + GA</b> y % <b>Over</b>.
         </div>
         """
-        bars_html = _bar_single("Over 2.5", over_h_pct, over_a_pct)
+        bars_html = ""
 
     # 3) BTTS — one bar only
     elif mk == "BTTS":
@@ -813,7 +817,7 @@ def _render_back_stats(p: dict, market: str = "") -> str:
           BTTS: <b>GF/GA</b> y % <b>BTTS</b>.
         </div>
         """
-        bars_html = _bar_single("BTTS", btts_h_pct, btts_a_pct)
+        bars_html = ""
 
     # 4) fallback — one bar only
     else:
@@ -822,16 +826,81 @@ def _render_back_stats(p: dict, market: str = "") -> str:
           Forma y tendencias.
         </div>
         """
-        bars_html = _bar_single("Over 2.5", over_h_pct, over_a_pct)
+        bars_html = ""
+
+    # Compact recent form (últimos partidos) on back
+    form_html = f"""
+      <div class="back-form-compact">
+        <div class="back-form-head">
+          <span class="back-form-title">ÚLTIMOS</span>
+          <span class="back-form-sub muted">5</span>
+        </div>
+        <div class="back-form-row">
+          <div class="back-form-team">
+            <div class="back-form-chips">{_chips_from_form(str(form_h), 5)}</div>
+          </div>
+          <div class="back-form-team right">
+            <div class="back-form-chips">{_chips_from_form(str(form_a), 5)}</div>
+          </div>
+        </div>
+      </div>
+    """
+
+    # Trends: show both Over & BTTS in compact form (no scrollbars)
+    trends_html = ""
+    if (over_h_pct is not None or over_a_pct is not None) or (btts_h_pct is not None or btts_a_pct is not None):
+        parts = []
+        if over_h_pct is not None or over_a_pct is not None:
+            parts.append(_bar_single("Over 2.5", over_h_pct, over_a_pct))
+        if btts_h_pct is not None or btts_a_pct is not None:
+            parts.append(_bar_single("BTTS", btts_h_pct, btts_a_pct))
+        trends_html = f'<div class="back-bars back-bars-compact">{"".join(parts)}</div>'
+
+    # xG block (only if at least one xG-like number exists)
+    def _fmt_num(v):
+        if v is None:
+            return "—"
+        try:
+            return f"{float(v):.2f}"
+        except (TypeError, ValueError):
+            s = str(v).strip()
+            return s if s else "—"
+
+    has_xg = any(v is not None and str(v).strip() != "" and str(v).strip() != "—" for v in [xg_h, xg_a, xga_h, xga_a])
+    xg_html = ""
+    if has_xg:
+        xg_html = f"""
+      <div class="back-divider"></div>
+      <div class="back-metrics back-metrics-2x2">
+        <div class="metric">
+          <div class="metric-label">xG</div>
+          <div class="metric-comp">
+            <div class="metric-num">{html_lib.escape(_fmt_num(xg_h))}</div>
+            <div class="metric-vs">vs</div>
+            <div class="metric-num right">{html_lib.escape(_fmt_num(xg_a))}</div>
+          </div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">xGA</div>
+          <div class="metric-comp">
+            <div class="metric-num">{html_lib.escape(_fmt_num(xga_h))}</div>
+            <div class="metric-vs">vs</div>
+            <div class="metric-num right">{html_lib.escape(_fmt_num(xga_a))}</div>
+          </div>
+        </div>
+      </div>
+        """
 
     return f"""
-    <div class="back-card">
+    <div class="back-card back-compact">
       <div class="back-topline">
         <div>{html_lib.escape(str(home))}</div>
         <div class="muted">vs</div>
         <div style="text-align:right">{html_lib.escape(str(away))}</div>
       </div>
       {explain}
+      <div class="back-divider"></div>
+      {form_html}
       <div class="back-divider"></div>
       <div class="back-metrics">
         <div class="metric">
@@ -851,8 +920,9 @@ def _render_back_stats(p: dict, market: str = "") -> str:
           </div>
         </div>
       </div>
+      {xg_html}
       <div class="back-divider"></div>
-      <div class="back-bars">{bars_html}</div>
+      {trends_html}
     </div>
     """
 
