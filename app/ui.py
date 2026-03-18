@@ -747,88 +747,74 @@ def _chips_from_form(form_str: str, max_n: int = 5) -> str:
 
 
 def _render_back_stats(p: dict, market: str = "") -> str:
-    home = p.get("home", "")
-    away = p.get("away", "")
+    # Back side: compact analysis (no match score, no duplicate market).
+    stats_home = p.get("stats_home") if isinstance(p.get("stats_home"), dict) else {}
+    stats_away = p.get("stats_away") if isinstance(p.get("stats_away"), dict) else {}
 
-    # Basketball: same shell, no football metrics (xG, Over 2.5, BTTS, form)
+    # Basketball: fallback compact info (no football-specific blocks).
     if (p.get("model") or "").strip().upper() == "BASKETBALL":
+        form_h = stats_home.get("form", "")
+        form_a = stats_away.get("form", "")
+        pick_text = market or "—"
         return f"""
     <div class="back-card back-compact">
-      <div class="back-topline">
-        <div>{html_lib.escape(str(home))}</div>
-        <div class="muted">vs</div>
-        <div style="text-align:right">{html_lib.escape(str(away))}</div>
-      </div>
-      <div class="back-sub">
-        Pick: <b>{html_lib.escape(market or "—")}</b>. Mercados: Moneyline, Total puntos, Spread.
+      <div class="back-sub">Pick: <b>{html_lib.escape(str(pick_text))}</b></div>
+      <div class="back-divider"></div>
+      <div class="back-form-compact">
+        <div class="back-form-head">
+          <span class="back-form-title">ÚLTIMOS</span>
+          <span class="back-form-sub muted">5</span>
+        </div>
+        <div class="back-form-row">
+          <div class="back-form-team">
+            <div class="back-form-legend muted">H</div>
+            <div class="back-form-chips">{_chips_from_form(str(form_h), 5) if form_h else ""}</div>
+          </div>
+          <div class="back-form-team right">
+            <div class="back-form-legend muted">A</div>
+            <div class="back-form-chips">{_chips_from_form(str(form_a), 5) if form_a else ""}</div>
+          </div>
+        </div>
       </div>
     </div>
     """
 
-    stats_home = p.get("stats_home") if isinstance(p.get("stats_home"), dict) else {}
-    stats_away = p.get("stats_away") if isinstance(p.get("stats_away"), dict) else {}
-
     gf_h = stats_home.get("gf", "—")
     ga_h = stats_home.get("ga", "—")
-    form_h = stats_home.get("form", "—")
-    xg_h = stats_home.get("xg", None)
-    xga_h = stats_home.get("xga", stats_home.get("xg_against", None))
+    form_h = stats_home.get("form", "")
 
     gf_a = stats_away.get("gf", "—")
     ga_a = stats_away.get("ga", "—")
-    form_a = stats_away.get("form", "—")
-    xg_a = stats_away.get("xg", None)
-    xga_a = stats_away.get("xga", stats_away.get("xg_against", None))
+    form_a = stats_away.get("form", "")
 
     over_h_pct = _to_pct01(stats_home.get("over25"))
     over_a_pct = _to_pct01(stats_away.get("over25"))
     btts_h_pct = _to_pct01(stats_home.get("btts"))
     btts_a_pct = _to_pct01(stats_away.get("btts"))
 
-    # clave de market
+    # Insight (one-liner, premium and non-debug).
     mk = _market_key(market)
-
-    # ---- BLOQUES “SEGÚN MARKET” ----
-    explain = ""
-    bars_html = ""
-
-    # 1) RESULTADOS (1X2 / X2 / 12) — one bar only for compact back
-    if mk == "RES":
-        explain = """
-        <div class="back-sub">
-          Resultado: <b>ataque vs defensa</b> y forma.
-        </div>
-        """
-        bars_html = ""
-
-    # 2) OVER (Over 1.5 / 2.5) — one bar only for compact back
-    elif mk == "OVER":
-        explain = """
-        <div class="back-sub">
-          Goles: <b>GF + GA</b> y % <b>Over</b>.
-        </div>
-        """
-        bars_html = ""
-
-    # 3) BTTS — one bar only
+    if mk == "OVER":
+        insight = "Enfoque: más de 2.5 y presión ofensiva"
     elif mk == "BTTS":
-        explain = """
-        <div class="back-sub">
-          BTTS: <b>GF/GA</b> y % <b>BTTS</b>.
-        </div>
-        """
-        bars_html = ""
-
-    # 4) fallback — one bar only
+        insight = "Enfoque: BTTS por empuje en ambos lados"
+    elif mk == "RES":
+        insight = "Enfoque: ataque vs defensa + forma"
     else:
-        explain = """
-        <div class="back-sub">
-          Forma y tendencias.
-        </div>
-        """
-        bars_html = ""
+        insight = "Enfoque: forma y tendencia estadística"
 
-    # Compact recent form (últimos partidos) on back
+    def _safe_form_chips(v) -> str:
+        if v is None:
+            return ""
+        s = str(v).strip()
+        if not s:
+            return ""
+        chips = _chips_from_form(s, 5)
+        return "" if "—" in chips else chips
+
+    form_h_html = _safe_form_chips(form_h)
+    form_a_html = _safe_form_chips(form_a)
+
     form_html = f"""
       <div class="back-form-compact">
         <div class="back-form-head">
@@ -837,92 +823,89 @@ def _render_back_stats(p: dict, market: str = "") -> str:
         </div>
         <div class="back-form-row">
           <div class="back-form-team">
-            <div class="back-form-chips">{_chips_from_form(str(form_h), 5)}</div>
+            <div class="back-form-legend muted">H</div>
+            <div class="back-form-chips">{form_h_html}</div>
           </div>
           <div class="back-form-team right">
-            <div class="back-form-chips">{_chips_from_form(str(form_a), 5)}</div>
+            <div class="back-form-legend muted">A</div>
+            <div class="back-form-chips">{form_a_html}</div>
           </div>
         </div>
       </div>
     """
 
-    # Trends: show both Over & BTTS in compact form (no scrollbars)
-    trends_html = ""
-    if (over_h_pct is not None or over_a_pct is not None) or (btts_h_pct is not None or btts_a_pct is not None):
-        parts = []
-        if over_h_pct is not None or over_a_pct is not None:
-            parts.append(_bar_single("Over 2.5", over_h_pct, over_a_pct))
-        if btts_h_pct is not None or btts_a_pct is not None:
-            parts.append(_bar_single("BTTS", btts_h_pct, btts_a_pct))
-        trends_html = f'<div class="back-bars back-bars-compact">{"".join(parts)}</div>'
-
-    # xG block (only if at least one xG-like number exists)
-    def _fmt_num(v):
+    # GF/GA compact block (values home vs away).
+    def _has_stat(v) -> bool:
         if v is None:
-            return "—"
-        try:
-            return f"{float(v):.2f}"
-        except (TypeError, ValueError):
-            s = str(v).strip()
-            return s if s else "—"
+            return False
+        s = str(v).strip()
+        if not s or s == "—":
+            return False
+        return s.lower() != "none"
 
-    has_xg = any(v is not None and str(v).strip() != "" and str(v).strip() != "—" for v in [xg_h, xg_a, xga_h, xga_a])
-    xg_html = ""
-    if has_xg:
-        xg_html = f"""
-      <div class="back-divider"></div>
-      <div class="back-metrics back-metrics-2x2">
-        <div class="metric">
-          <div class="metric-label">xG</div>
-          <div class="metric-comp">
-            <div class="metric-num">{html_lib.escape(_fmt_num(xg_h))}</div>
-            <div class="metric-vs">vs</div>
-            <div class="metric-num right">{html_lib.escape(_fmt_num(xg_a))}</div>
+    def _fmt_stat(v) -> str:
+        if not _has_stat(v):
+            return "—"
+        return html_lib.escape(str(v))
+
+    show_gfga = _has_stat(gf_h) or _has_stat(gf_a) or _has_stat(ga_h) or _has_stat(ga_a)
+    gfga_html = ""
+    if show_gfga:
+        gf_h_s = _fmt_stat(gf_h)
+        gf_a_s = _fmt_stat(gf_a)
+        ga_h_s = _fmt_stat(ga_h)
+        ga_a_s = _fmt_stat(ga_a)
+        gfga_html = f"""
+      <div class="back-gg-compact">
+        <div class="back-gg-col">
+          <div class="back-gg-label">GF</div>
+          <div class="back-gg-values">
+            <span class="back-gg-num">{gf_h_s}</span>
+            <span class="back-gg-vs">vs</span>
+            <span class="back-gg-num right">{gf_a_s}</span>
           </div>
         </div>
-        <div class="metric">
-          <div class="metric-label">xGA</div>
-          <div class="metric-comp">
-            <div class="metric-num">{html_lib.escape(_fmt_num(xga_h))}</div>
-            <div class="metric-vs">vs</div>
-            <div class="metric-num right">{html_lib.escape(_fmt_num(xga_a))}</div>
+        <div class="back-gg-col">
+          <div class="back-gg-label">GA</div>
+          <div class="back-gg-values">
+            <span class="back-gg-num">{ga_h_s}</span>
+            <span class="back-gg-vs">vs</span>
+            <span class="back-gg-num right">{ga_a_s}</span>
           </div>
         </div>
       </div>
         """
 
+    # Trends: BTTS + Over 2.5 (compact bars).
+    btts_html = ""
+    if btts_h_pct is not None or btts_a_pct is not None:
+        btts_html = _bar_single("BTTS", btts_h_pct, btts_a_pct)
+    over_html = ""
+    if over_h_pct is not None or over_a_pct is not None:
+        over_html = _bar_single("Más de 2.5", over_h_pct, over_a_pct)
+
+    trends_html = ""
+    if btts_html or over_html:
+        trends_parts = [x for x in [btts_html, over_html] if x]
+        trends_html = f'<div class="back-bars back-bars-compact">{"".join(trends_parts)}</div>'
+
+    blocks = [form_html]
+    if gfga_html:
+        blocks.append(gfga_html)
+    if trends_html:
+        blocks.append(trends_html)
+    sections = ""
+    for i, b in enumerate(blocks):
+        if not b:
+            continue
+        if sections:
+            sections += '<div class="back-divider"></div>'
+        sections += b
+
     return f"""
     <div class="back-card back-compact">
-      <div class="back-topline">
-        <div>{html_lib.escape(str(home))}</div>
-        <div class="muted">vs</div>
-        <div style="text-align:right">{html_lib.escape(str(away))}</div>
-      </div>
-      {explain}
-      <div class="back-divider"></div>
-      {form_html}
-      <div class="back-divider"></div>
-      <div class="back-metrics">
-        <div class="metric">
-          <div class="metric-label">GF</div>
-          <div class="metric-comp">
-            <div class="metric-num">{html_lib.escape(str(gf_h))}</div>
-            <div class="metric-vs">vs</div>
-            <div class="metric-num right">{html_lib.escape(str(gf_a))}</div>
-          </div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">GA</div>
-          <div class="metric-comp">
-            <div class="metric-num">{html_lib.escape(str(ga_h))}</div>
-            <div class="metric-vs">vs</div>
-            <div class="metric-num right">{html_lib.escape(str(ga_a))}</div>
-          </div>
-        </div>
-      </div>
-      {xg_html}
-      <div class="back-divider"></div>
-      {trends_html}
+      {sections}
+      <div class="back-insight muted">{html_lib.escape(insight)}</div>
     </div>
     """
 
@@ -1032,24 +1015,14 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         f'<span class="pick-badge risk {html_lib.escape(risk.lower())}">{html_lib.escape(risk)}</span>'
     )
 
-    sh, sa = _extract_score(p, match_by_id=match_by_id)
-    show_score = (result != "PENDING" and sh is not None and sa is not None)
-
-    if show_score:
-        teams_html = f"""
-        <div class="score-teams">
-          <div class="score-line">
-            <div class="score-team">{home_part}</div>
-            <div class="score-num">{html_lib.escape(str(sh))}</div>
-          </div>
-          <div class="score-line">
-            <div class="score-team">{away_part}</div>
-            <div class="score-num">{html_lib.escape(str(sa))}</div>
-          </div>
-        </div>
-        """
-    else:
-        teams_html = f'<div class="row">{home_part} <span class="vs">vs</span> {away_part}</div>'
+    # Front side: decision-focused teams block (no match score).
+    teams_html = f"""
+    <div class="aftr-teams">
+      <div class="aftr-team">{home_part}</div>
+      <div class="aftr-vs">vs</div>
+      <div class="aftr-team">{away_part}</div>
+    </div>
+    """
 
     # CONF BAR
     conf_i = _safe_int(p.get("confidence"))
@@ -1140,6 +1113,33 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
             odds_line_html += ' <span class="pick-bookmaker">' + html_lib.escape(bookmaker_title) + "</span>"
         odds_line_html += "</div>"
 
+    # Compact "prob • odds" line for premium front.
+    odds_compact = ""
+    if odds_decimal is not None:
+        try:
+            odds_compact = f"{float(odds_decimal):.2f}"
+        except (TypeError, ValueError):
+            odds_compact = ""
+    elif implied_prob is not None:
+        try:
+            odds_compact = f"Impl {float(implied_prob) * 100:.1f}%"
+        except (TypeError, ValueError):
+            odds_compact = ""
+    if odds_compact:
+        prob_odds_html = f"""
+        <div class="aftr-prob-odds">
+          <span class="aftr-prob">{best_prob_pct}%</span>
+          <span class="aftr-dot">•</span>
+          <span class="aftr-odds">{html_lib.escape(odds_compact)}</span>
+        </div>
+        """
+    else:
+        prob_odds_html = f"""
+        <div class="aftr-prob-odds">
+          <span class="aftr-prob">{best_prob_pct}%</span>
+        </div>
+        """
+
     # AFTR Score block: use new fields when present, else legacy _aftr_score
     aftr_score_val = p.get("aftr_score")
     if aftr_score_val is None:
@@ -1167,7 +1167,7 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     else:
         conf_level_raw = str(conf_val).strip()
     conf_level = conf_level_raw.upper() if conf_level_raw else ""
-    tier_label = "WATCH" if tier == "pass" else tier.upper()
+    tier_label = "watch" if tier == "pass" else tier
     if edge_str != "—":
         try:
             val = float(str(edge_display).replace(",", ".")) * 100
@@ -1175,14 +1175,13 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         except (TypeError, ValueError):
             edge_badge = edge_str
     else:
-        edge_badge = "—"
-    conf_badge = conf_level if conf_level else "CONF EN PROCESO"
-    show_conf = True
+        edge_badge = ""
+    conf_badge_text = f"{conf_level} CONF" if conf_level else "CONF EN PROCESO"
     aftr_badges = []
     aftr_badges.append(f'<span class="aftr-badge aftr-badge-tier" style="border-color:{tier_color};color:{tier_color};">{html_lib.escape(tier_label)}</span>')
-    aftr_badges.append(f'<span class="aftr-badge aftr-badge-edge">{html_lib.escape(edge_badge)} EDGE</span>')
-    if show_conf:
-        aftr_badges.append(f'<span class="aftr-badge aftr-badge-conf">{html_lib.escape(conf_badge)} CONF</span>')
+    if edge_badge:
+        aftr_badges.append(f'<span class="aftr-badge aftr-badge-edge">{html_lib.escape(edge_badge)} EDGE</span>')
+    aftr_badges.append(f'<span class="aftr-badge aftr-badge-conf">{html_lib.escape(conf_badge_text)}</span>')
     aftr_badges_html = "".join(aftr_badges)
     aftr_block_html = f"""
       <div class="aftr-score-block" style="border-left: 4px solid {tier_color};">
@@ -1190,6 +1189,18 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         <div class="aftr-score-num">{aftr_score_val}</div>
         <div class="aftr-badges">{aftr_badges_html}</div>
       </div>"""
+
+    # Top meta row (league, kickoff time, tier) for premium front.
+    utc_raw = str(p.get("utcDate", "") or "").strip()
+    if "T" in utc_raw and len(utc_raw) >= 19:
+        kickoff_time = utc_raw.split("T")[1][:5]
+    else:
+        kickoff_time = utc_raw[:16] if utc_raw else "—"
+    league_code = (p.get("_league") or p.get("league") or "").strip()
+    league_label = settings.leagues.get(league_code, league_code) if league_code else "AFTR"
+    tier_meta_badge_html = (
+        f'<span class="aftr-meta-tier-pill" style="border-color:{tier_color};color:{tier_color};">{html_lib.escape(tier_label)}</span>'
+    )
     pick_id_val = _pick_id_for_card(p, best)
     pick_id_attr = html_lib.escape(pick_id_val)
     market_val = (best or {}).get("market") or p.get("best_market") or ""
@@ -1197,29 +1208,22 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     edge_raw = p.get("edge")
     edge_attr = html_lib.escape(str(edge_raw)) if edge_raw is not None else ""
     pick_actions_html = f"""
-      <div class="pick-actions" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-        <button type="button" class="btn-favorite-pick pill" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{aftr_score_val}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}" style="padding:6px 12px; font-size:0.85rem;">⭐ Guardar</button>
-        <button type="button" class="btn-follow-pick pill" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{aftr_score_val}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}" style="padding:6px 12px; font-size:0.85rem;">📈 Seguir pick</button>
+      <div class="pick-actions aftr-actions">
+        <button type="button" class="btn-favorite-pick pill pick-action-btn" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{aftr_score_val}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}">⭐ Guardar</button>
+        <button type="button" class="btn-follow-pick pill pick-action-btn pick-action-follow" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{aftr_score_val}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}">📈 Seguir pick</button>
       </div>"""
     front_html = f"""
-    <div class="{card_class}">
+    <div class="{card_class} aftr-pick-card">
+      <div class="aftr-topmeta">
+        <span class="aftr-meta-league">{html_lib.escape(league_label)}</span>
+        <span class="aftr-meta-time">{html_lib.escape(kickoff_time)}</span>
+        {tier_meta_badge_html}
+      </div>
       {teams_html}
-      <div class="meta" data-utc="{html_lib.escape(str(p.get('utcDate','')))}">
-        {html_lib.escape(str(p.get('utcDate','')))}
-      </div>
       {aftr_block_html}
-
-      <div class="pick pick-best">
-        <span class="pick-main">{html_lib.escape(best_market)}</span>
-        {badge_html}
-        <span class="pick-prob">&mdash; {best_prob_pct}%{best_fair_str}</span>
-      </div>
-      {odds_line_html}
-
-      {conf_bar}
-
-      <div class="candidates">
-        {cand_block}
+      <div class="aftr-mainpick">
+        <div class="aftr-market">{html_lib.escape(str(best_market))}</div>
+        {prob_odds_html}
       </div>
       {pick_actions_html}
     </div>
@@ -3966,7 +3970,7 @@ def account_page(request: Request):
     </div>
     <div class="top-actions">
       <div class="links">
-        <a href="/">Panel</a>
+        <a href="/" class="pill" style="padding: 8px 14px; display:inline-block;">🏠 Home</a>
       </div>
     </div>"""
 
