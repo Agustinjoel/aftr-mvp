@@ -1043,7 +1043,8 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     odds_decimal = p.get("odds_decimal")
     implied_prob = p.get("implied_prob")
     edge_val = p.get("edge")
-    bookmaker_title = (p.get("bookmaker_title") or "").strip()
+    _bt = p.get("bookmaker_title")
+    bookmaker_title = str(_bt).strip() if _bt is not None else ""
     odds_parts = []
     if odds_decimal is not None:
         try:
@@ -1078,7 +1079,8 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
             aftr_score_val = int(round(float(aftr_score_val)))
         except (TypeError, ValueError):
             aftr_score_val = _aftr_score(p)
-    tier = (p.get("tier") or "pass").strip().lower() or "pass"
+    _t = p.get("tier")
+    tier = (str(_t).strip().lower() if _t is not None else "pass") or "pass"
     tier_colors = {"elite": "#FFD700", "strong": "#00C853", "risky": "#FF9800", "pass": "#9E9E9E"}
     tier_color = tier_colors.get(tier, "#9E9E9E")
     edge_display = p.get("edge")
@@ -1089,7 +1091,11 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
             edge_str = "—"
     else:
         edge_str = "—"
-    conf_level_raw = (p.get("confidence_level") or p.get("confidence") or "").strip() or ""
+    conf_val = p.get("confidence_level") or p.get("confidence")
+    if conf_val is None:
+        conf_level_raw = ""
+    else:
+        conf_level_raw = str(conf_val).strip()
     conf_level = conf_level_raw.upper() if conf_level_raw else ""
     tier_label = "WATCH" if tier == "pass" else tier.upper()
     if edge_str != "—":
@@ -2001,7 +2007,8 @@ def home_page(request: Request) -> str:
         except (TypeError, ValueError):
             edge_pos = False
         edge_class = " home-pick-edge-pos" if edge_pos else ""
-        tier = (p.get("tier") or "pass").strip().lower() or "pass"
+        _t = p.get("tier")
+        tier = (str(_t).strip().lower() if _t is not None else "pass") or "pass"
         tier_colors = {"elite": "#FFD700", "strong": "#00C853", "risky": "#FF9800", "pass": "#9E9E9E"}
         tier_color = tier_colors.get(tier, "#9E9E9E")
         home_part = _team_with_crest(p.get("home_crest"), p.get("home") or "—")
