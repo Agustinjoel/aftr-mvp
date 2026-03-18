@@ -100,10 +100,19 @@ def init_db():
         user_id INTEGER NOT NULL,
         pick_id TEXT NOT NULL,
         created_at TEXT NOT NULL,
+        market TEXT,
+        aftr_score REAL,
+        tier TEXT,
+        edge REAL,
         FOREIGN KEY(user_id) REFERENCES users(id),
         UNIQUE(user_id, pick_id)
     )
     """)
+    for col in [("market", "TEXT"), ("aftr_score", "REAL"), ("tier", "TEXT"), ("edge", "REAL")]:
+        try:
+            cur.execute("ALTER TABLE user_favorites ADD COLUMN " + col[0] + " " + col[1])
+        except sqlite3.OperationalError:
+            pass
     cur.execute("""
     CREATE TABLE IF NOT EXISTS user_picks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -112,9 +121,23 @@ def init_db():
         action TEXT NOT NULL,
         result TEXT NULL,
         created_at TEXT NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id)
+        market TEXT,
+        aftr_score REAL,
+        tier TEXT,
+        edge REAL,
+        FOREIGN KEY(user_id) REFERENCES users(id),
+        UNIQUE(user_id, pick_id)
     )
     """)
+    for col in [("market", "TEXT"), ("aftr_score", "REAL"), ("tier", "TEXT"), ("edge", "REAL")]:
+        try:
+            cur.execute("ALTER TABLE user_picks ADD COLUMN " + col[0] + " " + col[1])
+        except sqlite3.OperationalError:
+            pass
+    try:
+        cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_user_picks_user_pick ON user_picks(user_id, pick_id)")
+    except sqlite3.OperationalError:
+        pass
     try:
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_picks_user_id ON user_picks(user_id)")

@@ -954,6 +954,20 @@ def _extract_score(p: dict, match_by_id: dict[int, dict] | None = None) -> tuple
 # =========================================================
 # Card renderer
 # =========================================================
+def _pick_id_for_card(p: dict, best: dict | None = None) -> str:
+    """Stable id for a pick (for favorite/follow). Uses p.id or composite from league, match_id, market, utcDate."""
+    if not isinstance(p, dict):
+        return ""
+    pid = p.get("id") or p.get("pick_id")
+    if pid is not None and str(pid).strip():
+        return str(pid).strip()
+    league = (p.get("_league") or p.get("league") or "").strip()
+    match_id = str(p.get("match_id") or p.get("id") or "")
+    market = (best or {}).get("market") or p.get("best_market") or ""
+    utc = str(p.get("utcDate") or "")
+    return "|".join([league, match_id, market, utc]).strip("|") or "unknown"
+
+
 def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | None = None) -> str:
     home_name = p.get("home", "")
     away_name = p.get("away", "")
@@ -1131,6 +1145,17 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
           <span class="aftr-confidence">Confidence: {html_lib.escape(conf_level)}</span>
         </div>
       </div>"""
+    pick_id_val = _pick_id_for_card(p, best)
+    pick_id_attr = html_lib.escape(pick_id_val)
+    market_val = (best or {}).get("market") or p.get("best_market") or ""
+    market_attr = html_lib.escape(str(market_val))
+    edge_raw = p.get("edge")
+    edge_attr = html_lib.escape(str(edge_raw)) if edge_raw is not None else ""
+    pick_actions_html = f"""
+      <div class="pick-actions" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+        <button type="button" class="btn-favorite-pick pill" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{aftr_score_val}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}" style="padding:6px 12px; font-size:0.85rem;">⭐ Guardar</button>
+        <button type="button" class="btn-follow-pick pill" data-pick-id="{pick_id_attr}" style="padding:6px 12px; font-size:0.85rem;">📈 Seguir pick</button>
+      </div>"""
     front_html = f"""
     <div class="{card_class}">
       {teams_html}
@@ -1151,6 +1176,7 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
       <div class="candidates">
         {cand_block}
       </div>
+      {pick_actions_html}
     </div>
     """
 
@@ -1158,7 +1184,7 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     back_html = _render_back_stats(p, market_for_back)
 
     return f"""
-    <div class="flip-card" role="button" tabindex="0" aria-label="Ver stats">
+    <div class="flip-card" role="button" tabindex="0" aria-label="Ver stats" data-pick-id="{pick_id_attr}">
       <div class="flip-inner">
         <div class="flip-front">{front_html}</div>
         <div class="flip-back">{back_html}</div>
@@ -3283,6 +3309,89 @@ def dashboard(request: Request, league: str):
                 e.preventDefault();
                 fc.classList.toggle('is-flipped');
               });
+
+              (function pickActions(){
+                var base = window.location.origin || (window.location.protocol + '//' + window.location.host);
+                window.__userLoggedIn = null;
+                function checkLogin(){
+                  if (window.__userLoggedIn !== null) return Promise.resolve(window.__userLoggedIn);
+                  return fetch(base + '/user/me', { credentials: 'include' }).then(function(r){ return r.json(); }).then(function(d){
+                    window.__userLoggedIn = !!(d && d.ok && d.user);
+                    return window.__userLoggedIn;
+                  }).catch(function(){ window.__userLoggedIn = false; return false; });
+                }
+                function toast(msg){
+                  var el = document.createElement('div');
+                  el.className = 'pick-toast';
+                  el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card-bg,#1a1a1a);color:#fff;padding:10px 18px;border-radius:8px;font-size:0.9rem;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+                  el.textContent = msg;
+                  document.body.appendChild(el);
+                  setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 2500);
+                }
+                function doFavorite(btn){
+                  var pickId = btn.getAttribute('data-pick-id');
+                  if (!pickId) return;
+                  checkLogin().then(function(loggedIn){
+                    if (!loggedIn){ alert('Iniciá sesión para usar esta función'); return; }
+                    if (btn.disabled) return;
+                    btn.disabled = true;
+                    var payload = { pick_id: pickId };
+                    var market = btn.getAttribute('data-market'); if (market) payload.market = market;
+                    var aftr = btn.getAttribute('data-aftr-score'); if (aftr !== null && aftr !== '') payload.aftr_score = parseInt(aftr, 10);
+                    var tier = btn.getAttribute('data-tier'); if (tier) payload.tier = tier;
+                    var edge = btn.getAttribute('data-edge'); if (edge !== null && edge !== '') payload.edge = parseFloat(edge);
+                    fetch(base + '/user/favorite', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) })
+                      .then(function(r){ return r.json(); })
+                      .then(function(d){ if (d && d.ok){ btn.textContent = 'Guardado ✅'; toast('Guardado ✅'); } else { btn.disabled = false; toast(d && d.error || 'Error'); } })
+                      .catch(function(){ btn.disabled = false; toast('Error de conexión'); });
+                  });
+                }
+                function doFollow(btn){
+                  var pickId = btn.getAttribute('data-pick-id');
+                  if (!pickId) return;
+                  checkLogin().then(function(loggedIn){
+                    if (!loggedIn){ alert('Iniciá sesión para usar esta función'); return; }
+                    if (btn.disabled) return;
+                    btn.disabled = true;
+                    fetch(base + '/user/follow-pick', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ pick_id: pickId }) })
+                      .then(function(r){ return r.json(); })
+                      .then(function(d){ if (d && d.ok){ btn.textContent = 'Siguiendo 📈'; toast('Siguiendo 📈'); } else { btn.disabled = false; toast(d && d.error || 'Error'); } })
+                      .catch(function(){ btn.disabled = false; toast('Error de conexión'); });
+                  });
+                }
+                function applyPersistedState(){
+                  checkLogin().then(function(loggedIn){
+                    if (!loggedIn) return;
+                    Promise.all([
+                      fetch(base + '/user/favorites', { credentials: 'include' }).then(function(r){ return r.json(); }),
+                      fetch(base + '/user/followed-ids', { credentials: 'include' }).then(function(r){ return r.json(); })
+                    ]).then(function(results){
+                      var favData = results[0];
+                      var followedData = results[1];
+                      var favoriteIds = {};
+                      var followedIds = {};
+                      if (favData && favData.ok && Array.isArray(favData.favorites)) favData.favorites.forEach(function(x){ favoriteIds[x.pick_id] = true; });
+                      if (followedData && followedData.ok && Array.isArray(followedData.pick_ids)) followedData.pick_ids.forEach(function(id){ followedIds[id] = true; });
+                      document.querySelectorAll('.btn-favorite-pick').forEach(function(btn){
+                        var id = btn.getAttribute('data-pick-id');
+                        if (id && favoriteIds[id]){ btn.textContent = 'Guardado ✅'; btn.disabled = true; }
+                      });
+                      document.querySelectorAll('.btn-follow-pick').forEach(function(btn){
+                        var id = btn.getAttribute('data-pick-id');
+                        if (id && followedIds[id]){ btn.textContent = 'Siguiendo 📈'; btn.disabled = true; }
+                      });
+                    }).catch(function(){});
+                  });
+                }
+                document.addEventListener('click', function(e){
+                  var fav = e.target.closest && e.target.closest('.btn-favorite-pick');
+                  if (fav){ e.preventDefault(); e.stopPropagation(); doFavorite(fav); return; }
+                  var fol = e.target.closest && e.target.closest('.btn-follow-pick');
+                  if (fol){ e.preventDefault(); e.stopPropagation(); doFollow(fol); return; }
+                });
+                if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyPersistedState);
+                else applyPersistedState();
+              })();
             </script>
       """
     page_html +="""
@@ -3738,6 +3847,19 @@ def account_page(request: Request):
     plan_class = "account-plan-premium" if is_premium else "account-plan-free"
     upgrade_cta = "" if is_premium else '<p class="muted" style="margin-top: 8px; font-size: 0.9rem;"><a href="/?open=premium" style="color: var(--accent, #0b5ed7);">Mejorar a Premium</a></p>'
 
+    premium_upsell_card = ""
+    if not is_premium:
+        premium_upsell_card = """
+      <div class="card account-premium-cta" style="padding: 20px; margin-bottom: 24px; background: linear-gradient(135deg, var(--card-bg, #1a1a1a) 0%, #252530 100%); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+        <h3 style="margin: 0 0 14px 0; font-size: 1.1rem;">Desbloqueá AFTR Premium</h3>
+        <ul style="margin: 0 0 16px 0; padding-left: 20px; font-size: 0.9rem; color: var(--muted, #888); line-height: 1.6;">
+          <li>Picks elite y strong</li>
+          <li>AFTR Score completo</li>
+          <li>Historial y seguimiento avanzado</li>
+        </ul>
+        <a href="/?open=premium" class="pill" style="display: inline-block; padding: 10px 20px; background: var(--accent, #0b5ed7); color: #fff; text-decoration: none; font-weight: 600; border-radius: 8px;">Obtener Premium</a>
+      </div>"""
+
     body = header_html + f"""
     <div class="page account-page" style="max-width: 560px; margin: 24px auto;">
       <h2 style="margin-bottom: 16px;">Mi cuenta</h2>
@@ -3748,6 +3870,7 @@ def account_page(request: Request):
         {upgrade_cta}
         <p class="muted" style="margin-top: 12px; font-size: 0.85rem;">Cuenta desde {created_display}</p>
       </div>
+{premium_upsell_card}
 
       <h3 style="margin: 20px 0 12px 0; font-size: 1rem;">Tus estadísticas</h3>
       <div id="account-stats" class="account-stats" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-bottom: 24px;">
@@ -3768,11 +3891,13 @@ def account_page(request: Request):
 
       <section id="favoritos" style="margin-bottom: 24px;">
         <h3 style="margin: 0 0 12px 0; font-size: 1rem;">Favoritos</h3>
-        <div class="card" style="padding: 16px;"><p class="muted" style="margin: 0;">Tus picks favoritos aparecerán aquí.</p></div>
+        <div id="account-favorites" class="account-favorites">
+          <p class="muted" style="margin: 0;">Cargando…</p>
+        </div>
       </section>
 
       <section id="historial">
-        <h3 style="margin: 0 0 12px 0; font-size: 1rem;">Historial reciente (seguidos)</h3>
+        <h3 style="margin: 0 0 12px 0; font-size: 1rem;">Historial reciente (últimos 10 seguidos)</h3>
         <div id="account-history" class="account-history">
           <p class="muted" style="margin: 0;">Cargando…</p>
         </div>
@@ -3785,9 +3910,10 @@ def account_page(request: Request):
       function fetchJSON(url) {{
         return fetch(url, {{ credentials: "include" }}).then(function(r) {{ return r.json(); }});
       }}
-      Promise.all([fetchJSON(base + "/user/stats"), fetchJSON(base + "/user/history")]).then(function(results) {{
+      Promise.all([fetchJSON(base + "/user/stats"), fetchJSON(base + "/user/history"), fetchJSON(base + "/user/favorites")]).then(function(results) {{
         var stats = results[0];
         var history = results[1];
+        var favorites = results[2];
         if (stats && stats.ok && stats.stats) {{
           var s = stats.stats;
           var el = function(id) {{ return document.getElementById(id); }};
@@ -3798,8 +3924,39 @@ def account_page(request: Request):
           if (el("stat-pending")) el("stat-pending").textContent = s.pending != null ? s.pending : "—";
           if (el("stat-roi")) el("stat-roi").textContent = s.roi != null ? s.roi + "%" : "—";
         }}
+        if (favorites && favorites.ok && Array.isArray(favorites.favorites)) {{
+          var list = favorites.favorites;
+          var container = document.getElementById("account-favorites");
+          if (container) {{
+            if (list.length === 0) {{
+              container.innerHTML = "<div class=\\"card\\" style=\\"padding: 16px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No tenés favoritos todavía.</p></div>";
+            }} else {{
+              var html = "<div style=\\"display: grid; gap: 10px;\\">";
+              list.forEach(function(item) {{
+                var market = esc(item.market || "—");
+                var aftrScore = item.aftr_score != null ? item.aftr_score : "—";
+                var tier = esc((item.tier || "—").toUpperCase());
+                var edge = item.edge != null ? (Number(item.edge) * 100).toFixed(1) + "%" : "—";
+                var date = esc((item.created_at || "").slice(0, 10));
+                html += "<div class=\\"card\\" style=\\"padding: 12px 14px; border-left: 4px solid var(--accent, #0b5ed7);\\">";
+                html += "<div style=\\"font-weight: 600; margin-bottom: 6px;\\">" + market + "</div>";
+                html += "<div style=\\"display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.85rem; color: var(--muted, #888);\\">";
+                html += "<span>AFTR <b style=\\"color: inherit;\\">" + aftrScore + "</b></span>";
+                html += "<span>Tier " + tier + "</span>";
+                html += "<span>Edge " + edge + "</span>";
+                html += "<span>" + date + "</span>";
+                html += "</div></div>";
+              }});
+              html += "</div>";
+              container.innerHTML = html;
+            }}
+          }}
+        }} else {{
+          var favEl = document.getElementById("account-favorites");
+          if (favEl) favEl.innerHTML = "<div class=\\"card\\" style=\\"padding: 16px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No tenés favoritos todavía.</p></div>";
+        }}
         if (history && history.ok && Array.isArray(history.history)) {{
-          var list = history.history.slice(0, 5);
+          var list = history.history;
           var container = document.getElementById("account-history");
           if (!container) return;
           if (list.length === 0) {{
@@ -3807,10 +3964,15 @@ def account_page(request: Request):
           }} else {{
             var html = "<ul style=\\"list-style: none; padding: 0; margin: 0;\\">";
             list.forEach(function(item) {{
-              var result = esc(item.result || "Pendiente");
-              var date = esc((item.created_at || "").slice(0, 10));
               var pickId = esc(item.pick_id || "—");
-              html += "<li class=\\"card\\" style=\\"padding: 10px 14px; margin-bottom: 8px;\\"><span>" + pickId + "</span> <span class=\\"muted\\">" + result + "</span> <span class=\\"muted\\" style=\\"font-size: 0.85rem;\\">" + date + "</span></li>";
+              var market = esc(item.market || "—");
+              var aftrScore = item.aftr_score != null ? item.aftr_score : "—";
+              var tier = esc(item.tier || "—");
+              var edge = item.edge != null ? (Number(item.edge) * 100).toFixed(1) + "%" : "—";
+              var result = esc(item.result || "PENDING");
+              var date = esc((item.created_at || "").slice(0, 10));
+              html += "<li class=\\"card\\" style=\\"padding: 10px 14px; margin-bottom: 8px;\\">";
+              html += "<span>" + pickId + "</span> · <span class=\\"muted\\">" + market + "</span> · AFTR " + aftrScore + " · " + tier + " · " + edge + " · <span class=\\"muted\\">" + result + "</span> <span class=\\"muted\\" style=\\"font-size: 0.85rem;\\">" + date + "</span></li>";
             }});
             html += "</ul>";
             container.innerHTML = html;
@@ -3822,6 +3984,8 @@ def account_page(request: Request):
       }}).catch(function() {{
         var c = document.getElementById("account-history");
         if (c) c.innerHTML = "<p class=\\"muted\\" style=\\"margin: 0;\\">Error al cargar datos.</p>";
+        var favEl = document.getElementById("account-favorites");
+        if (favEl) favEl.innerHTML = "<div class=\\"card\\" style=\\"padding: 16px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">Error al cargar favoritos.</p></div>";
       }});
     }})();
     </script>"""

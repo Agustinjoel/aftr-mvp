@@ -116,10 +116,10 @@ def user_stats(request: Request):
     finally:
         conn.close()
 
-    settled = wins + losses + push
+    total = followed_picks
     roi = None
-    if settled > 0:
-        roi = round((wins - losses) / settled * 100.0, 2)
+    if total and total > 0:
+        roi = round((wins - losses) / total * 100.0, 2)
 
     return JSONResponse({
         "ok": True,
@@ -136,7 +136,7 @@ def user_stats(request: Request):
 
 @router.post("/favorite")
 def user_favorite(request: Request, payload: dict = Body(...)):
-    """Store a favorite pick_id for the current user."""
+    """Store a favorite pick_id for the current user. Optional: market, aftr_score, tier, edge."""
     uid, err = _require_user(request)
     if err is not None:
         return err
@@ -146,14 +146,35 @@ def user_favorite(request: Request, payload: dict = Body(...)):
             {"ok": False, "error": "pick_id_required"},
             status_code=400,
         )
+    market = (payload.get("market") or "").strip() or None
+    aftr_score = payload.get("aftr_score")
+    if aftr_score is not None:
+        try:
+            aftr_score = float(aftr_score)
+        except (TypeError, ValueError):
+            aftr_score = None
+    tier = (payload.get("tier") or "").strip() or None
+    edge = payload.get("edge")
+    if edge is not None:
+        try:
+            edge = float(edge)
+        except (TypeError, ValueError):
+            edge = None
     now = datetime.now(timezone.utc).isoformat()
     conn = get_conn()
     try:
         cur = conn.cursor()
         cur.execute(
-            """INSERT OR IGNORE INTO user_favorites (user_id, pick_id, created_at)
-               VALUES (?, ?, ?)""",
-            (uid, pick_id, now),
+            """INSERT OR IGNORE INTO user_favorites (user_id, pick_id, created_at, market, aftr_score, tier, edge)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (uid, pick_id, now, market, aftr_score, tier, edge),
+        )
+        cur.execute(
+            """UPDATE user_favorites SET
+               market = COALESCE(?, market), aftr_score = COALESCE(?, aftr_score),
+               tier = COALESCE(?, tier), edge = COALESCE(?, edge)
+               WHERE user_id = ? AND pick_id = ?""",
+            (market, aftr_score, tier, edge, uid, pick_id),
         )
         conn.commit()
     finally:
@@ -161,9 +182,60 @@ def user_favorite(request: Request, payload: dict = Body(...)):
     return JSONResponse({"ok": True, "pick_id": pick_id})
 
 
+@router.get("/favorites")
+def user_favorites(request: Request):
+    """List favorites for the current user with optional market, aftr_score, tier, edge."""
+    uid, err = _require_user(request)
+    if err is not None:
+        return err
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """SELECT pick_id, created_at, market, aftr_score, tier, edge
+               FROM user_favorites WHERE user_id = ? ORDER BY created_at DESC""",
+            (uid,),
+        )
+        rows = cur.fetchall()
+    finally:
+        conn.close()
+    items = []
+    for row in rows:
+        r = dict(row)
+        items.append({
+            "pick_id": r.get("pick_id"),
+            "created_at": r.get("created_at"),
+            "market": r.get("market"),
+            "aftr_score": r.get("aftr_score"),
+            "tier": r.get("tier"),
+            "edge": r.get("edge"),
+        })
+    return JSONResponse({"ok": True, "favorites": items})
+
+
+@router.get("/followed-ids")
+def user_followed_ids(request: Request):
+    """List all followed pick_ids for the current user (for persisted UI state)."""
+    uid, err = _require_user(request)
+    if err is not None:
+        return err
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT pick_id FROM user_picks WHERE user_id = ?",
+            (uid,),
+        )
+        rows = cur.fetchall()
+    finally:
+        conn.close()
+    pick_ids = [row["pick_id"] for row in rows]
+    return JSONResponse({"ok": True, "pick_ids": pick_ids})
+
+
 @router.post("/follow-pick")
 def user_follow_pick(request: Request, payload: dict = Body(...)):
-    """Store a followed pick for the current user (action=follow)."""
+    """Store a followed pick for the current user (action=follow). Avoids duplicate (user_id, pick_id)."""
     uid, err = _require_user(request)
     if err is not None:
         return err
@@ -173,14 +245,35 @@ def user_follow_pick(request: Request, payload: dict = Body(...)):
             {"ok": False, "error": "pick_id_required"},
             status_code=400,
         )
+    market = (payload.get("market") or "").strip() or None
+    aftr_score = payload.get("aftr_score")
+    if aftr_score is not None:
+        try:
+            aftr_score = float(aftr_score)
+        except (TypeError, ValueError):
+            aftr_score = None
+    tier = (payload.get("tier") or "").strip() or None
+    edge = payload.get("edge")
+    if edge is not None:
+        try:
+            edge = float(edge)
+        except (TypeError, ValueError):
+            edge = None
     now = datetime.now(timezone.utc).isoformat()
     conn = get_conn()
     try:
         cur = conn.cursor()
         cur.execute(
-            """INSERT INTO user_picks (user_id, pick_id, action, result, created_at)
-               VALUES (?, ?, ?, ?, ?)""",
-            (uid, pick_id, "follow", None, now),
+            "SELECT 1 FROM user_picks WHERE user_id = ? AND pick_id = ? LIMIT 1",
+            (uid, pick_id),
+        )
+        if cur.fetchone():
+            return JSONResponse({"ok": True, "pick_id": pick_id})
+        cur.execute(
+            """INSERT INTO user_picks
+               (user_id, pick_id, action, result, created_at, market, aftr_score, tier, edge)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (uid, pick_id, "follow", "PENDING", now, market, aftr_score, tier, edge),
         )
         conn.commit()
     finally:
@@ -190,7 +283,7 @@ def user_follow_pick(request: Request, payload: dict = Body(...)):
 
 @router.get("/history")
 def user_history(request: Request):
-    """Followed picks for the current user, newest first."""
+    """Followed picks for the current user, newest first. Limit 10. Includes market, aftr_score, tier, edge, result."""
     uid, err = _require_user(request)
     if err is not None:
         return err
@@ -198,22 +291,26 @@ def user_history(request: Request):
     try:
         cur = conn.cursor()
         cur.execute(
-            """SELECT id, pick_id, action, result, created_at
+            """SELECT id, pick_id, action, result, created_at, market, aftr_score, tier, edge
                FROM user_picks WHERE user_id = ?
-               ORDER BY created_at DESC""",
+               ORDER BY created_at DESC LIMIT 10""",
             (uid,),
         )
         rows = cur.fetchall()
     finally:
         conn.close()
-    items = [
-        {
-            "id": row["id"],
-            "pick_id": row["pick_id"],
-            "action": row["action"],
-            "result": row["result"],
-            "created_at": row["created_at"],
-        }
-        for row in rows
-    ]
+    items = []
+    for row in rows:
+        r = dict(row)
+        items.append({
+            "id": r.get("id"),
+            "pick_id": r.get("pick_id"),
+            "action": r.get("action"),
+            "result": r.get("result") or "PENDING",
+            "created_at": r.get("created_at"),
+            "market": r.get("market"),
+            "aftr_score": r.get("aftr_score"),
+            "tier": r.get("tier"),
+            "edge": r.get("edge"),
+        })
     return JSONResponse({"ok": True, "history": items})
