@@ -29,6 +29,7 @@ from fastapi import Form
 
 router = APIRouter()
 logger = logging.getLogger("aftr.ui")
+_finished_card_debug_logged = False
 
 
 # Universal auth modal bootstrap: define on window so no page can throw ReferenceError.
@@ -1153,6 +1154,7 @@ def _pick_id_for_card(p: dict, best: dict | None = None) -> str:
 
 
 def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | None = None) -> str:
+    global _finished_card_debug_logged
     home_name = p.get("home", "")
     away_name = p.get("away", "")
     home_team_attr = html_lib.escape(str(home_name or ""))
@@ -1219,6 +1221,17 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     final_away_score: int | None = None
     if is_finished:
         final_home_score, final_away_score = _extract_score(p, match_by_id)
+        if not _finished_card_debug_logged:
+            logger.debug(
+                "Finished card debug: home_team=%s away_team=%s home_score=%s away_score=%s result=%s status=%s",
+                str(p.get("home") or p.get("home_team") or ""),
+                str(p.get("away") or p.get("away_team") or ""),
+                str(final_home_score),
+                str(final_away_score),
+                str(p.get("result") or ""),
+                str(p.get("status") or ""),
+            )
+            _finished_card_debug_logged = True
 
     card_class = "card"
     if result == "WIN":
@@ -1239,7 +1252,11 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         teams_html = f"""
     <div class="aftr-teams aftr-teams-finished">
       <div class="aftr-team aftr-team-left">{home_part}</div>
-      <div class="aftr-score-inline">{final_home_score} - {final_away_score}</div>
+      <div class="aftr-score-inline">
+        <span class="aftr-score-home">{final_home_score}</span>
+        <span class="aftr-score-sep">-</span>
+        <span class="aftr-score-away">{final_away_score}</span>
+      </div>
       <div class="aftr-team aftr-team-right">{away_part}</div>
     </div>
     """

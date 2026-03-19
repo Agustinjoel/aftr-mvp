@@ -419,12 +419,36 @@ h2::after{
 }
 
 .aftr-score-inline{
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 64px;
+  padding: 2px 6px;
+  font-size: 14px;
   font-weight: 1000;
   color: rgba(234,242,255,.92);
   letter-spacing: .2px;
   white-space: nowrap;
   text-align: center;
+  justify-self: center;
+}
+.aftr-score-home,
+.aftr-score-away{
+  min-width: 10px;
+  text-align: center;
+}
+.aftr-score-sep{
+  opacity: 0.9;
+}
+.aftr-teams-finished{
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+.aftr-teams-finished .aftr-team-left{
+  justify-self: start;
+}
+.aftr-teams-finished .aftr-team-right{
+  justify-self: end;
 }
 
 .aftr-mainpick{
