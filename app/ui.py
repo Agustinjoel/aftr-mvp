@@ -1000,6 +1000,8 @@ def _pick_id_for_card(p: dict, best: dict | None = None) -> str:
 def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | None = None) -> str:
     home_name = p.get("home", "")
     away_name = p.get("away", "")
+    home_team_attr = html_lib.escape(str(home_name or ""))
+    away_team_attr = html_lib.escape(str(away_name or ""))
 
     home_part = _team_with_crest(p.get("home_crest"), home_name)
     away_part = _team_with_crest(p.get("away_crest"), away_name)
@@ -1226,8 +1228,14 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     edge_attr = html_lib.escape(str(edge_raw)) if edge_raw is not None else ""
     pick_actions_html = f"""
       <div class="pick-actions aftr-actions">
-        <button type="button" class="btn-favorite-pick pill pick-action-btn" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{aftr_score_val}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}">⭐ Guardar</button>
-        <button type="button" class="btn-follow-pick pill pick-action-btn pick-action-follow" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{aftr_score_val}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}">📈 Seguir pick</button>
+        <button type="button" class="btn-favorite-pick pill pick-action-btn"
+          data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{aftr_score_val}"
+          data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"
+          data-home-team="{home_team_attr}" data-away-team="{away_team_attr}">⭐ Guardar</button>
+        <button type="button" class="btn-follow-pick pill pick-action-btn pick-action-follow"
+          data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{aftr_score_val}"
+          data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"
+          data-home-team="{home_team_attr}" data-away-team="{away_team_attr}">📈 Seguir pick</button>
       </div>"""
     front_html = f"""
     <div class="{card_class} aftr-pick-card">
@@ -2127,8 +2135,16 @@ def home_page(request: Request) -> str:
             <span>Odds {odds_str}</span>
           </div>
           <div class="pick-actions" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-            <button type="button" class="btn-favorite-pick pill" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}" style="padding:6px 12px; font-size:0.85rem;">⭐ Guardar</button>
-            <button type="button" class="btn-follow-pick pill" data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}" style="padding:6px 12px; font-size:0.85rem;">📈 Seguir pick</button>
+            <button type="button" class="btn-favorite-pick pill"
+              data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}"
+              data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"
+              data-home-team="{home}" data-away-team="{away}"
+              style="padding:6px 12px; font-size:0.85rem;">⭐ Guardar</button>
+            <button type="button" class="btn-follow-pick pill"
+              data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}"
+              data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"
+              data-home-team="{home}" data-away-team="{away}"
+              style="padding:6px 12px; font-size:0.85rem;">📈 Seguir pick</button>
           </div>
         </div>""")
 
@@ -2503,6 +2519,8 @@ def home_page(request: Request) -> str:
               var aftr = btn.getAttribute("data-aftr-score"); if (aftr !== null && aftr !== "") payload.aftr_score = parseInt(aftr, 10);
               var tier = btn.getAttribute("data-tier"); if (tier) payload.tier = tier;
               var edge = btn.getAttribute("data-edge"); if (edge !== null && edge !== "") payload.edge = parseFloat(edge);
+              var home = btn.getAttribute("data-home-team"); if (home) payload.home_team = home;
+              var away = btn.getAttribute("data-away-team"); if (away) payload.away_team = away;
               fetch(base + "/user/favorite", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(payload) })
                 .then(function(r){ return r.json(); })
                 .then(function(d){ if (d && d.ok){ btn.textContent = "Guardado ✅"; toast("Pick guardada"); } else { btn.disabled = false; toast(d && d.error || "Error"); } })
@@ -2521,6 +2539,8 @@ def home_page(request: Request) -> str:
               var aftr = btn.getAttribute("data-aftr-score"); if (aftr !== null && aftr !== "") payload.aftr_score = parseInt(aftr, 10);
               var tier = btn.getAttribute("data-tier"); if (tier) payload.tier = tier;
               var edge = btn.getAttribute("data-edge"); if (edge !== null && edge !== "") payload.edge = parseFloat(edge);
+              var home = btn.getAttribute("data-home-team"); if (home) payload.home_team = home;
+              var away = btn.getAttribute("data-away-team"); if (away) payload.away_team = away;
               fetch(base + "/user/follow-pick", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify(payload) })
                 .then(function(r){ return r.json(); })
                 .then(function(d){ if (d && d.ok){ btn.textContent = "Siguiendo 📈"; toast("Pick seguida"); } else { btn.disabled = false; toast(d && d.error || "Error"); } })
@@ -2540,11 +2560,11 @@ def home_page(request: Request) -> str:
                 if (results[1] && results[1].ok && Array.isArray(results[1].pick_ids)) results[1].pick_ids.forEach(function(id){ followedIds[id] = true; });
                 document.querySelectorAll(".btn-favorite-pick").forEach(function(btn){
                   var id = btn.getAttribute("data-pick-id");
-                  if (id && favoriteIds[id]){ btn.textContent = "Guardado ✅"; btn.disabled = true; }
+                  if (id && favoriteIds[id]){ btn.textContent = "Guardado ✅"; }
                 });
                 document.querySelectorAll(".btn-follow-pick").forEach(function(btn){
                   var id = btn.getAttribute("data-pick-id");
-                  if (id && followedIds[id]){ btn.textContent = "Siguiendo 📈"; btn.disabled = true; }
+                  if (id && followedIds[id]){ btn.textContent = "Siguiendo 📈"; }
                 });
               }).catch(function(){});
             });
@@ -3501,6 +3521,8 @@ def dashboard(request: Request, league: str):
                     var aftr = btn.getAttribute('data-aftr-score'); if (aftr !== null && aftr !== '') payload.aftr_score = parseInt(aftr, 10);
                     var tier = btn.getAttribute('data-tier'); if (tier) payload.tier = tier;
                     var edge = btn.getAttribute('data-edge'); if (edge !== null && edge !== '') payload.edge = parseFloat(edge);
+                    var home = btn.getAttribute('data-home-team'); if (home) payload.home_team = home;
+                    var away = btn.getAttribute('data-away-team'); if (away) payload.away_team = away;
                     fetch(base + '/user/favorite', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) })
                       .then(function(r){ return r.json(); })
                       .then(function(d){ if (d && d.ok){ btn.textContent = 'Guardado ✅'; toast('Pick guardada'); } else { btn.disabled = false; toast(d && d.error || 'Error'); } })
@@ -3519,6 +3541,8 @@ def dashboard(request: Request, league: str):
                     var aftr = btn.getAttribute('data-aftr-score'); if (aftr !== null && aftr !== '') payload.aftr_score = parseInt(aftr, 10);
                     var tier = btn.getAttribute('data-tier'); if (tier) payload.tier = tier;
                     var edge = btn.getAttribute('data-edge'); if (edge !== null && edge !== '') payload.edge = parseFloat(edge);
+                    var home = btn.getAttribute('data-home-team'); if (home) payload.home_team = home;
+                    var away = btn.getAttribute('data-away-team'); if (away) payload.away_team = away;
                     fetch(base + '/user/follow-pick', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) })
                       .then(function(r){ return r.json(); })
                       .then(function(d){ if (d && d.ok){ btn.textContent = 'Siguiendo 📈'; toast('Pick seguida'); } else { btn.disabled = false; toast(d && d.error || 'Error'); } })
@@ -3540,11 +3564,11 @@ def dashboard(request: Request, league: str):
                       if (followedData && followedData.ok && Array.isArray(followedData.pick_ids)) followedData.pick_ids.forEach(function(id){ followedIds[id] = true; });
                       document.querySelectorAll('.btn-favorite-pick').forEach(function(btn){
                         var id = btn.getAttribute('data-pick-id');
-                        if (id && favoriteIds[id]){ btn.textContent = 'Guardado ✅'; btn.disabled = true; }
+                        if (id && favoriteIds[id]){ btn.textContent = 'Guardado ✅'; }
                       });
                       document.querySelectorAll('.btn-follow-pick').forEach(function(btn){
                         var id = btn.getAttribute('data-pick-id');
-                        if (id && followedIds[id]){ btn.textContent = 'Siguiendo 📈'; btn.disabled = true; }
+                        if (id && followedIds[id]){ btn.textContent = 'Siguiendo 📈'; }
                       });
                     }).catch(function(){});
                   });

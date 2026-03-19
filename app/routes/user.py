@@ -54,6 +54,19 @@ def _premium_until(user_id: int) -> str | None:
         return None
 
 
+def _norm_team_name(v: object) -> str | None:
+    """Normalize incoming team strings; return None for placeholders/missing."""
+    if v is None:
+        return None
+    s = str(v).strip()
+    if not s:
+        return None
+    low = s.lower()
+    if low in {"ninguno", "none", "null", "n/a", "-", "—", "–"}:
+        return None
+    return s
+
+
 @router.get("/me")
 def user_me(request: Request):
     """Current user: id, email, username, role, subscription_status, premium_until."""
@@ -136,7 +149,7 @@ def user_stats(request: Request):
 
 @router.post("/favorite")
 def user_favorite(request: Request, payload: dict = Body(...)):
-    """Store a favorite pick_id for the current user. Optional: market, aftr_score, tier, edge."""
+    """Store a favorite pick_id for the current user. Optional: market, aftr_score, tier, edge, home_team, away_team."""
     uid, err = _require_user(request)
     if err is not None:
         return err
@@ -160,21 +173,25 @@ def user_favorite(request: Request, payload: dict = Body(...)):
             edge = float(edge)
         except (TypeError, ValueError):
             edge = None
+    home_team = _norm_team_name(payload.get("home_team"))
+    away_team = _norm_team_name(payload.get("away_team"))
     now = datetime.now(timezone.utc).isoformat()
     conn = get_conn()
     try:
         cur = conn.cursor()
         cur.execute(
-            """INSERT OR IGNORE INTO user_favorites (user_id, pick_id, created_at, market, aftr_score, tier, edge)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (uid, pick_id, now, market, aftr_score, tier, edge),
+            """INSERT OR IGNORE INTO user_favorites
+               (user_id, pick_id, created_at, market, aftr_score, tier, edge, home_team, away_team)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (uid, pick_id, now, market, aftr_score, tier, edge, home_team, away_team),
         )
         cur.execute(
             """UPDATE user_favorites SET
                market = COALESCE(?, market), aftr_score = COALESCE(?, aftr_score),
-               tier = COALESCE(?, tier), edge = COALESCE(?, edge)
+               tier = COALESCE(?, tier), edge = COALESCE(?, edge),
+               home_team = COALESCE(?, home_team), away_team = COALESCE(?, away_team)
                WHERE user_id = ? AND pick_id = ?""",
-            (market, aftr_score, tier, edge, uid, pick_id),
+            (market, aftr_score, tier, edge, home_team, away_team, uid, pick_id),
         )
         conn.commit()
     finally:
@@ -281,7 +298,7 @@ def user_followed_ids(request: Request):
 
 @router.post("/follow-pick")
 def user_follow_pick(request: Request, payload: dict = Body(...)):
-    """Store a followed pick for the current user (action=follow). Avoids duplicate (user_id, pick_id)."""
+    """Store a followed pick for the current user (action=follow). Avoids duplicate (user_id, pick_id). Optional: home_team/away_team."""
     uid, err = _require_user(request)
     if err is not None:
         return err
@@ -305,21 +322,25 @@ def user_follow_pick(request: Request, payload: dict = Body(...)):
             edge = float(edge)
         except (TypeError, ValueError):
             edge = None
+    home_team = _norm_team_name(payload.get("home_team"))
+    away_team = _norm_team_name(payload.get("away_team"))
     now = datetime.now(timezone.utc).isoformat()
     conn = get_conn()
     try:
         cur = conn.cursor()
         cur.execute(
-            "SELECT 1 FROM user_picks WHERE user_id = ? AND pick_id = ? LIMIT 1",
-            (uid, pick_id),
+            """INSERT OR IGNORE INTO user_picks
+               (user_id, pick_id, action, result, created_at, market, aftr_score, tier, edge, home_team, away_team)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (uid, pick_id, "follow", "PENDING", now, market, aftr_score, tier, edge, home_team, away_team),
         )
-        if cur.fetchone():
-            return JSONResponse({"ok": True, "pick_id": pick_id})
         cur.execute(
-            """INSERT INTO user_picks
-               (user_id, pick_id, action, result, created_at, market, aftr_score, tier, edge)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (uid, pick_id, "follow", "PENDING", now, market, aftr_score, tier, edge),
+            """UPDATE user_picks SET
+               market = COALESCE(?, market), aftr_score = COALESCE(?, aftr_score),
+               tier = COALESCE(?, tier), edge = COALESCE(?, edge),
+               home_team = COALESCE(?, home_team), away_team = COALESCE(?, away_team)
+               WHERE user_id = ? AND pick_id = ?""",
+            (market, aftr_score, tier, edge, home_team, away_team, uid, pick_id),
         )
         conn.commit()
     finally:
