@@ -4148,7 +4148,7 @@ def account_page(request: Request):
                 var edgeKey = edgeTxt === "—" ? "neutral" : (edgeNum >= 0 ? "pos" : "neg");
                 var home = esc(item.home || "");
                 var away = esc(item.away || "");
-                var teams = (home && away) ? (home + " vs " + away) : "—";
+                var teams = (home && away) ? (home + " vs " + away) : "Partido no disponible";
                 var savedWhen = timeAgo(item.created_at);
                 html += "<div class=\\"account-pick-card account-pick-fav\\">";
                 html += "<div class=\\"account-pick-title\\">" + market + "</div>";
@@ -4188,7 +4188,7 @@ def account_page(request: Request):
               var edgeKey = edgeTxt === "—" ? "neutral" : (edgeNum >= 0 ? "pos" : "neg");
               var home = esc(item.home || "");
               var away = esc(item.away || "");
-              var teams = (home && away) ? (home + " vs " + away) : "—";
+              var teams = (home && away) ? (home + " vs " + away) : "Partido no disponible";
               var result = (item.result || "PENDING").toUpperCase();
               var date = esc((item.created_at || "").slice(0, 10));
               html += "<div class=\\"account-pick-card account-pick-history\\">";

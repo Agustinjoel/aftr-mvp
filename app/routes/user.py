@@ -188,68 +188,74 @@ def user_favorites(request: Request):
     uid, err = _require_user(request)
     if err is not None:
         return err
-    conn = get_conn()
+    items: list[dict] = []
     try:
-        cur = conn.cursor()
-        cur.execute(
-            """SELECT pick_id, created_at, market, aftr_score, tier, edge
-               FROM user_favorites WHERE user_id = ? ORDER BY created_at DESC""",
-            (uid,),
-        )
-        rows = cur.fetchall()
-    finally:
-        conn.close()
-
-    def _parse_pick_id(pid: str):
-        if not pid or "|" not in str(pid):
-            return None
-        parts = str(pid).split("|")
-        if len(parts) < 2:
-            return None
-        league = (parts[0] or "").strip()
+        conn = get_conn()
         try:
-            match_id = int(parts[1])
-        except (TypeError, ValueError):
-            return None
-        if not league:
-            return None
-        return league, match_id
+            cur = conn.cursor()
 
-    def _teams_for_pick_id(pid: str):
-        parsed = _parse_pick_id(pid)
-        if not parsed:
-            return ("", "")
-        league, match_id = parsed
-        c = get_conn()
-        try:
-            cur2 = c.cursor()
-            cur2.execute(
-                "SELECT home, away FROM matches WHERE league = ? AND match_id = ? LIMIT 1",
-                (league, match_id),
-            )
-            row = cur2.fetchone()
-            if not row:
-                return ("", "")
-            home = row["home"] if "home" in row.keys() else row[0]
-            away = row["away"] if "away" in row.keys() else row[1]
-            return (str(home) if home is not None else "", str(away) if away is not None else "")
+            def _table_columns(table: str) -> set[str]:
+                # Introspect columns so missing tables/columns never crash.
+                cur2 = conn.cursor()
+                cur2.execute(f"PRAGMA table_info({table})")
+                cols = cur2.fetchall()
+                # SQLite returns columns with "name" as the second field.
+                out = set()
+                for c in cols:
+                    try:
+                        out.add(str(c.get("name")))
+                    except Exception:
+                        out.add(str(c[1]))
+                return out
+
+            uf_cols = _table_columns("user_favorites")
+            up_cols = _table_columns("user_picks")
+
+            has_home_away_in_favs = "home_team" in uf_cols and "away_team" in uf_cols
+            has_home_away_in_picks = "home_team" in up_cols and "away_team" in up_cols
+
+            base_cols = ["pick_id", "created_at", "market", "aftr_score", "tier", "edge"]
+            select_cols = base_cols[:]
+            if has_home_away_in_favs:
+                select_cols += ["home_team", "away_team"]
+
+            sql = "SELECT " + ", ".join(select_cols) + " FROM user_favorites WHERE user_id = ? ORDER BY created_at DESC"
+            cur.execute(sql, (uid,))
+            rows = cur.fetchall()
+
+            for row in rows:
+                r = dict(row)
+                pick_id = r.get("pick_id")
+                home = r.get("home_team") if has_home_away_in_favs else None
+                away = r.get("away_team") if has_home_away_in_favs else None
+
+                if (home is None or away is None) and has_home_away_in_picks:
+                    cur.execute(
+                        "SELECT home_team, away_team FROM user_picks WHERE user_id = ? AND pick_id = ? LIMIT 1",
+                        (uid, pick_id),
+                    )
+                    rr = cur.fetchone()
+                    if rr:
+                        rr_d = dict(rr)
+                        home = rr_d.get("home_team")
+                        away = rr_d.get("away_team")
+
+                items.append({
+                    "pick_id": pick_id,
+                    "created_at": r.get("created_at"),
+                    "market": r.get("market"),
+                    "aftr_score": r.get("aftr_score"),
+                    "tier": r.get("tier"),
+                    "edge": r.get("edge"),
+                    "home": "" if home is None else str(home),
+                    "away": "" if away is None else str(away),
+                })
         finally:
-            c.close()
+            conn.close()
+    except Exception:
+        # Never crash the user panel.
+        items = []
 
-    items = []
-    for row in rows:
-        r = dict(row)
-        home, away = _teams_for_pick_id(r.get("pick_id"))
-        items.append({
-            "pick_id": r.get("pick_id"),
-            "created_at": r.get("created_at"),
-            "market": r.get("market"),
-            "aftr_score": r.get("aftr_score"),
-            "tier": r.get("tier"),
-            "edge": r.get("edge"),
-            "home": home,
-            "away": away,
-        })
     return JSONResponse({"ok": True, "favorites": items})
 
 
@@ -327,70 +333,56 @@ def user_history(request: Request):
     uid, err = _require_user(request)
     if err is not None:
         return err
-    conn = get_conn()
+    items: list[dict] = []
     try:
-        cur = conn.cursor()
-        cur.execute(
-            """SELECT id, pick_id, action, result, created_at, market, aftr_score, tier, edge
-               FROM user_picks WHERE user_id = ?
-               ORDER BY created_at DESC LIMIT 10""",
-            (uid,),
-        )
-        rows = cur.fetchall()
-    finally:
-        conn.close()
-
-    def _parse_pick_id(pid: str):
-        if not pid or "|" not in str(pid):
-            return None
-        parts = str(pid).split("|")
-        if len(parts) < 2:
-            return None
-        league = (parts[0] or "").strip()
+        conn = get_conn()
         try:
-            match_id = int(parts[1])
-        except (TypeError, ValueError):
-            return None
-        if not league:
-            return None
-        return league, match_id
+            cur = conn.cursor()
 
-    def _teams_for_pick_id(pid: str):
-        parsed = _parse_pick_id(pid)
-        if not parsed:
-            return ("", "")
-        league, match_id = parsed
-        c = get_conn()
-        try:
-            cur2 = c.cursor()
-            cur2.execute(
-                "SELECT home, away FROM matches WHERE league = ? AND match_id = ? LIMIT 1",
-                (league, match_id),
-            )
-            row = cur2.fetchone()
-            if not row:
-                return ("", "")
-            home = row["home"] if "home" in row.keys() else row[0]
-            away = row["away"] if "away" in row.keys() else row[1]
-            return (str(home) if home is not None else "", str(away) if away is not None else "")
+            def _table_columns(table: str) -> set[str]:
+                cur2 = conn.cursor()
+                cur2.execute(f"PRAGMA table_info({table})")
+                cols = cur2.fetchall()
+                out = set()
+                for c in cols:
+                    try:
+                        out.add(str(c.get("name")))
+                    except Exception:
+                        out.add(str(c[1]))
+                return out
+
+            up_cols = _table_columns("user_picks")
+            has_home_away = "home_team" in up_cols and "away_team" in up_cols
+
+            base_cols = ["id", "pick_id", "action", "result", "created_at", "market", "aftr_score", "tier", "edge"]
+            select_cols = base_cols[:]
+            if has_home_away:
+                select_cols += ["home_team", "away_team"]
+
+            sql = "SELECT " + ", ".join(select_cols) + " FROM user_picks WHERE user_id = ? ORDER BY created_at DESC LIMIT 10"
+            cur.execute(sql, (uid,))
+            rows = cur.fetchall()
+
+            for row in rows:
+                r = dict(row)
+                home = r.get("home_team") if has_home_away else None
+                away = r.get("away_team") if has_home_away else None
+                items.append({
+                    "id": r.get("id"),
+                    "pick_id": r.get("pick_id"),
+                    "action": r.get("action"),
+                    "result": r.get("result") or "PENDING",
+                    "created_at": r.get("created_at"),
+                    "market": r.get("market"),
+                    "aftr_score": r.get("aftr_score"),
+                    "tier": r.get("tier"),
+                    "edge": r.get("edge"),
+                    "home": "" if home is None else str(home),
+                    "away": "" if away is None else str(away),
+                })
         finally:
-            c.close()
+            conn.close()
+    except Exception:
+        items = []
 
-    items = []
-    for row in rows:
-        r = dict(row)
-        home, away = _teams_for_pick_id(r.get("pick_id"))
-        items.append({
-            "id": r.get("id"),
-            "pick_id": r.get("pick_id"),
-            "action": r.get("action"),
-            "result": r.get("result") or "PENDING",
-            "created_at": r.get("created_at"),
-            "market": r.get("market"),
-            "aftr_score": r.get("aftr_score"),
-            "tier": r.get("tier"),
-            "edge": r.get("edge"),
-            "home": home,
-            "away": away,
-        })
     return JSONResponse({"ok": True, "history": items})
