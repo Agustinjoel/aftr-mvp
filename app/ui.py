@@ -1028,9 +1028,24 @@ def _extract_score(p: dict, match_by_id: dict[int, dict] | None = None) -> tuple
             if hh is not None and aa is not None:
                 return (_safe_int(hh), _safe_int(aa))
 
-    mid = _safe_int(p.get("match_id"))
-    if match_by_id and mid is not None and mid in match_by_id:
-        return _extract_score_from_match(match_by_id[mid])
+    mid = _safe_int(p.get("match_id") or p.get("id"))
+    if match_by_id and mid is not None:
+        # Common case: match_by_id keyed by match_id (int).
+        if mid in match_by_id:
+            return _extract_score_from_match(match_by_id[mid])
+
+        # Dashboard case: match_by_id keyed by (league_code, match_id).
+        league_code = (p.get("_league") or p.get("league") or "").strip()
+        if league_code:
+            candidate_keys = [
+                (league_code, mid),
+                (str(league_code), mid),
+                (league_code, str(mid)),
+                (str(league_code), str(mid)),
+            ]
+            for k in candidate_keys:
+                if k in match_by_id:
+                    return _extract_score_from_match(match_by_id[k])
 
     return (None, None)
 
@@ -1094,6 +1109,11 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
 
     is_finished = result in ("WIN", "LOSS", "PUSH") or finished_flag or status_raw in {"FINISHED", "FINAL", "SETTLED", "FINALIZADO"}
 
+    final_home_score: int | None = None
+    final_away_score: int | None = None
+    if is_finished:
+        final_home_score, final_away_score = _extract_score(p, match_by_id)
+
     card_class = "card"
     if result == "WIN":
         card_class = "card pick-win"
@@ -1108,8 +1128,17 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         f'<span class="pick-badge risk {html_lib.escape(risk.lower())}">{html_lib.escape(risk)}</span>'
     )
 
-    # Front side: decision-focused teams block (no match score).
-    teams_html = f"""
+    # Front side: teams block. For finished picks, embed final score in the center.
+    if is_finished and final_home_score is not None and final_away_score is not None:
+        teams_html = f"""
+    <div class="aftr-teams aftr-teams-finished">
+      <div class="aftr-team aftr-team-left">{home_part}</div>
+      <div class="aftr-score-inline">{final_home_score} - {final_away_score}</div>
+      <div class="aftr-team aftr-team-right">{away_part}</div>
+    </div>
+    """
+    else:
+        teams_html = f"""
     <div class="aftr-teams">
       <div class="aftr-team aftr-team-left">{home_part}</div>
       <div class="aftr-vs">vs</div>
@@ -1294,6 +1323,9 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     tier_meta_badge_html = (
         f'<span class="aftr-meta-tier-pill" style="border-color:{tier_color};color:{tier_color};">{html_lib.escape(tier_label)}</span>'
     )
+    if is_finished and tier_label == "watch":
+        # Finished result cards are already covered by WIN/LOSS/PUSH badge; hide WATCH for a cleaner UI.
+        tier_meta_badge_html = ""
     pick_id_val = _pick_id_for_card(p, best)
     pick_id_attr = html_lib.escape(pick_id_val)
     market_val = (best or {}).get("market") or p.get("best_market") or ""
@@ -1301,32 +1333,22 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     edge_raw = p.get("edge")
     edge_attr = html_lib.escape(str(edge_raw)) if edge_raw is not None else ""
     if is_finished:
-        hs, a_s = _extract_score(p, match_by_id)
-        if hs is None or a_s is None:
+        if final_home_score is None or final_away_score is None:
             try:
                 logger.debug(
-                    "Missing final score extract for pick_id=%s match_id=%s result=%s status=%s fields=%s",
+                    "Missing final score extract for pick_id=%s match_id=%s result=%s status=%s",
                     str(p.get("id") or p.get("pick_id") or ""),
                     str(p.get("match_id") or ""),
                     str(p.get("result") or ""),
                     str(p.get("status") or ""),
-                    {
-                        "score_home": p.get("score_home"),
-                        "score_away": p.get("score_away"),
-                        "home_score": p.get("home_score"),
-                        "away_score": p.get("away_score"),
-                        "score": p.get("score"),
-                    },
                 )
             except Exception:
                 pass
+
         outcome_badge = result if result in ("WIN", "LOSS", "PUSH") else "FINALIZADO"
         prob_line_html = ""
         if best_prob_present:
             prob_line_html = f'<div class="pick-finished-prob">{best_prob_pct:.1f}%</div>'
-        final_score_html = ""
-        if hs is not None and a_s is not None:
-            final_score_html = f'<div class="pick-finished-final">Final: {hs}-{a_s}</div>'
         pick_actions_html = f"""
       <div class="pick-finished-status">
         <div class="pick-finished-top">
@@ -1336,7 +1358,6 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         <div class="pick-finished-badge-row">
           <span class="pick-badge">{html_lib.escape(outcome_badge)}</span>
         </div>
-        {final_score_html}
       </div>"""
     else:
         pick_actions_html = f"""
