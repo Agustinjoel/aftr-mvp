@@ -463,6 +463,35 @@ h2::after{
 }
 
 /* =========================
+   FINISHED PICK STATUS
+========================= */
+.pick-finished-status{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.pick-finished-label{
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .03em;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: rgba(234,242,255,.92);
+}
+.pick-final-score{
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(180,220,255,.95);
+}
+
+/* =========================
    CONF BAR
 ========================= */
 .conf-wrap{ width:100%; margin-top:6px; }
@@ -2202,6 +2231,11 @@ canvas{
   border-color: rgba(239,68,68,.35);
   background: rgba(239,68,68,.14);
   color: #fda4af;
+}
+.account-status-push{
+  border-color: rgba(234,179,8,.35);
+  background: rgba(234,179,8,.14);
+  color: #fde68a;
 }
 
 /* =========================

@@ -11,6 +11,8 @@ from fastapi.responses import JSONResponse
 
 from app.auth import get_user_id, get_user_by_id
 from app.db import get_conn
+from config.settings import settings
+from data.cache import read_json
 
 router = APIRouter()
 
@@ -65,6 +67,66 @@ def _norm_team_name(v: object) -> str | None:
     if low in {"ninguno", "none", "null", "n/a", "-", "—", "–"}:
         return None
     return s
+
+
+def _norm_result(v: object) -> str:
+    """Normalize result strings into {WIN, LOSS, PUSH, PENDING}."""
+    r = (str(v or "")).strip().upper()
+    return r if r in {"WIN", "LOSS", "PUSH", "PENDING"} else "PENDING"
+
+
+def _daily_pick_id(p: dict, league_code: str) -> str:
+    """
+    Reproduce the same stable-ish pick_id logic used by the UI renderer.
+    Enough for resolving "pending" history rows into finished results.
+    """
+    if not isinstance(p, dict):
+        return ""
+    pid = p.get("id") or p.get("pick_id")
+    if pid is not None and str(pid).strip():
+        return str(pid).strip()
+
+    match_id = str(p.get("match_id") or p.get("id") or "")
+    market = str(p.get("best_market") or "")
+    utc = str(p.get("utcDate") or "")
+    return "|".join([str(league_code or "").strip(), match_id, market, utc]).strip("|") or "unknown"
+
+
+def _safe_int(v: object) -> int | None:
+    try:
+        if v is None:
+            return None
+        s = str(v).strip()
+        if not s:
+            return None
+        return int(float(s))
+    except Exception:
+        return None
+
+
+def _extract_score(p: object) -> tuple[int | None, int | None]:
+    """Best-effort final score extraction from daily pick dicts."""
+    if not isinstance(p, dict):
+        return (None, None)
+    h = _safe_int(p.get("score_home"))
+    a = _safe_int(p.get("score_away"))
+    if h is not None and a is not None:
+        return (h, a)
+
+    sc = p.get("score")
+    if isinstance(sc, dict):
+        hh = _safe_int(sc.get("home"))
+        aa = _safe_int(sc.get("away"))
+        if hh is not None and aa is not None:
+            return (hh, aa)
+        ft = sc.get("fullTime") or sc.get("full_time")
+        if isinstance(ft, dict):
+            hh = _safe_int(ft.get("home"))
+            aa = _safe_int(ft.get("away"))
+            if hh is not None and aa is not None:
+                return (hh, aa)
+
+    return (None, None)
 
 
 @router.get("/me")
@@ -436,15 +498,88 @@ def user_history(request: Request):
             cur.execute(sql, (uid,))
             rows = cur.fetchall()
 
+            pending_pick_ids: set[str] = set()
             for row in rows:
                 r = dict(row)
+                pick_id = r.get("pick_id")
+                if not pick_id:
+                    continue
+                if _norm_result(r.get("result")) == "PENDING":
+                    pending_pick_ids.add(str(pick_id))
+
+            resolved_daily: dict[str, dict] = {}
+            if pending_pick_ids:
+                # If some pick_id values are composite (league|match_id|market|utc),
+                # resolve by (league_code, match_id, utc) so market mismatches don't block resolution.
+                pending_composite_map: dict[tuple[str, str, str], set[str]] = {}
+                for pid in pending_pick_ids:
+                    parts = str(pid).split("|")
+                    if len(parts) == 4:
+                        # league_code, match_id, market, utc
+                        key = (parts[0], parts[1], parts[3])
+                        pending_composite_map.setdefault(key, set()).add(pid)
+
+                # Resolve pending history rows using the latest daily_picks cache.
+                for league_code in list(getattr(settings, "leagues", {}).keys()):
+                    picks = read_json(f"daily_picks_{league_code}.json") or []
+                    if not isinstance(picks, list):
+                        continue
+                    for p in picks:
+                        if not isinstance(p, dict):
+                            continue
+                        pid_raw = p.get("id") or p.get("pick_id")
+                        pid_raw = str(pid_raw).strip() if pid_raw is not None else ""
+                        if pid_raw and pid_raw in pending_pick_ids:
+                            resolved_daily[pid_raw] = p
+                        else:
+                            computed_pid = _daily_pick_id(p, str(league_code))
+                            if computed_pid and computed_pid in pending_pick_ids:
+                                resolved_daily[computed_pid] = p
+
+                        # Composite fallback resolution (ignoring market)
+                        match_id = str(p.get("match_id") or p.get("id") or "")
+                        utc = str(p.get("utcDate") or "")
+                        comp_key = (str(league_code), match_id, utc)
+                        if comp_key in pending_composite_map:
+                            for resolved_pid in pending_composite_map[comp_key]:
+                                resolved_daily[resolved_pid] = p
+                            pending_composite_map.pop(comp_key, None)
+                        if pending_pick_ids.issubset(resolved_daily.keys()):
+                            break
+                    if pending_pick_ids.issubset(resolved_daily.keys()):
+                        break
+
+            for row in rows:
+                r = dict(row)
+                pick_id = r.get("pick_id")
                 home = r.get("home_team") if has_home_away else None
                 away = r.get("away_team") if has_home_away else None
+
+                result = _norm_result(r.get("result"))
+                final_score = None
+                if result == "PENDING" and pick_id:
+                    dp = resolved_daily.get(str(pick_id))
+                    if isinstance(dp, dict):
+                        result = _norm_result(dp.get("result"))
+                        if result == "PENDING":
+                            status_raw = str(dp.get("status") or "").strip().upper()
+                            if status_raw in ("WIN", "LOSS", "PUSH"):
+                                result = status_raw
+                        if has_home_away:
+                            if _norm_team_name(home) is None:
+                                home = dp.get("home_team") or dp.get("home")
+                            if _norm_team_name(away) is None:
+                                away = dp.get("away_team") or dp.get("away")
+                        if result in ("WIN", "LOSS", "PUSH"):
+                            hs, a_s = _extract_score(dp)
+                            if hs is not None and a_s is not None:
+                                final_score = f"{hs}-{a_s}"
+
                 items.append({
                     "id": r.get("id"),
                     "pick_id": r.get("pick_id"),
                     "action": r.get("action"),
-                    "result": r.get("result") or "PENDING",
+                    "result": result,
                     "created_at": r.get("created_at"),
                     "market": r.get("market"),
                     "aftr_score": r.get("aftr_score"),
@@ -452,6 +587,7 @@ def user_history(request: Request):
                     "edge": r.get("edge"),
                     "home": "" if home is None else str(home),
                     "away": "" if away is None else str(away),
+                    "final_score": final_score,
                 })
         finally:
             conn.close()

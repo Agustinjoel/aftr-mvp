@@ -1019,6 +1019,19 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     best_fair_str = f" • {best_fair}" if best_fair is not None else ""
 
     result = _result_norm(p)
+    status_raw = str(p.get("status") or "").strip().upper()
+    finished_flag_raw = p.get("finished")
+    finished_flag = False
+    if isinstance(finished_flag_raw, bool):
+        finished_flag = finished_flag_raw
+    elif finished_flag_raw is not None:
+        finished_flag = str(finished_flag_raw).strip().lower() in {"1", "true", "yes", "y", "finished"}
+
+    # If status carries explicit outcome, prefer it.
+    if status_raw in ("WIN", "LOSS", "PUSH"):
+        result = status_raw
+
+    is_finished = result in ("WIN", "LOSS", "PUSH") or finished_flag or status_raw in {"FINISHED", "FINAL", "SETTLED", "FINALIZADO"}
 
     card_class = "card"
     if result == "WIN":
@@ -1226,7 +1239,20 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     market_attr = html_lib.escape(str(market_val))
     edge_raw = p.get("edge")
     edge_attr = html_lib.escape(str(edge_raw)) if edge_raw is not None else ""
-    pick_actions_html = f"""
+    if is_finished:
+        hs, a_s = _extract_score(p, match_by_id)
+        primary_status = result if result in ("WIN", "LOSS", "PUSH") else "FINALIZADO"
+        final_score_html = ""
+        if hs is not None and a_s is not None:
+            final_score_html = f'<span class="pick-final-score">Final {hs}-{a_s}</span>'
+        pick_actions_html = f"""
+      <div class="pick-finished-status">
+        <span class="pick-badge">{html_lib.escape(primary_status)}</span>
+        {('<span class="pick-finished-label">FINALIZADO</span>' if result in ("WIN", "LOSS", "PUSH") else '')}
+        {final_score_html}
+      </div>"""
+    else:
+        pick_actions_html = f"""
       <div class="pick-actions aftr-actions">
         <button type="button" class="btn-favorite-pick pill pick-action-btn"
           data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{aftr_score_val}"
@@ -2645,7 +2671,7 @@ def home_page(request: Request) -> str:
                 ctx.beginPath(); ctx.moveTo(pt.x, padY); ctx.lineTo(pt.x, padY+innerH); ctx.stroke(); ctx.globalAlpha = 1;
                 ctx.fillStyle = "rgba(120,170,255,1)"; ctx.beginPath(); ctx.arc(pt.x, pt.y, 6, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = "rgba(255,255,255,0.95)"; ctx.beginPath(); ctx.arc(pt.x, pt.y, 3, 0, Math.PI*2); ctx.fill();
-              }
+              }}
             }
             function nearestIndex(mx){
               var best = 0, bestDist = Infinity;
@@ -4257,7 +4283,12 @@ def account_page(request: Request):
               var edgeKey = edgeTxt === "—" ? "neutral" : (edgeNum >= 0 ? "pos" : "neg");
               var home = esc(item.home || "");
               var away = esc(item.away || "");
+              var finalScore = esc(item.final_score || "");
               var teams = (home && away) ? (home + " vs " + away) : "Partido no disponible";
+              if(finalScore){{
+                if(home && away) teams = teams + " · " + finalScore;
+                else teams = "Final " + finalScore;
+              }}
               var result = (item.result || "PENDING").toUpperCase();
               var date = esc((item.created_at || "").slice(0, 10));
               var pickId = esc(item.pick_id || "");
