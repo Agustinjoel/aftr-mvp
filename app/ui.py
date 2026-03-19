@@ -597,7 +597,25 @@ def _risk_label_from_conf(p: dict) -> str:
 
 def _result_norm(p: dict) -> str:
     r = (p.get("result") or "").strip().upper()
-    return r if r in ("WIN", "LOSS", "PUSH", "PENDING") else "PENDING"
+    # Normalize legacy/spanish outcomes to english codes.
+    spanish_to_english = {
+        # PUSH
+        "EMPUJAR": "PUSH",
+        "EMPATAR": "PUSH",
+        "EMPATE": "PUSH",
+        "DRAW": "PUSH",
+        # WIN
+        "GANAR": "WIN",
+        "GANA": "WIN",
+        # LOSS
+        "PERDER": "LOSS",
+        "PIERDE": "LOSS",
+    }
+    if r in ("WIN", "LOSS", "PUSH", "PENDING"):
+        return r
+    if r in spanish_to_english:
+        return spanish_to_english[r]
+    return "PENDING"
 
 
 def _label_for_date(d: date, today: date) -> str:
@@ -1011,6 +1029,7 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     best_prob = (best or {}).get("prob")
     if best_prob is None:
         best_prob = p.get("best_prob")
+    best_prob_present = best_prob is not None
     best_prob_pct = round(_safe_float(best_prob, 0) * 100, 1)
 
     best_fair = (best or {}).get("fair")
@@ -1241,14 +1260,22 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     edge_attr = html_lib.escape(str(edge_raw)) if edge_raw is not None else ""
     if is_finished:
         hs, a_s = _extract_score(p, match_by_id)
-        primary_status = result if result in ("WIN", "LOSS", "PUSH") else "FINALIZADO"
+        outcome_badge = result if result in ("WIN", "LOSS", "PUSH") else "FINALIZADO"
+        prob_line_html = ""
+        if best_prob_present:
+            prob_line_html = f'<div class="pick-finished-prob">{best_prob_pct:.1f}%</div>'
         final_score_html = ""
         if hs is not None and a_s is not None:
-            final_score_html = f'<span class="pick-final-score">Final {hs}-{a_s}</span>'
+            final_score_html = f'<div class="pick-finished-final">Final: {hs}-{a_s}</div>'
         pick_actions_html = f"""
       <div class="pick-finished-status">
-        <span class="pick-badge">{html_lib.escape(primary_status)}</span>
-        {('<span class="pick-finished-label">FINALIZADO</span>' if result in ("WIN", "LOSS", "PUSH") else '')}
+        <div class="pick-finished-top">
+          <div class="pick-finished-market">{html_lib.escape(str(best_market))}</div>
+          {prob_line_html}
+        </div>
+        <div class="pick-finished-badge-row">
+          <span class="pick-badge">{html_lib.escape(outcome_badge)}</span>
+        </div>
         {final_score_html}
       </div>"""
     else:

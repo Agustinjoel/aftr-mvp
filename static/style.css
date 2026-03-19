@@ -466,26 +466,37 @@ h2::after{
    FINISHED PICK STATUS
 ========================= */
 .pick-finished-status{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 10px;
-  flex-wrap: wrap;
   margin-top: 10px;
   padding-top: 8px;
   border-top: 1px solid rgba(255,255,255,.08);
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
 }
-.pick-finished-label{
-  font-size: 10px;
+.pick-finished-top{
+  display:flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pick-finished-market{
+  font-size: 12px;
   font-weight: 900;
-  letter-spacing: .03em;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
-  color: rgba(234,242,255,.92);
+  color: rgba(180,220,255,.95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.pick-final-score{
+.pick-finished-prob{
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(234,242,255,.9);
+}
+.pick-finished-badge-row{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+.pick-finished-final{
   font-size: 12px;
   font-weight: 900;
   color: rgba(180,220,255,.95);
