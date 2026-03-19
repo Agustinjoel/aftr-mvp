@@ -3,6 +3,7 @@ from __future__ import annotations
 import html as html_lib
 import json
 import logging
+import re
 import unicodedata
 from datetime import date, datetime, timezone, timedelta
 from typing import Any, Callable
@@ -952,7 +953,21 @@ def _extract_score_from_match(m: dict) -> tuple[int | None, int | None]:
     if not isinstance(m, dict):
         return (None, None)
 
+    def _parse_score_string(score_str: object) -> tuple[int | None, int | None]:
+        if score_str is None:
+            return (None, None)
+        s = str(score_str).strip()
+        if not s:
+            return (None, None)
+        # Extract first two integers in any format: "1-1", "1:1", "1–1", "Final 1-1"
+        nums = re.findall(r"\d+", s)
+        if len(nums) >= 2:
+            return (_safe_int(nums[0]), _safe_int(nums[1]))
+        return (None, None)
+
     sc = m.get("score")
+    if isinstance(sc, str):
+        return _parse_score_string(sc)
     if isinstance(sc, dict):
         h = sc.get("home")
         a = sc.get("away")
@@ -973,12 +988,34 @@ def _extract_score(p: dict, match_by_id: dict[int, dict] | None = None) -> tuple
     if not isinstance(p, dict):
         return (None, None)
 
-    h = p.get("score_home")
-    a = p.get("score_away")
-    if h is not None and a is not None:
-        return (_safe_int(h), _safe_int(a))
+    def _parse_score_string(score_str: object) -> tuple[int | None, int | None]:
+        if score_str is None:
+            return (None, None)
+        s = str(score_str).strip()
+        if not s:
+            return (None, None)
+        nums = re.findall(r"\d+", s)
+        if len(nums) >= 2:
+            return (_safe_int(nums[0]), _safe_int(nums[1]))
+        return (None, None)
 
+    # Try common explicit score fields first
+    for hk, ak in [
+        ("score_home", "score_away"),
+        ("home_score", "away_score"),
+        ("homeScore", "awayScore"),
+        ("h_home_score", "h_away_score"),  # rare legacy keys
+    ]:
+        h = p.get(hk)
+        a = p.get(ak)
+        if h is not None and a is not None:
+            return (_safe_int(h), _safe_int(a))
+
+    # Try generic score container
     sc = p.get("score")
+    if isinstance(sc, str):
+        return _parse_score_string(sc)
+
     if isinstance(sc, dict):
         hh = sc.get("home")
         aa = sc.get("away")
@@ -1049,6 +1086,11 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     # If status carries explicit outcome, prefer it.
     if status_raw in ("WIN", "LOSS", "PUSH"):
         result = status_raw
+    else:
+        # Handle legacy/spanish outcome stored in `status` (e.g. EMPUJAR/EMPATE).
+        maybe_outcome = _result_norm({"result": status_raw})
+        if maybe_outcome in ("WIN", "LOSS", "PUSH"):
+            result = maybe_outcome
 
     is_finished = result in ("WIN", "LOSS", "PUSH") or finished_flag or status_raw in {"FINISHED", "FINAL", "SETTLED", "FINALIZADO"}
 
@@ -1260,6 +1302,24 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     edge_attr = html_lib.escape(str(edge_raw)) if edge_raw is not None else ""
     if is_finished:
         hs, a_s = _extract_score(p, match_by_id)
+        if hs is None or a_s is None:
+            try:
+                logger.debug(
+                    "Missing final score extract for pick_id=%s match_id=%s result=%s status=%s fields=%s",
+                    str(p.get("id") or p.get("pick_id") or ""),
+                    str(p.get("match_id") or ""),
+                    str(p.get("result") or ""),
+                    str(p.get("status") or ""),
+                    {
+                        "score_home": p.get("score_home"),
+                        "score_away": p.get("score_away"),
+                        "home_score": p.get("home_score"),
+                        "away_score": p.get("away_score"),
+                        "score": p.get("score"),
+                    },
+                )
+            except Exception:
+                pass
         outcome_badge = result if result in ("WIN", "LOSS", "PUSH") else "FINALIZADO"
         prob_line_html = ""
         if best_prob_present:
@@ -1290,6 +1350,14 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
           data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"
           data-home-team="{home_team_attr}" data-away-team="{away_team_attr}">📈 Seguir pick</button>
       </div>"""
+    mainpick_html = ""
+    if not is_finished:
+        mainpick_html = f"""
+      <div class="aftr-mainpick">
+        <div class="aftr-market">{html_lib.escape(str(best_market))}</div>
+        {prob_odds_html}
+      </div>"""
+
     front_html = f"""
     <div class="{card_class} aftr-pick-card">
       <div class="aftr-topmeta">
@@ -1299,10 +1367,7 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
       </div>
       {teams_html}
       {aftr_block_html}
-      <div class="aftr-mainpick">
-        <div class="aftr-market">{html_lib.escape(str(best_market))}</div>
-        {prob_odds_html}
-      </div>
+      {mainpick_html}
       {pick_actions_html}
     </div>
     """
