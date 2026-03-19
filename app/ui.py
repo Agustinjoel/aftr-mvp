@@ -619,6 +619,91 @@ def _result_norm(p: dict) -> str:
     return "PENDING"
 
 
+def _parse_utcdate_maybe(s: object) -> datetime | None:
+    """Parse utcDate/ISO string into UTC datetime. Returns None on failure (no fallback-to-now)."""
+    if s is None:
+        return None
+    try:
+        ss = str(s).strip()
+        if not ss:
+            return None
+        if ss.endswith("Z"):
+            ss = ss.replace("Z", "+00:00")
+        dt = datetime.fromisoformat(ss)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except Exception:
+        return None
+
+
+def isMatchFinished(match: dict) -> bool:
+    """
+    Decide finished vs upcoming from explicit fields first:
+    - status == "FINISHED"
+    - result outcome present (WIN/LOSS/PUSH) in `result`
+    - finished flag
+    - score + utcDate in the past (home_score/away_score or common score variants)
+    """
+    if not isinstance(match, dict):
+        return False
+
+    status_raw = str(match.get("status") or "").strip().upper()
+    if status_raw in {"FINISHED", "FINAL", "SETTLED", "FINALIZADO"}:
+        return True
+    if status_raw in {"WIN", "LOSS", "PUSH"}:
+        return True
+
+    raw_result = match.get("result")
+    if raw_result is not None:
+        norm = _result_norm({"result": raw_result})
+        if norm in {"WIN", "LOSS", "PUSH"}:
+            return True
+
+    finished_flag_raw = match.get("finished")
+    if isinstance(finished_flag_raw, bool):
+        if finished_flag_raw:
+            return True
+    elif finished_flag_raw is not None:
+        try:
+            if str(finished_flag_raw).strip().lower() in {"1", "true", "yes", "y", "finished"}:
+                return True
+        except Exception:
+            pass
+
+    # Score + time condition.
+    # Prefer explicit home_score/away_score but also accept common legacy variants.
+    home_score = match.get("home_score")
+    away_score = match.get("away_score")
+    if home_score is None and away_score is None:
+        home_score = match.get("score_home") if match.get("score_home") is not None else match.get("homeScore")
+        away_score = match.get("score_away") if match.get("score_away") is not None else match.get("awayScore")
+    if (home_score is None or away_score is None):
+        sc = match.get("score")
+        if isinstance(sc, dict):
+            hh = sc.get("home")
+            aa = sc.get("away")
+            if hh is not None and aa is not None:
+                home_score = hh if home_score is None else home_score
+                away_score = aa if away_score is None else away_score
+            ft = sc.get("fullTime") or sc.get("full_time")
+            if isinstance(ft, dict):
+                fh = ft.get("home")
+                fa = ft.get("away")
+                if fh is not None and fa is not None:
+                    home_score = fh if home_score is None else home_score
+                    away_score = fa if away_score is None else away_score
+
+    if home_score is not None and away_score is not None:
+        dt = _parse_utcdate_maybe(match.get("utcDate"))
+        if dt is not None and dt <= datetime.now(timezone.utc):
+            # Ensure score parseable to ints
+            if _safe_int(home_score) is not None and _safe_int(away_score) is not None:
+                return True
+
+    return False
+
+
 def _label_for_date(d: date, today: date) -> str:
     if d == today:
         return "Hoy"
@@ -1107,7 +1192,28 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         if maybe_outcome in ("WIN", "LOSS", "PUSH"):
             result = maybe_outcome
 
-    is_finished = result in ("WIN", "LOSS", "PUSH") or finished_flag or status_raw in {"FINISHED", "FINAL", "SETTLED", "FINALIZADO"}
+    match_for_state: dict | None = None
+    if isinstance(match_by_id, dict):
+        mid = _safe_int(p.get("match_id") or p.get("id"))
+        if mid is not None:
+            if mid in match_by_id:
+                match_for_state = match_by_id[mid]
+            else:
+                league_code = (p.get("_league") or p.get("league") or "").strip()
+                if league_code:
+                    candidate_keys = [
+                        (league_code, mid),
+                        (str(league_code), mid),
+                        (league_code, str(mid)),
+                        (str(league_code), str(mid)),
+                    ]
+                    for k in candidate_keys:
+                        if k in match_by_id:
+                            match_for_state = match_by_id[k]
+                            break
+
+    # Single authoritative finished detection.
+    is_finished = isMatchFinished(p) or (isMatchFinished(match_for_state) if isinstance(match_for_state, dict) else False)
 
     final_home_score: int | None = None
     final_away_score: int | None = None
@@ -1973,8 +2079,17 @@ def _load_all_leagues_data(
             all_picks.append(p)
             picks_by_league.setdefault(code, []).append(p)
 
-    all_settled = [p for p in all_picks if _result_norm(p) in ("WIN", "LOSS", "PUSH")]
-    all_upcoming = [p for p in all_picks if _result_norm(p) == "PENDING"]
+    all_settled: list[dict] = []
+    all_upcoming: list[dict] = []
+    for p in all_picks:
+        league_code = (p.get("_league") or p.get("league") or "").strip()
+        mid = _safe_int(p.get("match_id") or p.get("id"))
+        match_obj = match_by_key.get((league_code, mid)) if league_code and mid is not None else None
+        finished = isMatchFinished(p) or (isMatchFinished(match_obj) if isinstance(match_obj, dict) else False)
+        if finished:
+            all_settled.append(p)
+        else:
+            all_upcoming.append(p)
     logger.info(
         "load_all_leagues: total all_picks=%s all_settled=%s all_upcoming=%s leagues_with_picks=%s",
         len(all_picks), len(all_settled), len(all_upcoming), list(picks_by_league.keys()),
@@ -2121,7 +2236,9 @@ def home_page(request: Request) -> str:
                 league_picks = picks_by_league.get(code) or []
                 best = None
                 for p in league_picks:
-                    if _result_norm(p) != "PENDING":
+                    p_mid = _safe_int(p.get("match_id") or p.get("id"))
+                    p_match = match_by_key.get((code, p_mid)) if p_mid is not None else None
+                    if isMatchFinished(p) or (isMatchFinished(p_match) if isinstance(p_match, dict) else False):
                         continue
                     if _safe_int(p.get("match_id")) == mid or _safe_int(p.get("id")) == mid:
                         if best is None or _pick_score(p) > _pick_score(best):
@@ -2143,13 +2260,25 @@ def home_page(request: Request) -> str:
         picks = picks_by_league.get(code) or []
         w = sum(1 for p in picks if _result_norm(p) == "WIN")
         l_ = sum(1 for p in picks if _result_norm(p) == "LOSS")
-        pend = sum(1 for p in picks if _result_norm(p) == "PENDING")
-        settled_count = w + l_ + sum(1 for p in picks if _result_norm(p) == "PUSH")
+        pend = 0
+        settled_count = 0
+        for p in picks:
+            p_mid = _safe_int(p.get("match_id") or p.get("id"))
+            p_match = match_by_key.get((code, p_mid)) if p_mid is not None else None
+            if isMatchFinished(p) or (isMatchFinished(p_match) if isinstance(p_match, dict) else False):
+                settled_count += 1
+            else:
+                pend += 1
         n = round(sum(_unit_delta(p) for p in picks if _result_norm(p) in ("WIN", "LOSS", "PUSH")), 2)
         roi_pct = round(n / settled_count * 100, 1) if settled_count and settled_count > 0 else None
         roi_str_league = f"{roi_pct:+.1f}%" if roi_pct is not None else "—"
         # Top pick of the day: best pending pick by _pick_score
-        pending_picks = [p for p in picks if _result_norm(p) == "PENDING"]
+        pending_picks = []
+        for p in picks:
+            p_mid = _safe_int(p.get("match_id") or p.get("id"))
+            p_match = match_by_key.get((code, p_mid)) if p_mid is not None else None
+            if not (isMatchFinished(p) or (isMatchFinished(p_match) if isinstance(p_match, dict) else False)):
+                pending_picks.append(p)
         top_pick = max(pending_picks, key=_pick_score) if pending_picks else None
         featured_stats.append({
             "code": code,
@@ -2935,8 +3064,16 @@ def dashboard(request: Request, league: str):
         if mid_i is not None:
             match_by_id[mid_i] = m
 
-    upcoming_picks = [p for p in picks if _result_norm(p) == "PENDING"]
-    settled_picks = [p for p in picks if _result_norm(p) in ("WIN", "LOSS", "PUSH")]
+    upcoming_picks: list[dict] = []
+    settled_picks: list[dict] = []
+    for p in picks:
+        mid = _safe_int(p.get("match_id") or p.get("id"))
+        match_obj = match_by_id.get(mid) if mid is not None else None
+        finished = isMatchFinished(p) or (isMatchFinished(match_obj) if isinstance(match_obj, dict) else False)
+        if finished:
+            settled_picks.append(p)
+        else:
+            upcoming_picks.append(p)
 
     def _model_rank(p: dict) -> int:
         return 0 if (p.get("model") or "").strip().upper() == "B" else 1
