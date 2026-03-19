@@ -276,6 +276,32 @@ def user_favorites(request: Request):
     return JSONResponse({"ok": True, "favorites": items})
 
 
+@router.post("/unfavorite")
+def user_unfavorite(request: Request, payload: dict = Body(...)):
+    """Remove a pick from the current user's favorites. Body: { "pick_id": "..." }."""
+    uid, err = _require_user(request)
+    if err is not None:
+        return err
+    pick_id = (payload.get("pick_id") or "").strip()
+    if not pick_id:
+        return JSONResponse(
+            {"ok": False, "error": "pick_id_required"},
+            status_code=400,
+        )
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "DELETE FROM user_favorites WHERE user_id = ? AND pick_id = ?",
+            (uid, pick_id),
+        )
+        conn.commit()
+        deleted = cur.rowcount
+    finally:
+        conn.close()
+    return JSONResponse({"ok": True, "removed": deleted > 0, "pick_id": pick_id})
+
+
 @router.get("/followed-ids")
 def user_followed_ids(request: Request):
     """List all followed pick_ids for the current user (for persisted UI state)."""
@@ -346,6 +372,32 @@ def user_follow_pick(request: Request, payload: dict = Body(...)):
     finally:
         conn.close()
     return JSONResponse({"ok": True, "pick_id": pick_id})
+
+
+@router.post("/unfollow")
+def user_unfollow(request: Request, payload: dict = Body(...)):
+    """Stop following a pick (remove from user_picks). Body: { "pick_id": "..." }."""
+    uid, err = _require_user(request)
+    if err is not None:
+        return err
+    pick_id = (payload.get("pick_id") or "").strip()
+    if not pick_id:
+        return JSONResponse(
+            {"ok": False, "error": "pick_id_required"},
+            status_code=400,
+        )
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "DELETE FROM user_picks WHERE user_id = ? AND pick_id = ?",
+            (uid, pick_id),
+        )
+        conn.commit()
+        deleted = cur.rowcount
+    finally:
+        conn.close()
+    return JSONResponse({"ok": True, "removed": deleted > 0, "pick_id": pick_id})
 
 
 @router.get("/history")

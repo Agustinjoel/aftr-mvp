@@ -3998,21 +3998,10 @@ def account_page(request: Request):
     """Phase 2 account dashboard: greeting, plan, stats (from /user/*), quick actions, history preview."""
     user, _, plan_badge = _account_header(request)
 
-    header_html = f"""
-    <div class="top top-pro">
-      <div class="brand">
-        <img src="/static/logo_aftr.png" class="logo-aftr" alt="AFTR" />
-        <div class="brand-text">
-          <div class="brand-title">AFTR</div>
-          <div class="brand-tag">Motor de apuestas con IA</div>
-        </div>
-        {plan_badge}
-      </div>
-    </div>
-    <div class="top-actions">
-      <div class="links">
-        <a href="/" class="pill" style="padding: 8px 14px; display:inline-block;">🏠 Home</a>
-      </div>
+    header_html = """
+    <div class="account-header-row">
+      <h1 class="account-header-title">Mi cuenta</h1>
+      <a href="/" class="account-header-home">🏠 Volver al inicio</a>
     </div>"""
 
     if not user:
@@ -4050,46 +4039,48 @@ def account_page(request: Request):
         <a href="/?open=premium" class="pill" style="display: inline-block; padding: 10px 20px; background: var(--accent, #0b5ed7); color: #fff; text-decoration: none; font-weight: 600; border-radius: 8px;">Desbloquear Premium</a>
       </div>"""
 
+    premium_wrapper_class = " account-page--premium" if is_premium else ""
+    hero_class = "account-hero account-hero-premium" if is_premium else "account-hero"
     body = header_html + f"""
-    <div class="page account-page" style="max-width: 560px; margin: 24px auto;">
-      <h2 style="margin-bottom: 16px;">Mi cuenta</h2>
-
-      <div class="card account-hero" style="padding: 24px; margin-bottom: 20px; background: var(--card-bg, #1a1a1a); border-radius: 12px;">
-        <p class="account-greeting" style="font-size: 1.25rem; margin: 0 0 8px 0;">Hola, {display_name}</p>
-        <p class="account-plan {plan_class}" style="margin: 0; font-weight: 600;">{plan_label}</p>
+    <div class="page account-page account-page-wrapper{premium_wrapper_class}">
+      <div class="card {hero_class}">
+        <p class="account-greeting">Hola, {display_name}</p>
+        <div class="account-plan-row">
+          <p class="account-plan {plan_class}">{plan_label}</p>
+          {('<span class="account-premium-badge">AFTR Premium activo</span>' if is_premium else '')}
+        </div>
         {upgrade_cta}
-        <p class="muted" style="margin-top: 12px; font-size: 0.85rem;">Cuenta desde {created_display}</p>
+        <p class="account-created muted">Cuenta desde {created_display}</p>
       </div>
 {premium_upsell_card}
 
-      <h3 style="margin: 20px 0 12px 0; font-size: 1rem;">Tus estadísticas</h3>
-      <div id="account-stats" class="account-stats" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-bottom: 24px;">
-        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Seguidos</span><span id="stat-followed">0</span></div>
-        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Favoritos</span><span id="stat-favorites">0</span></div>
-        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Victorias</span><span id="stat-wins">0</span></div>
-        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Pérdidas</span><span id="stat-losses">0</span></div>
-        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">Pendientes</span><span id="stat-pending">0</span></div>
-        <div class="card" style="padding: 14px; text-align: center;"><span class="muted" style="display:block; font-size: 0.75rem;">ROI</span><span id="stat-roi">0%</span></div>
+      <h3 class="account-section-title">Tus estadísticas</h3>
+      <div id="account-stats" class="account-stats">
+        <div class="account-stat-card"><span class="account-stat-label muted">Seguidos</span><span id="stat-followed" class="account-stat-value">0</span></div>
+        <div class="account-stat-card"><span class="account-stat-label muted">Favoritos</span><span id="stat-favorites" class="account-stat-value">0</span></div>
+        <div class="account-stat-card"><span class="account-stat-label muted">Victorias</span><span id="stat-wins" class="account-stat-value">0</span></div>
+        <div class="account-stat-card"><span class="account-stat-label muted">Pérdidas</span><span id="stat-losses" class="account-stat-value">0</span></div>
+        <div class="account-stat-card"><span class="account-stat-label muted">Pendientes</span><span id="stat-pending" class="account-stat-value">0</span></div>
+        <div class="account-stat-card"><span class="account-stat-label muted">ROI</span><span id="stat-roi" class="account-stat-value">0%</span></div>
       </div>
 
-      <h3 style="margin: 20px 0 12px 0; font-size: 1rem;">Acciones</h3>
-      <div class="account-actions" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px;">
-        <a href="#favoritos" class="pill" style="padding: 10px 18px;">Ver favoritos</a>
-        <a href="#historial" class="pill" style="padding: 10px 18px;">Ver historial</a>
-        <a href="/auth/logout" class="pill" style="padding: 10px 18px;">Cerrar sesión</a>
+      <div class="account-actions">
+        <a href="#favoritos" class="pill account-action-pill">Ver favoritos</a>
+        <a href="#historial" class="pill account-action-pill">Ver historial</a>
+        <a href="/auth/logout" class="pill account-action-pill">Cerrar sesión</a>
       </div>
 
-      <section id="favoritos" style="margin-bottom: 32px; scroll-margin-top: 16px;">
-        <h3 style="margin: 0 0 12px 0; font-size: 1rem;">Favoritos</h3>
-        <div id="account-favorites" class="account-favorites" style="display: grid; gap: 12px;">
-          <p class="muted" style="margin: 0;">Cargando…</p>
+      <section id="favoritos" class="account-section">
+        <h3 class="account-section-title">Favoritos</h3>
+        <div id="account-favorites" class="account-favorites">
+          <p class="muted">Cargando…</p>
         </div>
       </section>
 
-      <section id="historial" style="scroll-margin-top: 16px;">
-        <h3 style="margin: 0 0 12px 0; font-size: 1rem;">Historial (últimos 10 seguidos)</h3>
-        <div id="account-history" class="account-history" style="display: grid; gap: 12px;">
-          <p class="muted" style="margin: 0;">Cargando…</p>
+      <section id="historial" class="account-section">
+        <h3 class="account-section-title">Historial (últimos 10 seguidos)</h3>
+        <div id="account-history" class="account-history">
+          <p class="muted">Cargando…</p>
         </div>
       </section>
     </div>
@@ -4136,22 +4127,72 @@ def account_page(request: Request):
         if (hrs < 24) return "hace " + hrs + "h";
         return "hace " + days + "d";
       }}
+      function updateStatEls(s) {{
+        var el = function(id) {{ return document.getElementById(id); }};
+        var num = function(v) {{ return (v != null && v !== "") ? Number(v) : 0; }};
+        var roiVal = s.roi != null ? Number(s.roi) : 0;
+        if (el("stat-followed")) el("stat-followed").textContent = num(s.followed_picks);
+        if (el("stat-favorites")) el("stat-favorites").textContent = num(s.favorites_count);
+        if (el("stat-wins")) el("stat-wins").textContent = num(s.wins);
+        if (el("stat-losses")) el("stat-losses").textContent = num(s.losses);
+        if (el("stat-pending")) el("stat-pending").textContent = num(s.pending);
+        if (el("stat-roi")) el("stat-roi").textContent = roiVal.toFixed(1) + "%";
+      }}
+      function refreshStats() {{
+        fetchJSON(base + "/user/stats").then(function(stats) {{
+          if (stats && stats.ok && stats.stats) updateStatEls(stats.stats);
+        }});
+      }}
+      document.addEventListener("click", function(e) {{
+        var btn = e.target.closest && e.target.closest(".btn-remove-fav");
+        if (btn) {{
+          e.preventDefault();
+          var pickId = btn.getAttribute("data-pick-id");
+          if (!pickId) return;
+          btn.disabled = true;
+          fetch(base + "/user/unfavorite", {{ method: "POST", headers: {{ "Content-Type": "application/json" }}, credentials: "include", body: JSON.stringify({{ pick_id: pickId }}) }})
+            .then(function(r) {{ return r.json(); }})
+            .then(function(d) {{
+              if (d && d.ok) {{
+                var card = btn.closest(".account-pick-card");
+                if (card) card.remove();
+                refreshStats();
+                var cont = document.getElementById("account-favorites");
+                if (cont && !cont.querySelector(".account-pick-card")) {{
+                  cont.innerHTML = "<div class=\\"card\\" style=\\"padding: 20px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No tenés favoritos todavía.</p></div>";
+                }}
+              }} else btn.disabled = false;
+            }})
+            .catch(function() {{ btn.disabled = false; }});
+          return;
+        }}
+        var unfollowBtn = e.target.closest && e.target.closest(".btn-unfollow");
+        if (unfollowBtn) {{
+          e.preventDefault();
+          var pickId = unfollowBtn.getAttribute("data-pick-id");
+          if (!pickId) return;
+          unfollowBtn.disabled = true;
+          fetch(base + "/user/unfollow", {{ method: "POST", headers: {{ "Content-Type": "application/json" }}, credentials: "include", body: JSON.stringify({{ pick_id: pickId }}) }})
+            .then(function(r) {{ return r.json(); }})
+            .then(function(d) {{
+              if (d && d.ok) {{
+                var card = unfollowBtn.closest(".account-pick-card");
+                if (card) card.remove();
+                refreshStats();
+                var cont = document.getElementById("account-history");
+                if (cont && !cont.querySelector(".account-pick-card")) {{
+                  cont.innerHTML = "<div class=\\"card\\" style=\\"padding: 20px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">Todavía no seguís picks.</p></div>";
+                }}
+              }} else unfollowBtn.disabled = false;
+            }})
+            .catch(function() {{ unfollowBtn.disabled = false; }});
+        }}
+      }});
       Promise.all([fetchJSON(base + "/user/stats"), fetchJSON(base + "/user/history"), fetchJSON(base + "/user/favorites")]).then(function(results) {{
         var stats = results[0];
         var history = results[1];
         var favorites = results[2];
-        if (stats && stats.ok && stats.stats) {{
-          var s = stats.stats;
-          var el = function(id) {{ return document.getElementById(id); }};
-          var num = function(v) {{ return (v != null && v !== "") ? Number(v) : 0; }};
-          var roiVal = s.roi != null ? Number(s.roi) : 0;
-          if (el("stat-followed")) el("stat-followed").textContent = num(s.followed_picks);
-          if (el("stat-favorites")) el("stat-favorites").textContent = num(s.favorites_count);
-          if (el("stat-wins")) el("stat-wins").textContent = num(s.wins);
-          if (el("stat-losses")) el("stat-losses").textContent = num(s.losses);
-          if (el("stat-pending")) el("stat-pending").textContent = num(s.pending);
-          if (el("stat-roi")) el("stat-roi").textContent = roiVal.toFixed(1) + "%";
-        }}
+        if (stats && stats.ok && stats.stats) updateStatEls(stats.stats);
         if (favorites && favorites.ok && Array.isArray(favorites.favorites)) {{
           var list = favorites.favorites;
           var container = document.getElementById("account-favorites");
@@ -4174,7 +4215,8 @@ def account_page(request: Request):
                 var away = esc(item.away || "");
                 var teams = (home && away) ? (home + " vs " + away) : "Partido no disponible";
                 var savedWhen = timeAgo(item.created_at);
-                html += "<div class=\\"account-pick-card account-pick-fav\\">";
+                var pickId = esc(item.pick_id || "");
+                html += "<div class=\\"account-pick-card account-pick-fav\\" data-pick-id=\\"" + pickId + "\\">";
                 html += "<div class=\\"account-pick-title\\">" + market + "</div>";
                 html += "<div class=\\"account-pick-subtitle\\">" + teams + "</div>";
                 html += "<div class=\\"account-badge-row\\">";
@@ -4182,7 +4224,10 @@ def account_page(request: Request):
                 html += "<span class=\\"account-mini-badge account-badge-tier account-badge-tier-" + esc(tierKey) + "\\">" + esc(tierTxt) + "</span>";
                 html += "<span class=\\"account-mini-badge account-badge-edge account-badge-edge-" + esc(edgeKey) + "\\">" + esc(edgeTxt) + " EDGE</span>";
                 html += "</div>";
-                html += "<div class=\\"account-pick-bottom\\"><span class=\\"account-pick-muted\\">Guardado " + savedWhen + "</span></div>";
+                html += "<div class=\\"account-pick-bottom\\">";
+                html += "<span class=\\"account-pick-muted\\">Guardado " + savedWhen + "</span>";
+                html += "<button type=\\"button\\" class=\\"btn-remove-fav account-card-action\\" data-pick-id=\\"" + pickId + "\\">Quitar de favoritos</button>";
+                html += "</div>";
                 html += "</div>";
               }});
               container.innerHTML = html;
@@ -4215,7 +4260,8 @@ def account_page(request: Request):
               var teams = (home && away) ? (home + " vs " + away) : "Partido no disponible";
               var result = (item.result || "PENDING").toUpperCase();
               var date = esc((item.created_at || "").slice(0, 10));
-              html += "<div class=\\"account-pick-card account-pick-history\\">";
+              var pickId = esc(item.pick_id || "");
+              html += "<div class=\\"account-pick-card account-pick-history\\" data-pick-id=\\"" + pickId + "\\">";
               html += "<div class=\\"account-pick-title\\">" + market + "</div>";
               html += "<div class=\\"account-pick-subtitle\\">" + teams + "</div>";
               html += "<div class=\\"account-badge-row\\">";
@@ -4226,6 +4272,7 @@ def account_page(request: Request):
               html += "<div class=\\"account-pick-bottom account-history-bottom\\">";
               html += "<span class=\\"account-status-badge account-status-" + esc(result.toLowerCase()) + "\\">" + result + "</span>";
               html += "<span class=\\"account-pick-date\\">" + date + "</span>";
+              html += "<button type=\\"button\\" class=\\"btn-unfollow account-card-action\\" data-pick-id=\\"" + pickId + "\\">Dejar de seguir</button>";
               html += "</div>";
               html += "</div>";
             }});
