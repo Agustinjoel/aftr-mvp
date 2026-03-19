@@ -113,7 +113,7 @@ def init_db():
         UNIQUE(user_id, pick_id)
     )
     """)
-    for col in [("market", "TEXT"), ("aftr_score", "REAL"), ("tier", "TEXT"), ("edge", "REAL")]:
+    for col in [("market", "TEXT"), ("aftr_score", "REAL"), ("tier", "TEXT"), ("edge", "REAL"), ("home_team", "TEXT"), ("away_team", "TEXT")]:
         try:
             cur.execute("ALTER TABLE user_favorites ADD COLUMN " + col[0] + " " + col[1])
         except sqlite3.OperationalError:
@@ -134,11 +134,23 @@ def init_db():
         UNIQUE(user_id, pick_id)
     )
     """)
-    for col in [("market", "TEXT"), ("aftr_score", "REAL"), ("tier", "TEXT"), ("edge", "REAL")]:
+    for col in [("market", "TEXT"), ("aftr_score", "REAL"), ("tier", "TEXT"), ("edge", "REAL"), ("home_team", "TEXT"), ("away_team", "TEXT")]:
         try:
             cur.execute("ALTER TABLE user_picks ADD COLUMN " + col[0] + " " + col[1])
         except sqlite3.OperationalError:
             pass
+    # Migration: if legacy Spanish columns exist, copy to home_team/away_team so code only uses English names
+    for table in ("user_favorites", "user_picks"):
+        table_info = cur.execute(f"PRAGMA table_info({table})").fetchall()
+        col_names = [row[1] for row in table_info]
+        has_legacy = "equipo_de_casa" in col_names and "equipo_visitante" in col_names
+        has_english = "home_team" in col_names and "away_team" in col_names
+        if has_legacy and has_english:
+            try:
+                cur.execute(f"UPDATE {table} SET home_team = equipo_de_casa WHERE home_team IS NULL AND equipo_de_casa IS NOT NULL")
+                cur.execute(f"UPDATE {table} SET away_team = equipo_visitante WHERE away_team IS NULL AND equipo_visitante IS NOT NULL")
+            except sqlite3.OperationalError:
+                pass
     try:
         cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_user_picks_user_pick ON user_picks(user_id, pick_id)")
     except sqlite3.OperationalError:
