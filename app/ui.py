@@ -1473,7 +1473,7 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         if best_prob_present:
             prob_line_html = f'<div class="pick-finished-prob">{best_prob_pct:.1f}%</div>'
         pick_actions_html = f"""
-      <div class="pick-finished-status">
+      <div class="pick-finished-status pick-main-highlight">
         <div class="pick-finished-top">
           <div class="pick-finished-market">{html_lib.escape(str(best_market))}</div>
           {prob_line_html}
@@ -1497,7 +1497,7 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     mainpick_html = ""
     if not is_finished:
         mainpick_html = f"""
-      <div class="aftr-mainpick">
+      <div class="aftr-mainpick pick-main-highlight">
         <div class="aftr-market">{html_lib.escape(str(best_market))}</div>
         {prob_odds_html}
       </div>"""

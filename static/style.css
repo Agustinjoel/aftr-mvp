@@ -456,6 +456,48 @@ h2::after{
   padding-top: 10px;
   border-top: 1px solid rgba(255,255,255,.08);
 }
+.pick-main-highlight{
+  margin-top: 6px;
+  margin-bottom: 2px;
+  padding: 16px 14px;
+  border-radius: 16px;
+  text-align: center;
+  border: 1px solid rgba(120,180,255,.22);
+  background: linear-gradient(135deg, rgba(56,189,248,0.18) 0%, rgba(255,255,255,0.03) 100%);
+  box-shadow: 0 0 0 1px rgba(120,180,255,.10), 0 14px 40px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.pick-main-highlight .aftr-market{
+  font-size: 18px;
+  color: rgba(200,235,255,.98);
+}
+.pick-main-highlight .aftr-prob{
+  font-size: 26px;
+  font-weight: 1000;
+  letter-spacing: -0.2px;
+}
+.pick-main-highlight .aftr-prob-odds{
+  margin-top: 6px;
+  justify-content: center;
+}
+.pick-main-highlight .aftr-dot,
+.pick-main-highlight .aftr-odds{
+  font-size: 11px;
+  opacity: .75;
+}
+.pick-main-highlight .pick-finished-prob{
+  font-size: 22px;
+}
+.pick-main-highlight .pick-finished-market{
+  font-size: 16px;
+}
+.pick-main-highlight.pick-finished-status{
+  padding-top: 14px;
+  padding-bottom: 12px;
+}
+.pick-main-highlight.pick-finished-status .pick-finished-badge-row{
+  justify-content: center;
+  margin-top: 6px;
+}
 .aftr-market{
   font-size: 16px;
   font-weight: 900;
