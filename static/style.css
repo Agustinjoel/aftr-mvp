@@ -299,28 +299,28 @@ h2::after{
 
 .aftr-score-block{
   margin-top: 0px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   padding: 10px 12px;
   padding-left: 14px;
   border-radius: 10px;
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(170,210,255,.08);
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(170,210,255,.06);
 }
 .aftr-score-label{
   font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: .6px;
-  color: var(--muted);
+  color: rgba(234,242,255,.6);
   margin-bottom: 4px;
 }
 .aftr-score-num{
-  font-size: 30px;
+  font-size: 22px;
   font-weight: 900;
   line-height: 1.1;
-  color: rgba(180,220,255,.98);
-  letter-spacing: -0.5px;
-  margin-bottom: 8px;
+  color: rgba(180,220,255,.78);
+  letter-spacing: -0.25px;
+  margin-bottom: 6px;
 }
 .aftr-badges{
   display: flex;
@@ -457,7 +457,7 @@ h2::after{
   border-top: 1px solid rgba(255,255,255,.08);
 }
 .aftr-market{
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 900;
   color: rgba(180,220,255,.95);
 }
@@ -469,6 +469,11 @@ h2::after{
   font-size: 12px;
   font-weight: 900;
   color: rgba(234,242,255,.85);
+}
+.aftr-prob{
+  font-size: 18px;
+  font-weight: 1000;
+  color: rgba(234,242,255,.95);
 }
 .aftr-dot{ color: rgba(234,242,255,.35); }
 .aftr-odds{ color: rgba(180,220,255,.95); }
@@ -520,7 +525,7 @@ h2::after{
   text-overflow: ellipsis;
 }
 .pick-finished-prob{
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 900;
   color: rgba(234,242,255,.9);
 }

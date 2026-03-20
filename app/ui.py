@@ -1502,6 +1502,16 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         {prob_odds_html}
       </div>"""
 
+    # Visual hierarchy:
+    # - Prediction (market + prob) is primary.
+    # - Result badge (finished) comes right below prediction.
+    # - AFTR score is secondary (demoted) and shown after prediction/buttons.
+    score_and_actions_html = ""
+    if is_finished:
+        score_and_actions_html = pick_actions_html + aftr_block_html
+    else:
+        score_and_actions_html = aftr_block_html + pick_actions_html
+
     front_html = f"""
     <div class="{card_class} aftr-pick-card">
       <div class="aftr-topmeta">
@@ -1510,9 +1520,8 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         {tier_meta_badge_html}
       </div>
       {teams_html}
-      {aftr_block_html}
       {mainpick_html}
-      {pick_actions_html}
+      {score_and_actions_html}
     </div>
     """
 
