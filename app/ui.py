@@ -512,6 +512,43 @@ def _pill_bar(active: str, unsupported: set[str] | None = None) -> str:
     return '<div class="leaguebar">' + "".join(pills) + "</div>"
 
 
+def _home_league_active_code(request: Request) -> str:
+    """League to highlight on home carousel (URL hint or default)."""
+    raw = (request.query_params.get("league") or "").strip()
+    if raw and settings.is_valid_league(raw):
+        return raw
+    return settings.default_league
+
+
+def _build_home_league_snap_carousel_html(request: Request, unsupported: set[str]) -> str:
+    """
+    Premium horizontal scroll-snap carousel for home: .league-carousel > .league-track > .league-item.
+    """
+    active = _home_league_active_code(request)
+    items: list[str] = []
+    for code, name in settings.leagues.items():
+        if code in unsupported:
+            continue
+        act = " is-active" if code == active else ""
+        logo = f"/static/leagues/{code.lower()}.png"
+        initial = (name or code or "?")[:1].upper()
+        items.append(
+            f'<a class="league-item{act}" href="/?league={html_lib.escape(code)}" data-code="{html_lib.escape(code)}">'
+            f'<span class="league-item__card">'
+            f'<img class="league-item__logo" src="{html_lib.escape(logo)}" alt="" width="56" height="56" loading="lazy" '
+            "onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\" />"
+            f'<span class="league-item__fallback" aria-hidden="true">{html_lib.escape(initial)}</span>'
+            f'<span class="league-item__name">{html_lib.escape(name)}</span>'
+            f"</span></a>"
+        )
+    return (
+        f'<div class="league-carousel league-carousel--snap-scroll" id="homeLeagueCarousel" '
+        f'data-active-code="{html_lib.escape(active)}">'
+        f'<div class="league-track">{"".join(items)}</div></div>'
+        '<script src="/static/home_league_carousel.js?v=1" defer></script>'
+    )
+
+
 # =========================================================
 # Cards bloqueadas (teaser Premium)
 # =========================================================
@@ -2985,54 +3022,11 @@ def home_page(request: Request) -> str:
             break
     big_matches = big_matches[:4]
 
-    # Featured league stats (for cards): only leagues with picks; include ROI and top pick
-    featured_stats: list[dict] = []
-    for code in sorted(leagues_with_picks):
-        picks = picks_by_league.get(code) or []
-        w = sum(1 for p in picks if _result_norm(p) == "WIN")
-        l_ = sum(1 for p in picks if _result_norm(p) == "LOSS")
-        pend = 0
-        settled_count = 0
-        for p in picks:
-            p_mid = _safe_int(p.get("match_id") or p.get("id"))
-            p_match = match_by_key.get((code, p_mid)) if p_mid is not None else None
-            if isMatchFinished(p) or (isMatchFinished(p_match) if isinstance(p_match, dict) else False):
-                settled_count += 1
-            else:
-                pend += 1
-        n = round(sum(_unit_delta(p) for p in picks if _result_norm(p) in ("WIN", "LOSS", "PUSH")), 2)
-        roi_pct = round(n / settled_count * 100, 1) if settled_count and settled_count > 0 else None
-        roi_str_league = f"{roi_pct:+.1f}%" if roi_pct is not None else "—"
-        # Top pick of the day: best pending pick by _pick_score
-        pending_picks = []
-        for p in picks:
-            p_mid = _safe_int(p.get("match_id") or p.get("id"))
-            p_match = match_by_key.get((code, p_mid)) if p_mid is not None else None
-            if not (isMatchFinished(p) or (isMatchFinished(p_match) if isinstance(p_match, dict) else False)):
-                pending_picks.append(p)
-        top_pick = max(pending_picks, key=_pick_score) if pending_picks else None
-        featured_stats.append({
-            "code": code,
-            "name": settings.leagues.get(code, code),
-            "wins": w,
-            "losses": l_,
-            "pending": pend,
-            "net": n,
-            "roi_pct": roi_pct,
-            "roi_str": roi_str_league,
-            "top_pick": top_pick,
-        })
-
     _unsupported_home = get_unsupported_leagues()
     _unsupported_football_home = {
         c for c in _unsupported_home if getattr(settings, "league_sport", {}).get(c) != "basketball"
     }
-    home_league_carousel_html = render_league_carousel(
-        active_league=settings.default_league,
-        unsupported=_unsupported_football_home,
-        carousel_id="leagueCarouselHome",
-        home_mode=True,
-    )
+    home_league_carousel_html = _build_home_league_snap_carousel_html(request, _unsupported_football_home)
 
     # Live picks (match in play): dedicated section + exclude from "Mejores Picks del Día"
     live_pick_keys: set[str] = set()
@@ -3299,45 +3293,6 @@ def home_page(request: Request) -> str:
           {pick_line}
         </a>""")
 
-    # Featured league cards: ROI, W/L, Pending, Net, Top pick (match, market, prob%, edge%)
-    featured_cards = []
-    for s in featured_stats:
-        top = s.get("top_pick")
-        top_pick_html = ""
-        if top:
-            home_t = html_lib.escape(str(top.get("home") or "—"))
-            away_t = html_lib.escape(str(top.get("away") or "—"))
-            market_t = html_lib.escape(str(top.get("best_market") or "—"))
-            prob_t = _safe_float(top.get("best_prob"), 0) * 100
-            edge_val = top.get("edge")
-            try:
-                edge_str_t = f"{float(edge_val)*100:+.1f}%" if edge_val is not None else "—"
-            except (TypeError, ValueError):
-                edge_str_t = "—"
-            top_pick_html = f"""
-          <div class="home-league-top-pick">
-            <div class="home-league-top-pick-label">Mejor pick</div>
-            <div class="home-league-top-pick-match">{home_t} vs {away_t}</div>
-            <div class="home-league-top-pick-market">{market_t}</div>
-            <div class="home-league-top-pick-meta">Prob {prob_t:.0f}% · Ventaja {edge_str_t}</div>
-          </div>"""
-        rp = s.get("roi_pct")
-        roi_class = "pos" if (rp is not None and rp >= 0) else "neg"
-        logo_src = LEAGUE_LOGO_PATHS.get(s["code"], f"/static/leagues/{s['code'].lower()}.png")
-        initial = _nav_initials.get(s["code"], (s["name"] or s["code"])[:1])
-        featured_cards.append(f"""
-        <div class="card home-league-card">
-          <div class="home-league-card-head">
-            <img src="{html_lib.escape(logo_src)}" alt="" class="home-league-logo" onerror="this.style.display='none';var n=this.nextElementSibling;if(n)n.style.display='inline-flex';">
-            <span class="league-nav-fallback home-league-fallback" style="display:none;">{html_lib.escape(initial)}</span>
-            <div class="home-league-card-title">{html_lib.escape(s['name'])}</div>
-          </div>
-          <div class="home-league-card-roi {roi_class}">{s['roi_str']}</div>
-          <div class="muted home-league-card-stats">W{s['wins']}-L{s['losses']} · Pend: {s['pending']} · Net {s['net']:+.1f}u</div>
-          {top_pick_html}
-          <a href="/?league={html_lib.escape(s['code'])}" class="home-league-ver">Ver liga</a>
-        </div>""")
-
     # Chart area: canvas + tooltip + embedded data when we have data; otherwise empty-state message.
     # Root cause of blank chart: chart script ran before/inconsistent order vs script that set
     # window.AFTR_ROI_POINTS. Fix: embed data in <script type="application/json" id="aftr-roi-chart-data">
@@ -3363,7 +3318,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=18">
+      <link rel="stylesheet" href="/static/style.css?v=19">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
@@ -3488,13 +3443,6 @@ def home_page(request: Request) -> str:
       <h2 class="home-h2">Partidos Destacados</h2>
       <div class="home-bigmatch-grid">
         {''.join(big_match_cards) if big_match_cards else '<p class="home-empty muted">No hay partidos destacados hoy.</p>'}
-      </div>
-      </section>
-
-      <section class="home-section">
-      <h2 class="home-h2">Ligas destacadas</h2>
-      <div class="home-leagues-grid">
-        {''.join(featured_cards)}
       </div>
       </section>
 
@@ -4089,7 +4037,7 @@ def dashboard(request: Request, league: str):
       <meta charset="utf-8"/>
       <title>AFTR Pick</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=18">
+      <link rel="stylesheet" href="/static/style.css?v=19">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 
       <link rel="manifest" href="/static/manifest.webmanifest">
@@ -5964,7 +5912,7 @@ def _simple_page(title: str, body: str) -> str:
   <meta charset="utf-8"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=18">
+  <link rel="stylesheet" href="/static/style.css?v=19">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 </head>
 <body>
