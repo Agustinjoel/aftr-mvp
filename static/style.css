@@ -385,6 +385,26 @@ h2::after{
   white-space: nowrap;
 }
 
+/* Live fixture — flip pick cards (league dashboard) */
+.aftr-pick-card--live{
+  border-radius: var(--radius);
+  box-shadow:
+    0 0 0 1px rgba(239,68,68,.32),
+    0 0 26px rgba(239,68,68,.12),
+    0 0 44px rgba(239,68,68,.05);
+  background: linear-gradient(165deg, rgba(239,68,68,.045), transparent 46%);
+}
+.aftr-meta-live{
+  color: #fca5a5;
+  font-weight: 900;
+  max-width: 55%;
+  text-shadow: 0 0 12px rgba(239,68,68,.28);
+}
+.aftr-teams-live .aftr-score-inline-live{
+  color: rgba(254,226,226,.96);
+  text-shadow: 0 0 14px rgba(239,68,68,.22);
+}
+
 .aftr-teams{
   display:grid;
   grid-template-columns: 1fr auto 1fr;
@@ -1499,6 +1519,72 @@ body{
 .home-pick-card{
   padding: 18px;
 }
+
+/* Home — En vivo ahora */
+.home-live-section{
+  margin-top: -4px;
+  margin-bottom: 44px;
+}
+.home-live-title{
+  color: rgba(254,226,226,.92);
+}
+.home-pick-card--live{
+  box-shadow:
+    0 0 0 1px rgba(239,68,68,.36),
+    0 0 22px rgba(239,68,68,.14),
+    0 10px 28px rgba(0,0,0,.22);
+  background: linear-gradient(180deg, rgba(239,68,68,.05), transparent 52%);
+}
+.home-pick-live-status{
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  color: #fca5a5;
+  margin: -2px 0 8px;
+  text-shadow: 0 0 10px rgba(239,68,68,.28);
+}
+@media (prefers-reduced-motion: no-preference){
+  .home-pick-live-status{
+    animation: aftr-live-softpulse 2.8s ease-in-out infinite;
+  }
+}
+@keyframes aftr-live-softpulse{
+  0%, 100%{ opacity: 1; filter: brightness(1); }
+  50%{ opacity: .88; filter: brightness(1.06); }
+}
+.home-pick-match-live{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: nowrap;
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.home-pick-live-team{
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.home-pick-live-team:last-child{
+  justify-content: flex-end;
+}
+.home-pick-live-score{
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-size: 17px;
+  font-weight: 1000;
+  color: rgba(254,226,226,.98);
+  padding: 4px 12px;
+  border-radius: 10px;
+  background: rgba(239,68,68,.11);
+  border: 1px solid rgba(239,68,68,.26);
+  box-shadow: 0 0 14px rgba(239,68,68,.12);
+}
+
 .home-pick-league{
   font-size: 12px;
   font-weight: 700;

@@ -651,6 +651,37 @@ def _parse_utcdate_maybe(s: object) -> datetime | None:
         return None
 
 
+# Match / provider statuses meaning the fixture is in progress (not final).
+MATCH_LIVE_STATUSES = frozenset(
+    {
+        "LIVE",
+        "IN_PLAY",
+        "INPLAY",
+        "PLAYING",
+        "1H",
+        "FIRST_HALF",
+        "H1",
+        "2H",
+        "SECOND_HALF",
+        "H2",
+        "HT",
+        "HALFTIME",
+        "HALF_TIME",
+        "BREAK",
+        "PAUSED",
+        "SUSPENDED",
+        "ET",
+        "EXTRA_TIME",
+        "AET",
+        "PENALTIES",
+        "PENALTY_SHOOTOUT",
+        "INT",
+        "LIVE_1H",
+        "LIVE_2H",
+    }
+)
+
+
 def isMatchFinished(match: dict) -> bool:
     """
     Decide finished vs upcoming from explicit fields first:
@@ -667,6 +698,10 @@ def isMatchFinished(match: dict) -> bool:
         return True
     if status_raw in {"WIN", "LOSS", "PUSH"}:
         return True
+
+    # In progress: never treat as finished from score + kickoff-time heuristic alone.
+    if status_raw in MATCH_LIVE_STATUSES:
+        return False
 
     raw_result = match.get("result")
     if raw_result is not None:
@@ -716,6 +751,59 @@ def isMatchFinished(match: dict) -> bool:
                 return True
 
     return False
+
+
+def isMatchLive(match: dict) -> bool:
+    """True when the fixture is in play (by status), and not considered finished."""
+    if not isinstance(match, dict):
+        return False
+    if isMatchFinished(match):
+        return False
+    status_raw = str(match.get("status") or "").strip().upper()
+    return status_raw in MATCH_LIVE_STATUSES
+
+
+def _live_minute_suffix(match: dict) -> str | None:
+    """Return a display minute like \"67'\" from common API fields, or None."""
+    if not isinstance(match, dict):
+        return None
+    for key in ("minute", "elapsed", "time_elapsed", "match_minute"):
+        raw = match.get(key)
+        if raw is None:
+            continue
+        try:
+            mi = int(float(str(raw).replace("'", "").strip()))
+            if mi >= 0:
+                return f"{mi}'"
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
+def _format_live_status_line(match: dict) -> str:
+    """Compact status for live headers (e.g. 🔴 LIVE 67', HT, 2H 74')."""
+    if not isinstance(match, dict):
+        return "🔴 LIVE"
+    st = str(match.get("status") or "").strip().upper()
+    minute_s = _live_minute_suffix(match)
+
+    if st in {"HT", "HALFTIME", "HALF_TIME", "BREAK"}:
+        return "HT"
+    if st in {"1H", "FIRST_HALF", "H1"}:
+        return f"1H {minute_s}" if minute_s else "1H"
+    if st in {"2H", "SECOND_HALF", "H2"}:
+        return f"2H {minute_s}" if minute_s else "2H"
+    if st in {"ET", "EXTRA_TIME", "AET"}:
+        return f"ET {minute_s}" if minute_s else "ET"
+    if st in {"PENALTIES", "PENALTY_SHOOTOUT"}:
+        return "Pen."
+    if st in {"PAUSED", "SUSPENDED"}:
+        return st.title()
+    if st == "INT":
+        return "Int."
+    if minute_s:
+        return f"🔴 LIVE {minute_s}"
+    return "🔴 LIVE"
 
 
 def _label_for_date(d: date, today: date) -> str:
@@ -1080,6 +1168,13 @@ def _extract_score_from_match(m: dict) -> tuple[int | None, int | None]:
             if h is not None and a is not None:
                 return (_safe_int(h), _safe_int(a))
 
+    hg = m.get("home_goals")
+    ag = m.get("away_goals")
+    if hg is not None and ag is not None:
+        hi, ai = _safe_int(hg), _safe_int(ag)
+        if hi is not None and ai is not None:
+            return (hi, ai)
+
     return (None, None)
 
 
@@ -1229,6 +1324,9 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
 
     # Single authoritative finished detection.
     is_finished = isMatchFinished(p) or (isMatchFinished(match_for_state) if isinstance(match_for_state, dict) else False)
+    is_live_display = isinstance(match_for_state, dict) and isMatchLive(match_for_state)
+    if is_live_display:
+        is_finished = False
 
     final_home_score: int | None = None
     final_away_score: int | None = None
@@ -1246,13 +1344,15 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
             )
             _finished_card_debug_logged = True
 
-    card_class = "card"
-    if result == "WIN":
-        card_class = "card pick-win"
+    card_class = "card aftr-pick-card"
+    if is_live_display:
+        card_class = "card aftr-pick-card aftr-pick-card--live"
+    elif result == "WIN":
+        card_class = "card pick-win aftr-pick-card"
     elif result == "LOSS":
-        card_class = "card pick-loss"
+        card_class = "card pick-loss aftr-pick-card"
     elif result == "PUSH":
-        card_class = "card pick-push"
+        card_class = "card pick-push aftr-pick-card"
 
     risk = _risk_label_from_conf(p)
     badge_html = (
@@ -1260,8 +1360,25 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         f'<span class="pick-badge risk {html_lib.escape(risk.lower())}">{html_lib.escape(risk)}</span>'
     )
 
-    # Front side: teams block. For finished picks, embed final score in the center.
-    if is_finished and final_home_score is not None and final_away_score is not None:
+    # Front side: teams block. Live / finished: score between teams; else vs.
+    live_hs: int | None = None
+    live_as: int | None = None
+    if is_live_display and isinstance(match_for_state, dict):
+        live_hs, live_as = _extract_score_from_match(match_for_state)
+
+    if is_live_display and live_hs is not None and live_as is not None:
+        teams_html = f"""
+    <div class="aftr-teams aftr-teams-live">
+      <div class="aftr-team aftr-team-left">{home_part}</div>
+      <div class="aftr-score-inline aftr-score-inline-live">
+        <span class="aftr-score-home">{live_hs}</span>
+        <span class="aftr-score-sep">-</span>
+        <span class="aftr-score-away">{live_as}</span>
+      </div>
+      <div class="aftr-team aftr-team-right">{away_part}</div>
+    </div>
+    """
+    elif is_finished and final_home_score is not None and final_away_score is not None:
         teams_html = f"""
     <div class="aftr-teams aftr-teams-finished">
       <div class="aftr-team aftr-team-left">{home_part}</div>
@@ -1454,6 +1571,9 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         kickoff_time = utc_raw.split("T")[1][:5]
     else:
         kickoff_time = utc_raw[:16] if utc_raw else "—"
+    if is_live_display and isinstance(match_for_state, dict):
+        kickoff_time = _format_live_status_line(match_for_state)
+    meta_time_class = "aftr-meta-time" + (" aftr-meta-live" if is_live_display else "")
     league_code = (p.get("_league") or p.get("league") or "").strip()
     league_label = settings.leagues.get(league_code, league_code) if league_code else "AFTR"
     tier_meta_badge_html = (
@@ -1526,10 +1646,10 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
         score_and_actions_html = aftr_block_html + pick_actions_html
 
     front_html = f"""
-    <div class="{card_class} aftr-pick-card">
+    <div class="{card_class}">
       <div class="aftr-topmeta">
         <span class="aftr-meta-league">{html_lib.escape(league_label)}</span>
-        <span class="aftr-meta-time">{html_lib.escape(kickoff_time)}</span>
+        <span class="{meta_time_class}">{html_lib.escape(kickoff_time)}</span>
         {tier_meta_badge_html}
       </div>
       {teams_html}
@@ -2350,6 +2470,30 @@ def home_page(request: Request) -> str:
         </a>''')
     home_nav_html = "\n".join(home_nav_items)
 
+    # Live picks (match in play): dedicated section + exclude from "Mejores Picks del Día"
+    live_pick_keys: set[str] = set()
+    live_picks: list[dict] = []
+    for p in all_upcoming:
+        if not isinstance(p, dict):
+            continue
+        mid = _safe_int(p.get("match_id") or p.get("id"))
+        league = p.get("_league")
+        if mid is None or not league:
+            continue
+        m = match_by_key.get((league, mid))
+        if not isinstance(m, dict):
+            continue
+        if isMatchFinished(p) or isMatchFinished(m):
+            continue
+        if not isMatchLive(m):
+            continue
+        pk = _pick_id_for_card(p, {"market": p.get("best_market")})
+        if pk in live_pick_keys:
+            continue
+        live_pick_keys.add(pk)
+        live_picks.append(p)
+    live_picks.sort(key=lambda p: (-(p.get("aftr_score") or 0), -_pick_score(p)))
+
     # Mejores Picks del Día: only picks scheduled for today or within near-term window (exclude far-future)
     today_local = datetime.now().astimezone().date()
     top_picks_max_days_ahead = 2  # today + up to 2 days ahead
@@ -2357,6 +2501,9 @@ def home_page(request: Request) -> str:
     picks_near_term = []
     for p in all_upcoming:
         if not isinstance(p, dict):
+            continue
+        pk = _pick_id_for_card(p, {"market": p.get("best_market")})
+        if pk in live_pick_keys:
             continue
         local_d = _pick_local_date(p, match_by_key)
         if local_d is None or not (today_local <= local_d <= end_local):
@@ -2455,6 +2602,123 @@ def home_page(request: Request) -> str:
           </div>
         </div>""")
 
+    for p in live_picks:
+        if p.get("home") and p.get("away"):
+            continue
+        mid = _safe_int(p.get("match_id")) or _safe_int(p.get("id"))
+        league = p.get("_league")
+        m = match_by_key.get((league, mid)) if mid is not None and league else None
+        if isinstance(m, dict):
+            if not p.get("home"):
+                p["home"] = m.get("home") or "—"
+            if not p.get("away"):
+                p["away"] = m.get("away") or "—"
+            if not p.get("home_crest") and m.get("home_crest"):
+                p["home_crest"] = m.get("home_crest")
+            if not p.get("away_crest") and m.get("away_crest"):
+                p["away_crest"] = m.get("away_crest")
+
+    live_pick_cards: list[str] = []
+    for p in live_picks:
+        league_code = p.get("_league") or "—"
+        league_name = html_lib.escape(settings.leagues.get(league_code, league_code))
+        home = html_lib.escape(str(p.get("home") or "—"))
+        away = html_lib.escape(str(p.get("away") or "—"))
+        market = html_lib.escape(str(p.get("best_market") or "—"))
+        score = p.get("aftr_score")
+        if score is None:
+            score = _aftr_score(p)
+        else:
+            try:
+                score = int(round(float(score)))
+            except (TypeError, ValueError):
+                score = _aftr_score(p)
+        edge = p.get("edge")
+        try:
+            edge_str = f"{float(edge)*100:+.1f}%" if edge is not None else "—"
+        except (TypeError, ValueError):
+            edge_str = "—"
+        conf_level = (p.get("confidence_level") or p.get("confidence") or "—")
+        conf_str = str(conf_level).upper() if conf_level != "—" else "—"
+        od = p.get("odds_decimal")
+        try:
+            odds_str = f"{float(od):.2f}" if od is not None else "—"
+        except (TypeError, ValueError):
+            odds_str = "—"
+        try:
+            edge_pos = edge is not None and float(edge) > 0
+        except (TypeError, ValueError):
+            edge_pos = False
+        edge_class = " home-pick-edge-pos" if edge_pos else ""
+        _t = p.get("tier")
+        tier = (str(_t).strip().lower() if _t is not None else "pass") or "pass"
+        tier_colors = {"elite": "#FFD700", "strong": "#00C853", "risky": "#FF9800", "pass": "#9E9E9E"}
+        tier_color = tier_colors.get(tier, "#9E9E9E")
+        home_part = _team_with_crest(p.get("home_crest"), p.get("home") or "—")
+        away_part = _team_with_crest(p.get("away_crest"), p.get("away") or "—")
+        pick_id_val = _pick_id_for_card(p, {"market": p.get("best_market")})
+        pick_id_attr = html_lib.escape(pick_id_val)
+        market_raw = str(p.get("best_market") or "")
+        market_attr = html_lib.escape(market_raw)
+        edge_raw = p.get("edge")
+        edge_attr = html_lib.escape(str(edge_raw)) if edge_raw is not None else ""
+        mid = _safe_int(p.get("match_id")) or _safe_int(p.get("id"))
+        league = p.get("_league")
+        m_live = match_by_key.get((league, mid)) if mid is not None and league else None
+        status_line = _format_live_status_line(m_live) if isinstance(m_live, dict) else "🔴 LIVE"
+        lh, la = _extract_score_from_match(m_live) if isinstance(m_live, dict) else (None, None)
+        if lh is not None and la is not None:
+            match_block = f"""
+          <div class="home-pick-match home-pick-match-live">
+            <div class="home-pick-live-team">{home_part}</div>
+            <div class="home-pick-live-score" aria-label="Marcador en vivo">{lh} - {la}</div>
+            <div class="home-pick-live-team">{away_part}</div>
+          </div>"""
+        else:
+            match_block = f"""
+          <div class="home-pick-match">
+            {home_part}
+            <span class="vs">vs</span>
+            {away_part}
+          </div>"""
+        live_pick_cards.append(f"""
+        <div class="card home-pick-card home-pick-card--live" style="border-left: 4px solid {tier_color};">
+          <div class="home-pick-live-status" role="status">{html_lib.escape(status_line)}</div>
+          <div class="home-pick-league">{league_name}</div>
+          {match_block}
+          <div class="home-pick-market">{market}</div>
+          <div class="home-pick-meta">
+            <span class="home-pick-score">AFTR {score}</span>
+            <span class="aftr-tier" style="color: {tier_color};">{html_lib.escape(tier.upper())}</span>
+            <span class="home-pick-edge{edge_class}">Ventaja {edge_str}</span>
+            <span>Conf {html_lib.escape(conf_str)}</span>
+            <span>Odds {odds_str}</span>
+          </div>
+          <div class="pick-actions" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+            <button type="button" class="btn-favorite-pick pill"
+              data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}"
+              data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"
+              data-home-team="{home}" data-away-team="{away}"
+              style="padding:6px 12px; font-size:0.85rem;">⭐ Guardar</button>
+            <button type="button" class="btn-follow-pick pill"
+              data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}"
+              data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"
+              data-home-team="{home}" data-away-team="{away}"
+              style="padding:6px 12px; font-size:0.85rem;">📈 Seguir pick</button>
+          </div>
+        </div>""")
+
+    live_section_html = ""
+    if live_pick_cards:
+        live_section_html = f"""
+      <section class="home-section home-live-section" id="live-now">
+      <h2 class="home-h2 home-live-title">🔴 En vivo ahora</h2>
+      <div class="home-picks-grid home-live-grid">
+        {''.join(live_pick_cards)}
+      </div>
+      </section>
+"""
+
     # Big matches HTML: [home crest] Home vs Away [away crest] (same helper as league pages)
     big_match_cards = []
     for b in big_matches:
@@ -2538,7 +2802,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=14">
+      <link rel="stylesheet" href="/static/style.css?v=15">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
@@ -2642,6 +2906,7 @@ def home_page(request: Request) -> str:
         </div>
         <div class="hero-art"></div>
       </section>
+      {live_section_html}
 
       <section class="home-section" id="top-picks">
       <h2 class="home-h2">Mejores Picks del Día</h2>
@@ -3156,7 +3421,7 @@ def dashboard(request: Request, league: str):
       <meta charset="utf-8"/>
       <title>AFTR Pick</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=14">
+      <link rel="stylesheet" href="/static/style.css?v=15">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 
       <link rel="manifest" href="/static/manifest.webmanifest">
@@ -3170,7 +3435,7 @@ def dashboard(request: Request, league: str):
       <link rel="apple-touch-startup-image" href="/static/pwa/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
       <link rel="apple-touch-startup-image" href="/static/pwa/splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
       <link rel="apple-touch-startup-image" href="/static/pwa/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)">
-      <link rel="stylesheet" href="/static/style.css?v=14">
+      <link rel="stylesheet" href="/static/style.css?v=15">
     </head>
 
     <body>
@@ -4681,7 +4946,7 @@ def _simple_page(title: str, body: str) -> str:
   <meta charset="utf-8"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=14">
+  <link rel="stylesheet" href="/static/style.css?v=15">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 </head>
 <body>
