@@ -22,6 +22,7 @@ from itsdangerous import URLSafeSerializer, BadSignature
 
 from fastapi import Body
 from fastapi.responses import JSONResponse
+from app.jinja_templates import render_league_carousel
 from app.timefmt import AFTR_DISPLAY_TZ, format_match_kickoff_ar, parse_utc_instant
 from app.auth import create_user
 from app.auth import get_user_id, get_user_by_id
@@ -3022,24 +3023,16 @@ def home_page(request: Request) -> str:
             "top_pick": top_pick,
         })
 
-    # Header nav: Home first, then all active leagues (logo + name, link to league page)
-    _nav_initials = {"PL": "P", "CL": "C", "PD": "L", "SA": "S", "NBA": "N"}
-    home_nav_items = []
-    home_nav_items.append('<a href="/" class="home-nav-item home-nav-home" aria-current="page"><span class="league-nav-fallback" style="display:inline-flex;">⌂</span><span class="league-nav-name">Home</span></a>')
-    # Order: preferred order from HOME_NAV_LEAGUES, then any other active leagues sorted by code
-    _preferred_codes = {c for c, _ in HOME_NAV_LEAGUES}
-    active_ordered = [c for c, _ in HOME_NAV_LEAGUES if c in leagues_with_picks] + sorted(leagues_with_picks - _preferred_codes)
-    for code in active_ordered:
-        display_name = settings.leagues.get(code, code)
-        initial = _nav_initials.get(code, (display_name or code)[:1])
-        logo_src = LEAGUE_LOGO_PATHS.get(code, f"/static/leagues/{code.lower()}.png")
-        home_nav_items.append(f'''
-        <a href="/?league={html_lib.escape(code)}" class="home-nav-item">
-          <img src="{html_lib.escape(logo_src)}" alt="" class="league-nav-logo" onerror="this.style.display='none';var s=this.nextElementSibling;if(s)s.style.display='inline-flex';">
-          <span class="league-nav-fallback" style="display:none;" aria-hidden="true">{html_lib.escape(initial)}</span>
-          <span class="league-nav-name">{html_lib.escape(display_name)}</span>
-        </a>''')
-    home_nav_html = "\n".join(home_nav_items)
+    _unsupported_home = get_unsupported_leagues()
+    _unsupported_football_home = {
+        c for c in _unsupported_home if getattr(settings, "league_sport", {}).get(c) != "basketball"
+    }
+    home_league_carousel_html = render_league_carousel(
+        active_league=settings.default_league,
+        unsupported=_unsupported_football_home,
+        carousel_id="leagueCarouselHome",
+        home_mode=True,
+    )
 
     # Live picks (match in play): dedicated section + exclude from "Mejores Picks del Día"
     live_pick_keys: set[str] = set()
@@ -3370,7 +3363,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=17">
+      <link rel="stylesheet" href="/static/style.css?v=18">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
@@ -3447,15 +3440,16 @@ def home_page(request: Request) -> str:
             <div class="brand-tag">Motor de apuestas con IA</div>
           </div>
         </div>
-        <nav class="home-header-nav" aria-label="Navegación principal">
-          {home_nav_html}
-        </nav>
+        <a href="/" class="home-header-inicio" aria-current="page">Inicio</a>
         <div class="home-header-auth">
           {plan_badge}
           {'<a href="/admin/users" class="muted">Admin</a>' if is_admin_user else ''}
         </div>
       </header>
       {cache_status_html}
+      <div class="home-carousel-strip" role="navigation" aria-label="Elegir liga">
+        {home_league_carousel_html}
+      </div>
 
       <section class="home-hero hero">
         <div class="hero-copy">
@@ -3915,13 +3909,12 @@ def dashboard(request: Request, league: str):
 
     user_premium = bool(uid and (is_premium_active(user) or plan == settings.plan_premium))
 
-    opts = ['<option value="">Inicio</option>']
-    for c, n in settings.leagues.items():
-        if c in unsupported_football:
-            continue
-        sel = ' selected' if c == league else ''
-        opts.append(f'<option value="{c}"{sel}>{html_lib.escape(n)}</option>')
-    league_options_html = ''.join(opts)
+    league_carousel_dashboard_html = render_league_carousel(
+        active_league=league,
+        unsupported=unsupported_football,
+        carousel_id="leagueCarouselDash",
+        home_mode=False,
+    )
 
     welcome_banner = ""
     if request.query_params.get("msg") == "cuenta_creada" and user:
@@ -4096,7 +4089,7 @@ def dashboard(request: Request, league: str):
       <meta charset="utf-8"/>
       <title>AFTR Pick</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=17">
+      <link rel="stylesheet" href="/static/style.css?v=18">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 
       <link rel="manifest" href="/static/manifest.webmanifest">
@@ -4110,7 +4103,6 @@ def dashboard(request: Request, league: str):
       <link rel="apple-touch-startup-image" href="/static/pwa/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
       <link rel="apple-touch-startup-image" href="/static/pwa/splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
       <link rel="apple-touch-startup-image" href="/static/pwa/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)">
-      <link rel="stylesheet" href="/static/style.css?v=17">
     </head>
 
     <body>
@@ -4249,7 +4241,7 @@ def dashboard(request: Request, league: str):
     """
 
     page_html += f"""
-      <div class="top top-pro">
+      <div class="top top-pro top-pro--with-carousel">
         <div class="brand">
           <img src="/static/logo_aftr.png" class="logo-aftr" alt="AFTR" />
           <div class="brand-text">
@@ -4258,18 +4250,12 @@ def dashboard(request: Request, league: str):
           </div>
           {plan_badge}
         </div>
-        </div>
         {welcome_banner}
         {cache_status_html}
-        <div class="top-actions">
-          <div class="league-select">
-            <span class="muted">Liga</span>
-            <select id="leagueSelect" onchange="window.location.href='/?league='+this.value">
-              {league_options_html}
-            </select>
-          </div>
-
+        <div class="top-actions top-actions--carousel" role="navigation" aria-label="Liga y enlaces">
+          {league_carousel_dashboard_html}
           <div class="links">
+            <a href="/">Inicio</a>
             <a href="/?league={league}">Panel</a>
             <a href="/api/matches?league={league}" target="_blank">Matches JSON</a>
             <a href="/api/picks?league={league}" target="_blank">Picks JSON</a>
@@ -5978,7 +5964,7 @@ def _simple_page(title: str, body: str) -> str:
   <meta charset="utf-8"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=17">
+  <link rel="stylesheet" href="/static/style.css?v=18">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 </head>
 <body>

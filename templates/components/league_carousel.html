@@ -1,0 +1,62 @@
+{# AFTR premium league carousel (coverflow). Rendered via Jinja2. #}
+<div class="league-carousel-wrap" data-component="league-carousel">
+  {# Fallback: horizontal scroll if JS disabled #}
+  <noscript>
+    <div class="league-carousel-fallback league-carousel-fallback--scroll" role="navigation" aria-label="Ligas">
+      {% for lg in leagues %}
+      <a class="league-carousel-fallback__link" href="/?league={{ lg.code }}">
+        <img src="{{ lg.logo }}" alt="" width="40" height="40" loading="lazy" />
+        <span>{{ lg.name }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </noscript>
+
+  <div
+    class="league-carousel{% if home_mode %} league-carousel--home{% endif %}"
+    id="{{ carousel_id }}"
+    data-active-code="{{ active_league | e }}"
+    data-home-mode="{{ '1' if home_mode else '0' }}"
+    role="region"
+    aria-label="Selector de liga"
+  >
+    <button type="button" class="league-carousel__arrow league-carousel__arrow--prev" aria-label="Liga anterior">
+      <span aria-hidden="true">‹</span>
+    </button>
+
+    <div class="league-carousel__viewport">
+      <div class="league-carousel__track" data-track>
+        {% for lg in leagues %}
+        <button
+          type="button"
+          class="league-carousel__item"
+          data-code="{{ lg.code | e }}"
+          data-index="{{ loop.index0 }}"
+          aria-label="{{ lg.name | e }}"
+        >
+          <span class="league-carousel__card">
+            <span class="league-carousel__glow" aria-hidden="true"></span>
+            <img
+              class="league-carousel__logo"
+              src="{{ lg.logo }}"
+              alt=""
+              width="56"
+              height="56"
+              loading="lazy"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+            />
+            <span class="league-carousel__logo-fallback" aria-hidden="true">{{ lg.initial | e }}</span>
+            <span class="league-carousel__name">{{ lg.name | e }}</span>
+          </span>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <button type="button" class="league-carousel__arrow league-carousel__arrow--next" aria-label="Liga siguiente">
+      <span aria-hidden="true">›</span>
+    </button>
+  </div>
+</div>
+
+<script src="/static/league_carousel.js?v=1" defer></script>
