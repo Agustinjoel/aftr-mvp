@@ -185,6 +185,15 @@ except ValueError:
 if RATE_LIMIT_COOLDOWN_CAP_SEC < 0:
     RATE_LIMIT_COOLDOWN_CAP_SEC = 0
 
+# Si refresh_running queda en True (crash / kill -9), tras este tiempo se considera colgado y se libera al leer meta.
+# Debe ser mayor que el peor tiempo de un refresh completo esperado (p. ej. 600–1800 en prod).
+try:
+    REFRESH_RUNNING_TTL_SEC = int((os.getenv("REFRESH_RUNNING_TTL_SEC") or "600").strip())
+except ValueError:
+    REFRESH_RUNNING_TTL_SEC = 600
+if REFRESH_RUNNING_TTL_SEC < 0:
+    REFRESH_RUNNING_TTL_SEC = 0
+
 
 class Settings:
     """Objeto de configuración accesible en toda la app."""
@@ -223,6 +232,7 @@ class Settings:
         self.auto_refresh_finished_days = AUTO_REFRESH_FINISHED_DAYS
         self.auto_refresh_fetch_odds = AUTO_REFRESH_FETCH_ODDS
         self.rate_limit_cooldown_cap_sec = RATE_LIMIT_COOLDOWN_CAP_SEC
+        self.refresh_running_ttl_sec = REFRESH_RUNNING_TTL_SEC
 
         self.secret_key = SECRET_KEY
 

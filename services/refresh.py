@@ -17,11 +17,12 @@ from core.model_b import estimate_xg_dynamic_split
 from core.combos import build_global_combos
 
 from data.cache import (
-    read_json,
-    write_json,
-    read_cache_meta,
-    write_cache_meta,
+    CACHE_META_FILENAME,
     backup_current_to_prev,
+    read_json,
+    release_refresh_running_meta,
+    write_cache_meta,
+    write_json,
 )
 from data.providers.football_data import (
     UnsupportedCompetitionError,
@@ -1032,15 +1033,31 @@ def refresh_all(
         return RefreshAllResult(ran=False, skipped_busy=True, light_mode=light)
 
     result = RefreshAllResult(ran=True, light_mode=light)
+    auto_log = logging.getLogger("aftr.auto_refresh")
     try:
         mode_label = "ligero" if light else "completo"
         logger.info("Iniciando refresco (%s)", mode_label)
 
-        meta = read_cache_meta()
-        write_cache_meta({
-            "refresh_running": True,
-            "last_updated": meta.get("last_updated") or datetime.now(timezone.utc).isoformat(),
-        })
+        now_iso = datetime.now(timezone.utc).isoformat()
+        raw_meta = read_json(CACHE_META_FILENAME)
+        meta_base = dict(raw_meta) if isinstance(raw_meta, dict) else {}
+        meta_base["refresh_running"] = True
+        meta_base["refresh_started_at"] = now_iso
+        meta_base["last_updated"] = meta_base.get("last_updated") or now_iso
+        write_cache_meta(meta_base)
+
+        if light:
+            auto_log.info(
+                "AUTO REFRESH START | refresh_running=true | started_at=%s | stuck_ttl=%ss",
+                now_iso,
+                int(getattr(settings, "refresh_running_ttl_sec", 0) or 0),
+            )
+        else:
+            logger.info(
+                "REFRESH START | refresh_running=true | started_at=%s | %s",
+                now_iso,
+                mode_label,
+            )
 
         m_metrics = RefreshMetrics()
         with football_data_refresh_cycle():
@@ -1110,12 +1127,29 @@ def refresh_all(
             result.matches_updated,
         )
         logger.info("✅ Refresco finalizado")
+        if light:
+            auto_log.info(
+                "AUTO REFRESH SUCCESS | leagues_refreshed=%d matches_updated=%d | %s",
+                result.leagues_refreshed,
+                result.matches_updated,
+                datetime.now(timezone.utc).isoformat(),
+            )
         return result
+    except Exception as e:
+        ts = datetime.now(timezone.utc).isoformat()
+        if light:
+            auto_log.error("AUTO REFRESH ERROR: %s | %s", e, ts)
+        logger.exception("REFRESH ERROR: %s | %s", e, ts)
+        raise
     finally:
-        write_cache_meta({
-            "refresh_running": False,
-            "last_updated": datetime.now(timezone.utc).isoformat(),
-        })
+        try:
+            release_refresh_running_meta()
+        except Exception as fin_e:
+            logger.critical(
+                "CRITICAL: release_refresh_running_meta falló (lock de proceso se libera igual): %s",
+                fin_e,
+                exc_info=True,
+            )
         _refresh_global_lock.release()
 
 

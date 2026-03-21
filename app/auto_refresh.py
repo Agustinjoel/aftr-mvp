@@ -37,7 +37,7 @@ async def _auto_refresh_loop(interval_sec: float) -> None:
         meta = read_cache_meta()
         if meta.get("refresh_running"):
             logger.info(
-                "AUTO REFRESH: tick skipped (refresh_running in cache) | %s",
+                "AUTO REFRESH: tick omitido (ya corriendo / refresh_running en caché) | %s",
                 _utc_ts(),
             )
         else:

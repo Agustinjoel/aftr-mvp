@@ -421,7 +421,20 @@ def _is_pick_valid(p: dict) -> bool:
 def _format_cache_status(meta: dict) -> str:
     """Genera HTML para la barra de estado: Última actualización / Actualizando datos."""
     if meta.get("refresh_running"):
-        return '<div class="cache-status cache-status-updating">Actualizando datos...</div>'
+        # Tras ~6.5s consulta /api/status: si el flag ya bajó, muestra última actualización; si no, sigue actualizando.
+        return (
+            '<div class="cache-status cache-status-updating aftr-cache-updating" role="status" '
+            'data-refresh-pending="1">Actualizando datos...</div>'
+            "<script>(function(){document.querySelectorAll('[data-refresh-pending=\"1\"]').forEach(function(el){"
+            "setTimeout(async function(){try{var r=await fetch('/api/status');var j=await r.json();"
+            "el.classList.remove('cache-status-updating');if(j.refresh_running){"
+            "el.classList.add('cache-status-updating');return;}"
+            "el.classList.add('muted');var lu=j.last_update;"
+            "el.textContent=lu?('Última actualización: '+String(lu).replace('T',' ').slice(0,16)):"
+            "'Última actualización: —';}catch(e){el.classList.remove('cache-status-updating');"
+            "el.classList.add('muted');el.textContent='Estado no disponible. Recargá la página.';}"
+            "},6500);});})();</script>"
+        )
     last = meta.get("last_updated")
     if not last:
         return '<div class="cache-status muted">Última actualización: —</div>'

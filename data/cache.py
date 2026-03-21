@@ -5,9 +5,10 @@ from __future__ import annotations
 
 import json
 import logging
+from datetime import datetime, timezone
 from typing import Any
 
-from config.settings import CACHE_DIR, DAILY_DIR
+from config.settings import CACHE_DIR, DAILY_DIR, settings
 
 CACHE_META_FILENAME = "cache_meta.json"
 _logger = logging.getLogger("aftr.cache")
@@ -82,23 +83,107 @@ def backup_current_to_prev(filename: str) -> None:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def _seconds_since_utc_iso(iso: str | None) -> float | None:
+    """Segundos desde un instante ISO (UTC); None si no parseable."""
+    if not iso or not isinstance(iso, str):
+        return None
+    try:
+        s = iso.strip()
+        if s.endswith("Z"):
+            dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+        else:
+            dt = datetime.fromisoformat(s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return (datetime.now(timezone.utc) - dt).total_seconds()
+    except Exception:
+        return None
+
+
 def read_cache_meta() -> dict[str, Any]:
-    """Lee cache_meta.json: last_updated (ISO str), refresh_running (bool)."""
+    """
+    Lee cache_meta.json: last_updated, refresh_running, refresh_started_at.
+    Si refresh_running lleva más de REFRESH_RUNNING_TTL_SEC sin cerrarse (p. ej. proceso muerto),
+    libera el flag y persiste meta corregida.
+    """
     data = read_json(CACHE_META_FILENAME)
     if not isinstance(data, dict):
-        return {"last_updated": None, "refresh_running": False}
+        return {"last_updated": None, "refresh_running": False, "refresh_started_at": None}
+
+    ttl = int(getattr(settings, "refresh_running_ttl_sec", 600) or 0)
+    running = bool(data.get("refresh_running"))
+
+    if running and ttl > 0:
+        started = data.get("refresh_started_at") or data.get("last_updated")
+        age = _seconds_since_utc_iso(started if isinstance(started, str) else None)
+        if age is None or age > float(ttl):
+            now_iso = datetime.now(timezone.utc).isoformat()
+            _logger.warning(
+                "refresh_running en caché expirado o sin marca de tiempo válida "
+                "(age=%s s, ttl=%s s) — liberando flag | %s",
+                age,
+                ttl,
+                now_iso,
+            )
+            data = {
+                **data,
+                "refresh_running": False,
+                "refresh_started_at": None,
+                "last_updated": data.get("last_updated") or now_iso,
+            }
+            try:
+                write_cache_meta(data)
+            except Exception as e:
+                _logger.error("No se pudo persistir meta tras liberar refresh expirado: %s", e)
+
     return {
         "last_updated": data.get("last_updated"),
         "refresh_running": bool(data.get("refresh_running")),
+        "refresh_started_at": data.get("refresh_started_at"),
     }
 
 
 def write_cache_meta(meta: dict[str, Any]) -> None:
-    """Escribe cache_meta.json (last_updated, refresh_running)."""
+    """Escribe cache_meta.json (last_updated, refresh_running, refresh_started_at, …)."""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path = CACHE_DIR / CACHE_META_FILENAME
     with open(path, "w", encoding="utf-8") as f:
         json.dump(meta, f, ensure_ascii=False, indent=2)
+
+
+def release_refresh_running_meta() -> None:
+    """
+    Fuerza refresh_running=False en caché. Llamar siempre en finally del refresco.
+    Nunca debe fallar en silencio: reintenta y loguea CRITICAL si hace falta.
+    """
+    now_iso = datetime.now(timezone.utc).isoformat()
+    try:
+        raw = read_json(CACHE_META_FILENAME)
+        base = dict(raw) if isinstance(raw, dict) else {}
+        base["refresh_running"] = False
+        base["refresh_started_at"] = None
+        base["last_updated"] = now_iso
+        write_cache_meta(base)
+        _logger.info(
+            "AUTO REFRESH END (lock liberado en caché) | refresh_running=false | %s",
+            now_iso,
+        )
+    except Exception as e:
+        _logger.critical(
+            "CRITICAL: no se pudo liberar refresh_running en caché: %s",
+            e,
+            exc_info=True,
+        )
+        try:
+            write_cache_meta(
+                {
+                    "refresh_running": False,
+                    "refresh_started_at": None,
+                    "last_updated": now_iso,
+                }
+            )
+        except Exception as e2:
+            _logger.critical("CRITICAL: reintento fallido al liberar refresh_running: %s", e2)
 
 
 def write_json(filename: str, data: Any) -> None:
