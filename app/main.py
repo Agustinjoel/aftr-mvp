@@ -1,8 +1,11 @@
+import asyncio
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app.auto_refresh import spawn_auto_refresh_task
 from app.routes.matches import router as matches_router
 from app.routes.picks import router as picks_router
 from app.routes.user import router as user_router
@@ -21,10 +24,35 @@ logging.basicConfig(
 )
 logger = logging.getLogger("aftr")
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Startup: optional background auto-refresh (AUTO_REFRESH=true).
+    Shutdown: cancel the asyncio task (in-flight refresh may finish in thread pool).
+    """
+    task: asyncio.Task | None = None
+    if settings.auto_refresh:
+        interval_sec = float(settings.refresh_every_min) * 60.0
+        logger.info(
+            "auto-refresh: scheduler enabled (every %.0f min)",
+            settings.refresh_every_min,
+        )
+        task = spawn_auto_refresh_task(interval_sec)
+    yield
+    if task is not None:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+
 app = FastAPI(
     title="AFTR Pick",
     description="API y dashboard de picks deportivos",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.mount("/static", StaticFiles(directory="static"), name="static")

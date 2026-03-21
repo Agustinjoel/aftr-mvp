@@ -140,6 +140,23 @@ DEBUG: bool = os.getenv("AFTR_DEBUG", "").lower() in ("1", "true", "yes")
 LOG_LEVEL: str = os.getenv("AFTR_LOG_LEVEL", "INFO")
 
 
+def _env_bool(name: str, default: bool = False) -> bool:
+    v = (os.getenv(name) or "").strip().lower()
+    if not v:
+        return default
+    return v in ("1", "true", "yes", "on")
+
+
+# Background refresh (same as `python -m app.cli refresh` → services.refresh.refresh_all)
+AUTO_REFRESH: bool = _env_bool("AUTO_REFRESH", False)
+try:
+    REFRESH_EVERY_MIN = int((os.getenv("REFRESH_EVERY_MIN") or "15").strip())
+except ValueError:
+    REFRESH_EVERY_MIN = 15
+if REFRESH_EVERY_MIN < 1:
+    REFRESH_EVERY_MIN = 1
+
+
 class Settings:
     """Objeto de configuración accesible en toda la app."""
 
@@ -169,6 +186,9 @@ class Settings:
 
         self.debug = DEBUG
         self.log_level = LOG_LEVEL
+
+        self.auto_refresh = AUTO_REFRESH
+        self.refresh_every_min = REFRESH_EVERY_MIN
 
         self.secret_key = SECRET_KEY
 
