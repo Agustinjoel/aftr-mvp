@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -35,10 +36,22 @@ async def lifespan(app: FastAPI):
     if settings.auto_refresh:
         interval_sec = float(settings.refresh_every_min) * 60.0
         logger.info(
-            "auto-refresh: scheduler enabled (every %.0f min)",
+            "AUTO REFRESH: starting scheduler on app startup | every %.0f min (%.0fs) | %s",
             settings.refresh_every_min,
+            interval_sec,
+            datetime.now(timezone.utc).isoformat(),
         )
         task = spawn_auto_refresh_task(interval_sec)
+        if task.done():
+            logger.error(
+                "AUTO REFRESH: task exited immediately (scheduler broken?) | %s",
+                datetime.now(timezone.utc).isoformat(),
+            )
+    else:
+        logger.info(
+            "AUTO REFRESH: scheduler not enabled (set AUTO_REFRESH=true) | %s",
+            datetime.now(timezone.utc).isoformat(),
+        )
     yield
     if task is not None:
         task.cancel()

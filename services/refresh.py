@@ -1032,12 +1032,9 @@ def refresh_all(
         return RefreshAllResult(ran=False, skipped_busy=True, light_mode=light)
 
     result = RefreshAllResult(ran=True, light_mode=light)
-    auto_log = logging.getLogger("aftr.auto_refresh")
     try:
         mode_label = "ligero" if light else "completo"
         logger.info("Iniciando refresco (%s)", mode_label)
-        if light:
-            auto_log.info("auto-refresh: started")
 
         meta = read_cache_meta()
         write_cache_meta({
@@ -1112,18 +1109,6 @@ def refresh_all(
             result.leagues_skipped_fresh,
             result.matches_updated,
         )
-        if light:
-            auto_log.info("auto-refresh: finished")
-            auto_log.info(
-                "auto-refresh: stats football_http_requests=%d cache_hits=%d matches_updated=%d "
-                "rate_limit_sleep_s=%d leagues_refreshed=%d leagues_skipped_fresh=%d",
-                result.football_http_requests,
-                result.football_cache_hits,
-                result.matches_updated,
-                result.rate_limit_sleep_sec,
-                result.leagues_refreshed,
-                result.leagues_skipped_fresh,
-            )
         logger.info("✅ Refresco finalizado")
         return result
     finally:
