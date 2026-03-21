@@ -522,10 +522,11 @@ def _home_league_active_code(request: Request) -> str:
 
 def _build_home_league_snap_carousel_html(request: Request, unsupported: set[str]) -> str:
     """
-    Premium horizontal scroll-snap carousel for home: .league-carousel > .league-track > .league-item.
+    3D-style league carousel for home: viewport + transform track + .league-item (JS-driven center).
     """
     active = _home_league_active_code(request)
     items: list[str] = []
+    ix = 0
     for code, name in settings.leagues.items():
         if code in unsupported:
             continue
@@ -533,19 +534,22 @@ def _build_home_league_snap_carousel_html(request: Request, unsupported: set[str
         logo = f"/static/leagues/{code.lower()}.png"
         initial = (name or code or "?")[:1].upper()
         items.append(
-            f'<a class="league-item{act}" href="/?league={html_lib.escape(code)}" data-code="{html_lib.escape(code)}">'
+            f'<a class="league-item{act}" href="/?league={html_lib.escape(code)}" data-code="{html_lib.escape(code)}" data-index="{ix}">'
             f'<span class="league-item__card">'
+            f'<span class="league-item__glow" aria-hidden="true"></span>'
             f'<img class="league-item__logo" src="{html_lib.escape(logo)}" alt="" width="56" height="56" loading="lazy" '
             "onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\" />"
             f'<span class="league-item__fallback" aria-hidden="true">{html_lib.escape(initial)}</span>'
             f'<span class="league-item__name">{html_lib.escape(name)}</span>'
             f"</span></a>"
         )
+        ix += 1
     return (
-        f'<div class="league-carousel league-carousel--snap-scroll" id="homeLeagueCarousel" '
+        f'<div class="league-carousel league-carousel--3d" id="homeLeagueCarousel" '
         f'data-active-code="{html_lib.escape(active)}">'
-        f'<div class="league-track">{"".join(items)}</div></div>'
-        '<script src="/static/home_league_carousel.js?v=1" defer></script>'
+        f'<div class="league-carousel__viewport3d" data-carousel-viewport>'
+        f'<div class="league-track" data-track>{"".join(items)}</div></div></div>'
+        '<script src="/static/home_league_carousel.js?v=2" defer></script>'
     )
 
 
@@ -3318,7 +3322,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=19">
+      <link rel="stylesheet" href="/static/style.css?v=20">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
@@ -4037,7 +4041,7 @@ def dashboard(request: Request, league: str):
       <meta charset="utf-8"/>
       <title>AFTR Pick</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=19">
+      <link rel="stylesheet" href="/static/style.css?v=20">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 
       <link rel="manifest" href="/static/manifest.webmanifest">
@@ -5912,7 +5916,7 @@ def _simple_page(title: str, body: str) -> str:
   <meta charset="utf-8"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=19">
+  <link rel="stylesheet" href="/static/style.css?v=20">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 </head>
 <body>

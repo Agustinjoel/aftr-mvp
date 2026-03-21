@@ -4124,182 +4124,241 @@ canvas{
 }
 
 /* =========================
-   Home: horizontal snap carousel (.league-track / .league-item)
-   (Does not affect dashboard coverflow: requires .league-carousel--snap-scroll)
+   Home: 3D transform carousel (JS-centered; no scrollbar)
+   Dashboard coverflow unchanged (.league-carousel without --3d)
 ========================= */
-.league-carousel.league-carousel--snap-scroll{
+.league-carousel.league-carousel--3d{
   display: block;
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 4px 0 8px;
-  background: linear-gradient(180deg, rgba(10,14,24,.75) 0%, rgba(8,12,20,.35) 100%);
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,.07);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 12px 40px rgba(0,0,0,.25);
+  padding: 8px 0 12px;
+  background: linear-gradient(180deg, rgba(10,14,24,.88) 0%, rgba(8,12,20,.4) 100%);
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 16px 48px rgba(0,0,0,.35);
+  user-select: none;
+  -webkit-user-select: none;
 }
-.home-carousel-strip .league-carousel--snap-scroll{
+.home-carousel-strip .league-carousel--3d{
   max-width: 100%;
 }
 
-.league-carousel--snap-scroll .league-track{
+.league-carousel--3d .league-carousel__viewport3d{
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  padding: 18px 0 22px;
+  touch-action: pan-y;
+  cursor: grab;
+  perspective: 1100px;
+  perspective-origin: 50% 45%;
+}
+.league-carousel--3d .league-carousel__viewport3d:active{
+  cursor: grabbing;
+}
+
+.league-carousel--3d .league-track{
   display: flex;
   flex-direction: row;
-  align-items: stretch;
-  gap: 8px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  padding: 14px max(10px, calc(50% - 64px)) 20px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(120,170,255,.35) transparent;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  width: max-content;
+  padding: 0 24px;
+  margin: 0;
+  will-change: transform;
+  transform-style: preserve-3d;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
-.league-carousel--snap-scroll .league-track::-webkit-scrollbar{
-  height: 5px;
-}
-.league-carousel--snap-scroll .league-track::-webkit-scrollbar-thumb{
-  background: rgba(120,170,255,.35);
-  border-radius: 99px;
+.league-carousel--3d .league-track::-webkit-scrollbar{
+  display: none;
+  width: 0;
+  height: 0;
 }
 
-.league-carousel--snap-scroll .league-item{
+.league-carousel--3d .league-item{
   flex: 0 0 auto;
-  scroll-snap-align: center;
   text-decoration: none;
   color: inherit;
-  opacity: 0.58;
-  transform: scale(0.9) translateY(0);
+  transform-style: preserve-3d;
   transition:
-    transform 0.3s ease,
-    opacity 0.3s ease,
-    filter 0.3s ease;
-  filter: drop-shadow(0 0 0 transparent);
+    transform 0.4s ease,
+    opacity 0.4s ease,
+    filter 0.4s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.league-carousel--snap-scroll .league-item__card{
+/* Distance-based 3D (classes set by JS) */
+.league-carousel--3d .league-item--d0{
+  transform: scale(1.15) rotateY(0deg) translateY(0) translateZ(0);
+  opacity: 1;
+  z-index: 12;
+  filter: none;
+  animation: league-3d-float 3.4s ease-in-out infinite;
+}
+.league-carousel--3d .league-item--dn1{
+  transform: scale(0.9) rotateY(20deg) translateY(10px) translateZ(-24px);
+  opacity: 0.62;
+  z-index: 6;
+  filter: blur(0.45px);
+}
+.league-carousel--3d .league-item--dp1{
+  transform: scale(0.9) rotateY(-20deg) translateY(10px) translateZ(-24px);
+  opacity: 0.62;
+  z-index: 6;
+  filter: blur(0.45px);
+}
+.league-carousel--3d .league-item--dn2{
+  transform: scale(0.85) rotateY(28deg) translateY(12px) translateZ(-40px);
+  opacity: 0.45;
+  z-index: 3;
+  filter: blur(1px);
+}
+.league-carousel--3d .league-item--dp2{
+  transform: scale(0.85) rotateY(-28deg) translateY(12px) translateZ(-40px);
+  opacity: 0.45;
+  z-index: 3;
+  filter: blur(1px);
+}
+.league-carousel--3d .league-item--far{
+  transform: scale(0.8) rotateY(34deg) translateY(14px) translateZ(-52px);
+  opacity: 0.32;
+  z-index: 1;
+  filter: blur(1.4px);
+  pointer-events: none;
+}
+
+.league-carousel--3d .league-item__card{
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 12px 14px 10px;
-  min-width: 88px;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.1);
-  background: linear-gradient(165deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
-  box-shadow: 0 6px 20px rgba(0,0,0,.28);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  padding: 12px 16px 10px;
+  min-width: 92px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: linear-gradient(155deg, rgba(255,255,255,.1), rgba(255,255,255,.03));
+  box-shadow: 0 8px 28px rgba(0,0,0,.32);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
 }
 
-.league-carousel--snap-scroll .league-item__logo{
+.league-carousel--3d .league-item__glow{
+  position: absolute;
+  inset: -8px;
+  border-radius: 24px;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse at 50% 75%, rgba(56,189,248,.45), transparent 62%);
+  transition: opacity 0.4s ease;
+  z-index: -1;
+}
+.league-carousel--3d .league-item--d0 .league-item__glow{
+  opacity: 1;
+}
+
+.league-carousel--3d .league-item--d0 .league-item__card{
+  border-color: rgba(120,180,255,.5);
+  background: linear-gradient(160deg, rgba(96,165,250,.22), rgba(120,170,255,.08), rgba(255,255,255,.05));
+  box-shadow:
+    0 0 0 1px rgba(120,180,255,.28),
+    0 16px 44px rgba(0,0,0,.45),
+    0 0 40px rgba(56,189,248,.25),
+    0 20px 50px rgba(56,189,248,.12);
+}
+
+.league-carousel--3d .league-item__logo{
   width: 52px;
   height: 52px;
   object-fit: contain;
   border-radius: 12px;
   display: block;
 }
-.league-carousel--snap-scroll .league-item__fallback{
+.league-carousel--3d .league-item__fallback{
   display: none;
   width: 52px;
   height: 52px;
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: rgba(255,255,255,.1);
+  background: rgba(255,255,255,.12);
   font-size: 20px;
   font-weight: 900;
   color: rgba(234,242,255,.9);
 }
-.league-carousel--snap-scroll .league-item__name{
+.league-carousel--3d .league-item__name{
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   text-align: center;
-  max-width: 96px;
+  max-width: 100px;
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: rgba(234,242,255,.75);
-  transition: color 0.3s ease;
+  color: rgba(234,242,255,.72);
+  transition: color 0.4s ease;
 }
-
-/* Active (center) league */
-.league-carousel--snap-scroll .league-item.is-active{
-  opacity: 1;
-  transform: scale(1.1) translateY(-8px);
-  filter: drop-shadow(0 0 20px rgba(56,189,248,.5)) drop-shadow(0 8px 24px rgba(0,0,0,.4));
-  animation: league-item-float 3.2s ease-in-out infinite;
-}
-.league-carousel--snap-scroll .league-item.is-active .league-item__card{
-  border-color: rgba(120,180,255,.45);
-  background: linear-gradient(165deg, rgba(120,170,255,.14), rgba(255,255,255,.04));
-  box-shadow:
-    0 0 0 1px rgba(120,180,255,.2),
-    0 12px 36px rgba(0,0,0,.4),
-    0 0 32px rgba(56,189,248,.18);
-}
-.league-carousel--snap-scroll .league-item.is-active .league-item__name{
+.league-carousel--3d .league-item--d0 .league-item__name{
   color: rgba(234,242,255,.98);
 }
 
-.league-carousel--snap-scroll .league-item:hover{
-  opacity: 0.88;
-  transform: scale(0.94) translateY(-3px);
-  filter: drop-shadow(0 0 14px rgba(96,165,250,.35));
+.league-carousel--3d .league-item:hover .league-item__card{
+  border-color: rgba(170,210,255,.38);
+  box-shadow: 0 0 24px rgba(56,189,248,.2);
 }
-.league-carousel--snap-scroll .league-item.is-active:hover{
+.league-carousel--3d .league-item--d0:hover .league-item__glow{
   opacity: 1;
-  transform: scale(1.14) translateY(-10px);
-  filter: drop-shadow(0 0 26px rgba(56,189,248,.6)) drop-shadow(0 10px 28px rgba(0,0,0,.45));
+  background: radial-gradient(ellipse at 50% 72%, rgba(96,210,255,.55), transparent 58%);
 }
-.league-carousel--snap-scroll .league-item:hover .league-item__card{
-  border-color: rgba(170,210,255,.32);
+.league-carousel--3d .league-item--d0:hover .league-item__card{
+  box-shadow:
+    0 0 0 1px rgba(150,200,255,.4),
+    0 18px 50px rgba(0,0,0,.5),
+    0 0 48px rgba(56,189,248,.35);
 }
 
-@keyframes league-item-float{
-  0%, 100%{ transform: scale(1.1) translateY(-8px); }
-  50%{ transform: scale(1.1) translateY(-11px); }
+@keyframes league-3d-float{
+  0%, 100%{ transform: scale(1.15) rotateY(0deg) translateY(0) translateZ(0); }
+  50%{ transform: scale(1.15) rotateY(0deg) translateY(-6px) translateZ(0); }
 }
 
 @media (max-width: 540px){
-  .league-carousel--snap-scroll .league-track{
-    gap: 6px;
-    padding: 12px max(8px, calc(50% - 76px)) 18px;
-  }
-  .league-carousel--snap-scroll .league-item__card{
-    min-width: 96px;
-    padding: 14px 16px 12px;
+  .league-carousel--3d .league-track{
     gap: 10px;
+    padding: 0 16px;
   }
-  .league-carousel--snap-scroll .league-item__logo,
-  .league-carousel--snap-scroll .league-item__fallback{
+  .league-carousel--3d .league-item__card{
+    min-width: 100px;
+    padding: 14px 18px 12px;
+  }
+  .league-carousel--3d .league-item__logo,
+  .league-carousel--3d .league-item__fallback{
     width: 58px;
     height: 58px;
   }
-  .league-carousel--snap-scroll .league-item__name{
+  .league-carousel--3d .league-item__name{
     font-size: 12px;
-    max-width: 104px;
+    max-width: 108px;
   }
-  .league-carousel--snap-scroll .league-item{
-    transform: scale(0.88) translateY(0);
-  }
-  .league-carousel--snap-scroll .league-item.is-active{
-    transform: scale(1.08) translateY(-6px);
+  .league-carousel--3d .league-item--d0{
+    animation-duration: 3s;
   }
 }
 
 @media (prefers-reduced-motion: reduce){
-  .league-carousel--snap-scroll .league-item{
+  .league-carousel--3d .league-item{
     transition-duration: 0.01ms;
   }
-  .league-carousel--snap-scroll .league-item.is-active{
+  .league-carousel--3d .league-item--d0{
     animation: none;
   }
-  .league-carousel--snap-scroll .league-track{
-    scroll-behavior: auto;
+  .league-carousel--3d .league-item__card,
+  .league-carousel--3d .league-item__glow{
+    transition-duration: 0.01ms;
   }
 }
