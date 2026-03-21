@@ -181,7 +181,11 @@ def _normalize_match(m: dict) -> dict:
 
     out.setdefault("home_crest", None)
     out.setdefault("away_crest", None)
-    out.setdefault("status", out.get("status") or "TIMED")
+    st_raw = out.get("status")
+    if st_raw is None or (isinstance(st_raw, str) and not st_raw.strip()):
+        out["status"] = "TIMED"
+    else:
+        out["status"] = str(st_raw).strip().upper()
     out.setdefault("sport", "football")
 
     sc = out.get("score")
@@ -1252,6 +1256,18 @@ def refresh_league(
 
     # 5b) Enrich football picks with odds (implied prob, edge) — optional to save Odds API calls
     merged_matches_for_odds = _merge_by_match_id(upcoming_matches, finished_matches_norm)
+    # Overlay IN_PLAY from API: SCHEDULED fetch omits live fixtures; without this, cache stays TIMED forever.
+    try:
+        raw_live_full = get_live_matches(league_code)
+        if raw_live_full:
+            for m in raw_live_full:
+                m["sport"] = "football"
+            live_norm_full = [_normalize_match(m) for m in raw_live_full]
+            merged_matches_for_odds = _merge_by_match_id(merged_matches_for_odds, live_norm_full)
+    except UnsupportedCompetitionError:
+        pass
+    except Exception as e:
+        logger.debug("full refresh live overlay %s: %s", league_code, e)
     if fetch_odds:
         odds_debug_enabled = bool(getattr(settings, "debug", False)) or str(os.getenv("AFTR_ODDS_DEBUG", "0")).lower() in (
             "1",
@@ -1303,9 +1319,9 @@ def refresh_league(
     keep_days = getattr(settings, "daily_keep_days", None)
     picks_daily = _window_daily(picks_all, keep_days)
 
-    # 7) Guardar matches (para score/compat UI). Backup actual a .prev antes de sobrescribir (fallback UI durante refresh).
+    # 7) Guardar matches (para score/compat UI). Fresh API data must win over stale disk (second arg wins).
     existing_matches = _read_json_list(f"daily_matches_{league_code}.json")
-    merged_matches = _merge_by_match_id(merged_matches_for_odds, existing_matches)
+    merged_matches = _merge_by_match_id(existing_matches, merged_matches_for_odds)
     backup_current_to_prev(f"daily_matches_{league_code}.json")
     write_json(f"daily_matches_{league_code}.json", merged_matches)
 

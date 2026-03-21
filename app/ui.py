@@ -3,6 +3,7 @@ from __future__ import annotations
 import html as html_lib
 import json
 import logging
+import os
 import re
 import unicodedata
 from datetime import date, datetime, timezone, timedelta
@@ -698,8 +699,46 @@ MATCH_LIVE_STATUSES = frozenset(
         "INT",
         "LIVE_1H",
         "LIVE_2H",
+        # Basketball / API-Sports style (short codes)
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "1Q",
+        "2Q",
+        "3Q",
+        "4Q",
+        "OT",
+        "BT",
+        "C1",
+        "C2",
+        "C3",
+        "C4",
     }
 )
+
+
+def _match_live_status_token(match: dict) -> str:
+    """
+    Normalize live-relevant status from flat or nested provider shapes (Football-Data, API-Sports, etc.).
+    """
+    if not isinstance(match, dict):
+        return ""
+    for key in ("status", "match_status", "state"):
+        v = match.get(key)
+        if v is not None and str(v).strip():
+            return str(v).strip().upper()
+    fx = match.get("fixture")
+    if isinstance(fx, dict):
+        st = fx.get("status")
+        if isinstance(st, dict):
+            for sub in ("short", "long", "shortName", "type"):
+                x = st.get(sub)
+                if x is not None and str(x).strip():
+                    return str(x).strip().upper()
+        elif st is not None and str(st).strip():
+            return str(st).strip().upper()
+    return ""
 
 
 def isMatchFinished(match: dict) -> bool:
@@ -713,7 +752,7 @@ def isMatchFinished(match: dict) -> bool:
     if not isinstance(match, dict):
         return False
 
-    status_raw = str(match.get("status") or "").strip().upper()
+    status_raw = _match_live_status_token(match)
     if status_raw in {"FINISHED", "FINAL", "SETTLED", "FINALIZADO"}:
         return True
     if status_raw in {"WIN", "LOSS", "PUSH"}:
@@ -768,6 +807,9 @@ def isMatchFinished(match: dict) -> bool:
         if dt is not None and dt <= datetime.now(timezone.utc):
             # Ensure score parseable to ints
             if _safe_int(home_score) is not None and _safe_int(away_score) is not None:
+                # Stale TIMED/SCHEDULED + score + past kickoff is usually LIVE (provider/cache lag), not FT.
+                if status_raw in {"TIMED", "SCHEDULED"}:
+                    return False
                 return True
 
     return False
@@ -779,7 +821,7 @@ def isMatchLive(match: dict) -> bool:
         return False
     if isMatchFinished(match):
         return False
-    status_raw = str(match.get("status") or "").strip().upper()
+    status_raw = _match_live_status_token(match)
     return status_raw in MATCH_LIVE_STATUSES
 
 
@@ -804,7 +846,7 @@ def _format_live_status_line(match: dict) -> str:
     """Compact status for live headers (e.g. 🔴 LIVE 67', HT, 2H 74')."""
     if not isinstance(match, dict):
         return "🔴 LIVE"
-    st = str(match.get("status") or "").strip().upper()
+    st = _match_live_status_token(match)
     minute_s = _live_minute_suffix(match)
 
     if st in {"HT", "HALFTIME", "HALF_TIME", "BREAK"}:
@@ -2616,6 +2658,52 @@ HOME_NAV_LEAGUES = [
 ]
 
 
+def _debug_log_live_match_candidates(league_code: str, matches: list[dict]) -> None:
+    """
+    Temporary diagnostics: kickoff in the past, not explicitly final — log raw status fields vs isMatchLive.
+    Enable: AFTR_LIVE_DEBUG=1
+    """
+    if os.getenv("AFTR_LIVE_DEBUG", "").strip().lower() not in ("1", "true", "yes", "on"):
+        return
+    now = datetime.now(timezone.utc)
+    fin_like = frozenset(
+        {"FINISHED", "FINAL", "FT", "AWARDED", "CANCELLED", "POSTPONED", "SETTLED", "FINALIZADO"},
+    )
+    for m in matches:
+        if not isinstance(m, dict):
+            continue
+        st = _match_live_status_token(m)
+        if st in fin_like:
+            continue
+        dt = _parse_utcdate_maybe(m.get("utcDate"))
+        if dt is None or dt > now:
+            continue
+        raw_bundle: dict[str, Any] = {
+            "status": m.get("status"),
+            "match_status": m.get("match_status"),
+            "state": m.get("state"),
+            "minute": m.get("minute"),
+            "elapsed": m.get("elapsed"),
+            "time_elapsed": m.get("time_elapsed"),
+            "match_minute": m.get("match_minute"),
+            "live": m.get("live"),
+        }
+        fx = m.get("fixture")
+        if isinstance(fx, dict):
+            raw_bundle["fixture.status"] = fx.get("status")
+        logger.info(
+            "AFTR_LIVE_DEBUG league=%s home=%s away=%s kickoff=%s status_fields=%s token=%s isMatchLive=%s isMatchFinished=%s",
+            league_code,
+            m.get("home"),
+            m.get("away"),
+            m.get("utcDate"),
+            raw_bundle,
+            st,
+            isMatchLive(m),
+            isMatchFinished(m),
+        )
+
+
 def _load_all_leagues_data(
     league_codes: list[str] | None = None,
 ) -> tuple[list[dict], dict[Any, dict], list[dict], list[dict], dict[str, list[dict]], dict[str, list[dict]]]:
@@ -2654,6 +2742,7 @@ def _load_all_leagues_data(
             if mid is not None:
                 match_by_key[(code, mid)] = m
         matches_by_league[code] = matches
+        _debug_log_live_match_candidates(code, matches)
 
         filtered_for_league: list[dict] = []
         for p in picks:

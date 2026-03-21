@@ -287,7 +287,9 @@ def get_upcoming_matches(league_code: str, days: int = 3) -> list[dict]:
         hid = (m.get("homeTeam") or {}).get("id")
         aid = (m.get("awayTeam") or {}).get("id")
 
-        out.append({
+        st = (m.get("status") or "").strip().upper()
+        minute = m.get("minute")
+        row = {
             "match_id": m.get("id"),
             "utcDate": utc,
             "home": home,
@@ -297,7 +299,12 @@ def get_upcoming_matches(league_code: str, days: int = 3) -> list[dict]:
             "away_team_id": aid,
             "home_crest": _crest_from_team_id(hid),
             "away_crest": _crest_from_team_id(aid),
-        })
+        }
+        if st:
+            row["status"] = st
+        if minute is not None:
+            row["minute"] = minute
+        out.append(row)
 
     return out[:60]
 
@@ -308,7 +315,9 @@ def _fd_match_to_aftr_row(m: dict, league_code: str) -> dict:
     hg, ag = ft.get("home"), ft.get("away")
     hid = (m.get("homeTeam") or {}).get("id")
     aid = (m.get("awayTeam") or {}).get("id")
-    return {
+    st = (m.get("status") or "").strip().upper() or "IN_PLAY"
+    minute = m.get("minute")
+    row = {
         "match_id": m.get("id"),
         "utcDate": m.get("utcDate", ""),
         "home": (m.get("homeTeam") or {}).get("name", ""),
@@ -320,8 +329,11 @@ def _fd_match_to_aftr_row(m: dict, league_code: str) -> dict:
         "away_crest": _crest_from_team_id(aid),
         "home_goals": hg,
         "away_goals": ag,
-        "status": (m.get("status") or "").upper() or "IN_PLAY",
+        "status": st,
     }
+    if minute is not None:
+        row["minute"] = minute
+    return row
 
 
 def get_live_matches(league_code: str) -> list[dict]:

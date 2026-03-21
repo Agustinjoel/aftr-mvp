@@ -1,6 +1,7 @@
 """
 Auto-refresh por capas: LIVE, RESULTS, ODDS/PRE-MATCH.
-- LIVE: solo ligas con pista IN_PLAY en caché local (sin API si no hay candidatos).
+- LIVE: ligas con IN_PLAY/PAUSED en caché, o con kickoff ya pasado y estado no final (evita gallina-huevo
+  cuando la caché solo tenía TIMED hasta el primer poll).
 - RESULTS: ventana corta (RESULTS_FINISHED_HOURS).
 - ODDS: solo ligas con partido en ventana ODDS_PREMATCH_HOURS; respeta frescura de daily_odds_*.json.
 
@@ -94,7 +95,7 @@ def _last_odds_ts(state: dict) -> float:
 
 
 def _leagues_with_live_hint_from_cache() -> list[str]:
-    """Ligas donde daily_matches muestra partido en vivo (evita N llamadas API si no hay ninguno)."""
+    """Ligas donde daily_matches ya marca explícitamente en juego."""
     out: list[str] = []
     for code in _football_league_codes():
         data = read_json(f"daily_matches_{code}.json")
@@ -108,6 +109,46 @@ def _leagues_with_live_hint_from_cache() -> list[str]:
                 out.append(code)
                 break
     return out
+
+
+def _leagues_with_kickoff_past_not_final(max_hours_after_kickoff: float = 5.0) -> list[str]:
+    """
+    Ligas con al menos un fixture: kickoff <= ahora, estado no claramente final, dentro de ventana reciente.
+    Desbloquea poll de get_live_matches cuando la caché aún dice TIMED/SCHEDULED.
+    """
+    out: list[str] = []
+    now = datetime.now(timezone.utc)
+    fin_like = frozenset(
+        {"FINISHED", "FT", "FINAL", "AWARDED", "CANCELLED", "POSTPONED", "SETTLED", "FINALIZADO"},
+    )
+    max_sec = max_hours_after_kickoff * 3600
+    for code in _football_league_codes():
+        data = read_json(f"daily_matches_{code}.json")
+        if not isinstance(data, list):
+            continue
+        for m in data:
+            if not isinstance(m, dict):
+                continue
+            st = (m.get("status") or "").upper()
+            if st in fin_like:
+                continue
+            dt = _parse_utcdate_str(m.get("utcDate"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            if dt > now:
+                continue
+            if (now - dt).total_seconds() > max_sec:
+                continue
+            out.append(code)
+            break
+    return out
+
+
+def _leagues_needing_live_poll() -> list[str]:
+    """Unión de pista IN_PLAY y candidatos por kickoff pasado (sin duplicados, orden estable)."""
+    hinted = set(_leagues_with_live_hint_from_cache())
+    hinted.update(_leagues_with_kickoff_past_not_final())
+    return sorted(hinted)
 
 
 def _league_in_prematch_window(league_code: str, hours: int) -> bool:
@@ -196,7 +237,7 @@ def run_live_refresh_job() -> JobOutcome:
             )
             return out
 
-        hints = _leagues_with_live_hint_from_cache()
+        hints = _leagues_needing_live_poll()
         if not hints:
             out.skipped = True
             out.skip_reason = "no_live_matches"
