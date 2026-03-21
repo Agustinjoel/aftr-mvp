@@ -1999,6 +1999,338 @@ def _build_combos_by_tier(
     return combos
 
 
+def _combo_match_key_for_home(p: dict) -> tuple[str, int] | None:
+    """Global match key for home combo dedupe: (league, match_id)."""
+    if not isinstance(p, dict):
+        return None
+    league = (p.get("_league") or p.get("league") or "").strip()
+    if not league:
+        return None
+    mid = _safe_int(p.get("match_id")) or _safe_int(p.get("id"))
+    if mid is None:
+        return None
+    return (league, int(mid))
+
+
+def _combo_leg_odds_value(p: dict) -> float | None:
+    """Leg odds for combo math (approx): odds_decimal → best_fair → 1/best_prob."""
+    if not isinstance(p, dict):
+        return None
+    od = p.get("odds_decimal")
+    if od is not None:
+        try:
+            return float(od)
+        except (TypeError, ValueError):
+            pass
+    bf = p.get("best_fair")
+    if bf is not None:
+        try:
+            return float(bf)
+        except (TypeError, ValueError):
+            pass
+    bp = p.get("best_prob")
+    bp = _safe_float(bp)
+    if bp is not None and bp > 0:
+        try:
+            return 1.0 / float(bp)
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
+def _build_home_premium_combos(
+    upcoming_picks: list[dict],
+    match_by_key: dict[Any, dict],
+) -> list[dict]:
+    """
+    Build exactly 3 premium combo cards with explicit roles:
+      1) Combo del Día (today only, 3-5 legs)
+      2) Combo 72h (today..+3 days, 3-5 legs)
+      3) Combo Value (today..+3 days, 3-5 legs; prioritize edge/value)
+
+    Dedupe:
+      - never repeat the same match inside a combo
+      - avoid repeating across combos when possible; if not enough inventory, allow cross-combo duplicates
+        but still avoid duplicates within each combo.
+    """
+    today_local = datetime.now().astimezone().date()
+
+    # Candidate validity: strong + enough confidence + (when present) positive edge.
+    def _valid(p: dict) -> bool:
+        if _aftr_score(p) < 75:
+            return False
+        if _safe_int(p.get("confidence"), 0) < 6:
+            return False
+        edge_val = p.get("edge")
+        if edge_val is not None:
+            try:
+                if float(edge_val) <= 0:
+                    return False
+            except (TypeError, ValueError):
+                return False
+        return True
+
+    def _in_local_window(p: dict, start_day: int, end_day: int) -> bool:
+        d = _pick_local_date(p, match_by_key)
+        if d is None:
+            return False
+        return (today_local + timedelta(days=start_day)) <= d <= (today_local + timedelta(days=end_day))
+
+    all_candidates = [p for p in (upcoming_picks or []) if isinstance(p, dict) and _valid(p)]
+
+    # Keep only window matches.
+    def _pool(start_day: int, end_day: int) -> list[dict]:
+        return [p for p in all_candidates if _in_local_window(p, start_day, end_day)]
+
+    pools = {
+        "day": _pool(0, 0),
+        "72h": _pool(0, 3),
+        "value": _pool(0, 3),
+    }
+
+    # Sort strategy per role.
+    day_sorted = sorted(pools["day"], key=lambda p: -_pick_score(p))
+    h72_sorted = sorted(pools["72h"], key=lambda p: -_pick_score(p))
+    value_sorted = sorted(
+        pools["value"],
+        key=lambda p: (
+            -float(_safe_float(p.get("edge"), 0) or 0),
+            -_aftr_score(p),
+            -_pick_score(p),
+        ),
+    )
+
+    def _target_leg_count(candidates: list[dict]) -> int:
+        uniq = set()
+        for p in candidates:
+            k = _combo_match_key_for_home(p)
+            if k:
+                uniq.add(k)
+        if len(uniq) >= 5:
+            return 5
+        if len(uniq) >= 4:
+            return 4
+        return 3
+
+    def _select_legs(candidates: list[dict], target_count: int, global_used: set[tuple[str, int]]) -> list[dict]:
+        legs: list[dict] = []
+        used_local: set[tuple[str, int]] = set()
+
+        # Preferred: do not reuse matches across combos.
+        for p in candidates:
+            k = _combo_match_key_for_home(p)
+            if not k or k in used_local or k in global_used:
+                continue
+            legs.append(p)
+            used_local.add(k)
+            if len(legs) >= target_count:
+                break
+
+        # Fallback: allow cross-combo duplicates but still avoid duplicates inside combo.
+        if len(legs) < 3:
+            for p in candidates:
+                k = _combo_match_key_for_home(p)
+                if not k or k in used_local:
+                    continue
+                legs.append(p)
+                used_local.add(k)
+                if len(legs) >= target_count:
+                    break
+        return legs
+
+    global_used: set[tuple[str, int]] = set()
+
+    combo_specs = [
+        {
+            "key": "day",
+            "title": "🔥 Combo del Día",
+            "description": "Las mejores selecciones de hoy",
+            "tier_badge": "Seguro",
+            "tier_class": "seguro",
+            "sorted": day_sorted,
+        },
+        {
+            "key": "72h",
+            "title": "⏳ Combo 72h",
+            "description": "Ventana ampliada de oportunidades",
+            "tier_badge": "Balanceado",
+            "tier_class": "balanceado",
+            "sorted": h72_sorted,
+        },
+        {
+            "key": "value",
+            "title": "💎 Combo Value",
+            "description": "Más edge, más cuota, más riesgo controlado",
+            "tier_badge": "Value",
+            "tier_class": "value",
+            "sorted": value_sorted,
+        },
+    ]
+
+    combos: list[dict] = []
+    for spec in combo_specs:
+        candidates = spec.get("sorted") or []
+        target_count = _target_leg_count(candidates)
+        legs_picks = _select_legs(candidates, target_count, global_used)
+        # Ensure 3-5 legs: if we couldn't find enough inventory, we return an empty combo.
+        if len(legs_picks) < 3:
+            combos.append({"spec": spec, "legs": [], "combined_odds": None, "combo_prob_pct": None, "combo_score": None})
+            continue
+
+        # Update global used matches to minimize duplicates across combos.
+        for lp in legs_picks:
+            k = _combo_match_key_for_home(lp)
+            if k:
+                global_used.add(k)
+
+        legs: list[dict] = []
+        combined_prob = 1.0
+        combined_odds: float | None = None
+        odds_ok = True
+        score_sum = 0
+
+        for lp in legs_picks:
+            mid = _safe_int(lp.get("match_id")) or _safe_int(lp.get("id"))
+            league_code = (lp.get("_league") or lp.get("league") or "").strip()
+            m = match_by_key.get((league_code, mid)) if mid is not None and league_code else None
+            home = lp.get("home") or (m.get("home") if isinstance(m, dict) else "") or "—"
+            away = lp.get("away") or (m.get("away") if isinstance(m, dict) else "") or "—"
+            market = (lp.get("best_market") or lp.get("best_market_name") or "").strip() or "—"
+            home_crest = lp.get("home_crest") or (m.get("home_crest") if isinstance(m, dict) else None)
+            away_crest = lp.get("away_crest") or (m.get("away_crest") if isinstance(m, dict) else None)
+
+            prob = _safe_float(lp.get("best_prob"), 0) or 0.0
+            leg_odds = _combo_leg_odds_value(lp)
+            aftr_sc = lp.get("aftr_score")
+            if aftr_sc is None:
+                aftr_sc = _aftr_score(lp)
+            try:
+                aftr_sc_int = int(round(float(aftr_sc)))
+            except (TypeError, ValueError):
+                aftr_sc_int = _aftr_score(lp)
+
+            legs.append(
+                {
+                    "home": home,
+                    "away": away,
+                    "market": market,
+                    "prob": prob,
+                    "home_crest": home_crest,
+                    "away_crest": away_crest,
+                    "match_id": mid,
+                    "odds_value": leg_odds,
+                    "aftr_score": aftr_sc_int,
+                }
+            )
+
+            combined_prob *= prob
+            score_sum += aftr_sc_int
+            if leg_odds is None:
+                odds_ok = False
+            else:
+                if combined_odds is None:
+                    combined_odds = float(leg_odds)
+                else:
+                    combined_odds *= float(leg_odds)
+
+        combo_prob_pct = round(combined_prob * 100, 1)
+        combo_score = int(round(score_sum / max(1, len(legs))))
+        if not odds_ok:
+            combined_odds = None
+
+        combos.append(
+            {
+                **spec,
+                "legs": legs,
+                "combo_prob_pct": combo_prob_pct,
+                "combined_odds": combined_odds,
+                "combo_score": combo_score,
+            }
+        )
+
+    return combos
+
+
+def _render_home_premium_combo_card(combo: dict) -> str:
+    """Render one of the 3 home premium combo cards."""
+    if not combo or not isinstance(combo, dict):
+        return ""
+    title = combo.get("title") or "Combo"
+    description = combo.get("description") or ""
+    tier_badge = combo.get("tier_badge") or "—"
+    tier_class = combo.get("tier_class") or "seguro"
+    legs = combo.get("legs") or []
+    n = len(legs)
+
+    prob_pct = combo.get("combo_prob_pct")
+    prob_str = f"{prob_pct:.1f}%" if prob_pct is not None else "—"
+    combined_odds = combo.get("combined_odds")
+    odds_str = f"~{combined_odds:.2f}" if combined_odds is not None else "—"
+    score = combo.get("combo_score")
+    score_str = str(score) if score is not None else "—"
+
+    if n == 0:
+        return f"""
+    <div class="card combo-card home-premium-combo-card">
+      <div class="combo-head">
+        <div class="combo-title">{html_lib.escape(title)}</div>
+        <span class="combo-tier home-combo-tier home-combo-tier--{html_lib.escape(tier_class)}">{html_lib.escape(tier_badge)}</span>
+      </div>
+      <div class="combo-sub">
+        <div class="home-combo-desc">{html_lib.escape(description)}</div>
+        <div class="home-combo-empty muted">No hay inventario suficiente.</div>
+      </div>
+    </div>"""
+
+    rows = []
+    for it in legs:
+        if not isinstance(it, dict):
+            continue
+        home = it.get("home") or "—"
+        away = it.get("away") or "—"
+        market = it.get("market") or "—"
+        prob = _safe_float(it.get("prob"), 0) or 0.0
+        p_pct = round(prob * 100, 0)
+        home_part = _team_with_crest(it.get("home_crest"), home)
+        away_part = _team_with_crest(it.get("away_crest"), away)
+        rows.append(
+            f"""
+          <div class="combo-leg">
+            <div class="combo-leg-top">
+              <span class="combo-match">
+                {home_part}
+                <span class="vs">vs</span>
+                {away_part}
+              </span>
+              <span class="combo-pct">{p_pct:.0f}%</span>
+            </div>
+            <div class="combo-market">{html_lib.escape(str(market))}</div>
+          </div>
+        """
+        )
+
+    return f"""
+    <div class="card combo-card home-premium-combo-card">
+      <div class="combo-head">
+        <div class="combo-title">{html_lib.escape(title)}</div>
+        <span class="combo-tier home-combo-tier home-combo-tier--{html_lib.escape(tier_class)}">{html_lib.escape(tier_badge)}</span>
+      </div>
+      <div class="combo-sub">
+        <div class="home-combo-desc">{html_lib.escape(description)}</div>
+        <div class="home-combo-stats muted">
+          <span><b>{n}</b> selecciones</span>
+          <span>Cuota total: <b>{html_lib.escape(odds_str)}</b></span>
+          <span>Prob: <b>{html_lib.escape(prob_str)}</b></span>
+          <span>AFTR combo: <b>{html_lib.escape(score_str)}</b></span>
+        </div>
+      </div>
+      <div class="combo-legs">
+        {''.join(rows)}
+      </div>
+    </div>
+    """
+
+
 def _render_combo_of_the_day(combo: dict) -> str:
     """Render the Combo of the Day section (same style as combo-card)."""
     if not combo or not isinstance(combo, dict):
@@ -2392,20 +2724,12 @@ def home_page(request: Request) -> str:
 
     # Mejores Picks del Día: best by _pick_score (limited to 4 in card build below)
 
-    # Three combos by tier (SAFE, MEDIUM, AGGRESSIVE) for home page
-    combos_by_tier = _build_combos_by_tier(
+    # 3 premium combo cards with explicit roles: Día / 72h / Value
+    premium_combos = _build_home_premium_combos(
         all_upcoming,
         match_by_key,
-        match_key_fn=lambda p: (p.get("_league"), _safe_int(p.get("match_id")) or _safe_int(p.get("id"))),
-        max_combos=3,
     )
-    tier_order = ("Safe", "Medium", "Aggressive")
-    # Fill three slots by position: first combo -> Safe, second -> Medium, third -> Aggressive
-    combos_html_list = [
-        _render_combo_card(combos_by_tier[i] if i < len(combos_by_tier) else None, tier_order[i])
-        for i in range(3)
-    ]
-    combos_section_html = "\n".join(combos_html_list)
+    combos_section_html = "\n".join(_render_home_premium_combo_card(c) for c in premium_combos)
 
     # Active leagues = all configured leagues that have at least one pick (nav, featured, big matches)
     leagues_with_picks = {
