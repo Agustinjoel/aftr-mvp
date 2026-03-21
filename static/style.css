@@ -2666,3 +2666,162 @@ canvas{
   border-color: rgba(212,175,55,.25);
   background: rgba(212,175,55,.06);
 }
+
+/* =========================
+   ACCOUNT — Premium Dashboard upgrade
+========================= */
+.account-hero-card{
+  position: relative;
+}
+.account-hero-top{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+.account-hero-meta{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.account-type-pill{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: rgba(234,242,255,.92);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+.account-type-pill--premium{
+  border-color: rgba(212,175,55,.45);
+  background: rgba(212,175,55,.12);
+  color: #e8d48a;
+  box-shadow: 0 0 16px rgba(212,175,55,.10);
+}
+.account-type-pill--free{
+  color: rgba(234,242,255,.78);
+}
+.account-hero-summary{
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.account-summary-item{
+  padding: 10px 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+}
+.account-summary-label{
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 6px;
+}
+.account-summary-value{
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: rgba(234,242,255,.98);
+}
+
+.account-stats-grid{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (min-width: 720px){
+  .account-stats-grid{
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .account-hero-summary{
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.account-insights-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.account-insight-card{
+  padding: 14px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+}
+.account-insight-label{
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 8px;
+}
+.account-insight-value{
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: rgba(234,242,255,.98);
+}
+
+.account-activity-list{
+  margin-top: 8px;
+}
+.account-activity-item{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 10px;
+}
+.account-activity-market{
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(234,242,255,.96);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-activity-date{
+  font-size: 0.8rem;
+  color: rgba(234,242,255,.7);
+  white-space: nowrap;
+}
+
+.account-card-link{
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.05);
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.78rem;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.account-card-link:hover{
+  background: rgba(255,255,255,.1);
+  color: var(--text);
+  border-color: rgba(255,255,255,.22);
+  text-decoration: none;
+}
+
+@media (max-width: 480px){
+  .account-hero-summary{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
