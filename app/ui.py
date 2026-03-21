@@ -347,6 +347,30 @@ def _unit_delta(p: dict) -> float:
     return 0.0
 
 
+def _pick_stake_units(p: dict) -> float:
+    """Stake in units for ROI denominator. Prefer explicit fields; else infer from suggest_units; default 1u."""
+    if not isinstance(p, dict):
+        return 1.0
+    for k in ("stake_units", "units_staked", "stake_size", "bet_units", "stake"):
+        v = p.get(k)
+        if v is not None:
+            try:
+                s = float(v)
+                if s > 0:
+                    return s
+            except (TypeError, ValueError):
+                pass
+    su = _suggest_units(p)
+    if isinstance(su, str) and su.strip().lower().endswith("u"):
+        try:
+            s = float(su.strip()[:-1].strip())
+            if s > 0:
+                return s
+        except (TypeError, ValueError):
+            pass
+    return 1.0
+
+
 def _roi_spark_points(settled_groups: list[dict]) -> list[dict]:
     """Build chart data: list of { date, label, v (cumulative profit), day (day net) } in chronological order."""
     pts: list[dict] = []
@@ -2748,16 +2772,42 @@ def home_page(request: Request) -> str:
     cache_meta = read_cache_meta()
     cache_status_html = _format_cache_status(cache_meta)
 
-    # Global summary
+    # Global summary (ROI uses resolved settled picks only — not upcoming)
     wins = sum(1 for p in all_settled if _result_norm(p) == "WIN")
     losses = sum(1 for p in all_settled if _result_norm(p) == "LOSS")
     pending = len(all_upcoming)
     total_picks = len(all_settled) + pending
     net = round(sum(_unit_delta(p) for p in all_settled), 2)
     winrate = round(wins / (wins + losses) * 100, 1) if (wins + losses) > 0 else None
-    roi_pct = round(net / total_picks * 100, 1) if total_picks and total_picks > 0 else None
-    roi_str = f"{(roi_pct if roi_pct is not None else 0):+.1f}%"
     winrate_str = f"{winrate}%" if winrate is not None else "—"
+
+    # ROI = (total_profit / total_stake) * 100; basis = resolved outcomes, else any finished bucket
+    roi_resolved = [p for p in all_settled if _result_norm(p) in ("WIN", "LOSS", "PUSH")]
+    roi_basis = roi_resolved if roi_resolved else list(all_settled)
+    total_profit = sum(_unit_delta(p) for p in roi_basis)
+    total_stake = sum(_pick_stake_units(p) for p in roi_basis)
+    roi_pct: float | None
+    if not roi_basis or total_stake <= 0:
+        roi_pct = None
+        roi_str = "—"
+    else:
+        roi_pct = round((total_profit / total_stake) * 100.0, 1)
+        roi_str = f"{roi_pct:+.1f}%"
+    if all_settled and not roi_resolved:
+        logger.warning(
+            "home_page ROI: all_settled=%s but no WIN/LOSS/PUSH on pick.result; using full all_settled for ROI basis",
+            len(all_settled),
+        )
+    logger.info(
+        "home_page ROI: resolved=%s basis_picks=%s (all_settled=%s) total_profit=%s total_stake=%s roi_pct=%s display=%s",
+        len(roi_resolved),
+        len(roi_basis),
+        len(all_settled),
+        round(total_profit, 4),
+        round(total_stake, 4),
+        roi_pct,
+        roi_str,
+    )
 
     # Performance chart (global)
     settled_sorted = sorted(all_settled, key=lambda p: _parse_utcdate_str(p.get("utcDate")), reverse=True)
