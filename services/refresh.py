@@ -5,6 +5,7 @@ Punto de entrada para cron/run_daily.
 from __future__ import annotations
 
 import logging
+import os
 import threading
 from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
@@ -643,15 +644,34 @@ def _enrich_football_picks_with_odds(
     league_code: str,
     matches: list[dict],
     picks: list[dict],
+    *,
+    debug_watch_keys: set[str] | None = None,
 ) -> list[dict]:
     """
     Attach odds_decimal, implied_prob, edge to each pick when odds are available.
-    Match by (home, away, date). Does not change picks that have no matching odds.
+    Match by (home, away, date).
+    Notes:
+    - When odds are refreshed, we avoid leaving stale odds fields behind:
+      if a pick doesn't match any provider odds event, odds fields are cleared.
+    - AFTR score + edge are recomputed later via `enrich_pick_with_aftr_score`.
     """
     if not picks:
         return picks
+
+    def _pick_debug_key(p: dict) -> str:
+        mid = p.get("match_id")
+        if mid is None:
+            mid = p.get("id")
+        bm = (p.get("best_market") or "").strip()
+        utc = str(p.get("utcDate") or "").strip()
+        home = str(p.get("home") or "").strip()
+        away = str(p.get("away") or "").strip()
+        return f"{mid}|{bm}|{utc}|{home}|{away}"
+
     try:
-        odds_events = ensure_odds_for_league(league_code, matches, use_cache_first=True)
+        # Important: when we are refreshing picks with odds, we must fetch fresh provider data.
+        # Otherwise `use_cache_first=True` can keep stale odds forever.
+        odds_events = ensure_odds_for_league(league_code, matches, use_cache_first=False)
         if not odds_events:
             return picks
         odds_lookup = match_odds_to_matches(odds_events, matches)
@@ -662,30 +682,94 @@ def _enrich_football_picks_with_odds(
     for p in picks:
         if not isinstance(p, dict):
             continue
+
+        watch = (debug_watch_keys is not None) and (_pick_debug_key(p) in debug_watch_keys)
+        key_pick = _pick_debug_key(p) if watch else None
+
+        old_odds_decimal = p.get("odds_decimal")
+        old_implied_prob = p.get("implied_prob")
+        old_edge = p.get("edge")
+
         match_placeholder = {
             "home": p.get("home"),
             "away": p.get("away"),
             "utcDate": p.get("utcDate"),
         }
         odds_row = get_odds_for_match(match_placeholder, odds_lookup)
-        if not odds_row:
-            continue
         best_market = (p.get("best_market") or "").strip()
-        if not best_market:
+
+        if not odds_row or not best_market:
+            # Prevent stale odds from previous cache loads.
+            p.pop("odds_decimal", None)
+            p.pop("implied_prob", None)
+            p.pop("bookmaker_title", None)
+            p.pop("edge", None)
+            if watch:
+                logger.info(
+                    "ODDS DEBUG clear | league=%s pick=%s home=%s away=%s utcDate=%s best_market=%s | old_odds_decimal=%s old_implied_prob=%s old_edge=%s | provider_match=%s",
+                    league_code,
+                    key_pick,
+                    p.get("home"),
+                    p.get("away"),
+                    p.get("utcDate"),
+                    best_market,
+                    old_odds_decimal,
+                    old_implied_prob,
+                    old_edge,
+                    "NONE",
+                )
             continue
+
         decimal_odds, implied_prob = get_decimal_and_implied_for_market(odds_row, best_market)
-        if decimal_odds is not None:
-            p["odds_decimal"] = round(float(decimal_odds), 2)
-        if implied_prob is not None:
+        if decimal_odds is not None and implied_prob is not None:
+            new_odds_decimal = round(float(decimal_odds), 2)
+            if watch:
+                logger.info(
+                    "ODDS DEBUG update | league=%s pick=%s home=%s away=%s utcDate=%s best_market=%s | old_odds_decimal=%s old_implied_prob=%s old_edge=%s | provider_decimal=%s provider_implied_prob=%s bookmaker=%s",
+                    league_code,
+                    key_pick,
+                    p.get("home"),
+                    p.get("away"),
+                    p.get("utcDate"),
+                    best_market,
+                    old_odds_decimal,
+                    old_implied_prob,
+                    old_edge,
+                    decimal_odds,
+                    implied_prob,
+                    (odds_row.get("bookmaker_title") or "").strip(),
+                )
+            p["odds_decimal"] = new_odds_decimal
             p["implied_prob"] = implied_prob
             aftr_prob = _safe_float(p.get("best_prob"))
             if aftr_prob is not None:
                 e = odds_edge(aftr_prob, implied_prob)
                 if e is not None:
                     p["edge"] = e
-        bookmaker_title = (odds_row.get("bookmaker_title") or "").strip()
-        if bookmaker_title:
-            p["bookmaker_title"] = bookmaker_title
+            bookmaker_title = (odds_row.get("bookmaker_title") or "").strip()
+            if bookmaker_title:
+                p["bookmaker_title"] = bookmaker_title
+        else:
+            # Provider match exists, but we couldn't map the pick market => clear stale odds.
+            p.pop("odds_decimal", None)
+            p.pop("implied_prob", None)
+            p.pop("bookmaker_title", None)
+            p.pop("edge", None)
+            if watch:
+                logger.info(
+                    "ODDS DEBUG clear-mapping | league=%s pick=%s home=%s away=%s utcDate=%s best_market=%s | old_odds_decimal=%s old_implied_prob=%s old_edge=%s | provider_decimal=%s provider_implied_prob=%s",
+                    league_code,
+                    key_pick,
+                    p.get("home"),
+                    p.get("away"),
+                    p.get("utcDate"),
+                    best_market,
+                    old_odds_decimal,
+                    old_implied_prob,
+                    old_edge,
+                    decimal_odds,
+                    implied_prob,
+                )
     return picks
 
 
@@ -796,7 +880,39 @@ def _refresh_league_upcoming_only(
     merged_picks = _merge_by_match_id(existing_picks, upcoming_picks)
     picks_all = _apply_results_by_match_id(merged_picks, finished_by_id)
     if fetch_odds:
-        picks_all = _enrich_football_picks_with_odds(league_code, merged_matches, picks_all)
+        odds_debug_enabled = bool(getattr(settings, "debug", False)) or str(os.getenv("AFTR_ODDS_DEBUG", "0")).lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        odds_debug_samples = int(os.getenv("AFTR_ODDS_DEBUG_SAMPLES", "3"))
+        debug_watch_keys: set[str] | None = None
+        if odds_debug_enabled and odds_debug_samples > 0:
+            debug_watch_keys = set()
+
+            def _pick_debug_key(p: dict) -> str:
+                mid = p.get("match_id")
+                if mid is None:
+                    mid = p.get("id")
+                bm = (p.get("best_market") or "").strip()
+                utc = str(p.get("utcDate") or "").strip()
+                home = str(p.get("home") or "").strip()
+                away = str(p.get("away") or "").strip()
+                return f"{mid}|{bm}|{utc}|{home}|{away}"
+
+            for p in picks_all:
+                if not isinstance(p, dict):
+                    continue
+                k = _pick_debug_key(p)
+                if not k:
+                    continue
+                debug_watch_keys.add(k)
+                if len(debug_watch_keys) >= odds_debug_samples:
+                    break
+
+        picks_all = _enrich_football_picks_with_odds(
+            league_code, merged_matches, picks_all, debug_watch_keys=debug_watch_keys
+        )
     for p in picks_all:
         if isinstance(p, dict):
             enrich_pick_with_aftr_score(p)
@@ -806,6 +922,43 @@ def _refresh_league_upcoming_only(
     write_json(f"daily_matches_{league_code}.json", merged_matches)
     backup_current_to_prev(f"daily_picks_{league_code}.json")
     write_json(f"daily_picks_{league_code}.json", picks_daily)
+
+    if fetch_odds:
+        odds_debug_enabled = bool(getattr(settings, "debug", False)) or str(os.getenv("AFTR_ODDS_DEBUG", "0")).lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        odds_debug_samples = int(os.getenv("AFTR_ODDS_DEBUG_SAMPLES", "3"))
+        if odds_debug_enabled and odds_debug_samples > 0:
+            # Read back what we actually wrote to disk (primary cache) to ensure odds updated end-to-end.
+            def _pick_debug_key(p: dict) -> str:
+                mid = p.get("match_id")
+                if mid is None:
+                    mid = p.get("id")
+                bm = (p.get("best_market") or "").strip()
+                utc = str(p.get("utcDate") or "").strip()
+                home = str(p.get("home") or "").strip()
+                away = str(p.get("away") or "").strip()
+                return f"{mid}|{bm}|{utc}|{home}|{away}"
+
+            saved = _read_json_list(f"daily_picks_{league_code}.json")
+            saved_map = {_pick_debug_key(p): p for p in saved if isinstance(p, dict)}
+
+            watch_keys = list(debug_watch_keys or [])
+            for k in watch_keys:
+                sp = saved_map.get(k) or {}
+                logger.info(
+                    "ODDS DEBUG saved | league=%s pick_key=%s home=%s away=%s best_market=%s | odds_decimal=%s implied_prob=%s edge=%s",
+                    league_code,
+                    k,
+                    sp.get("home"),
+                    sp.get("away"),
+                    sp.get("best_market"),
+                    sp.get("odds_decimal"),
+                    sp.get("implied_prob"),
+                    sp.get("edge"),
+                )
     _save_history(league_code, picks_all)
     _save_team_names_cache(team_names)
     if metrics is not None:
@@ -840,7 +993,39 @@ def _refresh_league_results_only(
     merged_picks = _merge_by_match_id(existing_picks, finished_picks)
     picks_all = _apply_results_by_match_id(merged_picks, finished_by_id)
     if fetch_odds:
-        picks_all = _enrich_football_picks_with_odds(league_code, merged_matches, picks_all)
+        odds_debug_enabled = bool(getattr(settings, "debug", False)) or str(os.getenv("AFTR_ODDS_DEBUG", "0")).lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        odds_debug_samples = int(os.getenv("AFTR_ODDS_DEBUG_SAMPLES", "3"))
+        debug_watch_keys: set[str] | None = None
+        if odds_debug_enabled and odds_debug_samples > 0:
+            debug_watch_keys = set()
+
+            def _pick_debug_key(p: dict) -> str:
+                mid = p.get("match_id")
+                if mid is None:
+                    mid = p.get("id")
+                bm = (p.get("best_market") or "").strip()
+                utc = str(p.get("utcDate") or "").strip()
+                home = str(p.get("home") or "").strip()
+                away = str(p.get("away") or "").strip()
+                return f"{mid}|{bm}|{utc}|{home}|{away}"
+
+            for p in picks_all:
+                if not isinstance(p, dict):
+                    continue
+                k = _pick_debug_key(p)
+                if not k:
+                    continue
+                debug_watch_keys.add(k)
+                if len(debug_watch_keys) >= odds_debug_samples:
+                    break
+
+        picks_all = _enrich_football_picks_with_odds(
+            league_code, merged_matches, picks_all, debug_watch_keys=debug_watch_keys
+        )
     for p in picks_all:
         if isinstance(p, dict):
             enrich_pick_with_aftr_score(p)
@@ -850,6 +1035,40 @@ def _refresh_league_results_only(
     write_json(f"daily_matches_{league_code}.json", merged_matches)
     backup_current_to_prev(f"daily_picks_{league_code}.json")
     write_json(f"daily_picks_{league_code}.json", picks_daily)
+
+    if fetch_odds:
+        odds_debug_enabled = bool(getattr(settings, "debug", False)) or str(os.getenv("AFTR_ODDS_DEBUG", "0")).lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        odds_debug_samples = int(os.getenv("AFTR_ODDS_DEBUG_SAMPLES", "3"))
+        if odds_debug_enabled and odds_debug_samples > 0:
+            def _pick_debug_key(p: dict) -> str:
+                mid = p.get("match_id")
+                if mid is None:
+                    mid = p.get("id")
+                bm = (p.get("best_market") or "").strip()
+                utc = str(p.get("utcDate") or "").strip()
+                home = str(p.get("home") or "").strip()
+                away = str(p.get("away") or "").strip()
+                return f"{mid}|{bm}|{utc}|{home}|{away}"
+
+            saved = _read_json_list(f"daily_picks_{league_code}.json")
+            saved_map = {_pick_debug_key(p): p for p in saved if isinstance(p, dict)}
+            for k in list(debug_watch_keys or []):
+                sp = saved_map.get(k) or {}
+                logger.info(
+                    "ODDS DEBUG saved | league=%s pick_key=%s home=%s away=%s best_market=%s | odds_decimal=%s implied_prob=%s edge=%s",
+                    league_code,
+                    k,
+                    sp.get("home"),
+                    sp.get("away"),
+                    sp.get("best_market"),
+                    sp.get("odds_decimal"),
+                    sp.get("implied_prob"),
+                    sp.get("edge"),
+                )
     _save_history(league_code, picks_all)
     _save_team_names_cache(team_names)
     if metrics is not None:
@@ -1034,7 +1253,39 @@ def refresh_league(
     # 5b) Enrich football picks with odds (implied prob, edge) — optional to save Odds API calls
     merged_matches_for_odds = _merge_by_match_id(upcoming_matches, finished_matches_norm)
     if fetch_odds:
-        picks_all = _enrich_football_picks_with_odds(league_code, merged_matches_for_odds, picks_all)
+        odds_debug_enabled = bool(getattr(settings, "debug", False)) or str(os.getenv("AFTR_ODDS_DEBUG", "0")).lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        odds_debug_samples = int(os.getenv("AFTR_ODDS_DEBUG_SAMPLES", "3"))
+        debug_watch_keys: set[str] | None = None
+        if odds_debug_enabled and odds_debug_samples > 0:
+            debug_watch_keys = set()
+
+            def _pick_debug_key(p: dict) -> str:
+                mid = p.get("match_id")
+                if mid is None:
+                    mid = p.get("id")
+                bm = (p.get("best_market") or "").strip()
+                utc = str(p.get("utcDate") or "").strip()
+                home = str(p.get("home") or "").strip()
+                away = str(p.get("away") or "").strip()
+                return f"{mid}|{bm}|{utc}|{home}|{away}"
+
+            for p in picks_all:
+                if not isinstance(p, dict):
+                    continue
+                k = _pick_debug_key(p)
+                if not k:
+                    continue
+                debug_watch_keys.add(k)
+                if len(debug_watch_keys) >= odds_debug_samples:
+                    break
+
+        picks_all = _enrich_football_picks_with_odds(
+            league_code, merged_matches_for_odds, picks_all, debug_watch_keys=debug_watch_keys
+        )
 
     # 5c) AFTR Score (model_score, value_score, form_score, xg_score, aftr_score, tier, edge, confidence, confidence_level)
     for p in picks_all:
@@ -1061,6 +1312,40 @@ def refresh_league(
     # daily picks
     backup_current_to_prev(f"daily_picks_{league_code}.json")
     write_json(f"daily_picks_{league_code}.json", picks_daily)
+
+    if fetch_odds:
+        odds_debug_enabled = bool(getattr(settings, "debug", False)) or str(os.getenv("AFTR_ODDS_DEBUG", "0")).lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        odds_debug_samples = int(os.getenv("AFTR_ODDS_DEBUG_SAMPLES", "3"))
+        if odds_debug_enabled and odds_debug_samples > 0:
+            def _pick_debug_key(p: dict) -> str:
+                mid = p.get("match_id")
+                if mid is None:
+                    mid = p.get("id")
+                bm = (p.get("best_market") or "").strip()
+                utc = str(p.get("utcDate") or "").strip()
+                home = str(p.get("home") or "").strip()
+                away = str(p.get("away") or "").strip()
+                return f"{mid}|{bm}|{utc}|{home}|{away}"
+
+            saved = _read_json_list(f"daily_picks_{league_code}.json")
+            saved_map = {_pick_debug_key(p): p for p in saved if isinstance(p, dict)}
+            for k in list(debug_watch_keys or []):
+                sp = saved_map.get(k) or {}
+                logger.info(
+                    "ODDS DEBUG saved | league=%s pick_key=%s home=%s away=%s best_market=%s | odds_decimal=%s implied_prob=%s edge=%s",
+                    league_code,
+                    k,
+                    sp.get("home"),
+                    sp.get("away"),
+                    sp.get("best_market"),
+                    sp.get("odds_decimal"),
+                    sp.get("implied_prob"),
+                    sp.get("edge"),
+                )
 
     # 8) history eterno
     _save_history(league_code, picks_all)
