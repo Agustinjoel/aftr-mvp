@@ -4090,7 +4090,6 @@ def dashboard(request: Request, league: str):
           </div>
         </div>
       </div>
-      {league_combos_html}
     """
 
     page_html += """
@@ -4315,6 +4314,9 @@ def dashboard(request: Request, league: str):
         </div>
       </section>
     """
+
+    # Combos after performance blocks (ROI + mercado)
+    page_html += league_combos_html
 
     # Upcoming: day filter by date (value=YYYY-MM-DD); default "Hoy" when available
     upcoming_filter_opts = ['<option value="ALL">Todos</option>']
