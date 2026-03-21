@@ -4973,62 +4973,70 @@ def account_page(request: Request):
 
     display_name = (user.get("username") or user.get("email") or "Usuario").strip()
     display_name = html_lib.escape(display_name)
+    email_display = html_lib.escape(str(user.get("email") or "").strip())
     created_display = _account_created_display(user.get("created_at"))
     uid = user.get("id")
     is_premium = is_premium_active(user) or (get_active_plan(uid) if uid else "") in (settings.plan_premium, settings.plan_pro)
     plan_label = "⭐ AFTR Premium activo" if is_premium else "Free plan"
     plan_class = "account-plan-premium" if is_premium else "account-plan-free"
-    upgrade_cta = "" if is_premium else '<p class="muted" style="margin-top: 8px; font-size: 0.9rem;"><a href="/?open=premium" style="color: var(--accent, #0b5ed7);">Desbloquear Premium</a></p>'
+    upgrade_cta = (
+        ""
+        if is_premium
+        else '<p class="account-hero-upgrade muted"><a href="/?open=premium" class="account-hero-upgrade-link">Desbloquear Premium</a></p>'
+    )
 
     premium_upsell_card = ""
     if not is_premium:
         premium_upsell_card = """
-      <div class="card account-premium-cta" style="padding: 20px; margin-bottom: 24px; background: linear-gradient(135deg, var(--card-bg, #1a1a1a) 0%, #252530 100%); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
-        <h3 style="margin: 0 0 14px 0; font-size: 1.1rem;">Desbloqueá AFTR Premium</h3>
-        <ul style="margin: 0 0 16px 0; padding-left: 20px; font-size: 0.9rem; color: var(--muted, #888); line-height: 1.6;">
+      <div class="card account-premium-teaser account-premium-cta">
+        <div class="account-premium-teaser-glow" aria-hidden="true"></div>
+        <h3 class="account-premium-teaser-title">Desbloqueá AFTR Premium</h3>
+        <ul class="account-premium-teaser-list muted">
           <li>Picks elite y strong</li>
           <li>AFTR Score completo</li>
           <li>Historial y seguimiento avanzado</li>
         </ul>
-        <a href="/?open=premium" class="pill" style="display: inline-block; padding: 10px 20px; background: var(--accent, #0b5ed7); color: #fff; text-decoration: none; font-weight: 600; border-radius: 8px;">Desbloquear Premium</a>
+        <a href="/?open=premium" class="pill account-premium-teaser-cta">Desbloquear Premium</a>
       </div>"""
 
     premium_wrapper_class = " account-page--premium" if is_premium else ""
     hero_class = "account-hero account-hero-premium" if is_premium else "account-hero"
+    account_email_line = (
+        f'<p class="account-email muted">{email_display}</p>' if email_display else ""
+    )
     body = header_html + f"""
     <div class="page account-page account-page-wrapper{premium_wrapper_class}">
       <div class="card {hero_class} account-hero-card">
-        <div class="account-hero-top">
-          <div>
-            <p class="account-greeting">Hola, {display_name}</p>
-            <div class="account-hero-meta">
-              <span class="account-type-pill {('account-type-pill--premium' if is_premium else 'account-type-pill--free')}">{'Premium' if is_premium else 'Free'}</span>
-              <span class="account-created muted">Miembro desde {created_display}</span>
-            </div>
-          </div>
-          <div class="account-hero-badges">
-            {('<span class="account-premium-badge">AFTR Premium activo</span>' if is_premium else '')}
-          </div>
+        <div class="account-hero-card-shine" aria-hidden="true"></div>
+        <div class="account-hero-ident">
+          <p class="account-greeting">Hola, {display_name}</p>
+          {account_email_line}
         </div>
-
+        <div class="account-hero-badge-row">
+          {(
+            '<span class="account-premium-badge-gold"><span class="account-premium-badge-gold-inner">Premium</span></span>'
+            if is_premium
+            else '<span class="account-type-pill account-type-pill--free">Free</span>'
+          )}
+          <span class="account-created muted">Miembro desde {created_display}</span>
+        </div>
         {upgrade_cta}
-
         <div class="account-hero-summary">
           <div class="account-summary-item">
             <span class="account-summary-label muted">Seguidos</span>
-            <span id="hero-followed" class="account-summary-value">0</span>
+            <span id="hero-followed" class="account-summary-value js-stat-anim">0</span>
           </div>
           <div class="account-summary-item">
             <span class="account-summary-label muted">Favoritos</span>
-            <span id="hero-favorites" class="account-summary-value">0</span>
+            <span id="hero-favorites" class="account-summary-value js-stat-anim">0</span>
           </div>
           <div class="account-summary-item">
             <span class="account-summary-label muted">Winrate</span>
-            <span id="hero-winrate" class="account-summary-value">—</span>
+            <span id="hero-winrate" class="account-summary-value js-stat-anim">—</span>
           </div>
           <div class="account-summary-item">
             <span class="account-summary-label muted">ROI</span>
-            <span id="hero-roi" class="account-summary-value">0%</span>
+            <span id="hero-roi" class="account-summary-value js-stat-anim">0%</span>
           </div>
           <div class="account-summary-item">
             <span class="account-summary-label muted">Racha</span>
@@ -5038,17 +5046,19 @@ def account_page(request: Request):
       </div>
 {premium_upsell_card}
 
-      <h3 class="account-section-title">Tu Dashboard</h3>
+      <section class="account-block account-block--stats">
+      <h3 class="account-section-title"><span class="account-section-title-accent">Dashboard</span></h3>
       <div id="account-stats" class="account-stats account-stats-grid">
-        <div class="account-stat-card"><span class="account-stat-label muted">Seguidos</span><span id="stat-followed" class="account-stat-value">0</span></div>
-        <div class="account-stat-card"><span class="account-stat-label muted">Favoritos</span><span id="stat-favorites" class="account-stat-value">0</span></div>
-        <div class="account-stat-card"><span class="account-stat-label muted">Victorias</span><span id="stat-wins" class="account-stat-value">0</span></div>
-        <div class="account-stat-card"><span class="account-stat-label muted">Pérdidas</span><span id="stat-losses" class="account-stat-value">0</span></div>
-        <div class="account-stat-card"><span class="account-stat-label muted">Pendientes</span><span id="stat-pending" class="account-stat-value">0</span></div>
-        <div class="account-stat-card"><span class="account-stat-label muted">ROI</span><span id="stat-roi" class="account-stat-value">0%</span></div>
-        <div class="account-stat-card"><span class="account-stat-label muted">Winrate</span><span id="stat-winrate" class="account-stat-value">—</span></div>
+        <div class="account-stat-card"><span class="account-stat-label muted">Seguidos</span><span id="stat-followed" class="account-stat-value js-stat-anim">0</span></div>
+        <div class="account-stat-card"><span class="account-stat-label muted">Favoritos</span><span id="stat-favorites" class="account-stat-value js-stat-anim">0</span></div>
+        <div class="account-stat-card"><span class="account-stat-label muted">Victorias</span><span id="stat-wins" class="account-stat-value js-stat-anim">0</span></div>
+        <div class="account-stat-card"><span class="account-stat-label muted">Pérdidas</span><span id="stat-losses" class="account-stat-value js-stat-anim">0</span></div>
+        <div class="account-stat-card"><span class="account-stat-label muted">Pendientes</span><span id="stat-pending" class="account-stat-value js-stat-anim">0</span></div>
+        <div class="account-stat-card account-stat-card--pulse"><span class="account-stat-label muted">ROI</span><span id="stat-roi" class="account-stat-value js-stat-anim">0%</span></div>
+        <div class="account-stat-card account-stat-card--pulse"><span class="account-stat-label muted">Winrate</span><span id="stat-winrate" class="account-stat-value js-stat-anim">—</span></div>
         <div class="account-stat-card"><span class="account-stat-label muted">Racha actual</span><span id="stat-streak" class="account-stat-value">—</span></div>
       </div>
+      </section>
 
       <div class="account-actions">
         <a href="#seguidas" class="pill account-action-pill">Seguidas activas</a>
@@ -5057,29 +5067,29 @@ def account_page(request: Request):
         <a href="/auth/logout" class="pill account-action-pill">Cerrar sesión</a>
       </div>
 
-      <section id="seguidas" class="account-section">
-        <h3 class="account-section-title">Picks seguidas activas</h3>
+      <section id="seguidas" class="account-section account-section--picks">
+        <h3 class="account-section-title"><span class="account-section-title-accent">Activas</span> · seguidas</h3>
         <div id="account-active-picks" class="account-favorites">
           <p class="muted">Cargando…</p>
         </div>
       </section>
 
-      <section id="favoritos" class="account-section">
-        <h3 class="account-section-title">Favoritos</h3>
+      <section id="favoritos" class="account-section account-section--picks">
+        <h3 class="account-section-title"><span class="account-section-title-accent">Favoritos</span></h3>
         <div id="account-favorites" class="account-favorites">
           <p class="muted">Cargando…</p>
         </div>
       </section>
 
-      <section id="historial" class="account-section">
-        <h3 class="account-section-title">Historial reciente</h3>
+      <section id="historial" class="account-section account-section--picks">
+        <h3 class="account-section-title"><span class="account-section-title-accent">Historial</span> · reciente</h3>
         <div id="account-history" class="account-history">
           <p class="muted">Cargando…</p>
         </div>
       </section>
 
-      <section id="account-insights" class="account-section">
-        <h3 class="account-section-title">Insights personales</h3>
+      <section id="account-insights" class="account-section account-section--insights">
+        <h3 class="account-section-title"><span class="account-section-title-accent">Insights</span> · vos</h3>
         <div class="account-insights-grid">
           <div class="account-insight-card">
             <div class="account-insight-label muted">Mejor mercado</div>
@@ -5104,7 +5114,54 @@ def account_page(request: Request):
     (function(){{
       var base = window.location.origin || (window.location.protocol + "//" + window.location.host);
       var knownLeagues = {json.dumps(list(settings.leagues.keys()))};
+      var __accountDidCountUp = false;
       function esc(s) {{ if (s == null || s === "") return ""; return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }}
+      function prefersReducedMotion() {{
+        return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      }}
+      function easeOutCubic(t) {{ return 1 - Math.pow(1 - t, 3); }}
+      function animateValueEl(el, finalStr) {{
+        if (!el || prefersReducedMotion()) return;
+        var s = String(finalStr).trim();
+        if (s === "—" || s === "") return;
+        var m = /^([+-]?\\d+(?:\\.\\d+)?)\\s*(%)?$/.exec(s.replace(",", "."));
+        if (!m) return;
+        var end = parseFloat(m[1]);
+        if (isNaN(end)) return;
+        var suffix = m[2] || "";
+        var start = 0;
+        var t0 = performance.now();
+        var dur = 580;
+        function step(now) {{
+          var p = easeOutCubic(Math.min(1, (now - t0) / dur));
+          var cur = start + (end - start) * p;
+          if (suffix === "%") el.textContent = cur.toFixed(1) + "%";
+          else el.textContent = String(Math.round(cur));
+          if (p < 1) requestAnimationFrame(step);
+          else el.textContent = s;
+        }}
+        if (suffix === "%") el.textContent = "0.0%";
+        else el.textContent = "0";
+        requestAnimationFrame(step);
+      }}
+      function runInitialStatCountUp() {{
+        if (__accountDidCountUp || prefersReducedMotion()) return;
+        __accountDidCountUp = true;
+        ["stat-followed","stat-favorites","stat-wins","stat-losses","stat-pending","stat-roi","stat-winrate","hero-followed","hero-favorites","hero-roi","hero-winrate"].forEach(function(id) {{
+          var el = document.getElementById(id);
+          if (!el) return;
+          animateValueEl(el, el.textContent);
+        }});
+      }}
+      function accountPickHeadHtml(market, teams, viewHref) {{
+        var h = "<div class=\\"account-pick-head\\">";
+        h += "<div class=\\"account-pick-head-main\\">";
+        h += "<div class=\\"account-pick-title\\">" + market + "</div>";
+        h += "<div class=\\"account-pick-subtitle\\">" + teams + "</div></div>";
+        if (viewHref) h += "<a class=\\"account-pick-open\\" href=\\"" + esc(viewHref) + "\\" aria-label=\\"Abrir pick\\"><span class=\\"account-pick-open-icon\\" aria-hidden=\\"true\\"></span></a>";
+        h += "</div>";
+        return h;
+      }}
       function fetchJSON(url) {{
         return fetch(url, {{ credentials: "include" }}).then(function(r) {{ return r.json(); }});
       }}
@@ -5264,6 +5321,7 @@ def account_page(request: Request):
         var histList = (history && history.ok && Array.isArray(history.history)) ? history.history : [];
         var favList = (favorites && favorites.ok && Array.isArray(favorites.favorites)) ? favorites.favorites : [];
         if (stats && stats.ok && stats.stats) updateStatEls(stats.stats);
+        runInitialStatCountUp();
 
         // Current streak + insights (best-effort from available history/favorites data)
         var streak = computeCurrentStreak(histList);
@@ -5346,9 +5404,9 @@ def account_page(request: Request):
                 var savedWhen = timeAgo(item.created_at);
                 var pickId = esc(item.pick_id || "");
                 var viewHref = panelHrefForPick(item.pick_id || "");
-                html += "<div class=\\"account-pick-card account-pick-fav\\" data-pick-id=\\"" + pickId + "\\">";
-                html += "<div class=\\"account-pick-title\\">" + market + "</div>";
-                html += "<div class=\\"account-pick-subtitle\\">" + teams + "</div>";
+                var highlightClass = (tierKey === "elite" || tierKey === "strong") ? " account-pick-highlight" : "";
+                html += "<div class=\\"account-pick-card account-pick-fav" + highlightClass + "\\" data-pick-id=\\"" + pickId + "\\">";
+                html += accountPickHeadHtml(market, teams, viewHref);
                 html += "<div class=\\"account-badge-row\\">";
                 html += "<span class=\\"account-mini-badge account-badge-aftr\\">AFTR <b>" + esc(aftrScore) + "</b></span>";
                 html += "<span class=\\"account-mini-badge account-badge-tier account-badge-tier-" + esc(tierKey) + "\\">" + esc(tierTxt) + "</span>";
@@ -5359,7 +5417,7 @@ def account_page(request: Request):
                 if (viewHref) {{
                   html += "<a class=\\"account-card-link\\" href=\\"" + esc(viewHref) + "\\">Ver en panel</a>";
                 }}
-                html += "<button type=\\"button\\" class=\\"btn-remove-fav account-card-action\\" data-pick-id=\\"" + pickId + "\\">Quitar de favoritos</button>";
+                html += "<button type=\\"button\\" class=\\"btn-remove-fav account-card-action account-card-action--warn\\" data-pick-id=\\"" + pickId + "\\">Quitar favoritos</button>";
                 html += "</div>";
                 html += "</div>";
               }});
@@ -5399,22 +5457,22 @@ def account_page(request: Request):
               var date = esc((item.created_at || "").slice(0, 10));
               var pickId = esc(item.pick_id || "");
               var viewHref = panelHrefForPick(item.pick_id || "");
+              var highlightClassA = (tierKey === "elite" || tierKey === "strong") ? " account-pick-highlight" : "";
 
-              html += "<div class=\\"account-pick-card account-pick-active\\" data-pick-id=\\"" + pickId + "\\">";
-              html += "<div class=\\"account-pick-title\\">" + market + "</div>";
-              html += "<div class=\\"account-pick-subtitle\\">" + teams + "</div>";
+              html += "<div class=\\"account-pick-card account-pick-active" + highlightClassA + "\\" data-pick-id=\\"" + pickId + "\\">";
+              html += accountPickHeadHtml(market, teams, viewHref);
               html += "<div class=\\"account-badge-row\\">";
               html += "<span class=\\"account-mini-badge account-badge-aftr\\">AFTR <b>" + esc(aftrScore) + "</b></span>";
               html += "<span class=\\"account-mini-badge account-badge-tier account-badge-tier-" + esc(tierKey) + "\\">" + esc(tierTxt) + "</span>";
               html += "<span class=\\"account-mini-badge account-badge-edge account-badge-edge-" + esc(edgeKey) + "\\">" + esc(edgeTxt) + " EDGE</span>";
               html += "</div>";
               html += "<div class=\\"account-pick-bottom\\">";
-              html += "<span class=\\"account-status-badge account-status-pending\\">PENDING</span>";
+              html += "<span class=\\"account-status-badge account-status-pending account-live-pulse\\"><span class=\\"account-live-dot\\" aria-hidden=\\"true\\"></span>Pendiente</span>";
               html += "<span class=\\"account-pick-date\\">" + date + "</span>";
               if (viewHref) {{
-                html += "<a class=\\"account-card-link\\" href=\\"" + esc(viewHref) + "\\">Ver en panel</a>";
+                html += "<a class=\\"account-card-link\\" href=\\"" + esc(viewHref) + "\\">Panel</a>";
               }}
-              html += "<button type=\\"button\\" class=\\"btn-unfollow account-card-action\\" data-pick-id=\\"" + pickId + "\\">Dejar de seguir</button>";
+              html += "<button type=\\"button\\" class=\\"btn-unfollow account-card-action account-card-action--warn\\" data-pick-id=\\"" + pickId + "\\">Dejar de seguir</button>";
               html += "</div>";
               html += "</div>";
             }});
@@ -5455,21 +5513,21 @@ def account_page(request: Request):
               var date = esc((item.created_at || "").slice(0, 10));
               var pickId = esc(item.pick_id || "");
               var viewHref = panelHrefForPick(item.pick_id || "");
-              html += "<div class=\\"account-pick-card account-pick-history\\" data-pick-id=\\"" + pickId + "\\">";
-              html += "<div class=\\"account-pick-title\\">" + market + "</div>";
-              html += "<div class=\\"account-pick-subtitle\\">" + teams + "</div>";
+              var highlightClassH = (tierKey === "elite" || tierKey === "strong") ? " account-pick-highlight" : "";
+              html += "<div class=\\"account-pick-card account-pick-history" + highlightClassH + "\\" data-pick-id=\\"" + pickId + "\\">";
+              html += accountPickHeadHtml(market, teams, viewHref);
               html += "<div class=\\"account-badge-row\\">";
               html += "<span class=\\"account-mini-badge account-badge-aftr\\">AFTR <b>" + esc(aftrScore) + "</b></span>";
               html += "<span class=\\"account-mini-badge account-badge-tier account-badge-tier-" + esc(tierKey) + "\\">" + esc(tierTxt) + "</span>";
               html += "<span class=\\"account-mini-badge account-badge-edge account-badge-edge-" + esc(edgeKey) + "\\">" + esc(edgeTxt) + " EDGE</span>";
               html += "</div>";
               html += "<div class=\\"account-pick-bottom account-history-bottom\\">";
-              html += "<span class=\\"account-status-badge account-status-" + esc(result.toLowerCase()) + "\\">" + result + "</span>";
+              html += "<span class=\\"account-status-badge account-status-" + esc(result.toLowerCase()) + " account-status-finished\\">" + result + "</span>";
               html += "<span class=\\"account-pick-date\\">" + date + "</span>";
               if (viewHref) {{
                 html += "<a class=\\"account-card-link\\" href=\\"" + esc(viewHref) + "\\">Ver en panel</a>";
               }}
-              html += "<button type=\\"button\\" class=\\"btn-unfollow account-card-action\\" data-pick-id=\\"" + pickId + "\\">Dejar de seguir</button>";
+              html += "<button type=\\"button\\" class=\\"btn-unfollow account-card-action account-card-action--warn\\" data-pick-id=\\"" + pickId + "\\">Dejar de seguir</button>";
               html += "</div>";
               html += "</div>";
             }});
