@@ -1261,6 +1261,53 @@ def _pick_id_for_card(p: dict, best: dict | None = None) -> str:
     return "|".join([league, match_id, market, utc]).strip("|") or "unknown"
 
 
+def _pick_odds_display_value(p: dict) -> str:
+    """
+    Single source for pick odds shown in UI (home cards + league flip cards).
+    Order: odds_decimal → best_fair (same as AFTR value scoring) → implied_prob → fair from best_prob.
+    Returns a short display token, e.g. "2.10", "Impl 48.2%", or "—".
+    """
+    if not isinstance(p, dict):
+        return "—"
+    od = p.get("odds_decimal")
+    if od is not None:
+        try:
+            return f"{float(od):.2f}"
+        except (TypeError, ValueError):
+            pass
+    bf = p.get("best_fair")
+    if bf is not None:
+        try:
+            return f"{float(bf):.2f}"
+        except (TypeError, ValueError):
+            pass
+    ip = p.get("implied_prob")
+    if ip is not None:
+        try:
+            return f"Impl {float(ip) * 100:.1f}%"
+        except (TypeError, ValueError):
+            pass
+    bp = p.get("best_prob")
+    if bp is not None:
+        try:
+            pp = float(bp)
+            if pp > 0:
+                return f"{1.0 / pp:.2f}"
+        except (TypeError, ValueError):
+            pass
+    return "—"
+
+
+def _pick_odds_home_line_text(p: dict) -> str:
+    """Home meta row: full label (e.g. 'Odds 2.10' or 'Impl 48%') for one span."""
+    v = _pick_odds_display_value(p)
+    if v == "—":
+        return "Odds —"
+    if v.startswith("Impl"):
+        return v
+    return f"Odds {v}"
+
+
 def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | None = None) -> str:
     global _finished_card_debug_logged
     home_name = p.get("home", "")
@@ -1464,16 +1511,12 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
     _bt = p.get("bookmaker_title")
     bookmaker_title = str(_bt).strip() if _bt is not None else ""
     odds_parts = []
-    if odds_decimal is not None:
-        try:
-            odds_parts.append(f"Odds {float(odds_decimal):.2f}")
-        except (TypeError, ValueError):
-            pass
-    if implied_prob is not None:
-        try:
-            odds_parts.append(f"Impl {float(implied_prob) * 100:.1f}%")
-        except (TypeError, ValueError):
-            pass
+    odds_display = _pick_odds_display_value(p)
+    if odds_display != "—":
+        if odds_display.startswith("Impl"):
+            odds_parts.append(odds_display)
+        else:
+            odds_parts.append(f"Odds {odds_display}")
     if edge_val is not None:
         try:
             ev = float(edge_val)
@@ -1488,18 +1531,11 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
             odds_line_html += ' <span class="pick-bookmaker">' + html_lib.escape(bookmaker_title) + "</span>"
         odds_line_html += "</div>"
 
-    # Compact "prob • odds" line for premium front.
+    # Compact "prob • odds" line for premium front (same source as home cards).
     odds_compact = ""
-    if odds_decimal is not None:
-        try:
-            odds_compact = f"{float(odds_decimal):.2f}"
-        except (TypeError, ValueError):
-            odds_compact = ""
-    elif implied_prob is not None:
-        try:
-            odds_compact = f"Impl {float(implied_prob) * 100:.1f}%"
-        except (TypeError, ValueError):
-            odds_compact = ""
+    oc = _pick_odds_display_value(p)
+    if oc != "—":
+        odds_compact = oc
     if odds_compact:
         prob_odds_html = f"""
         <div class="aftr-prob-odds">
@@ -2550,11 +2586,7 @@ def home_page(request: Request) -> str:
             edge_str = "—"
         conf_level = (p.get("confidence_level") or p.get("confidence") or "—")
         conf_str = str(conf_level).upper() if conf_level != "—" else "—"
-        od = p.get("odds_decimal")
-        try:
-            odds_str = f"{float(od):.2f}" if od is not None else "—"
-        except (TypeError, ValueError):
-            odds_str = "—"
+        odds_line_text = html_lib.escape(_pick_odds_home_line_text(p))
         try:
             edge_pos = edge is not None and float(edge) > 0
         except (TypeError, ValueError):
@@ -2586,7 +2618,7 @@ def home_page(request: Request) -> str:
             <span class="aftr-tier" style="color: {tier_color};">{html_lib.escape(tier.upper())}</span>
             <span class="home-pick-edge{edge_class}">Ventaja {edge_str}</span>
             <span>Conf {html_lib.escape(conf_str)}</span>
-            <span>Odds {odds_str}</span>
+            <span>{odds_line_text}</span>
           </div>
           <div class="pick-actions" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
             <button type="button" class="btn-favorite-pick pill"
@@ -2640,11 +2672,7 @@ def home_page(request: Request) -> str:
             edge_str = "—"
         conf_level = (p.get("confidence_level") or p.get("confidence") or "—")
         conf_str = str(conf_level).upper() if conf_level != "—" else "—"
-        od = p.get("odds_decimal")
-        try:
-            odds_str = f"{float(od):.2f}" if od is not None else "—"
-        except (TypeError, ValueError):
-            odds_str = "—"
+        odds_line_text = html_lib.escape(_pick_odds_home_line_text(p))
         try:
             edge_pos = edge is not None and float(edge) > 0
         except (TypeError, ValueError):
@@ -2692,7 +2720,7 @@ def home_page(request: Request) -> str:
             <span class="aftr-tier" style="color: {tier_color};">{html_lib.escape(tier.upper())}</span>
             <span class="home-pick-edge{edge_class}">Ventaja {edge_str}</span>
             <span>Conf {html_lib.escape(conf_str)}</span>
-            <span>Odds {odds_str}</span>
+            <span>{odds_line_text}</span>
           </div>
           <div class="pick-actions" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
             <button type="button" class="btn-favorite-pick pill"
