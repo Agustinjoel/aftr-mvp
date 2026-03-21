@@ -21,6 +21,7 @@ from itsdangerous import URLSafeSerializer, BadSignature
 
 from fastapi import Body
 from fastapi.responses import JSONResponse
+from app.timefmt import AFTR_DISPLAY_TZ, format_match_kickoff_ar, parse_utc_instant
 from app.auth import create_user
 from app.auth import get_user_id, get_user_by_id
 from app.models import get_active_plan
@@ -482,7 +483,7 @@ def _parse_utcdate_str(s) -> datetime:
 
 
 def _pick_local_date(p: dict, match_by_key: dict[Any, dict] | None) -> date | None:
-    """Return the match date (local) for a pick, or None if unknown. Uses pick utcDate or match utcDate."""
+    """Return the match calendar date in America/Argentina/Buenos_Aires, or None if unknown."""
     utc_str = p.get("utcDate")
     if not utc_str and match_by_key:
         mid = _safe_int(p.get("match_id")) or _safe_int(p.get("id"))
@@ -492,10 +493,10 @@ def _pick_local_date(p: dict, match_by_key: dict[Any, dict] | None) -> date | No
             utc_str = m.get("utcDate")
     if not utc_str:
         return None
-    dt = _parse_utcdate_str(utc_str)
-    if dt.tzinfo:
-        return dt.astimezone().date()
-    return dt.date()
+    dt = parse_utc_instant(utc_str)
+    if dt is None:
+        return None
+    return dt.astimezone(AFTR_DISPLAY_TZ).date()
 
 
 def _pill_bar(active: str, unsupported: set[str] | None = None) -> str:
@@ -659,20 +660,15 @@ def _result_norm(p: dict) -> str:
 
 def _parse_utcdate_maybe(s: object) -> datetime | None:
     """Parse utcDate/ISO string into UTC datetime. Returns None on failure (no fallback-to-now)."""
-    if s is None:
-        return None
-    try:
-        ss = str(s).strip()
-        if not ss:
-            return None
-        if ss.endswith("Z"):
-            ss = ss.replace("Z", "+00:00")
-        dt = datetime.fromisoformat(ss)
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        return dt.astimezone(timezone.utc)
-    except Exception:
-        return None
+    return parse_utc_instant(s)
+
+
+def _combo_leg_kickoff_html(leg: dict) -> str:
+    """Optional kickoff line for combo legs (America/Argentina/Buenos_Aires)."""
+    ko = format_match_kickoff_ar(leg.get("utcDate"))
+    if ko == "—":
+        return ""
+    return f'<div class="combo-kickoff muted">{html_lib.escape(ko)}</div>'
 
 
 # Match / provider statuses meaning the fixture is in progress (not final).
@@ -1626,11 +1622,9 @@ def _render_pick_card(p: dict, best: dict | None = None, match_by_id: dict | Non
       </div>"""
 
     # Top meta row (league, kickoff time, tier) for premium front.
-    utc_raw = str(p.get("utcDate", "") or "").strip()
-    if "T" in utc_raw and len(utc_raw) >= 19:
-        kickoff_time = utc_raw.split("T")[1][:5]
-    else:
-        kickoff_time = utc_raw[:16] if utc_raw else "—"
+    kickoff_time = format_match_kickoff_ar(p.get("utcDate"))
+    if kickoff_time == "—" and isinstance(match_for_state, dict):
+        kickoff_time = format_match_kickoff_ar(match_for_state.get("utcDate"))
     if is_live_display and isinstance(match_for_state, dict):
         kickoff_time = _format_live_status_line(match_for_state)
     meta_time_class = "aftr-meta-time" + (" aftr-meta-live" if is_live_display else "")
@@ -1835,6 +1829,7 @@ def _build_combo_of_the_day(
             "home_crest": p.get("home_crest") or (m.get("home_crest") if isinstance(m, dict) else "") or "",
             "away_crest": p.get("away_crest") or (m.get("away_crest") if isinstance(m, dict) else "") or "",
             "match_id": mid,
+            "utcDate": p.get("utcDate") or (m.get("utcDate") if isinstance(m, dict) else None),
         }
         if p.get("_league") is not None:
             leg_entry["_league"] = p.get("_league")
@@ -1961,6 +1956,7 @@ def _build_combos_by_tier(
                 "home_crest": p.get("home_crest") or (m.get("home_crest") if isinstance(m, dict) else "") or "",
                 "away_crest": p.get("away_crest") or (m.get("away_crest") if isinstance(m, dict) else "") or "",
                 "match_id": mid,
+                "utcDate": p.get("utcDate") or (m.get("utcDate") if isinstance(m, dict) else None),
             }
             if p.get("_league") is not None:
                 leg_entry["_league"] = p.get("_league")
@@ -2081,7 +2077,7 @@ def _build_home_premium_combos(
 
     If strict filters yield no filled combos but picks exist, retries with relaxed thresholds and logs why.
     """
-    today_local = datetime.now().astimezone().date()
+    today_local = datetime.now(AFTR_DISPLAY_TZ).date()
     upcoming = [p for p in (upcoming_picks or []) if isinstance(p, dict)]
     ctx = log_context or ""
 
@@ -2256,6 +2252,7 @@ def _build_home_premium_combos(
                         "match_id": mid,
                         "odds_value": leg_odds,
                         "aftr_score": aftr_sc_int,
+                        "utcDate": lp.get("utcDate") or (m.get("utcDate") if isinstance(m, dict) else None),
                     }
                 )
 
@@ -2374,6 +2371,7 @@ def _render_home_premium_combo_card(combo: dict) -> str:
               <span class="combo-pct">{p_pct:.0f}%</span>
             </div>
             <div class="combo-market">{html_lib.escape(str(market))}</div>
+            {_combo_leg_kickoff_html(it)}
           </div>
         """
         )
@@ -2436,6 +2434,7 @@ def _render_combo_of_the_day(combo: dict) -> str:
               <span class="combo-pct">{p:.0f}%</span>
             </div>
             <div class="combo-market">{html_lib.escape(str(market))}</div>
+            {_combo_leg_kickoff_html(it)}
           </div>
         """)
 
@@ -2495,6 +2494,7 @@ def _render_combo_card(combo: dict | None, tier_label: str) -> str:
               <span class="combo-pct">{p:.0f}%</span>
             </div>
             <div class="combo-market">{html_lib.escape(str(market))}</div>
+            {_combo_leg_kickoff_html(it)}
           </div>
         """)
 
@@ -2548,6 +2548,7 @@ def _render_combo_box(combo: dict) -> str:
               <span class="combo-pct">{p:.0f}%</span>
             </div>
             <div class="combo-market">{html_lib.escape(str(market))}</div>
+            {_combo_leg_kickoff_html(it)}
           </div>
         """)
 
@@ -4483,7 +4484,7 @@ def dashboard(request: Request, league: str):
               <div class="card">
                 <div class="row">{home_part} <span class="vs">vs</span> {away_part}</div>
                 <div class="meta" data-utc="{html_lib.escape(str(m.get('utcDate','')))}">
-                  {html_lib.escape(str(m.get('utcDate','')))}
+                  {html_lib.escape(format_match_kickoff_ar(m.get("utcDate")))}
                 </div>
               </div>
                 """

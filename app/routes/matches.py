@@ -1,8 +1,9 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Query
 
+from app.timefmt import AFTR_DISPLAY_TZ, parse_utc_instant
 from config.settings import settings
 from data.cache import read_json
 
@@ -13,20 +14,13 @@ _WEEKDAY_LABELS = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábad
 
 
 def _utc_to_local_date(utc_date_str: str) -> str | None:
-    """Convierte utcDate (ISO) a fecha local YYYY-MM-DD. None si no se puede parsear."""
+    """Convierte utcDate (ISO) a fecha calendario en America/Argentina/Buenos_Aires (YYYY-MM-DD)."""
     if not utc_date_str or not isinstance(utc_date_str, str):
         return None
-    s = utc_date_str.strip()
-    try:
-        if s.endswith("Z"):
-            s = s.replace("Z", "+00:00")
-        dt = datetime.fromisoformat(s)
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        local_dt = dt.astimezone()
-        return local_dt.date().isoformat()
-    except Exception:
+    dt = parse_utc_instant(utc_date_str.strip())
+    if dt is None:
         return None
+    return dt.astimezone(AFTR_DISPLAY_TZ).date().isoformat()
 
 
 def group_matches_by_day(
@@ -38,7 +32,7 @@ def group_matches_by_day(
     label: "Hoy" | "Mañana" | nombre del día (ej. "Lunes").
     Solo incluye fechas en [hoy, hoy + days - 1].
     """
-    today = datetime.now().astimezone().date()
+    today = datetime.now(AFTR_DISPLAY_TZ).date()
     end = today + timedelta(days=max(0, days - 1))
     by_date: dict[str, list[dict]] = {}
 
