@@ -156,6 +156,35 @@ except ValueError:
 if REFRESH_EVERY_MIN < 1:
     REFRESH_EVERY_MIN = 1
 
+# Auto-refresh (light mode): skip leagues refreshed recently; batch size 0 = all per cycle
+try:
+    REFRESH_SKIP_IF_FRESH_MIN = int((os.getenv("REFRESH_SKIP_IF_FRESH_MIN") or "30").strip())
+except ValueError:
+    REFRESH_SKIP_IF_FRESH_MIN = 30
+if REFRESH_SKIP_IF_FRESH_MIN < 0:
+    REFRESH_SKIP_IF_FRESH_MIN = 0
+
+try:
+    AUTO_REFRESH_LEAGUES_PER_CYCLE = int((os.getenv("AUTO_REFRESH_LEAGUES_PER_CYCLE") or "4").strip())
+except ValueError:
+    AUTO_REFRESH_LEAGUES_PER_CYCLE = 4
+
+try:
+    AUTO_REFRESH_FINISHED_DAYS = int((os.getenv("AUTO_REFRESH_FINISHED_DAYS") or "3").strip())
+except ValueError:
+    AUTO_REFRESH_FINISHED_DAYS = 3
+if AUTO_REFRESH_FINISHED_DAYS < 1:
+    AUTO_REFRESH_FINISHED_DAYS = 1
+
+AUTO_REFRESH_FETCH_ODDS = _env_bool("AUTO_REFRESH_FETCH_ODDS", False)
+
+try:
+    RATE_LIMIT_COOLDOWN_CAP_SEC = int((os.getenv("RATE_LIMIT_COOLDOWN_CAP_SEC") or "600").strip())
+except ValueError:
+    RATE_LIMIT_COOLDOWN_CAP_SEC = 600
+if RATE_LIMIT_COOLDOWN_CAP_SEC < 0:
+    RATE_LIMIT_COOLDOWN_CAP_SEC = 0
+
 
 class Settings:
     """Objeto de configuración accesible en toda la app."""
@@ -189,6 +218,11 @@ class Settings:
 
         self.auto_refresh = AUTO_REFRESH
         self.refresh_every_min = REFRESH_EVERY_MIN
+        self.refresh_skip_if_fresh_min = REFRESH_SKIP_IF_FRESH_MIN
+        self.auto_refresh_leagues_per_cycle = AUTO_REFRESH_LEAGUES_PER_CYCLE
+        self.auto_refresh_finished_days = AUTO_REFRESH_FINISHED_DAYS
+        self.auto_refresh_fetch_odds = AUTO_REFRESH_FETCH_ODDS
+        self.rate_limit_cooldown_cap_sec = RATE_LIMIT_COOLDOWN_CAP_SEC
 
         self.secret_key = SECRET_KEY
 

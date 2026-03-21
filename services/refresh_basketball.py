@@ -6,8 +6,6 @@ Writes daily_matches_{league_code}.json and daily_picks_{league_code}.json (e.g.
 from __future__ import annotations
 
 import logging
-from typing import Any
-
 from config.settings import settings
 from core.basketball_evaluation import evaluate_basketball_market
 from core.basketball_picks import build_basketball_picks
@@ -15,6 +13,7 @@ from data.cache import read_json, write_json, backup_current_to_prev
 from data.providers.api_sports_basketball import get_finished_games, get_upcoming_games
 
 from services.refresh import (
+    RefreshMetrics,
     _build_finished_lookup_by_id,
     _load_team_names_cache,
     _merge_by_match_id,
@@ -56,7 +55,12 @@ def _apply_results_basketball(
     return picks
 
 
-def refresh_league_basketball(league_code: str) -> tuple[int, int]:
+def refresh_league_basketball(
+    league_code: str,
+    *,
+    finished_days_back: int = 7,
+    metrics: RefreshMetrics | None = None,
+) -> tuple[int, int]:
     """
     Full NBA/basketball refresh: upcoming + finished from basketball provider,
     build picks with basketball_picks, apply results with basketball_evaluation,
@@ -81,7 +85,7 @@ def refresh_league_basketball(league_code: str) -> tuple[int, int]:
     finished_picks: list[dict] = []
     finished_matches_norm: list[dict] = []
     try:
-        finished_matches = get_finished_games(league_code, days_back=7)
+        finished_matches = get_finished_games(league_code, days_back=finished_days_back)
         finished_by_id = _build_finished_lookup_by_id(finished_matches or [])
         finished_matches_norm = [_normalize_match(m) for m in (finished_matches or [])]
         _update_team_names_from_matches(team_names, finished_matches_norm)
@@ -123,4 +127,6 @@ def refresh_league_basketball(league_code: str) -> tuple[int, int]:
         settled,
         pending,
     )
+    if metrics is not None:
+        metrics.matches_updated += len(merged_matches)
     return len(upcoming_matches), len(picks_daily)

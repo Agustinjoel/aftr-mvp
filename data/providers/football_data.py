@@ -4,18 +4,75 @@ Usa config.settings para API key.
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
+import copy
 import json
 import logging
 import os
+import threading
 import time
 from pathlib import Path
+from typing import Any, Iterator
 
 import requests
 
 from config.settings import CACHE_DIR, FOOTBALL_DATA_API_KEY
 
 logger = logging.getLogger(__name__)
+
+# --- Per-refresh cycle: dedupe identical GETs + HTTP / rate-limit stats (thread-safe) ---
+_cycle_lock = threading.Lock()
+_cycle_active = False
+_cycle_cache: dict[str, dict[str, Any]] = {}
+_stats_lock = threading.Lock()
+_cycle_stats: dict[str, int] = {
+    "http_requests": 0,
+    "cache_hits": 0,
+    "rate_limit_sleep_sec": 0,
+}
+
+
+def _cache_key(path: str, params: dict | None) -> str:
+    p = params or {}
+    enc = json.dumps(sorted(p.items()), default=str, sort_keys=True)
+    return f"{path}|{enc}"
+
+
+def _note_rate_limit_sleep(seconds: int) -> None:
+    try:
+        s = max(0, int(seconds))
+    except (TypeError, ValueError):
+        s = 0
+    with _stats_lock:
+        _cycle_stats["rate_limit_sleep_sec"] += s
+
+
+@contextmanager
+def football_data_refresh_cycle() -> Iterator[dict[str, int]]:
+    """
+    Wrap a single refresh run: reset stats, enable in-memory response dedupe for identical URLs.
+    Yields a live stats dict (http_requests, cache_hits, rate_limit_sleep_sec).
+    """
+    global _cycle_active
+    with _cycle_lock:
+        with _stats_lock:
+            _cycle_stats["http_requests"] = 0
+            _cycle_stats["cache_hits"] = 0
+            _cycle_stats["rate_limit_sleep_sec"] = 0
+            _cycle_cache.clear()
+            _cycle_active = True
+    try:
+        yield _cycle_stats
+    finally:
+        with _cycle_lock:
+            _cycle_active = False
+            _cycle_cache.clear()
+
+
+def get_football_data_cycle_stats_snapshot() -> dict[str, int]:
+    with _stats_lock:
+        return dict(_cycle_stats)
 
 
 class UnsupportedCompetitionError(Exception):
@@ -94,9 +151,25 @@ def _headers() -> dict[str, str]:
 
 
 def _get(path: str, params: dict | None = None) -> dict:
+    with _cycle_lock:
+        active = _cycle_active
+    if active:
+        ck = _cache_key(path, params)
+        with _cycle_lock:
+            if ck in _cycle_cache:
+                with _stats_lock:
+                    _cycle_stats["cache_hits"] += 1
+                return copy.deepcopy(_cycle_cache[ck])
+
     url = f"{BASE}{path}"
     attempt = 0
     while True:
+        with _cycle_lock:
+            act = _cycle_active
+        if act:
+            with _stats_lock:
+                _cycle_stats["http_requests"] += 1
+
         r = requests.get(url, headers=_headers(), params=params, timeout=20)
 
         # NOMBRES CORRECTOS DE HEADERS (observados en responses)
@@ -110,6 +183,7 @@ def _get(path: str, params: dict | None = None) -> dict:
             wait = int(reset or 60)
             if sleep_on_429:
                 logger.warning("Football-Data 429. Sleeping %ss... (%s)", wait, url)
+                _note_rate_limit_sleep(wait)
                 time.sleep(wait)
                 attempt = 0
                 continue
@@ -124,6 +198,7 @@ def _get(path: str, params: dict | None = None) -> dict:
                 if rem <= 1:
                     wait = int(reset or 60)
                     logger.warning("Rate limit bajo (%s). Sleeping %ss...", rem, wait)
+                    _note_rate_limit_sleep(wait)
                     time.sleep(wait)
             except ValueError:
                 pass
@@ -140,7 +215,13 @@ def _get(path: str, params: dict | None = None) -> dict:
         if r.status_code != 200:
             raise RuntimeError(f"Football-Data Error {r.status_code}: {r.text}")
 
-        return r.json()
+        payload = r.json()
+        with _cycle_lock:
+            if _cycle_active:
+                ck = _cache_key(path, params)
+                if isinstance(payload, dict):
+                    _cycle_cache[ck] = copy.deepcopy(payload)
+        return payload
 
 
 def _crest_from_team_id(team_id: int | None) -> str | None:
