@@ -1,6 +1,6 @@
 """
-Auto-refresh por tres tiers (asyncio): LIVE, UPCOMING, RESULTS.
-Cada uno corre en su propio loop con intervalo configurable; la lógica pesada va en threads.
+Auto-refresh por tres tiers (asyncio): LIVE, RESULTS, ODDS/PRE-MATCH.
+Los intervalos vienen de settings; la lógica vive en services.tiered_refresh.
 """
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ from datetime import datetime, timezone
 from config.settings import settings
 from services.tiered_refresh import (
     run_live_refresh_job,
+    run_odds_refresh_job,
     run_results_refresh_job,
-    run_upcoming_refresh_job,
 )
 
 logger = logging.getLogger("aftr.auto_refresh")
@@ -25,7 +25,7 @@ def _utc_iso() -> str:
 async def _live_loop() -> None:
     sec = float(getattr(settings, "live_refresh_seconds", 60) or 60)
     logger.info(
-        "AUTO REFRESH: LIVE loop started | interval=%.0fs | %s",
+        "AUTO REFRESH: LIVE loop | interval=%.0fs | %s",
         sec,
         _utc_iso(),
     )
@@ -34,16 +34,16 @@ async def _live_loop() -> None:
         await asyncio.sleep(sec)
 
 
-async def _upcoming_loop() -> None:
+async def _odds_loop() -> None:
     await asyncio.sleep(5.0)
     sec = float(getattr(settings, "upcoming_refresh_min", 15) or 15) * 60.0
     logger.info(
-        "AUTO REFRESH: UPCOMING loop started | interval=%.0fs | %s",
+        "AUTO REFRESH: ODDS/PRE-MATCH loop | interval=%.0fs | %s",
         sec,
         _utc_iso(),
     )
     while True:
-        await asyncio.to_thread(run_upcoming_refresh_job)
+        await asyncio.to_thread(run_odds_refresh_job)
         await asyncio.sleep(sec)
 
 
@@ -51,7 +51,7 @@ async def _results_loop() -> None:
     await asyncio.sleep(12.0)
     sec = float(getattr(settings, "results_refresh_min", 10) or 10) * 60.0
     logger.info(
-        "AUTO REFRESH: RESULTS loop started | interval=%.0fs | %s",
+        "AUTO REFRESH: RESULTS loop | interval=%.0fs | %s",
         sec,
         _utc_iso(),
     )
@@ -64,6 +64,6 @@ def spawn_auto_refresh_tasks() -> list[asyncio.Task[None]]:
     """Tres tareas en paralelo; lifespan debe cancelarlas al apagar."""
     return [
         asyncio.create_task(_live_loop(), name="aftr-tier-live"),
-        asyncio.create_task(_upcoming_loop(), name="aftr-tier-upcoming"),
+        asyncio.create_task(_odds_loop(), name="aftr-tier-odds"),
         asyncio.create_task(_results_loop(), name="aftr-tier-results"),
     ]

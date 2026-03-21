@@ -228,6 +228,39 @@ except ValueError:
 if REFRESH_BACKOFF_SECONDS < 0:
     REFRESH_BACKOFF_SECONDS = 0
 
+# Ventana de partidos FINISHED para job results (24–48h típico)
+try:
+    RESULTS_FINISHED_HOURS = int((os.getenv("RESULTS_FINISHED_HOURS") or "48").strip())
+except ValueError:
+    RESULTS_FINISHED_HOURS = 48
+if RESULTS_FINISHED_HOURS < 6:
+    RESULTS_FINISHED_HOURS = 6
+if RESULTS_FINISHED_HOURS > 168:
+    RESULTS_FINISHED_HOURS = 168
+
+# Pre-match / odds: solo ligas con partido en las próximas N horas
+try:
+    ODDS_PREMATCH_HOURS = int((os.getenv("ODDS_PREMATCH_HOURS") or "24").strip())
+except ValueError:
+    ODDS_PREMATCH_HOURS = 24
+if ODDS_PREMATCH_HOURS < 1:
+    ODDS_PREMATCH_HOURS = 1
+
+# No volver a pegarle a The Odds API si el archivo de caché es más reciente que esto
+try:
+    ODDS_MIN_REFRESH_MINUTES = int((os.getenv("ODDS_MIN_REFRESH_MINUTES") or "20").strip())
+except ValueError:
+    ODDS_MIN_REFRESH_MINUTES = 20
+if ODDS_MIN_REFRESH_MINUTES < 0:
+    ODDS_MIN_REFRESH_MINUTES = 0
+
+try:
+    FOOTBALL_HTTP_CACHE_TTL_SEC = int((os.getenv("FOOTBALL_HTTP_CACHE_TTL_SEC") or "45").strip())
+except ValueError:
+    FOOTBALL_HTTP_CACHE_TTL_SEC = 45
+if FOOTBALL_HTTP_CACHE_TTL_SEC < 0:
+    FOOTBALL_HTTP_CACHE_TTL_SEC = 0
+
 
 class Settings:
     """Objeto de configuración accesible en toda la app."""
@@ -273,6 +306,10 @@ class Settings:
         self.upcoming_refresh_min = UPCOMING_REFRESH_MIN
         self.results_refresh_min = RESULTS_REFRESH_MIN
         self.refresh_backoff_seconds = REFRESH_BACKOFF_SECONDS
+        self.results_finished_hours = RESULTS_FINISHED_HOURS
+        self.odds_prematch_hours = ODDS_PREMATCH_HOURS
+        self.odds_min_refresh_minutes = ODDS_MIN_REFRESH_MINUTES
+        self.football_http_cache_ttl_sec = FOOTBALL_HTTP_CACHE_TTL_SEC
 
         self.secret_key = SECRET_KEY
 

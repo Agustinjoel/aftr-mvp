@@ -433,7 +433,7 @@ def _format_cache_status(meta: dict) -> str:
             "el.textContent=lu?('Última actualización: '+String(lu).replace('T',' ').slice(0,16)):"
             "'Última actualización: —';}catch(e){el.classList.remove('cache-status-updating');"
             "el.classList.add('muted');el.textContent='Estado no disponible. Recargá la página.';}"
-            "},6500);});})();</script>"
+            "},8000);});})();</script>"
         )
     last = meta.get("last_updated")
     if not last:

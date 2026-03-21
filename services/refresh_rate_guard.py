@@ -46,7 +46,8 @@ def apply_backoff_seconds(seconds: float, cap: float) -> None:
         if until > _backoff_until_mono:
             _backoff_until_mono = until
             logger.warning(
-                "AUTO REFRESH RATE LIMIT LOW, backing off | extra_s=%.0f until_mono=%.0f",
+                "RATE LIMIT ALCANZADO - BACKOFF ACTIVADO | extra_s=%.0f | "
+                "AUTO REFRESH RATE LIMIT LOW, backing off until_mono=%.0f",
                 extra,
                 _backoff_until_mono,
             )

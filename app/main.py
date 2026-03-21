@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
     tasks: list[asyncio.Task[None]] = []
     if settings.auto_refresh:
         logger.info(
-            "AUTO REFRESH: starting tiered scheduler | live=%ss upcoming=%dm results=%dm | %s",
+            "AUTO REFRESH: starting tiered scheduler | live=%ss odds=%dm results=%dm | %s",
             getattr(settings, "live_refresh_seconds", 60),
             getattr(settings, "upcoming_refresh_min", 15),
             getattr(settings, "results_refresh_min", 10),

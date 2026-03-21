@@ -32,6 +32,32 @@ _cycle_stats: dict[str, int] = {
     "rate_limit_sleep_sec": 0,
 }
 
+# Respuestas GET recientes fuera del ciclo de refresh (TTL corto; ahorra cuota).
+_ttl_lock = threading.Lock()
+_ttl_store: dict[str, tuple[float, dict[str, Any]]] = {}
+
+
+def _http_ttl_seconds() -> int:
+    try:
+        from config.settings import settings
+
+        return max(0, int(getattr(settings, "football_http_cache_ttl_sec", 45) or 0))
+    except Exception:
+        try:
+            return max(0, int((os.getenv("FOOTBALL_HTTP_CACHE_TTL_SEC") or "45").strip()))
+        except ValueError:
+            return 0
+
+
+def _apply_rate_backoff_from_wait(wait: int) -> None:
+    try:
+        from services.refresh_rate_guard import apply_backoff_seconds
+
+        cap = float((os.getenv("REFRESH_BACKOFF_SECONDS") or "120").strip() or "120")
+        apply_backoff_seconds(float(wait), cap)
+    except Exception:
+        pass
+
 
 def _cache_key(path: str, params: dict | None) -> str:
     p = params or {}
@@ -151,15 +177,22 @@ def _headers() -> dict[str, str]:
 
 
 def _get(path: str, params: dict | None = None) -> dict:
+    ck = _cache_key(path, params)
     with _cycle_lock:
         active = _cycle_active
-    if active:
-        ck = _cache_key(path, params)
-        with _cycle_lock:
-            if ck in _cycle_cache:
-                with _stats_lock:
-                    _cycle_stats["cache_hits"] += 1
-                return copy.deepcopy(_cycle_cache[ck])
+        if active and ck in _cycle_cache:
+            with _stats_lock:
+                _cycle_stats["cache_hits"] += 1
+            return copy.deepcopy(_cycle_cache[ck])
+
+    ttl = _http_ttl_seconds()
+    if ttl > 0 and not active:
+        nowm = time.monotonic()
+        with _ttl_lock:
+            ent = _ttl_store.get(ck)
+            if ent and nowm < ent[0]:
+                logger.debug("football_data: cache TTL hit (no HTTP) | %s", path)
+                return copy.deepcopy(ent[1])
 
     url = f"{BASE}{path}"
     attempt = 0
@@ -184,6 +217,7 @@ def _get(path: str, params: dict | None = None) -> dict:
             if sleep_on_429:
                 logger.warning("Football-Data 429. Sleeping %ss... (%s)", wait, url)
                 _note_rate_limit_sleep(wait)
+                _apply_rate_backoff_from_wait(wait)
                 time.sleep(wait)
                 attempt = 0
                 continue
@@ -199,6 +233,7 @@ def _get(path: str, params: dict | None = None) -> dict:
                     wait = int(reset or 60)
                     logger.warning("Rate limit bajo (%s). Sleeping %ss...", rem, wait)
                     _note_rate_limit_sleep(wait)
+                    _apply_rate_backoff_from_wait(wait)
                     time.sleep(wait)
             except ValueError:
                 pass
@@ -218,9 +253,11 @@ def _get(path: str, params: dict | None = None) -> dict:
         payload = r.json()
         with _cycle_lock:
             if _cycle_active:
-                ck = _cache_key(path, params)
                 if isinstance(payload, dict):
                     _cycle_cache[ck] = copy.deepcopy(payload)
+        if isinstance(payload, dict) and ttl > 0:
+            with _ttl_lock:
+                _ttl_store[ck] = (time.monotonic() + float(ttl), copy.deepcopy(payload))
         return payload
 
 
