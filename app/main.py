@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.auto_refresh import spawn_auto_refresh_task
+from app.auto_refresh import spawn_auto_refresh_tasks
 from app.routes.matches import router as matches_router
 from app.routes.picks import router as picks_router
 from app.routes.user import router as user_router
@@ -29,31 +29,26 @@ logger = logging.getLogger("aftr")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
-    Startup: optional background auto-refresh (AUTO_REFRESH=true).
-    Shutdown: cancel the asyncio task (in-flight refresh may finish in thread pool).
+    Startup: optional multi-tier auto-refresh (AUTO_REFRESH=true): LIVE + UPCOMING + RESULTS.
+    Shutdown: cancel all asyncio tasks (in-flight work may finish in thread pool).
     """
-    task: asyncio.Task | None = None
+    tasks: list[asyncio.Task[None]] = []
     if settings.auto_refresh:
-        interval_sec = float(settings.refresh_every_min) * 60.0
         logger.info(
-            "AUTO REFRESH: starting scheduler on app startup | every %.0f min (%.0fs) | %s",
-            settings.refresh_every_min,
-            interval_sec,
+            "AUTO REFRESH: starting tiered scheduler | live=%ss upcoming=%dm results=%dm | %s",
+            getattr(settings, "live_refresh_seconds", 60),
+            getattr(settings, "upcoming_refresh_min", 15),
+            getattr(settings, "results_refresh_min", 10),
             datetime.now(timezone.utc).isoformat(),
         )
-        task = spawn_auto_refresh_task(interval_sec)
-        if task.done():
-            logger.error(
-                "AUTO REFRESH: task exited immediately (scheduler broken?) | %s",
-                datetime.now(timezone.utc).isoformat(),
-            )
+        tasks = spawn_auto_refresh_tasks()
     else:
         logger.info(
             "AUTO REFRESH: scheduler not enabled (set AUTO_REFRESH=true) | %s",
             datetime.now(timezone.utc).isoformat(),
         )
     yield
-    if task is not None:
+    for task in tasks:
         task.cancel()
         try:
             await task

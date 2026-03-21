@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 from datetime import datetime, timezone
 from typing import Any
 
@@ -184,6 +185,28 @@ def release_refresh_running_meta() -> None:
             )
         except Exception as e2:
             _logger.critical("CRITICAL: reintento fallido al liberar refresh_running: %s", e2)
+
+
+_heavy_busy_race_lock = threading.Lock()
+
+
+def try_begin_global_refresh_busy() -> bool:
+    """
+    Intenta marcar refresh_running=true para jobs pesados (upcoming/results).
+    False si ya hay otro refresco global (UI 'Actualizando datos…').
+    """
+    with _heavy_busy_race_lock:
+        meta = read_cache_meta()
+        if meta.get("refresh_running"):
+            return False
+        raw = read_json(CACHE_META_FILENAME)
+        base = dict(raw) if isinstance(raw, dict) else {}
+        now_iso = datetime.now(timezone.utc).isoformat()
+        base["refresh_running"] = True
+        base["refresh_started_at"] = now_iso
+        base["last_updated"] = base.get("last_updated") or now_iso
+        write_cache_meta(base)
+        return True
 
 
 def write_json(filename: str, data: Any) -> None:

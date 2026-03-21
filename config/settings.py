@@ -149,12 +149,6 @@ def _env_bool(name: str, default: bool = False) -> bool:
 
 # Background refresh (same as `python -m app.cli refresh` → services.refresh.refresh_all)
 AUTO_REFRESH: bool = _env_bool("AUTO_REFRESH", False)
-try:
-    REFRESH_EVERY_MIN = int((os.getenv("REFRESH_EVERY_MIN") or "15").strip())
-except ValueError:
-    REFRESH_EVERY_MIN = 15
-if REFRESH_EVERY_MIN < 1:
-    REFRESH_EVERY_MIN = 1
 
 # Auto-refresh (light mode): skip leagues refreshed recently; batch size 0 = all per cycle
 try:
@@ -194,6 +188,46 @@ except ValueError:
 if REFRESH_RUNNING_TTL_SEC < 0:
     REFRESH_RUNNING_TTL_SEC = 0
 
+# --- Auto-refresh multi-tier (LIVE / UPCOMING / RESULTS) ---
+try:
+    LIVE_REFRESH_SECONDS = int((os.getenv("LIVE_REFRESH_SECONDS") or "60").strip())
+except ValueError:
+    LIVE_REFRESH_SECONDS = 60
+if LIVE_REFRESH_SECONDS < 15:
+    LIVE_REFRESH_SECONDS = 15
+
+try:
+    LIVE_REFRESH_MIN_INTERVAL_SEC = int((os.getenv("LIVE_REFRESH_MIN_INTERVAL_SEC") or "30").strip())
+except ValueError:
+    LIVE_REFRESH_MIN_INTERVAL_SEC = 30
+if LIVE_REFRESH_MIN_INTERVAL_SEC < 10:
+    LIVE_REFRESH_MIN_INTERVAL_SEC = 10
+
+# UPCOMING_REFRESH_MIN overrides legacy REFRESH_EVERY_MIN if only the latter is set
+_raw_upcoming = (os.getenv("UPCOMING_REFRESH_MIN") or "").strip()
+if not _raw_upcoming:
+    _raw_upcoming = (os.getenv("REFRESH_EVERY_MIN") or "15").strip()
+try:
+    UPCOMING_REFRESH_MIN = int(_raw_upcoming)
+except ValueError:
+    UPCOMING_REFRESH_MIN = 15
+if UPCOMING_REFRESH_MIN < 1:
+    UPCOMING_REFRESH_MIN = 1
+
+try:
+    RESULTS_REFRESH_MIN = int((os.getenv("RESULTS_REFRESH_MIN") or "10").strip())
+except ValueError:
+    RESULTS_REFRESH_MIN = 10
+if RESULTS_REFRESH_MIN < 1:
+    RESULTS_REFRESH_MIN = 1
+
+try:
+    REFRESH_BACKOFF_SECONDS = int((os.getenv("REFRESH_BACKOFF_SECONDS") or "120").strip())
+except ValueError:
+    REFRESH_BACKOFF_SECONDS = 120
+if REFRESH_BACKOFF_SECONDS < 0:
+    REFRESH_BACKOFF_SECONDS = 0
+
 
 class Settings:
     """Objeto de configuración accesible en toda la app."""
@@ -226,13 +260,19 @@ class Settings:
         self.log_level = LOG_LEVEL
 
         self.auto_refresh = AUTO_REFRESH
-        self.refresh_every_min = REFRESH_EVERY_MIN
+        self.refresh_every_min = UPCOMING_REFRESH_MIN
         self.refresh_skip_if_fresh_min = REFRESH_SKIP_IF_FRESH_MIN
         self.auto_refresh_leagues_per_cycle = AUTO_REFRESH_LEAGUES_PER_CYCLE
         self.auto_refresh_finished_days = AUTO_REFRESH_FINISHED_DAYS
         self.auto_refresh_fetch_odds = AUTO_REFRESH_FETCH_ODDS
         self.rate_limit_cooldown_cap_sec = RATE_LIMIT_COOLDOWN_CAP_SEC
         self.refresh_running_ttl_sec = REFRESH_RUNNING_TTL_SEC
+
+        self.live_refresh_seconds = LIVE_REFRESH_SECONDS
+        self.live_refresh_min_interval_sec = LIVE_REFRESH_MIN_INTERVAL_SEC
+        self.upcoming_refresh_min = UPCOMING_REFRESH_MIN
+        self.results_refresh_min = RESULTS_REFRESH_MIN
+        self.refresh_backoff_seconds = REFRESH_BACKOFF_SECONDS
 
         self.secret_key = SECRET_KEY
 

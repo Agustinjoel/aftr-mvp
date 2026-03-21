@@ -265,6 +265,54 @@ def get_upcoming_matches(league_code: str, days: int = 3) -> list[dict]:
     return out[:60]
 
 
+def _fd_match_to_aftr_row(m: dict, league_code: str) -> dict:
+    """Normaliza un match crudo de Football-Data API v4 al shape AFTR (daily_matches)."""
+    ft = ((m.get("score") or {}).get("fullTime")) or {}
+    hg, ag = ft.get("home"), ft.get("away")
+    hid = (m.get("homeTeam") or {}).get("id")
+    aid = (m.get("awayTeam") or {}).get("id")
+    return {
+        "match_id": m.get("id"),
+        "utcDate": m.get("utcDate", ""),
+        "home": (m.get("homeTeam") or {}).get("name", ""),
+        "away": (m.get("awayTeam") or {}).get("name", ""),
+        "league": league_code,
+        "home_team_id": hid,
+        "away_team_id": aid,
+        "home_crest": _crest_from_team_id(hid),
+        "away_crest": _crest_from_team_id(aid),
+        "home_goals": hg,
+        "away_goals": ag,
+        "status": (m.get("status") or "").upper() or "IN_PLAY",
+    }
+
+
+def get_live_matches(league_code: str) -> list[dict]:
+    """
+    Partidos en juego: una petición por liga con status=IN_PLAY (mínima huella de API).
+    """
+    comp = COMPETITIONS.get(league_code, "PL")
+    out: list[dict] = []
+    # Una sola llamada por liga (IN_PLAY); PAUSED omitido para ahorrar cuota.
+    try:
+        data = _get(
+            f"/competitions/{comp}/matches",
+            params={"status": "IN_PLAY"},
+        )
+    except UnsupportedCompetitionError:
+        raise
+    except Exception as e:
+        logger.debug("get_live_matches %s: %s", league_code, e)
+        return out
+    for m in data.get("matches") or []:
+        if not isinstance(m, dict):
+            continue
+        row = _fd_match_to_aftr_row(m, league_code)
+        row["sport"] = "football"
+        out.append(row)
+    return out
+
+
 def get_finished_matches(league_code: str, days_back: int = 5) -> list[dict]:
     """
     Partidos finalizados con resultado (home_goals, away_goals).

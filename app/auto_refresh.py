@@ -1,8 +1,6 @@
 """
-Background periodic refresh: light `refresh_all(light=True)` on a repeating asyncio loop.
-
-Logs every cycle with AUTO REFRESH STARTED / FINISHED and explicit UTC timestamps.
-Started from FastAPI lifespan when AUTO_REFRESH=true.
+Auto-refresh por tres tiers (asyncio): LIVE, UPCOMING, RESULTS.
+Cada uno corre en su propio loop con intervalo configurable; la lógica pesada va en threads.
 """
 from __future__ import annotations
 
@@ -11,80 +9,61 @@ import logging
 from datetime import datetime, timezone
 
 from config.settings import settings
-from data.cache import read_cache_meta
-from services.refresh import refresh_all
+from services.tiered_refresh import (
+    run_live_refresh_job,
+    run_results_refresh_job,
+    run_upcoming_refresh_job,
+)
 
 logger = logging.getLogger("aftr.auto_refresh")
 
 
-def _utc_ts() -> str:
+def _utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-async def _auto_refresh_loop(interval_sec: float) -> None:
-    """
-    Infinite loop: one tick per iteration, then sleep `interval_sec` (+ optional rate-limit extra).
-    Each iteration logs AUTO REFRESH STARTED / FINISHED with timestamps.
-    """
+async def _live_loop() -> None:
+    sec = float(getattr(settings, "live_refresh_seconds", 60) or 60)
     logger.info(
-        "AUTO REFRESH: scheduler loop active | interval=%.0fs | %s",
-        interval_sec,
-        _utc_ts(),
+        "AUTO REFRESH: LIVE loop started | interval=%.0fs | %s",
+        sec,
+        _utc_iso(),
     )
     while True:
-        logger.info("AUTO REFRESH STARTED | %s", _utc_ts())
-        extra = 0
-        meta = read_cache_meta()
-        if meta.get("refresh_running"):
-            logger.info(
-                "AUTO REFRESH: tick omitido (ya corriendo / refresh_running en caché) | %s",
-                _utc_ts(),
-            )
-        else:
-            try:
-                res = await asyncio.to_thread(
-                    lambda: refresh_all(non_blocking=True, light=True)
-                )
-                if res.skipped_busy:
-                    logger.info(
-                        "AUTO REFRESH: tick skipped (refresh lock busy) | %s",
-                        _utc_ts(),
-                    )
-                else:
-                    logger.info(
-                        "AUTO REFRESH: tick OK | leagues_refreshed=%d skipped_fresh=%d "
-                        "football_http=%d matches_updated=%d rate_limit_sleep_s=%d | %s",
-                        res.leagues_refreshed,
-                        res.leagues_skipped_fresh,
-                        res.football_http_requests,
-                        res.matches_updated,
-                        res.rate_limit_sleep_sec,
-                        _utc_ts(),
-                    )
-                    cap = int(getattr(settings, "rate_limit_cooldown_cap_sec", 600) or 600)
-                    if res.rate_limit_sleep_sec and cap > 0:
-                        extra = min(cap, int(res.rate_limit_sleep_sec))
-                        if extra:
-                            logger.info(
-                                "AUTO REFRESH: rate-limit cooldown +%ds | %s",
-                                extra,
-                                _utc_ts(),
-                            )
-            except Exception:
-                logger.exception("AUTO REFRESH: tick failed | %s", _utc_ts())
-
-        sleep_next = interval_sec + extra
-        logger.info(
-            "AUTO REFRESH FINISHED | next_sleep_s=%.0f | %s",
-            sleep_next,
-            _utc_ts(),
-        )
-        await asyncio.sleep(sleep_next)
+        await asyncio.to_thread(run_live_refresh_job)
+        await asyncio.sleep(sec)
 
 
-def spawn_auto_refresh_task(interval_sec: float) -> asyncio.Task[None]:
-    """Start the background loop; caller owns cancellation on shutdown."""
-    return asyncio.create_task(
-        _auto_refresh_loop(interval_sec),
-        name="aftr-auto-refresh",
+async def _upcoming_loop() -> None:
+    await asyncio.sleep(5.0)
+    sec = float(getattr(settings, "upcoming_refresh_min", 15) or 15) * 60.0
+    logger.info(
+        "AUTO REFRESH: UPCOMING loop started | interval=%.0fs | %s",
+        sec,
+        _utc_iso(),
     )
+    while True:
+        await asyncio.to_thread(run_upcoming_refresh_job)
+        await asyncio.sleep(sec)
+
+
+async def _results_loop() -> None:
+    await asyncio.sleep(12.0)
+    sec = float(getattr(settings, "results_refresh_min", 10) or 10) * 60.0
+    logger.info(
+        "AUTO REFRESH: RESULTS loop started | interval=%.0fs | %s",
+        sec,
+        _utc_iso(),
+    )
+    while True:
+        await asyncio.to_thread(run_results_refresh_job)
+        await asyncio.sleep(sec)
+
+
+def spawn_auto_refresh_tasks() -> list[asyncio.Task[None]]:
+    """Tres tareas en paralelo; lifespan debe cancelarlas al apagar."""
+    return [
+        asyncio.create_task(_live_loop(), name="aftr-tier-live"),
+        asyncio.create_task(_upcoming_loop(), name="aftr-tier-upcoming"),
+        asyncio.create_task(_results_loop(), name="aftr-tier-results"),
+    ]
