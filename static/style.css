@@ -3612,3 +3612,206 @@ canvas{
   font-size: 0.82rem;
   line-height: 1.35;
 }
+
+/* =========================
+   PREMIUM — ROI / performance panel (home + league)
+========================= */
+.perf-panel-section{
+  margin-bottom: 56px;
+}
+.perf-panel-head{
+  margin-bottom: 22px;
+}
+.perf-panel-head--home .perf-panel-title{
+  margin-bottom: 8px;
+}
+.perf-panel-title{
+  margin: 0 0 6px 0;
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+.perf-panel-sub{
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  max-width: 34rem;
+}
+.league-perf-block{
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.perf-panel-glass{
+  position: relative;
+  border-radius: 18px;
+  padding: 22px 20px 20px;
+  background:
+    linear-gradient(165deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.03) 45%, rgba(8,12,22,.55) 100%);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow:
+    0 16px 48px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.1),
+    inset 0 -1px 0 rgba(0,0,0,.2);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+.perf-panel-glass::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 48px rgba(56, 189, 248, 0.06);
+}
+.perf-strip-stats{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 26px;
+}
+@media (max-width: 640px){
+  .perf-strip-stats{
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+}
+.perf-stat-tile{
+  position: relative;
+  padding: 16px 14px 14px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.1);
+  text-align: center;
+  transition: transform 0.25s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.perf-stat-tile:hover{
+  transform: scale(1.02);
+  border-color: rgba(170, 210, 255, 0.22);
+  box-shadow: 0 8px 28px rgba(0,0,0,.28), 0 0 24px rgba(56, 189, 248, 0.08);
+}
+.perf-stat-tile--primary{
+  padding-top: 18px;
+}
+.perf-stat-tile--primary .perf-stat-value{
+  font-size: 1.65rem;
+}
+.perf-stat-tile--pos{
+  border-color: rgba(34, 197, 94, 0.28);
+  box-shadow: inset 0 0 28px rgba(34, 197, 94, 0.07), 0 0 20px rgba(34, 197, 94, 0.06);
+}
+.perf-stat-tile--pos:hover{
+  box-shadow: 0 8px 28px rgba(0,0,0,.28), 0 0 28px rgba(34, 197, 94, 0.12);
+}
+.perf-stat-tile--neg{
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: inset 0 0 28px rgba(239, 68, 68, 0.08), 0 0 18px rgba(239, 68, 68, 0.06);
+}
+.perf-stat-tile--neg:hover{
+  box-shadow: 0 8px 28px rgba(0,0,0,.28), 0 0 26px rgba(239, 68, 68, 0.12);
+}
+.perf-stat-tile--neutral{
+  opacity: 0.92;
+}
+.perf-stat-tile--flat{
+  border-color: rgba(255,255,255,.12);
+}
+.perf-stat-arrow{
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.perf-stat-arrow--up{
+  color: #4ade80;
+  text-shadow: 0 0 14px rgba(74, 222, 128, 0.45);
+}
+.perf-stat-arrow--down{
+  color: #f87171;
+  text-shadow: 0 0 14px rgba(248, 113, 113, 0.4);
+}
+.perf-stat-value{
+  display: block;
+  font-size: 1.28rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: rgba(234,242,255,.98);
+}
+.perf-stat-tile--neg .perf-stat-value{
+  color: #fecaca;
+}
+.perf-stat-tile--pos .perf-stat-value{
+  color: #d1fae5;
+}
+.perf-stat-label{
+  display: block;
+  margin-top: 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(234,242,255,.55);
+}
+.perf-chart-head-inner{
+  margin-bottom: 14px;
+  padding-top: 4px;
+}
+.perf-chart-canvas-wrap{
+  min-height: 148px;
+  border-radius: 12px;
+  background: rgba(0,0,0,.12);
+  border: 1px solid rgba(255,255,255,.06);
+  box-shadow: inset 0 2px 16px rgba(0,0,0,.25);
+}
+.perf-chart-empty-state{
+  padding: 36px 20px 40px;
+  text-align: center;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+}
+.perf-chart-empty-title{
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: rgba(234,242,255,.9);
+}
+.perf-chart-empty-sub{
+  margin: 0 auto;
+  max-width: 22rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.home-perf-inner .perf-panel-glass{
+  max-width: 680px;
+  margin: 0 auto;
+}
+.home-perf-section .home-perf-intro.perf-panel-sub{
+  margin-bottom: 0;
+}
+.league-perf-chart-shell{
+  margin-top: 0;
+}
+.league-dash-panel .perf-chart-canvas-wrap{
+  min-height: 156px;
+}
+
+/* Home: perf glass overrides older .home-perf-chart-wrap flat card */
+.home-perf-chart-wrap.perf-panel-glass{
+  padding: 22px 20px 20px;
+  background:
+    linear-gradient(165deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.03) 45%, rgba(8,12,22,.55) 100%);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow:
+    0 16px 48px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.1),
+    inset 0 -1px 0 rgba(0,0,0,.2);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .perf-stat-tile:hover{
+    transform: none;
+  }
+}

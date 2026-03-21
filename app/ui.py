@@ -2814,8 +2814,33 @@ def home_page(request: Request) -> str:
     settled_groups = group_picks_recent_by_day_desc(settled_sorted, days=7)
     spark_points = _roi_spark_points(settled_groups)
     last_spark = spark_points[-1] if spark_points else {}
-    perf_accum = last_spark.get("v", 0)
-    perf_day = last_spark.get("day", 0)
+    perf_accum = float(last_spark.get("v", 0) or 0)
+    perf_day = float(last_spark.get("day", 0) or 0)
+    if roi_pct is None:
+        home_perf_trend = "neutral"
+    elif roi_pct > 0:
+        home_perf_trend = "up"
+    elif roi_pct < 0:
+        home_perf_trend = "down"
+    else:
+        home_perf_trend = "flat"
+    _hp = []
+    if roi_pct is not None:
+        if roi_pct > 0:
+            _hp.append("perf-stat-tile--pos")
+        elif roi_pct < 0:
+            _hp.append("perf-stat-tile--neg")
+        else:
+            _hp.append("perf-stat-tile--flat")
+    else:
+        _hp.append("perf-stat-tile--neutral")
+    home_primary_tile_class = " ".join(_hp)
+    home_arrow_up_style = "display:inline" if home_perf_trend == "up" else "display:none"
+    home_arrow_down_style = "display:inline" if home_perf_trend == "down" else "display:none"
+    home_accum_pos = perf_accum > 0
+    home_accum_neg = perf_accum < 0
+    home_day_pos = perf_day > 0
+    home_day_neg = perf_day < 0
 
     # Mejores Picks del Día: best by _pick_score (limited to 4 in card build below)
 
@@ -3242,7 +3267,12 @@ def home_page(request: Request) -> str:
             '<script type="application/json" id="aftr-roi-chart-data">' + chart_data_json + '</script>'
         )
     else:
-        home_perf_chart_inner = '<p class="home-perf-empty muted">No hay datos de rendimiento en los últimos 7 días.</p>'
+        home_perf_chart_inner = (
+            '<div class="perf-chart-empty-state" role="status">'
+            '<p class="perf-chart-empty-title">Sin datos suficientes todavía</p>'
+            '<p class="perf-chart-empty-sub muted">No hay picks resueltos en la ventana reciente para graficar.</p>'
+            "</div>"
+        )
 
     page_html = f"""
     <html>
@@ -3250,7 +3280,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=16">
+      <link rel="stylesheet" href="/static/style.css?v=17">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
@@ -3384,25 +3414,37 @@ def home_page(request: Request) -> str:
       </div>
       </section>
 
-      <section class="home-section home-perf-section">
-      <h2 class="home-h2">Rendimiento AFTR</h2>
-      <p class="home-perf-intro muted">Evolución del ROI acumulado y neto por día (últimos 7 días).</p>
+      <section class="home-section home-perf-section perf-panel-section">
+      <div class="perf-panel-head perf-panel-head--home">
+        <h2 class="home-h2 perf-panel-title">Rendimiento AFTR</h2>
+        <p class="home-perf-intro muted perf-panel-sub">Evolución del ROI y unidades netas (últimos 7 días).</p>
+      </div>
       <div class="home-perf-inner">
-        <div class="home-perf-chart-wrap card">
-          <div class="roi-spark-wrap home-spark-wrap">
-            <div class="roi-spark-head">
-              <div>
-                <div class="roi-spark-title">Acumulado</div>
-                <div class="roi-spark-sub muted">Neto por día</div>
-              </div>
+        <div class="perf-panel-glass home-perf-chart-wrap card home-spark-wrap">
+          <div class="perf-strip-stats perf-strip-stats--home" role="group" aria-label="Resumen de rendimiento">
+            <div class="perf-stat-tile perf-stat-tile--primary {home_primary_tile_class}">
+              <span class="perf-stat-arrow perf-stat-arrow--up" aria-hidden="true" style="{home_arrow_up_style}">↑</span>
+              <span class="perf-stat-arrow perf-stat-arrow--down" aria-hidden="true" style="{home_arrow_down_style}">↓</span>
+              <span class="perf-stat-value">{roi_str}</span>
+              <span class="perf-stat-label">ROI total</span>
             </div>
-            <div class="roi-spark-canvas">
-              {home_perf_chart_inner}
+            <div class="perf-stat-tile{' perf-stat-tile--pos' if home_accum_pos else ''}{' perf-stat-tile--neg' if home_accum_neg else ''}">
+              <span class="perf-stat-value">{perf_accum:+.2f}u</span>
+              <span class="perf-stat-label">Profit acumulado</span>
             </div>
-            <div class="home-perf-summary">
-              <span class="home-perf-summary-item"><span class="muted">Acumulado</span> <strong>{perf_accum:+.2f}u</strong></span>
-              <span class="home-perf-summary-item"><span class="muted">Último día</span> <strong>{perf_day:+.2f}u</strong></span>
+            <div class="perf-stat-tile{' perf-stat-tile--pos' if home_day_pos else ''}{' perf-stat-tile--neg' if home_day_neg else ''}">
+              <span class="perf-stat-value">{perf_day:+.2f}u</span>
+              <span class="perf-stat-label">Último día</span>
             </div>
+          </div>
+          <div class="roi-spark-head perf-chart-head-inner">
+            <div>
+              <div class="roi-spark-title">Curva acumulada</div>
+              <div class="roi-spark-sub muted">Pasá el mouse para ver el detalle por día</div>
+            </div>
+          </div>
+          <div class="roi-spark-canvas perf-chart-canvas-wrap home-spark-canvas-inner">
+            {home_perf_chart_inner}
           </div>
         </div>
       </div>
@@ -3881,6 +3923,61 @@ def dashboard(request: Request, league: str):
     spark_points = _roi_spark_points(settled_groups)
     market_rows = _profit_by_market(settled_picks)
 
+    # Performance strip (above chart): ROI, acumulado chart, último día
+    league_last_spark = spark_points[-1] if spark_points else {}
+    league_perf_accum = round(float(league_last_spark.get("v", 0) or 0), 2)
+    league_perf_day = round(float(league_last_spark.get("day", 0) or 0), 2)
+    _lr = [p for p in settled_picks if _result_norm(p) in ("WIN", "LOSS", "PUSH")]
+    _lb = _lr if _lr else list(settled_picks)
+    _lts = sum(_pick_stake_units(p) for p in _lb) if _lb else 0.0
+    if _lb and _lts > 0:
+        _ltp = sum(_unit_delta(p) for p in _lb)
+        league_strip_roi_pct = round((_ltp / _lts) * 100.0, 1)
+        league_strip_roi_str = f"{league_strip_roi_pct:+.1f}%"
+    else:
+        league_strip_roi_pct = None
+        league_strip_roi_str = "—"
+    if league_strip_roi_pct is None:
+        league_perf_trend = "neutral"
+    elif league_strip_roi_pct > 0:
+        league_perf_trend = "up"
+    elif league_strip_roi_pct < 0:
+        league_perf_trend = "down"
+    else:
+        league_perf_trend = "flat"
+    league_arrow_up = league_perf_trend == "up"
+    league_arrow_down = league_perf_trend == "down"
+    league_accum_pos = league_perf_accum > 0
+    league_accum_neg = league_perf_accum < 0
+    league_day_pos = league_perf_day > 0
+    league_day_neg = league_perf_day < 0
+    has_league_chart = bool(spark_points)
+    if has_league_chart:
+        league_roi_chart_body = (
+            '<canvas id="roiSpark" aria-hidden="true"></canvas>\n'
+            '          <div id="roiTip" class="roi-tip" style="display:none;"></div>'
+        )
+    else:
+        league_roi_chart_body = (
+            '<div class="perf-chart-empty-state" role="status">'
+            '<p class="perf-chart-empty-title">Sin datos suficientes todavía</p>'
+            '<p class="perf-chart-empty-sub muted">La curva aparece cuando haya picks resueltos en los últimos días.</p>'
+            "</div>"
+        )
+    _lp = []
+    if league_strip_roi_pct is not None:
+        if league_strip_roi_pct > 0:
+            _lp.append("perf-stat-tile--pos")
+        elif league_strip_roi_pct < 0:
+            _lp.append("perf-stat-tile--neg")
+        else:
+            _lp.append("perf-stat-tile--flat")
+    else:
+        _lp.append("perf-stat-tile--neutral")
+    league_primary_tile_class = " ".join(_lp)
+    league_arrow_up_style = "display:inline" if league_arrow_up else "display:none"
+    league_arrow_down_style = "display:inline" if league_arrow_down else "display:none"
+
     # Premium combos UI (same component as homepage)
     # - match_by_key keyed by (league, match_id); _league forced above on all picks
 
@@ -3909,7 +4006,7 @@ def dashboard(request: Request, league: str):
       <meta charset="utf-8"/>
       <title>AFTR Pick</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=16">
+      <link rel="stylesheet" href="/static/style.css?v=17">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 
       <link rel="manifest" href="/static/manifest.webmanifest">
@@ -3923,7 +4020,7 @@ def dashboard(request: Request, league: str):
       <link rel="apple-touch-startup-image" href="/static/pwa/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
       <link rel="apple-touch-startup-image" href="/static/pwa/splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
       <link rel="apple-touch-startup-image" href="/static/pwa/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)">
-      <link rel="stylesheet" href="/static/style.css?v=16">
+      <link rel="stylesheet" href="/static/style.css?v=17">
     </head>
 
     <body>
@@ -4244,7 +4341,7 @@ def dashboard(request: Request, league: str):
     </script>
     """
 
-    # summary bar + ROI chart: constrained width so KPIs don't stretch edge-to-edge on wide viewports
+    # summary bar + premium ROI / performance block
     page_html += f"""
       <div class="league-dash-panel">
       <div id="summary-bar" class="summary-bar league-kpi-strip" data-league="{league}">
@@ -4257,19 +4354,39 @@ def dashboard(request: Request, league: str):
           <div class="kpi-card"><span class="kpi-label">Beneficio neto</span><span class="kpi-value" id="kpi-net">—</span></div>
         </div>
       </div>
-      <div class="roi-spark-wrap league-roi-panel">
-        <div class="roi-spark-head">
-          <div>
-            <div class="roi-spark-title">📈 Rendimiento (últimos días)</div>
-            <div class="roi-spark-sub muted">Acumulado + neto por día (hover para detalle)</div>
-         </div>
+      <section class="league-perf-block perf-panel-premium" aria-label="Rendimiento">
+        <div class="perf-panel-head">
+          <h2 class="perf-panel-title">Rendimiento</h2>
+          <p class="perf-panel-sub muted">Últimos días · unidades netas en esta liga</p>
         </div>
-
-        <div class="roi-spark-canvas">
-          <canvas id="roiSpark"></canvas>
-          <div id="roiTip" class="roi-tip" style="display:none;"></div>
+        <div class="perf-panel-glass league-perf-chart-shell">
+          <div class="perf-strip-stats" role="group" aria-label="Resumen de rendimiento">
+            <div class="perf-stat-tile perf-stat-tile--primary {league_primary_tile_class}">
+              <span class="perf-stat-arrow perf-stat-arrow--up" aria-hidden="true" style="{league_arrow_up_style}">↑</span>
+              <span class="perf-stat-arrow perf-stat-arrow--down" aria-hidden="true" style="{league_arrow_down_style}">↓</span>
+              <span class="perf-stat-value" id="perf-strip-roi">{league_strip_roi_str}</span>
+              <span class="perf-stat-label">ROI total</span>
+            </div>
+            <div class="perf-stat-tile{' perf-stat-tile--pos' if league_accum_pos else ''}{' perf-stat-tile--neg' if league_accum_neg else ''}">
+              <span class="perf-stat-value" id="perf-strip-accum">{league_perf_accum:+.2f}u</span>
+              <span class="perf-stat-label">Profit acumulado</span>
+            </div>
+            <div class="perf-stat-tile{' perf-stat-tile--pos' if league_day_pos else ''}{' perf-stat-tile--neg' if league_day_neg else ''}">
+              <span class="perf-stat-value" id="perf-strip-day">{league_perf_day:+.2f}u</span>
+              <span class="perf-stat-label">Último día</span>
+            </div>
+          </div>
+          <div class="roi-spark-head perf-chart-head-inner">
+            <div>
+              <div class="roi-spark-title">Curva acumulada</div>
+              <div class="roi-spark-sub muted">Pasá el mouse para ver el detalle por día</div>
+            </div>
+          </div>
+          <div class="roi-spark-canvas perf-chart-canvas-wrap">
+            {league_roi_chart_body}
+          </div>
         </div>
-      </div>
+      </section>
       </div>
 
       <script>
@@ -4928,6 +5045,30 @@ def dashboard(request: Request, league: str):
 
           var roiEl = document.getElementById('kpi-roi');
           if (roiEl) roiEl.textContent = (settled > 0 && d.roi != null) ? (d.roi + '%') : '—';
+
+          var pr = document.getElementById('perf-strip-roi');
+          var ptile = document.querySelector('.league-perf-block .perf-stat-tile--primary');
+          if (pr && ptile) {
+            var rtxt = (settled > 0 && d.roi != null) ? (String(d.roi).indexOf('%') >= 0 ? String(d.roi) : (d.roi + '%')) : '—';
+            pr.textContent = rtxt;
+            var rn = (settled > 0 && d.roi != null) ? Number(d.roi) : NaN;
+            ptile.classList.remove('perf-stat-tile--pos','perf-stat-tile--neg','perf-stat-tile--flat','perf-stat-tile--neutral');
+            var au = ptile.querySelector('.perf-stat-arrow--up');
+            var ad = ptile.querySelector('.perf-stat-arrow--down');
+            if (au) au.style.display = 'none';
+            if (ad) ad.style.display = 'none';
+            if (rtxt === '—' || isNaN(rn)) {
+              ptile.classList.add('perf-stat-tile--neutral');
+            } else if (rn > 0) {
+              ptile.classList.add('perf-stat-tile--pos');
+              if (au) au.style.display = 'inline';
+            } else if (rn < 0) {
+              ptile.classList.add('perf-stat-tile--neg');
+              if (ad) ad.style.display = 'inline';
+            } else {
+              ptile.classList.add('perf-stat-tile--flat');
+            }
+          }
 
           var el;
           el = document.getElementById('kpi-total'); if (el) el.textContent = (d.total_picks != null) ? d.total_picks : '—';
@@ -5747,7 +5888,7 @@ def _simple_page(title: str, body: str) -> str:
   <meta charset="utf-8"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=16">
+  <link rel="stylesheet" href="/static/style.css?v=17">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 </head>
 <body>
