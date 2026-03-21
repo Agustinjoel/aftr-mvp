@@ -3334,3 +3334,281 @@ canvas{
     transform: none !important;
   }
 }
+
+/* =========================
+   HOME — polish (hero KPIs, ROI block, bottom hub)
+========================= */
+.home-hero-kpis{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 20px;
+  margin-top: 22px;
+  max-width: 420px;
+}
+@media (min-width: 640px){
+  .home-hero-kpis{
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: none;
+    gap: 12px 28px;
+  }
+}
+.home-hero-kpi{
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: linear-gradient(165deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 8px 24px rgba(0,0,0,.2);
+  min-width: 0;
+}
+.home-hero-kpi span{
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  opacity: .72;
+}
+.home-hero-kpi strong{
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 900;
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.home-perf-inner{
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
+}
+.home-perf-chart-wrap.card{
+  padding: 20px 18px 18px;
+  margin: 0;
+}
+
+.home-bottom-hub-section{
+  margin-top: 12px;
+  margin-bottom: 40px;
+}
+.home-bottom-hub{
+  max-width: 920px;
+  margin: 0 auto;
+}
+.home-bottom-hub-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: stretch;
+}
+@media (max-width: 720px){
+  .home-bottom-hub-grid{
+    grid-template-columns: 1fr;
+  }
+}
+.home-hub-card{
+  padding: 22px 22px 24px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 100%;
+  background: linear-gradient(165deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.home-hub-card--primary{
+  border-color: rgba(56, 189, 248, 0.22);
+}
+.home-hub-card--account{
+  border-color: rgba(139, 92, 246, 0.2);
+}
+.home-hub-eyebrow{
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(180, 220, 255, 0.75);
+}
+.home-hub-title{
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+.home-hub-desc{
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.home-hub-perks{
+  margin: 4px 0 0 0;
+  padding-left: 18px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: rgba(234,242,255,.88);
+}
+.home-hub-perks--compact{
+  list-style: none;
+  padding-left: 0;
+}
+.home-hub-perks--compact li{
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.home-hub-perks--compact li:last-child{
+  border-bottom: none;
+}
+.home-hub-cta{
+  margin-top: auto;
+  padding: 10px 20px !important;
+}
+.home-hub-cta-secondary{
+  margin-top: auto;
+  padding: 9px 18px !important;
+  background: rgba(255,255,255,.08) !important;
+  border: 1px solid rgba(255,255,255,.15) !important;
+}
+.home-hub-foot{
+  margin: 0;
+  font-size: 0.8rem;
+}
+.home-hub-link{
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+.home-hub-link:hover{
+  color: var(--text);
+}
+
+/* League dashboard — KPI + ROI contained width */
+.league-dash-panel{
+  max-width: 920px;
+  margin: 0 auto 20px;
+  padding: 0 2px;
+}
+.league-kpi-strip{
+  margin-bottom: 16px;
+}
+.league-kpi-grid{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 520px){
+  .league-kpi-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.league-roi-panel{
+  padding: 18px 16px 16px;
+  margin-top: 0;
+}
+.league-roi-panel .roi-spark-canvas{
+  min-height: 160px;
+}
+
+/* League — compact mercado grid */
+.league-market-section{
+  max-width: 720px;
+  margin: 28px auto 8px;
+  padding: 0 4px;
+}
+.league-market-title{
+  margin-bottom: 8px !important;
+}
+.league-market-intro{
+  margin: 0 0 16px 0;
+  font-size: 0.88rem;
+  max-width: 36rem;
+}
+.market-compact-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 540px){
+  .market-compact-grid{
+    grid-template-columns: 1fr;
+  }
+}
+.market-compact-card{
+  padding: 14px 14px 12px !important;
+  margin: 0;
+}
+.market-compact-top{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.market-compact-name{
+  font-weight: 900;
+  font-size: 0.88rem;
+  line-height: 1.3;
+  min-width: 0;
+}
+.market-compact-net{
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.market-compact-net--pos{ color: #86efac; }
+.market-compact-net--neg{ color: #fca5a5; }
+.market-compact-meta{
+  font-size: 0.72rem;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+.market-bar--compact{
+  height: 10px;
+}
+.market-compact-empty{
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Account — recent activity feed cards */
+.account-activity-feed-card{
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  background: linear-gradient(160deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 6px 18px rgba(0,0,0,.18);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.account-activity-feed-card:last-child{
+  margin-bottom: 0;
+}
+.account-activity-feed-card:hover{
+  border-color: rgba(56, 189, 248, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 8px 22px rgba(0,0,0,.22);
+}
+.account-activity-feed-top{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.account-activity-feed-date{
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(234,242,255,.65);
+  white-space: nowrap;
+}
+.account-activity-feed-market{
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: rgba(234,242,255,.96);
+  margin-bottom: 4px;
+}
+.account-activity-feed-match{
+  font-size: 0.82rem;
+  line-height: 1.35;
+}

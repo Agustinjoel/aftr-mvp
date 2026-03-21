@@ -462,7 +462,7 @@ def _pick_local_date(p: dict, match_by_key: dict[Any, dict] | None) -> date | No
     utc_str = p.get("utcDate")
     if not utc_str and match_by_key:
         mid = _safe_int(p.get("match_id")) or _safe_int(p.get("id"))
-        league = p.get("_league")
+        league = (p.get("_league") or p.get("league") or "").strip()
         m = match_by_key.get((league, mid)) if mid is not None and league else None
         if isinstance(m, dict):
             utc_str = m.get("utcDate")
@@ -2041,6 +2041,8 @@ def _combo_leg_odds_value(p: dict) -> float | None:
 def _build_home_premium_combos(
     upcoming_picks: list[dict],
     match_by_key: dict[Any, dict],
+    *,
+    log_context: str | None = None,
 ) -> list[dict]:
     """
     Build exactly 3 premium combo cards with explicit roles:
@@ -2052,11 +2054,14 @@ def _build_home_premium_combos(
       - never repeat the same match inside a combo
       - avoid repeating across combos when possible; if not enough inventory, allow cross-combo duplicates
         but still avoid duplicates within each combo.
+
+    If strict filters yield no filled combos but picks exist, retries with relaxed thresholds and logs why.
     """
     today_local = datetime.now().astimezone().date()
+    upcoming = [p for p in (upcoming_picks or []) if isinstance(p, dict)]
+    ctx = log_context or ""
 
-    # Candidate validity: strong + enough confidence + (when present) positive edge.
-    def _valid(p: dict) -> bool:
+    def _valid_strict(p: dict) -> bool:
         if _aftr_score(p) < 75:
             return False
         if _safe_int(p.get("confidence"), 0) < 6:
@@ -2070,35 +2075,19 @@ def _build_home_premium_combos(
                 return False
         return True
 
+    def _valid_relaxed(p: dict) -> bool:
+        """Still quality-biased, but allows neutral/negative edge and slightly lower bars."""
+        if _aftr_score(p) < 62:
+            return False
+        if _safe_int(p.get("confidence"), 0) < 5:
+            return False
+        return True
+
     def _in_local_window(p: dict, start_day: int, end_day: int) -> bool:
         d = _pick_local_date(p, match_by_key)
         if d is None:
             return False
         return (today_local + timedelta(days=start_day)) <= d <= (today_local + timedelta(days=end_day))
-
-    all_candidates = [p for p in (upcoming_picks or []) if isinstance(p, dict) and _valid(p)]
-
-    # Keep only window matches.
-    def _pool(start_day: int, end_day: int) -> list[dict]:
-        return [p for p in all_candidates if _in_local_window(p, start_day, end_day)]
-
-    pools = {
-        "day": _pool(0, 0),
-        "72h": _pool(0, 3),
-        "value": _pool(0, 3),
-    }
-
-    # Sort strategy per role.
-    day_sorted = sorted(pools["day"], key=lambda p: -_pick_score(p))
-    h72_sorted = sorted(pools["72h"], key=lambda p: -_pick_score(p))
-    value_sorted = sorted(
-        pools["value"],
-        key=lambda p: (
-            -float(_safe_float(p.get("edge"), 0) or 0),
-            -_aftr_score(p),
-            -_pick_score(p),
-        ),
-    )
 
     def _target_leg_count(candidates: list[dict]) -> int:
         uniq = set()
@@ -2116,7 +2105,6 @@ def _build_home_premium_combos(
         legs: list[dict] = []
         used_local: set[tuple[str, int]] = set()
 
-        # Preferred: do not reuse matches across combos.
         for p in candidates:
             k = _combo_match_key_for_home(p)
             if not k or k in used_local or k in global_used:
@@ -2126,7 +2114,6 @@ def _build_home_premium_combos(
             if len(legs) >= target_count:
                 break
 
-        # Fallback: allow cross-combo duplicates but still avoid duplicates inside combo.
         if len(legs) < 3:
             for p in candidates:
                 k = _combo_match_key_for_home(p)
@@ -2138,115 +2125,173 @@ def _build_home_premium_combos(
                     break
         return legs
 
-    global_used: set[tuple[str, int]] = set()
+    def _assemble(valid_fn) -> list[dict]:
+        all_candidates = [p for p in upcoming if valid_fn(p)]
 
-    combo_specs = [
-        {
-            "key": "day",
-            "title": "🔥 Combo del Día",
-            "description": "Las mejores selecciones de hoy",
-            "tier_badge": "Seguro",
-            "tier_class": "seguro",
-            "sorted": day_sorted,
-        },
-        {
-            "key": "72h",
-            "title": "⏳ Combo 72h",
-            "description": "Ventana ampliada de oportunidades",
-            "tier_badge": "Balanceado",
-            "tier_class": "balanceado",
-            "sorted": h72_sorted,
-        },
-        {
-            "key": "value",
-            "title": "💎 Combo Value",
-            "description": "Más edge, más cuota, más riesgo controlado",
-            "tier_badge": "Value",
-            "tier_class": "value",
-            "sorted": value_sorted,
-        },
-    ]
+        def _pool(start_day: int, end_day: int) -> list[dict]:
+            return [p for p in all_candidates if _in_local_window(p, start_day, end_day)]
 
-    combos: list[dict] = []
-    for spec in combo_specs:
-        candidates = spec.get("sorted") or []
-        target_count = _target_leg_count(candidates)
-        legs_picks = _select_legs(candidates, target_count, global_used)
-        # Ensure 3-5 legs: if we couldn't find enough inventory, we return an empty combo.
-        if len(legs_picks) < 3:
-            combos.append({"spec": spec, "legs": [], "combined_odds": None, "combo_prob_pct": None, "combo_score": None})
-            continue
+        pools = {
+            "day": _pool(0, 0),
+            "72h": _pool(0, 3),
+            "value": _pool(0, 3),
+        }
+        day_sorted = sorted(pools["day"], key=lambda p: -_pick_score(p))
+        h72_sorted = sorted(pools["72h"], key=lambda p: -_pick_score(p))
+        value_sorted = sorted(
+            pools["value"],
+            key=lambda p: (
+                -float(_safe_float(p.get("edge"), 0) or 0),
+                -_aftr_score(p),
+                -_pick_score(p),
+            ),
+        )
+        combo_specs = [
+            {
+                "key": "day",
+                "title": "🔥 Combo del Día",
+                "description": "Las mejores selecciones de hoy",
+                "tier_badge": "Seguro",
+                "tier_class": "seguro",
+                "sorted": day_sorted,
+            },
+            {
+                "key": "72h",
+                "title": "⏳ Combo 72h",
+                "description": "Ventana ampliada de oportunidades",
+                "tier_badge": "Balanceado",
+                "tier_class": "balanceado",
+                "sorted": h72_sorted,
+            },
+            {
+                "key": "value",
+                "title": "💎 Combo Value",
+                "description": "Más edge, más cuota, más riesgo controlado",
+                "tier_badge": "Value",
+                "tier_class": "value",
+                "sorted": value_sorted,
+            },
+        ]
+        global_used: set[tuple[str, int]] = set()
+        combos: list[dict] = []
+        for spec in combo_specs:
+            candidates = spec.get("sorted") or []
+            target_count = _target_leg_count(candidates)
+            legs_picks = _select_legs(candidates, target_count, global_used)
+            if len(legs_picks) < 3:
+                combos.append(
+                    {
+                        **spec,
+                        "legs": [],
+                        "combined_odds": None,
+                        "combo_prob_pct": None,
+                        "combo_score": None,
+                    }
+                )
+                continue
 
-        # Update global used matches to minimize duplicates across combos.
-        for lp in legs_picks:
-            k = _combo_match_key_for_home(lp)
-            if k:
-                global_used.add(k)
+            for lp in legs_picks:
+                k = _combo_match_key_for_home(lp)
+                if k:
+                    global_used.add(k)
 
-        legs: list[dict] = []
-        combined_prob = 1.0
-        combined_odds: float | None = None
-        odds_ok = True
-        score_sum = 0
+            legs: list[dict] = []
+            combined_prob = 1.0
+            combined_odds: float | None = None
+            odds_ok = True
+            score_sum = 0
 
-        for lp in legs_picks:
-            mid = _safe_int(lp.get("match_id")) or _safe_int(lp.get("id"))
-            league_code = (lp.get("_league") or lp.get("league") or "").strip()
-            m = match_by_key.get((league_code, mid)) if mid is not None and league_code else None
-            home = lp.get("home") or (m.get("home") if isinstance(m, dict) else "") or "—"
-            away = lp.get("away") or (m.get("away") if isinstance(m, dict) else "") or "—"
-            market = (lp.get("best_market") or lp.get("best_market_name") or "").strip() or "—"
-            home_crest = lp.get("home_crest") or (m.get("home_crest") if isinstance(m, dict) else None)
-            away_crest = lp.get("away_crest") or (m.get("away_crest") if isinstance(m, dict) else None)
+            for lp in legs_picks:
+                mid = _safe_int(lp.get("match_id")) or _safe_int(lp.get("id"))
+                league_code = (lp.get("_league") or lp.get("league") or "").strip()
+                m = match_by_key.get((league_code, mid)) if mid is not None and league_code else None
+                home = lp.get("home") or (m.get("home") if isinstance(m, dict) else "") or "—"
+                away = lp.get("away") or (m.get("away") if isinstance(m, dict) else "") or "—"
+                market = (lp.get("best_market") or lp.get("best_market_name") or "").strip() or "—"
+                home_crest = lp.get("home_crest") or (m.get("home_crest") if isinstance(m, dict) else None)
+                away_crest = lp.get("away_crest") or (m.get("away_crest") if isinstance(m, dict) else None)
 
-            prob = _safe_float(lp.get("best_prob"), 0) or 0.0
-            leg_odds = _combo_leg_odds_value(lp)
-            aftr_sc = lp.get("aftr_score")
-            if aftr_sc is None:
-                aftr_sc = _aftr_score(lp)
-            try:
-                aftr_sc_int = int(round(float(aftr_sc)))
-            except (TypeError, ValueError):
-                aftr_sc_int = _aftr_score(lp)
+                prob = _safe_float(lp.get("best_prob"), 0) or 0.0
+                leg_odds = _combo_leg_odds_value(lp)
+                aftr_sc = lp.get("aftr_score")
+                if aftr_sc is None:
+                    aftr_sc = _aftr_score(lp)
+                try:
+                    aftr_sc_int = int(round(float(aftr_sc)))
+                except (TypeError, ValueError):
+                    aftr_sc_int = _aftr_score(lp)
 
-            legs.append(
+                legs.append(
+                    {
+                        "home": home,
+                        "away": away,
+                        "market": market,
+                        "prob": prob,
+                        "home_crest": home_crest,
+                        "away_crest": away_crest,
+                        "match_id": mid,
+                        "odds_value": leg_odds,
+                        "aftr_score": aftr_sc_int,
+                    }
+                )
+
+                combined_prob *= prob
+                score_sum += aftr_sc_int
+                if leg_odds is None:
+                    odds_ok = False
+                else:
+                    if combined_odds is None:
+                        combined_odds = float(leg_odds)
+                    else:
+                        combined_odds *= float(leg_odds)
+
+            combo_prob_pct = round(combined_prob * 100, 1)
+            combo_score = int(round(score_sum / max(1, len(legs))))
+            if not odds_ok:
+                combined_odds = None
+
+            combos.append(
                 {
-                    "home": home,
-                    "away": away,
-                    "market": market,
-                    "prob": prob,
-                    "home_crest": home_crest,
-                    "away_crest": away_crest,
-                    "match_id": mid,
-                    "odds_value": leg_odds,
-                    "aftr_score": aftr_sc_int,
+                    **spec,
+                    "legs": legs,
+                    "combo_prob_pct": combo_prob_pct,
+                    "combined_odds": combined_odds,
+                    "combo_score": combo_score,
                 }
             )
+        return combos
 
-            combined_prob *= prob
-            score_sum += aftr_sc_int
-            if leg_odds is None:
-                odds_ok = False
-            else:
-                if combined_odds is None:
-                    combined_odds = float(leg_odds)
-                else:
-                    combined_odds *= float(leg_odds)
+    combos = _assemble(_valid_strict)
+    filled = sum(1 for c in combos if len(c.get("legs") or []) >= 3)
 
-        combo_prob_pct = round(combined_prob * 100, 1)
-        combo_score = int(round(score_sum / max(1, len(legs))))
-        if not odds_ok:
-            combined_odds = None
-
-        combos.append(
-            {
-                **spec,
-                "legs": legs,
-                "combo_prob_pct": combo_prob_pct,
-                "combined_odds": combined_odds,
-                "combo_score": combo_score,
-            }
+    if filled == 0 and upcoming:
+        n_strict = len([p for p in upcoming if _valid_strict(p)])
+        n_relaxed = len([p for p in upcoming if _valid_relaxed(p)])
+        no_key = sum(1 for p in upcoming if _combo_match_key_for_home(p) is None)
+        no_date = sum(1 for p in upcoming if _pick_local_date(p, match_by_key) is None)
+        in_day = sum(1 for p in upcoming if _in_local_window(p, 0, 0))
+        in_72 = sum(1 for p in upcoming if _in_local_window(p, 0, 3))
+        logger.warning(
+            "premium_combos[%s]: 0 filled combos | upcoming=%s strict_ok=%s relaxed_ok=%s "
+            "no_match_key=%s no_local_date=%s in_today_window=%s in_72h_window=%s",
+            ctx or "—",
+            len(upcoming),
+            n_strict,
+            n_relaxed,
+            no_key,
+            no_date,
+            in_day,
+            in_72,
         )
+
+    if filled == 0 and len(upcoming) >= 3 and n_relaxed >= 3:
+        combos_r = _assemble(_valid_relaxed)
+        if sum(1 for c in combos_r if len(c.get("legs") or []) >= 3) > 0:
+            logger.warning(
+                "premium_combos[%s]: using RELAXED thresholds (AFTR≥62, CONF≥5, any edge)",
+                ctx or "—",
+            )
+            return combos_r
 
     return combos
 
@@ -2728,6 +2773,7 @@ def home_page(request: Request) -> str:
     premium_combos = _build_home_premium_combos(
         all_upcoming,
         match_by_key,
+        log_context="home",
     )
     combos_section_html = "\n".join(_render_home_premium_combo_card(c) for c in premium_combos)
 
@@ -3154,7 +3200,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=15">
+      <link rel="stylesheet" href="/static/style.css?v=16">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
@@ -3245,11 +3291,11 @@ def home_page(request: Request) -> str:
         <div class="hero-copy">
           <h1>Picks con IA, apuestas de valor y combinadas inteligentes</h1>
           <p>Las mejores oportunidades del día, filtradas por AFTR Score, ventaja y confianza.</p>
-          <div class="hero-stats">
-            <div><span>ROI GLOBAL</span><strong>{roi_str}</strong></div>
-            <div><span>GANANCIA NETA</span><strong>{net:+.1f}u</strong></div>
-            <div><span>TASA DE ACIERTO</span><strong>{winrate_str}</strong></div>
-            <div><span>PICKS TOTALES</span><strong>{total_picks}</strong></div>
+          <div class="hero-stats home-hero-kpis">
+            <div class="home-hero-kpi"><span>ROI GLOBAL</span><strong>{roi_str}</strong></div>
+            <div class="home-hero-kpi"><span>GANANCIA NETA</span><strong>{net:+.1f}u</strong></div>
+            <div class="home-hero-kpi"><span>TASA DE ACIERTO</span><strong>{winrate_str}</strong></div>
+            <div class="home-hero-kpi"><span>PICKS TOTALES</span><strong>{total_picks}</strong></div>
           </div>
           <div class="hero-buttons">
             <a href="#top-picks" class="btn-secondary">Ver picks de hoy</a>
@@ -3291,51 +3337,67 @@ def home_page(request: Request) -> str:
       <section class="home-section home-perf-section">
       <h2 class="home-h2">Rendimiento AFTR</h2>
       <p class="home-perf-intro muted">Evolución del ROI acumulado y neto por día (últimos 7 días).</p>
-      <div class="home-perf-chart-wrap">
-        <div class="roi-spark-wrap home-spark-wrap">
-          <div class="roi-spark-head">
-            <div>
-              <div class="roi-spark-title">Acumulado</div>
-              <div class="roi-spark-sub muted">Neto por día</div>
+      <div class="home-perf-inner">
+        <div class="home-perf-chart-wrap card">
+          <div class="roi-spark-wrap home-spark-wrap">
+            <div class="roi-spark-head">
+              <div>
+                <div class="roi-spark-title">Acumulado</div>
+                <div class="roi-spark-sub muted">Neto por día</div>
+              </div>
             </div>
-          </div>
-          <div class="roi-spark-canvas">
-            {home_perf_chart_inner}
-          </div>
-          <div class="home-perf-summary">
-            <span class="home-perf-summary-item"><span class="muted">Acumulado</span> <strong>{perf_accum:+.2f}u</strong></span>
-            <span class="home-perf-summary-item"><span class="muted">Último día</span> <strong>{perf_day:+.2f}u</strong></span>
+            <div class="roi-spark-canvas">
+              {home_perf_chart_inner}
+            </div>
+            <div class="home-perf-summary">
+              <span class="home-perf-summary-item"><span class="muted">Acumulado</span> <strong>{perf_accum:+.2f}u</strong></span>
+              <span class="home-perf-summary-item"><span class="muted">Último día</span> <strong>{perf_day:+.2f}u</strong></span>
+            </div>
           </div>
         </div>
       </div>
       </section>
 
-      <section class="home-section home-cta-section">
-        <div class="home-premium-block">
-          {"<div class=\"premium-badge\" style=\"font-size:1.1rem;\">⭐ Premium activo</div>" if user_premium else f"""
-          <h2 class="home-premium-title">Desbloqueá todo con Premium</h2>
-          <p class="home-premium-subtitle muted">Más picks, combos de valor y todas las ligas. Sin límites.</p>
-          <div class="home-premium-compare">
-            <div class="home-premium-col home-premium-free">
-              <div class="home-premium-col-title">Gratis</div>
-              <ul class="home-premium-list">
-                <li>Picks limitadas</li>
-                <li>Algunas ligas</li>
+      <section class="home-section home-bottom-hub-section">
+        <div class="home-bottom-hub">
+          <div class="home-bottom-hub-grid">
+            <div class="card home-hub-card home-hub-card--primary">
+              {(
+                """<div class="home-hub-eyebrow">Estado</div>
+              <h3 class="home-hub-title">⭐ Premium activo</h3>
+              <ul class="home-hub-perks">
+                <li>Todos los picks y ligas desbloqueados</li>
+                <li>Combos de valor y AFTR Score completo</li>
+                <li>Historial avanzado en tu cuenta</li>
               </ul>
+              <a href="/account" class="pill home-hub-cta-secondary">Ver mi cuenta</a>"""
+                if user_premium
+                else f"""<div class="home-hub-eyebrow">Planes</div>
+              <h3 class="home-hub-title">Desbloqueá AFTR Premium</h3>
+              <p class="home-hub-desc muted">Picks ilimitados, combos inteligentes y todas las ligas.</p>
+              <ul class="home-hub-perks home-hub-perks--compact">
+                <li><strong>Gratis</strong> — picks limitadas · ligas seleccionadas</li>
+                <li><strong>Premium</strong> — todo el motor · $9.99/mes</li>
+              </ul>
+              <button type="button" class="pill home-hub-cta" onclick="openPremium();">Obtener Premium</button>"""
+              )}
             </div>
-            <div class="home-premium-col home-premium-pro">
-              <div class="home-premium-col-title">Premium</div>
-              <ul class="home-premium-list">
-                <li>Todos los picks del día</li>
-                <li>Alto AFTR Score + combinadas de valor</li>
-                <li>Todas las ligas</li>
-                <li>Sin límites</li>
-              </ul>
-              <div class="home-premium-price"><span class="price-main">$9.99</span><span class="price-sub">/ mes</span></div>
-              <button type="button" class="home-cta-btn" onclick="openPremium();">Obtener Premium</button>
+            <div class="card home-hub-card home-hub-card--account">
+              {(
+                f"""<div class="home-hub-eyebrow">Tu cuenta AFTR</div>
+              <h3 class="home-hub-title">Hola, {html_lib.escape((user.get("username") or (user.get("email") or "Usuario").split("@")[0] or "Usuario").strip()[:28])}</h3>
+              <p class="home-hub-desc muted">Seguí picks activos, favoritos, historial e insights personales.</p>
+              <a href="/account" class="pill home-hub-cta">Ir al dashboard</a>
+              <p class="home-hub-foot muted">ROI, winrate y actividad reciente en un solo lugar.</p>"""
+                if user
+                else """<div class="home-hub-eyebrow">Tu cuenta AFTR</div>
+              <h3 class="home-hub-title">Seguí tu rendimiento</h3>
+              <p class="home-hub-desc muted">Favoritos, picks seguidas y estadísticas con una cuenta gratis.</p>
+              <a href="/?auth=register" class="pill home-hub-cta">Crear cuenta</a>
+              <a href="/?auth=login" class="home-hub-link muted">Ya tengo cuenta →</a>"""
+              )}
             </div>
           </div>
-          """}
         </div>
       </section>
 
@@ -3700,6 +3762,11 @@ def dashboard(request: Request, league: str):
             league, len(raw_picks_list),
         )
         picks = raw_picks_list
+    # Force canonical league code on every pick so combo date windows + match_by_key align
+    # (cached picks may carry a different _league/league string — setdefault was not enough for PL).
+    for p in picks:
+        if isinstance(p, dict):
+            p["_league"] = league
     logger.info(
         "dashboard: league=%s raw_matches=%s raw_picks=%s after_filter_picks=%s",
         league, len(matches), len(raw_picks_list), len(picks),
@@ -3765,11 +3832,7 @@ def dashboard(request: Request, league: str):
     market_rows = _profit_by_market(settled_picks)
 
     # Premium combos UI (same component as homepage)
-    # - homepage combo builder expects: match_by_key keyed by (league, match_id)
-    # - and pick objects with a stable league code in `_league`
-    for p in upcoming_picks:
-        if isinstance(p, dict):
-            p.setdefault("_league", league)
+    # - match_by_key keyed by (league, match_id); _league forced above on all picks
 
     match_by_key = {}
     for mid_i, m in match_by_id.items():
@@ -3778,6 +3841,7 @@ def dashboard(request: Request, league: str):
     premium_combos = _build_home_premium_combos(
         upcoming_picks,
         match_by_key,
+        log_context=f"league={league}",
     )
     combos_section_html = "\n".join(_render_home_premium_combo_card(c) for c in premium_combos)
     league_combos_html = f"""
@@ -3795,7 +3859,7 @@ def dashboard(request: Request, league: str):
       <meta charset="utf-8"/>
       <title>AFTR Pick</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=15">
+      <link rel="stylesheet" href="/static/style.css?v=16">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 
       <link rel="manifest" href="/static/manifest.webmanifest">
@@ -3809,7 +3873,7 @@ def dashboard(request: Request, league: str):
       <link rel="apple-touch-startup-image" href="/static/pwa/splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
       <link rel="apple-touch-startup-image" href="/static/pwa/splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
       <link rel="apple-touch-startup-image" href="/static/pwa/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)">
-      <link rel="stylesheet" href="/static/style.css?v=15">
+      <link rel="stylesheet" href="/static/style.css?v=16">
     </head>
 
     <body>
@@ -4131,10 +4195,11 @@ def dashboard(request: Request, league: str):
     </script>
     """
 
-    # summary bar
+    # summary bar + ROI chart: constrained width so KPIs don't stretch edge-to-edge on wide viewports
     page_html += f"""
-      <div id="summary-bar" class="summary-bar" data-league="{league}">
-        <div class="kpi-grid">
+      <div class="league-dash-panel">
+      <div id="summary-bar" class="summary-bar league-kpi-strip" data-league="{league}">
+        <div class="kpi-grid league-kpi-grid">
           <div class="kpi-card"><span class="kpi-label">ROI</span><span class="kpi-value" id="kpi-roi">—</span></div>
           <div class="kpi-card"><span class="kpi-label">Selecciones totales</span><span class="kpi-value" id="kpi-total">—</span></div>
           <div class="kpi-card"><span class="kpi-label">Gana</span><span class="kpi-value" id="kpi-wins">—</span></div>
@@ -4143,9 +4208,7 @@ def dashboard(request: Request, league: str):
           <div class="kpi-card"><span class="kpi-label">Beneficio neto</span><span class="kpi-value" id="kpi-net">—</span></div>
         </div>
       </div>
-    """
-    page_html += f"""
-      <div class="roi-spark-wrap">
+      <div class="roi-spark-wrap league-roi-panel">
         <div class="roi-spark-head">
           <div>
             <div class="roi-spark-title">📈 Rendimiento (últimos días)</div>
@@ -4157,6 +4220,7 @@ def dashboard(request: Request, league: str):
           <canvas id="roiSpark"></canvas>
           <div id="roiTip" class="roi-tip" style="display:none;"></div>
         </div>
+      </div>
       </div>
 
       <script>
@@ -4172,26 +4236,34 @@ def dashboard(request: Request, league: str):
       </script>
     """
 
-    # Profit por mercado
-    page_html += f"""
-      <h2 style="margin-top:18px;">💰 Ganancia por mercado</h2>
-      <div class="market-wrap">
-        {''.join([f'''
-          <div class="market-row">
-            <div class="market-head">
-              <div class="market-name">{html_lib.escape(str(r["market"]))}</div>
-              <div class="market-meta muted">
-                {r["picks"]} picks • W{r["wins"]}-L{r["losses"]}{" • " + str(r["winrate"]) + "%" if r["winrate"] is not None else ""}
-              </div>
+    # Profit por mercado — compact grid (2 cols on desktop), aligned with dashboard width
+    market_slice = market_rows[:8]
+    market_cards_html = ""
+    for r in market_slice:
+        wr = f" • {r['winrate']}%" if r["winrate"] is not None else ""
+        net_cls = "market-compact-net--pos" if r["net_units"] >= 0 else "market-compact-net--neg"
+        market_cards_html += f"""
+          <div class="market-compact-card card">
+            <div class="market-compact-top">
+              <div class="market-compact-name">{html_lib.escape(str(r["market"]))}</div>
+              <div class="market-compact-net {net_cls}">{("+" if r["net_units"]>=0 else "")}{r["net_units"]}u</div>
             </div>
-
-            <div class="market-bar">
+            <div class="market-compact-meta muted">{r["picks"]} picks · W{r["wins"]}-L{r["losses"]}{wr}</div>
+            <div class="market-bar market-bar--compact">
               <div class="market-fill" data-u="{r["net_units"]}"></div>
               <div class="market-val">{("+" if r["net_units"]>=0 else "") + str(r["net_units"])}u</div>
             </div>
-          </div>
-        ''' for r in market_rows[:8]])}
-      </div>
+          </div>"""
+    if not market_cards_html:
+        market_cards_html = '<p class="muted market-compact-empty">Sin datos de mercado todavía.</p>'
+    page_html += f"""
+      <section class="league-market-section">
+        <h2 class="league-market-title home-h2">💰 Ganancia por mercado</h2>
+        <p class="league-market-intro muted">Unidades netas por mercado (histórico resuelto en esta liga).</p>
+        <div class="market-compact-grid">
+          {market_cards_html}
+        </div>
+      </section>
     """
 
     # Upcoming: day filter by date (value=YYYY-MM-DD); default "Hoy" when available
@@ -5363,7 +5435,7 @@ def account_page(request: Request):
         }});
         if (document.getElementById("insight-top-league")) document.getElementById("insight-top-league").textContent = esc(topLeague);
 
-        // Recent activity (top 3 entries from history list)
+        // Recent activity (top 3) — card layout: status + date, market, match line
         var recentHtml = "";
         (histList || []).slice(0, 3).forEach(function(item){{
           if (!item) return;
@@ -5371,11 +5443,18 @@ def account_page(request: Request):
           var resultClass = r.toLowerCase();
           var market = esc(item.market || "—");
           var dt = esc((item.created_at || "").slice(0,10));
-          recentHtml += "<div class=\\"account-activity-item\\">" +
-            "<span class=\\"account-status-badge account-status-" + esc(resultClass) + "\\">" + esc(r) + "</span>" +
-            "<span class=\\"account-activity-market\\">" + market + "</span>" +
-            "<span class=\\"account-activity-date\\">" + (dt || "—") + "</span>" +
-          "</div>";
+          var home = esc(item.home || "");
+          var away = esc(item.away || "");
+          var matchLine = (home && away) ? (home + " vs " + away) : "";
+          var finCls = (r === "WIN" || r === "LOSS" || r === "PUSH") ? " account-status-finished" : "";
+          recentHtml += "<div class=\\"account-activity-feed-card\\">" +
+            "<div class=\\"account-activity-feed-top\\">" +
+            "<span class=\\"account-status-badge account-status-" + esc(resultClass) + finCls + "\\">" + esc(r) + "</span>" +
+            "<span class=\\"account-activity-feed-date\\">" + (dt || "—") + "</span>" +
+            "</div>" +
+            "<div class=\\"account-activity-feed-market\\">" + market + "</div>" +
+            (matchLine ? "<div class=\\"account-activity-feed-match muted\\">" + matchLine + "</div>" : "") +
+            "</div>";
         }});
         var activityEl = document.getElementById("insight-recent-activity");
         if (activityEl) activityEl.innerHTML = recentHtml || "<span class=\\"muted\\">—</span>";
@@ -5616,7 +5695,7 @@ def _simple_page(title: str, body: str) -> str:
   <meta charset="utf-8"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=15">
+  <link rel="stylesheet" href="/static/style.css?v=16">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 </head>
 <body>
