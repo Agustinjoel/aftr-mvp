@@ -1700,9 +1700,19 @@ body{
 ========================= */
 .home-combos-grid{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   min-width: 0;
+}
+@media (max-width: 980px){
+  .home-combos-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px){
+  .home-combos-grid{
+    grid-template-columns: 1fr;
+  }
 }
 .home-premium-combo-card{
   padding: 14px 16px;

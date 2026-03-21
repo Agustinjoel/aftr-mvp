@@ -3764,8 +3764,30 @@ def dashboard(request: Request, league: str):
     spark_points = _roi_spark_points(settled_groups)
     market_rows = _profit_by_market(settled_picks)
 
-    combo_of_the_day = _build_combo_of_the_day(upcoming_picks, match_by_id)
-    combo_of_the_day_html = _render_combo_of_the_day(combo_of_the_day) if combo_of_the_day else ""
+    # Premium combos UI (same component as homepage)
+    # - homepage combo builder expects: match_by_key keyed by (league, match_id)
+    # - and pick objects with a stable league code in `_league`
+    for p in upcoming_picks:
+        if isinstance(p, dict):
+            p.setdefault("_league", league)
+
+    match_by_key = {}
+    for mid_i, m in match_by_id.items():
+        match_by_key[(league, mid_i)] = m
+
+    premium_combos = _build_home_premium_combos(
+        upcoming_picks,
+        match_by_key,
+    )
+    combos_section_html = "\n".join(_render_home_premium_combo_card(c) for c in premium_combos)
+    league_combos_html = f"""
+    <section class="home-section">
+      <h2 class="home-h2">Combos de Hoy</h2>
+      <div class="home-combos-grid">
+        {combos_section_html}
+      </div>
+    </section>
+    """
 
     page_html = f"""
     <html>
@@ -3954,7 +3976,7 @@ def dashboard(request: Request, league: str):
           </div>
         </div>
       </div>
-      {combo_of_the_day_html}
+      {league_combos_html}
     """
 
     page_html += """
