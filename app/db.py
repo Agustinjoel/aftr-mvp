@@ -139,6 +139,11 @@ def init_db():
             cur.execute("ALTER TABLE user_picks ADD COLUMN " + col[0] + " " + col[1])
         except sqlite3.OperationalError:
             pass
+    for col in [("settled_at", "TEXT"), ("score_home", "INTEGER"), ("score_away", "INTEGER")]:
+        try:
+            cur.execute("ALTER TABLE user_picks ADD COLUMN " + col[0] + " " + col[1])
+        except sqlite3.OperationalError:
+            pass
     # Migration: if legacy Spanish columns exist, copy to home_team/away_team so code only uses English names
     for table in ("user_favorites", "user_picks"):
         table_info = cur.execute(f"PRAGMA table_info({table})").fetchall()
