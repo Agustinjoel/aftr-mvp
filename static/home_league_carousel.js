@@ -266,6 +266,8 @@
     boot();
   }
 
-  var el = document.getElementById("homeLeagueCarousel");
-  if (el && el.classList.contains("league-carousel--3d")) init(el);
+  var roots = document.querySelectorAll(".league-carousel.league-carousel--3d");
+  for (var r = 0; r < roots.length; r++) {
+    init(roots[r]);
+  }
 })();

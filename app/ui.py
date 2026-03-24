@@ -22,7 +22,6 @@ from itsdangerous import URLSafeSerializer, BadSignature
 
 from fastapi import Body
 from fastapi.responses import JSONResponse
-from app.jinja_templates import render_league_carousel
 from app.timefmt import AFTR_DISPLAY_TZ, format_match_kickoff_ar, parse_utc_instant
 from app.auth import create_user
 from app.auth import get_user_id, get_user_by_id
@@ -520,11 +519,23 @@ def _home_league_active_code(request: Request) -> str:
     return settings.default_league
 
 
-def _build_home_league_snap_carousel_html(request: Request, unsupported: set[str]) -> str:
+def _build_home_league_snap_carousel_html(
+    request: Request,
+    unsupported: set[str],
+    *,
+    carousel_id: str = "homeLeagueCarousel",
+    active_league: str | None = None,
+    include_script: bool = True,
+) -> str:
     """
-    3D-style league carousel for home: viewport + transform track + .league-item (JS-driven center).
+    3D-style league carousel: viewport + transform track + .league-item anchors (home_league_carousel.js).
+    Used on home and league dashboard; pass carousel_id + active_league on dashboard.
     """
-    active = _home_league_active_code(request)
+    if active_league is not None:
+        ac = (active_league or "").strip()
+        active = ac if settings.is_valid_league(ac) else _home_league_active_code(request)
+    else:
+        active = _home_league_active_code(request)
     items: list[str] = []
     ix = 0
     for code, name in settings.leagues.items():
@@ -545,13 +556,19 @@ def _build_home_league_snap_carousel_html(request: Request, unsupported: set[str
             f"</span></a>"
         )
         ix += 1
-    return (
-        f'<div class="league-carousel league-carousel--3d" id="homeLeagueCarousel" '
+    cid = html_lib.escape(carousel_id)
+    core = (
+        f'<div class="league-carousel league-carousel--3d" id="{cid}" '
         f'data-active-code="{html_lib.escape(active)}">'
         f'<div class="league-carousel__viewport3d" data-carousel-viewport>'
         f'<div class="league-track" data-track>{"".join(items)}</div></div></div>'
-        '<script src="/static/home_league_carousel.js?v=5" defer></script>'
     )
+    script = (
+        '<script src="/static/home_league_carousel.js?v=6" defer></script>'
+        if include_script
+        else ""
+    )
+    return core + script
 
 
 # =========================================================
@@ -3324,7 +3341,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=21">
+      <link rel="stylesheet" href="/static/style.css?v=22">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
@@ -3863,11 +3880,15 @@ def dashboard(request: Request, league: str):
 
     user_premium = bool(uid and (is_premium_active(user) or plan == settings.plan_premium))
 
-    league_carousel_dashboard_html = render_league_carousel(
-        active_league=league,
-        unsupported=unsupported_football,
-        carousel_id="leagueCarouselDash",
-        home_mode=False,
+    league_carousel_dashboard_html = (
+        '<div class="home-carousel-strip" role="navigation" aria-label="Elegir liga">'
+        + _build_home_league_snap_carousel_html(
+            request,
+            unsupported_football,
+            carousel_id="leagueCarouselDash",
+            active_league=league,
+        )
+        + "</div>"
     )
 
     welcome_banner = ""
@@ -4043,7 +4064,7 @@ def dashboard(request: Request, league: str):
       <meta charset="utf-8"/>
       <title>AFTR Pick</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=21">
+      <link rel="stylesheet" href="/static/style.css?v=22">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 
       <link rel="manifest" href="/static/manifest.webmanifest">
@@ -5918,7 +5939,7 @@ def _simple_page(title: str, body: str) -> str:
   <meta charset="utf-8"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=21">
+  <link rel="stylesheet" href="/static/style.css?v=22">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 </head>
 <body>

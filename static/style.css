@@ -3848,7 +3848,14 @@ canvas{
   border-color: rgba(170,210,255,.28);
   background: rgba(255,255,255,.04);
 }
+/* League dashboard: carousel needs full row width (same effective width as home strip). */
+.top.top-pro.top-pro--with-carousel{
+  flex-wrap: wrap;
+}
 .top-pro--with-carousel .top-actions--carousel{
+  flex: 1 1 100%;
+  min-width: 0;
+  max-width: 100%;
   flex-direction: column;
   align-items: stretch;
   gap: 14px;
