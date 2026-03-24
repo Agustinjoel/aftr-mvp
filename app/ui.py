@@ -535,7 +535,7 @@ def _build_home_league_snap_carousel_html(request: Request, unsupported: set[str
         logo = f"/static/leagues/{logo_slug}.png"
         initial = (name or code or "?")[:1].upper()
         items.append(
-            f'<a class="league-item{act}" href="/?league={html_lib.escape(code)}" data-code="{html_lib.escape(code)}" data-index="{ix}">'
+            f'<a class="league-card league-item{act}" href="/?league={html_lib.escape(code)}" data-code="{html_lib.escape(code)}" data-index="{ix}">'
             f'<span class="league-item__card">'
             f'<span class="league-item__glow" aria-hidden="true"></span>'
             f'<img class="league-item__logo" src="{html_lib.escape(logo)}" alt="" width="56" height="56" loading="lazy" '
@@ -550,7 +550,7 @@ def _build_home_league_snap_carousel_html(request: Request, unsupported: set[str
         f'data-active-code="{html_lib.escape(active)}">'
         f'<div class="league-carousel__viewport3d" data-carousel-viewport>'
         f'<div class="league-track" data-track>{"".join(items)}</div></div></div>'
-        '<script src="/static/home_league_carousel.js?v=4" defer></script>'
+        '<script src="/static/home_league_carousel.js?v=5" defer></script>'
     )
 
 
@@ -3324,7 +3324,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=20">
+      <link rel="stylesheet" href="/static/style.css?v=21">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
@@ -4043,7 +4043,7 @@ def dashboard(request: Request, league: str):
       <meta charset="utf-8"/>
       <title>AFTR Pick</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=20">
+      <link rel="stylesheet" href="/static/style.css?v=21">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 
       <link rel="manifest" href="/static/manifest.webmanifest">
@@ -5918,7 +5918,7 @@ def _simple_page(title: str, body: str) -> str:
   <meta charset="utf-8"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=20">
+  <link rel="stylesheet" href="/static/style.css?v=21">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 </head>
 <body>

@@ -41,6 +41,9 @@
     var touchPauseTimer = null;
     var autoTimer = null;
     var suppressClick = false;
+    var activePointerId = null;
+    var pointerCaptured = false;
+    var CAPTURE_AFTER_PX = 10;
 
     function setDistanceClasses() {
       items.forEach(function (el, i) {
@@ -160,11 +163,11 @@
         dragOffset = 0;
         dragMoved = 0;
         suppressClick = false;
+        activePointerId = e.pointerId;
+        pointerCaptured = false;
         clearAuto();
         track.style.transition = "none";
-        try {
-          viewport.setPointerCapture(e.pointerId);
-        } catch (err) {}
+        /* Do not setPointerCapture on down: it retargets the click away from <a>, breaking navigation. */
       },
       { passive: true }
     );
@@ -173,6 +176,16 @@
       if (!dragging) return;
       dragOffset = e.clientX - dragStartClientX;
       dragMoved = Math.max(dragMoved, Math.abs(dragOffset));
+      if (
+        !pointerCaptured &&
+        activePointerId === e.pointerId &&
+        dragMoved > CAPTURE_AFTER_PX
+      ) {
+        pointerCaptured = true;
+        try {
+          viewport.setPointerCapture(e.pointerId);
+        } catch (err) {}
+      }
       applyTrack(true, dragOffset);
     });
 
@@ -182,8 +195,12 @@
       dragging = false;
       dragMoved = 0;
       try {
-        viewport.releasePointerCapture(e.pointerId);
+        if (pointerCaptured && activePointerId === e.pointerId) {
+          viewport.releasePointerCapture(e.pointerId);
+        }
       } catch (err) {}
+      pointerCaptured = false;
+      activePointerId = null;
 
       if (dm > SWIPE_THRESH || dm > CLICK_MAX_MOVE) {
         suppressClick = true;
@@ -204,6 +221,13 @@
       dragging = false;
       dragMoved = 0;
       dragOffset = 0;
+      try {
+        if (pointerCaptured && activePointerId === e.pointerId) {
+          viewport.releasePointerCapture(e.pointerId);
+        }
+      } catch (err) {}
+      pointerCaptured = false;
+      activePointerId = null;
       applyTrack(false, 0);
       setDistanceClasses();
       scheduleAuto();
@@ -213,7 +237,7 @@
     root.addEventListener(
       "click",
       function (e) {
-        var a = e.target.closest("a.league-item");
+        var a = e.target.closest("a.league-item, a.league-card");
         if (!a || !root.contains(a)) return;
         if (suppressClick) {
           e.preventDefault();

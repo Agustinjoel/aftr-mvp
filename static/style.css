@@ -3825,6 +3825,8 @@ canvas{
   max-width: 100%;
 }
 .home-carousel-strip{
+  position: relative;
+  z-index: 2;
   margin: 0 0 18px;
   padding: 0 12px;
   max-width: 1200px;
@@ -4178,7 +4180,8 @@ canvas{
   height: 0;
 }
 
-.league-carousel--3d .league-item{
+.league-carousel--3d .league-item,
+.league-carousel--3d a.league-card{
   flex: 0 0 auto;
   text-decoration: none;
   color: inherit;
@@ -4188,6 +4191,9 @@ canvas{
     opacity 0.4s ease,
     filter 0.4s ease;
   -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+  position: relative;
 }
 
 /* Distance-based 3D (classes set by JS) */
@@ -4227,7 +4233,7 @@ canvas{
   opacity: 0.32;
   z-index: 1;
   filter: blur(1.4px);
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .league-carousel--3d .league-item__card{
