@@ -208,22 +208,19 @@
       scheduleAuto();
     });
 
-    items.forEach(function (el, i) {
-      el.addEventListener(
-        "click",
-        function (e) {
-          if (suppressClick) {
-            e.preventDefault();
-            return;
-          }
-          if (i !== idx) {
-            e.preventDefault();
-            goTo(i, false);
-          }
-        },
-        true
-      );
-    });
+    /* Let <a class="league-item" href="/?league=..."> navigate normally; only block after a drag gesture. */
+    root.addEventListener(
+      "click",
+      function (e) {
+        var a = e.target.closest("a.league-item");
+        if (!a || !root.contains(a)) return;
+        if (suppressClick) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        }
+      },
+      true
+    );
 
     window.addEventListener("resize", function () {
       applyTrack(true, 0);

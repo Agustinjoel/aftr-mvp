@@ -549,7 +549,7 @@ def _build_home_league_snap_carousel_html(request: Request, unsupported: set[str
         f'data-active-code="{html_lib.escape(active)}">'
         f'<div class="league-carousel__viewport3d" data-carousel-viewport>'
         f'<div class="league-track" data-track>{"".join(items)}</div></div></div>'
-        '<script src="/static/home_league_carousel.js?v=2" defer></script>'
+        '<script src="/static/home_league_carousel.js?v=3" defer></script>'
     )
 
 
