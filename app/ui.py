@@ -530,8 +530,9 @@ def _build_home_league_snap_carousel_html(request: Request, unsupported: set[str
     for code, name in settings.leagues.items():
         if code in unsupported:
             continue
-        act = " is-active" if code == active else ""
-        logo = f"/static/leagues/{code.lower()}.png"
+        act = " is-active active" if code == active else ""
+        logo_slug = {"EL": "uel"}.get(code, code.lower())
+        logo = f"/static/leagues/{logo_slug}.png"
         initial = (name or code or "?")[:1].upper()
         items.append(
             f'<a class="league-item{act}" href="/?league={html_lib.escape(code)}" data-code="{html_lib.escape(code)}" data-index="{ix}">'
@@ -549,7 +550,7 @@ def _build_home_league_snap_carousel_html(request: Request, unsupported: set[str
         f'data-active-code="{html_lib.escape(active)}">'
         f'<div class="league-carousel__viewport3d" data-carousel-viewport>'
         f'<div class="league-track" data-track>{"".join(items)}</div></div></div>'
-        '<script src="/static/home_league_carousel.js?v=3" defer></script>'
+        '<script src="/static/home_league_carousel.js?v=4" defer></script>'
     )
 
 
@@ -3302,7 +3303,8 @@ def home_page(request: Request) -> str:
     # window.AFTR_ROI_POINTS. Fix: embed data in <script type="application/json" id="aftr-roi-chart-data">
     # so the chart reads from the DOM (getElementById + JSON.parse) when it runs.
     if spark_points:
-        chart_data_json = json.dumps(spark_points)
+        # Break "</script" sequences so HTML parsers do not close this tag early.
+        chart_data_json = json.dumps(spark_points).replace("</script", "<\\/script")
         home_perf_chart_inner = (
             '<canvas id="roiSpark" aria-hidden="true"></canvas>\n            '
             '<div id="roiTip" class="roi-tip" style="display:none;"></div>\n            '
@@ -3759,7 +3761,7 @@ def home_page(request: Request) -> str:
                 ctx.beginPath(); ctx.moveTo(pt.x, padY); ctx.lineTo(pt.x, padY+innerH); ctx.stroke(); ctx.globalAlpha = 1;
                 ctx.fillStyle = "rgba(120,170,255,1)"; ctx.beginPath(); ctx.arc(pt.x, pt.y, 6, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = "rgba(255,255,255,0.95)"; ctx.beginPath(); ctx.arc(pt.x, pt.y, 3, 0, Math.PI*2); ctx.fill();
-              }}
+              }
             }
             function nearestIndex(mx){
               var best = 0, bestDist = Infinity;

@@ -46,6 +46,7 @@
       items.forEach(function (el, i) {
         var d = i - idx;
         el.classList.toggle("is-active", d === 0);
+        el.classList.toggle("active", d === 0);
         el.setAttribute("aria-current", d === 0 ? "true" : "false");
         el.classList.remove(
           "league-item--dn2",
