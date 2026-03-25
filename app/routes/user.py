@@ -20,7 +20,7 @@ from data.cache import read_json
 router = APIRouter()
 
 # Short-lived cache: building league pick indexes reads many JSON files.
-_RESOLUTION_MAPS: tuple[dict, dict, dict] | None = None
+_RESOLUTION_MAPS: tuple[dict, dict, dict, dict] | None = None
 _RESOLUTION_MAPS_MONO: float = 0.0
 _RESOLUTION_MAPS_TTL_SEC = 45.0
 
@@ -112,6 +112,33 @@ def _safe_int(v: object) -> int | None:
         return None
 
 
+def _parse_utcdate_maybe(v: object) -> datetime | None:
+    """Best-effort UTC datetime parsing from cached match/pick dicts."""
+    if v is None:
+        return None
+    s = str(v).strip()
+    if not s:
+        return None
+    try:
+        # Handle trailing Z -> +00:00
+        if s.endswith("Z"):
+            s = s[:-1] + "+00:00"
+        dt = datetime.fromisoformat(s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except Exception:
+        return None
+
+
+def _team_norm_key(v: object) -> str | None:
+    """Lower/strip + validate team names for matching."""
+    n = _norm_team_name(v)
+    if n is None:
+        return None
+    return str(n).strip().lower()
+
+
 def _extract_score(p: object) -> tuple[int | None, int | None]:
     """Best-effort final score extraction from daily pick dicts."""
     if not isinstance(p, dict):
@@ -144,19 +171,58 @@ def _as_pick_list(data: object) -> list[dict]:
 
 
 def _dashboard_match_finished(m: dict) -> bool:
-    """Conservative: only treat as final when status clearly indicates finished (avoid live false positives)."""
+    """
+    Conservative: treat as finished when we see explicit finished tokens OR when final scores are present
+    and utcDate is in the past (and not clearly live).
+    """
+    if not isinstance(m, dict):
+        return False
+
+    finished_flag_raw = m.get("finished")
+    if isinstance(finished_flag_raw, bool):
+        if finished_flag_raw:
+            return True
+        # finished=false is a strong indicator it's not settled yet
+        return False
+
     s = str(m.get("status") or m.get("match_status") or "").strip().upper()
     if not s and m.get("stage") is not None:
         s = str(m.get("stage")).strip().upper()
-    if s in {"FINISHED", "FINAL", "FT", "SETTLED", "FINALIZADO", "ENDED", "AET", "PEN", "AWARDED"}:
+
+    finished_tokens = {"FINISHED", "FINAL", "FT", "SETTLED", "FINALIZADO", "ENDED", "AET", "PEN", "AWARDED"}
+    live_tokens = {
+        "LIVE",
+        "IN_PLAY",
+        "PAUSED",
+        "HALFTIME",
+        "HT",
+        "BREAK",
+        "1H",
+        "2H",
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "OT",
+    }
+    not_finished_tokens = {"TIMED", "SCHEDULED", "NS", "TBD", "POSTPONED", "CANCELLED", "SUSP", "ABD", "CANCL"}
+
+    if s in finished_tokens:
         return True
-    if s in {
-        "LIVE", "IN_PLAY", "PAUSED", "HALFTIME", "HT", "BREAK",
-        "1H", "2H", "Q1", "Q2", "Q3", "Q4", "OT",
-    }:
+    if s in live_tokens:
         return False
-    if s in {"TIMED", "SCHEDULED", "NS", "TBD", "POSTPONED", "CANCELLED", "SUSP", "ABD", "CANCL"}:
+    if s in not_finished_tokens:
         return False
+
+    hs, aa = _extract_score(m)
+    if hs is None or aa is None:
+        return False
+    dt = _parse_utcdate_maybe(m.get("utcDate"))
+    if dt is None:
+        return False
+    # Only mark finished if kickoff time is already past (and no live token above).
+    if dt <= datetime.now(timezone.utc):
+        return True
     return False
 
 
@@ -174,6 +240,7 @@ def _settle_from_pick_and_match(
     p: dict,
     market_row: str | None,
     matches_idx: dict[tuple[str, int], dict],
+    matches_by_team: dict[tuple[str, str, str], list[dict]],
 ) -> tuple[str, int | None, int | None]:
     mkt = (market_row or p.get("best_market") or p.get("market") or "").strip()
 
@@ -185,29 +252,50 @@ def _settle_from_pick_and_match(
         return r, hs, aa
 
     mid = _safe_int(p.get("match_id") or p.get("id"))
-    if mid is None:
+    if mid is not None:
+        match = matches_idx.get((league, mid))
+        if isinstance(match, dict) and _dashboard_match_finished(match):
+            hs2, aa2 = _extract_score(match)
+            if hs2 is None or aa2 is None:
+                hs2, aa2 = hs, aa
+            if hs2 is not None and aa2 is not None:
+                ev = _evaluate_market_for_league(league, mkt, hs2, aa2)
+                return ev, hs2, aa2
+
+    # Fallback by team pair when match_id doesn't resolve.
+    home_key = _team_norm_key(p.get("home_team") or p.get("home"))
+    away_key = _team_norm_key(p.get("away_team") or p.get("away"))
+    if not home_key or not away_key:
         return "PENDING", None, None
-    match = matches_idx.get((league, mid))
-    if not isinstance(match, dict) or not _dashboard_match_finished(match):
-        return "PENDING", None, None
-    hs2, aa2 = _extract_score(match)
-    if hs2 is None or aa2 is None:
-        hs2, aa2 = hs, aa
-    if hs2 is None or aa2 is None:
-        return "PENDING", None, None
-    ev = _evaluate_market_for_league(league, mkt, hs2, aa2)
-    return ev, hs2, aa2
+
+    candidates = matches_by_team.get((league, home_key, away_key), [])
+    for cand in candidates:
+        if not isinstance(cand, dict) or not _dashboard_match_finished(cand):
+            continue
+        hs2, aa2 = _extract_score(cand)
+        if hs2 is not None and aa2 is not None:
+            ev = _evaluate_market_for_league(league, mkt, hs2, aa2)
+            return ev, hs2, aa2
+
+    return "PENDING", None, None
 
 
-def _pick_resolution_maps() -> tuple[dict[str, tuple[str, dict]], dict[tuple[str, str, str], tuple[str, dict]], dict[tuple[str, int], dict]]:
+def _pick_resolution_maps() -> tuple[
+    dict[str, tuple[str, dict]],
+    dict[tuple[str, str, str], tuple[str, dict]],
+    dict[tuple[str, int], dict],
+    dict[tuple[str, str, str], list[dict]],
+]:
     """
     by_pick_id: pick_id / composite id -> (league, pick_dict)
     by_triple: (league, match_id_str, utc) -> (league, pick_dict)
     matches_idx: (league, match_id_int) -> match dict
+    matches_by_team: (league, home_norm, away_norm) -> list[match dict]
     """
     by_pick_id: dict[str, tuple[str, dict]] = {}
     by_triple: dict[tuple[str, str, str], tuple[str, dict]] = {}
     matches_idx: dict[tuple[str, int], dict] = {}
+    matches_by_team: dict[tuple[str, str, str], list[dict]] = {}
 
     def add_from_picks(league: str, picks: list[dict], history_first: bool) -> None:
         for p in picks:
@@ -239,11 +327,20 @@ def _pick_resolution_maps() -> tuple[dict[str, tuple[str, dict]], dict[tuple[str
             mid = _safe_int(m.get("match_id") or m.get("id"))
             if mid is not None:
                 matches_idx[(lg, mid)] = m
+            home_key = _team_norm_key(m.get("home_team") or m.get("home"))
+            away_key = _team_norm_key(m.get("away_team") or m.get("away"))
+            if home_key and away_key:
+                matches_by_team.setdefault((lg, home_key, away_key), []).append(m)
 
-    return by_pick_id, by_triple, matches_idx
+    return by_pick_id, by_triple, matches_idx, matches_by_team
 
 
-def _get_resolution_maps_cached() -> tuple[dict[str, tuple[str, dict]], dict[tuple[str, str, str], tuple[str, dict]], dict[tuple[str, int], dict]]:
+def _get_resolution_maps_cached() -> tuple[
+    dict[str, tuple[str, dict]],
+    dict[tuple[str, str, str], tuple[str, dict]],
+    dict[tuple[str, int], dict],
+    dict[tuple[str, str, str], list[dict]],
+]:
     global _RESOLUTION_MAPS, _RESOLUTION_MAPS_MONO
     now = time.monotonic()
     if _RESOLUTION_MAPS is not None and (now - _RESOLUTION_MAPS_MONO) < _RESOLUTION_MAPS_TTL_SEC:
@@ -276,7 +373,7 @@ def _user_picks_extra_columns(cur) -> set[str]:
 
 def _sync_followed_picks_for_user(uid: int) -> None:
     """Persist WIN/LOSS/PUSH onto user_picks using picks_history / daily_picks / daily_matches."""
-    by_id, by_triple, matches_idx = _get_resolution_maps_cached()
+    by_id, by_triple, matches_idx, matches_by_team = _get_resolution_maps_cached()
     settled_at = datetime.now(timezone.utc).isoformat()
     conn = get_conn()
     try:
@@ -284,6 +381,7 @@ def _sync_followed_picks_for_user(uid: int) -> None:
         cols = _user_picks_extra_columns(cur)
         has_scores = "score_home" in cols and "score_away" in cols
         has_settled = "settled_at" in cols
+        has_status = "status" in cols
         cur.execute(
             "SELECT pick_id, market, COALESCE(result, '') AS result FROM user_picks WHERE user_id = ?",
             (uid,),
@@ -293,28 +391,69 @@ def _sync_followed_picks_for_user(uid: int) -> None:
                 continue
             pick_id = row["pick_id"]
             got = _lookup_pick_record(str(pick_id), by_id, by_triple)
-            if not got:
-                continue
-            league, p = got
-            r, hs, aa = _settle_from_pick_and_match(league, p, row["market"], matches_idx)
+            league: str | None = None
+            r = "PENDING"
+            hs: int | None = None
+            aa: int | None = None
+
+            if got:
+                league, p = got
+                r, hs, aa = _settle_from_pick_and_match(league, p, row["market"], matches_idx, matches_by_team)
+            else:
+                # Reconstruct from composite pick_id when we can't resolve pick metadata from JSON caches.
+                # Expected: league|match_id|market|utc
+                parts = str(pick_id).split("|")
+                if len(parts) == 4:
+                    lg = (parts[0] or "").strip()
+                    mid_s = (parts[1] or "").strip()
+                    mkt = (parts[2] or "").strip()
+                    mid = _safe_int(mid_s)
+                    if lg and mid is not None:
+                        match = matches_idx.get((lg, mid))
+                        if isinstance(match, dict) and _dashboard_match_finished(match):
+                            hs2, aa2 = _extract_score(match)
+                            if hs2 is not None and aa2 is not None:
+                                league = lg
+                                r = _evaluate_market_for_league(lg, mkt, hs2, aa2)
+                                hs, aa = hs2, aa2
+
             if r == "PENDING":
                 continue
             if has_scores and has_settled:
-                cur.execute(
-                    """UPDATE user_picks SET result = ?, score_home = ?, score_away = ?, settled_at = ?
-                       WHERE user_id = ? AND pick_id = ?""",
-                    (r, hs, aa, settled_at, uid, pick_id),
-                )
+                if has_status:
+                    cur.execute(
+                        """UPDATE user_picks SET result = ?, score_home = ?, score_away = ?, settled_at = ?, status = ?
+                           WHERE user_id = ? AND pick_id = ?""",
+                        (r, hs, aa, settled_at, "SETTLED", uid, pick_id),
+                    )
+                else:
+                    cur.execute(
+                        """UPDATE user_picks SET result = ?, score_home = ?, score_away = ?, settled_at = ?
+                           WHERE user_id = ? AND pick_id = ?""",
+                        (r, hs, aa, settled_at, uid, pick_id),
+                    )
             elif has_settled:
-                cur.execute(
-                    "UPDATE user_picks SET result = ?, settled_at = ? WHERE user_id = ? AND pick_id = ?",
-                    (r, settled_at, uid, pick_id),
-                )
+                if has_status:
+                    cur.execute(
+                        "UPDATE user_picks SET result = ?, settled_at = ?, status = ? WHERE user_id = ? AND pick_id = ?",
+                        (r, settled_at, "SETTLED", uid, pick_id),
+                    )
+                else:
+                    cur.execute(
+                        "UPDATE user_picks SET result = ?, settled_at = ? WHERE user_id = ? AND pick_id = ?",
+                        (r, settled_at, uid, pick_id),
+                    )
             else:
-                cur.execute(
-                    "UPDATE user_picks SET result = ? WHERE user_id = ? AND pick_id = ?",
-                    (r, uid, pick_id),
-                )
+                if has_status:
+                    cur.execute(
+                        "UPDATE user_picks SET result = ?, status = ? WHERE user_id = ? AND pick_id = ?",
+                        (r, "SETTLED", uid, pick_id),
+                    )
+                else:
+                    cur.execute(
+                        "UPDATE user_picks SET result = ? WHERE user_id = ? AND pick_id = ?",
+                        (r, uid, pick_id),
+                    )
         conn.commit()
     finally:
         conn.close()
@@ -326,13 +465,28 @@ def _resolved_row_for_favorite(
     by_id: dict[str, tuple[str, dict]],
     by_triple: dict[tuple[str, str, str], tuple[str, dict]],
     matches_idx: dict[tuple[str, int], dict],
+    matches_by_team: dict[tuple[str, str, str], list[dict]],
 ) -> tuple[str, str | None]:
     """(result, final_score str or None) for display; favorites have no result column in DB."""
     got = _lookup_pick_record(str(pick_id), by_id, by_triple)
     if not got:
+        # Attempt reconstruction from composite pick_id
+        parts = str(pick_id).split("|")
+        if len(parts) == 4:
+            lg = (parts[0] or "").strip()
+            mid = _safe_int((parts[1] or "").strip())
+            mkt_from_id = (parts[2] or "").strip()
+            if lg and mid is not None:
+                match = matches_idx.get((lg, mid))
+                if isinstance(match, dict) and _dashboard_match_finished(match):
+                    hs2, aa2 = _extract_score(match)
+                    if hs2 is not None and aa2 is not None:
+                        ev = _evaluate_market_for_league(lg, market or mkt_from_id, hs2, aa2)
+                        return ev, f"{hs2}-{aa2}"
         return "PENDING", None
+
     league, p = got
-    r, hs, aa = _settle_from_pick_and_match(league, p, market, matches_idx)
+    r, hs, aa = _settle_from_pick_and_match(league, p, market, matches_idx, matches_by_team)
     if r == "PENDING" or hs is None or aa is None:
         return r, None
     return r, f"{hs}-{aa}"
@@ -483,7 +637,7 @@ def user_favorites(request: Request):
     uid, err = _require_user(request)
     if err is not None:
         return err
-    by_id, by_triple, matches_idx = _get_resolution_maps_cached()
+    by_id, by_triple, matches_idx, matches_by_team = _get_resolution_maps_cached()
     items: list[dict] = []
     try:
         conn = get_conn()
@@ -537,7 +691,7 @@ def user_favorites(request: Request):
                         away = rr_d.get("away_team")
 
                 fres, fscore = _resolved_row_for_favorite(
-                    str(pick_id), r.get("market"), by_id, by_triple, matches_idx
+                    str(pick_id), r.get("market"), by_id, by_triple, matches_idx, matches_by_team
                 )
                 items.append({
                     "pick_id": pick_id,
