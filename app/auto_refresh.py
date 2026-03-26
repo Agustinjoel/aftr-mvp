@@ -29,6 +29,8 @@ async def _live_loop() -> None:
         sec,
         _utc_iso(),
     )
+    # Defer first job so uvicorn can finish binding and health checks before heavy work.
+    await asyncio.sleep(5.0)
     while True:
         await asyncio.to_thread(run_live_refresh_job)
         await asyncio.sleep(sec)

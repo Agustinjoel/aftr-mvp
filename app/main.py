@@ -68,11 +68,12 @@ app = FastAPI(
 static_dir = settings.base_dir / "static"
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
+# Auth before UI so /auth/* is not shadowed by ui_router (e.g. legacy duplicate paths).
+app.include_router(auth_router)
 app.include_router(ui_router)
 app.include_router(live_router)
 app.include_router(matches_router, prefix="/api", tags=["matches"])
 app.include_router(picks_router, prefix="/api", tags=["picks"])
-app.include_router(auth_router)
 app.include_router(user_router, prefix="/user", tags=["user"])
 app.include_router(pay_router)
 

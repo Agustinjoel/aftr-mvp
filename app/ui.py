@@ -201,7 +201,7 @@ def _clear_plan_cookie(resp: RedirectResponse) -> None:
     resp.delete_cookie("aftr_plan", path="/")
 
 
-@router.post("/auth/signup")
+@router.post("/auth/lead")
 def signup(data: dict = Body(...)):
     email = (data.get("email") or "").strip().lower()
     if not email or "@" not in email:
@@ -3398,9 +3398,9 @@ def home_page(request: Request) -> str:
             <button class="modal-x" onclick="closeLoginModal()">✕</button>
           </div>
           <div class="modal-body">
-            <form action="/auth/login" method="post" onsubmit="console.log('FORM SUBMIT');">
-              <input type="email" name="email" required>
-              <input type="password" name="password" required>
+            <form action="/auth/login" method="post" enctype="application/x-www-form-urlencoded">
+              <input type="email" name="email" required autocomplete="username" inputmode="email">
+              <input type="password" name="password" required autocomplete="current-password">
               <button type="submit">Entrar</button>
             </form>
             <div class="modal-line" style="margin-top: 12px;">
@@ -4151,9 +4151,9 @@ def dashboard(request: Request, league: str):
         </div>
 
         <div class="modal-body">
-          <form action="/auth/login" method="post" onsubmit="console.log('FORM SUBMIT');">
-            <input type="email" name="email" required>
-            <input type="password" name="password" required>
+          <form action="/auth/login" method="post" enctype="application/x-www-form-urlencoded">
+            <input type="email" name="email" required autocomplete="username" inputmode="email">
+            <input type="password" name="password" required autocomplete="current-password">
             <button type="submit">Entrar</button>
           </form>
           <div class="modal-line" style="margin-top: 12px;">

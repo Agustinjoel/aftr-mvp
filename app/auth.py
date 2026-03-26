@@ -1,84 +1,76 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
-from fastapi import APIRouter, Request, Form
-from fastapi.responses import RedirectResponse
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+
+from fastapi import APIRouter, Request, Form, Body
+from fastapi.responses import RedirectResponse, JSONResponse
 from itsdangerous import URLSafeSerializer, BadSignature
 from passlib.hash import bcrypt
 
-from config.settings import settings
+import sqlite3
+import secrets
+import hashlib as _hashlib
+
 from app.db import get_conn
-import hashlib
+from config.settings import settings
+from app.email_utils import send_email
 
 router = APIRouter()
 logger = logging.getLogger("aftr.auth")
 
-def _ser():
-    return URLSafeSerializer(settings.secret_key, salt="aftr-session")
+_AFTR_SESSION_MAX_AGE = 60 * 60 * 24 * 30
 
-def set_session(resp: RedirectResponse, user_id: int):
-    token = _ser().dumps({"uid": user_id})
-    resp.set_cookie(
-        "aftr_session", token,
-        max_age=60*60*24*30,
-        httponly=True,
-        samesite="lax",
-        path="/",
-        secure=False,
-    )
 
-# auth.py
+def _aftr_session_cookie_flags() -> dict:
+    """Consistent Set-Cookie / delete_cookie flags (Secure must match on HTTPS)."""
+    sec = bool(getattr(settings, "cookie_secure", False))
+    return {
+        "path": "/",
+        "httponly": True,
+        "samesite": "lax",
+        "secure": sec,
+    }
 
-from typing import Optional
-import sqlite3
-import secrets
-import hashlib as _hashlib
-from fastapi import APIRouter, Request, Form, Body
-from fastapi.responses import RedirectResponse, JSONResponse
-from passlib.hash import bcrypt
-from datetime import datetime, timezone, timedelta
-
-from app.db import get_conn
-from config.settings import settings
-from itsdangerous import URLSafeSerializer, BadSignature
-from app.email_utils import send_email
-
-router = APIRouter()
 
 def _ser():
     return URLSafeSerializer(settings.secret_key, salt="aftr-session")
 
+
 def set_session(resp: RedirectResponse, user_id: int):
     token = _ser().dumps({"uid": user_id})
+    kw = _aftr_session_cookie_flags()
     resp.set_cookie(
-        "aftr_session", token,
-        max_age=60*60*24*30,
-        httponly=True,
-        samesite="lax",
-        path="/",
-        secure=False,
+        "aftr_session",
+        token,
+        max_age=_AFTR_SESSION_MAX_AGE,
+        **kw,
     )
     logger.info("set_session called: user_id=%s (set_cookie aftr_session)", user_id)
+
 
 def set_session_on_response(resp, user_id: int):
     """Set session cookie on any response (e.g. JSONResponse) for post-register login."""
     token = _ser().dumps({"uid": user_id})
+    kw = _aftr_session_cookie_flags()
     resp.set_cookie(
-        "aftr_session", token,
-        max_age=60*60*24*30,
-        httponly=True,
-        samesite="lax",
-        path="/",
-        secure=False,
+        "aftr_session",
+        token,
+        max_age=_AFTR_SESSION_MAX_AGE,
+        **kw,
     )
     logger.info("set_session_on_response called: user_id=%s (set_cookie aftr_session)", user_id)
+
 
 def get_user_id(request: Request) -> Optional[int]:
     cookies = request.cookies if hasattr(request, "cookies") and request.cookies else {}
     raw = cookies.get("aftr_session")
     if not raw:
-        logger.info("get_user_id: no aftr_session cookie; request.cookies keys=%s", list(cookies.keys()) if cookies else "None")
+        logger.debug(
+            "get_user_id: no aftr_session cookie; request.cookies keys=%s",
+            list(cookies.keys()) if cookies else "None",
+        )
         return None
     try:
         data = _ser().loads(raw)
@@ -104,7 +96,14 @@ def clear_session_if_invalid(request: Request, response) -> None:
     except Exception:
         return
     if get_user_by_id(uid) is None:
-        response.delete_cookie("aftr_session", path="/")
+        kw = _aftr_session_cookie_flags()
+        response.delete_cookie(
+            "aftr_session",
+            path=kw["path"],
+            secure=kw["secure"],
+            httponly=kw["httponly"],
+            samesite=kw["samesite"],
+        )
         logger.info("clear_session_if_invalid: cleared invalid session cookie for uid=%s", uid)
 
 
@@ -135,7 +134,14 @@ def create_user(email: str, username: str, password: str) -> int:
         conn.close()
 
 def clear_session(resp: RedirectResponse):
-    resp.delete_cookie("aftr_session", path="/")
+    kw = _aftr_session_cookie_flags()
+    resp.delete_cookie(
+        "aftr_session",
+        path=kw["path"],
+        secure=kw["secure"],
+        httponly=kw["httponly"],
+        samesite=kw["samesite"],
+    )
 
 def get_user_by_email(email: str) -> dict | None:
     """Look up user by email only. Returns row dict with id, email, password_hash, etc., or None."""
@@ -272,6 +278,7 @@ def signup_lead(payload: dict = Body(...)):
 
     now = datetime.now(timezone.utc).isoformat()
     conn = get_conn()
+    new_uid: int | None = None
     try:
         cur = conn.cursor()
         cur.execute(
@@ -281,6 +288,7 @@ def signup_lead(payload: dict = Body(...)):
             ) VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (email, username or None, pw_hash, "free_user", "inactive", now, now),
         )
+        new_uid = int(cur.lastrowid)
         conn.commit()
     except sqlite3.IntegrityError:
         return JSONResponse(content={"ok": False, "error": "email_ya_registrado"}, status_code=400)
@@ -288,7 +296,8 @@ def signup_lead(payload: dict = Body(...)):
         conn.close()
 
     resp = JSONResponse(content={"ok": True})
-    resp.set_cookie("aftr_user", email, max_age=60*60*24*365, samesite="lax", path="/")
+    if new_uid is not None:
+        set_session_on_response(resp, new_uid)
     return resp
 
 @router.post("/auth/login")

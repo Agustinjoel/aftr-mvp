@@ -48,6 +48,15 @@ DB_PATH: str = (
 # App base URL (para links absolutos en emails / Stripe)
 APP_BASE_URL: str = (os.getenv("APP_BASE_URL") or "").strip().rstrip("/")
 
+# Session cookies: Secure flag (required on HTTPS for reliable behavior in modern browsers).
+_cookie_secure_raw = (os.getenv("COOKIE_SECURE") or "").strip().lower()
+if _cookie_secure_raw in ("1", "true", "yes"):
+    COOKIE_SECURE = True
+elif _cookie_secure_raw in ("0", "false", "no"):
+    COOKIE_SECURE = False
+else:
+    COOKIE_SECURE = APP_BASE_URL.lower().startswith("https://")
+
 # SMTP (password recovery, etc.)
 SMTP_SERVER: str = (os.getenv("SMTP_SERVER") or "").strip()
 SMTP_PORT: int = int(os.getenv("SMTP_PORT") or "0") or 0
@@ -312,6 +321,7 @@ class Settings:
         self.football_http_cache_ttl_sec = FOOTBALL_HTTP_CACHE_TTL_SEC
 
         self.secret_key = SECRET_KEY
+        self.cookie_secure = COOKIE_SECURE
 
         self.plan_free = PLAN_FREE
         self.plan_premium = PLAN_PREMIUM
