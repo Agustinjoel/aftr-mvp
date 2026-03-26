@@ -64,12 +64,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Static (ruta absoluta para funcionar desde cualquier CWD)
+# Absolute path so uvicorn works when CWD is not the project root (e.g. some PaaS layouts).
 static_dir = settings.base_dir / "static"
-if static_dir.exists():
-    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 app.include_router(ui_router)
 app.include_router(live_router)
