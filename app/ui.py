@@ -13,7 +13,7 @@ from fastapi import APIRouter, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from config.settings import settings
-from data.cache import read_json, read_json_with_fallback, read_cache_meta
+from data.cache import read_json, read_json_with_fallback, read_cache_meta, write_json
 from data.providers.football_data import get_unsupported_leagues
 from app.routes.matches import group_matches_by_day
 from core.poisson import market_priority
@@ -32,6 +32,7 @@ from fastapi import Form
 router = APIRouter()
 logger = logging.getLogger("aftr.ui")
 _finished_card_debug_logged = False
+HOME_VISIBLE_SNAPSHOT_FILE = "home_visible_picks_snapshot.json"
 
 
 # Universal auth modal bootstrap: define on window so no page can throw ReferenceError.
@@ -3093,7 +3094,52 @@ def home_page(request: Request) -> str:
         picks_near_term,
         key=lambda p: (-(p.get("aftr_score") or 0), -_pick_score(p)),
     )[:4]
-    active_picks_now = len(live_picks) + len(top_picks)
+    top_picks_source = "near_term"
+    if not top_picks:
+        # Fallback #2: nearest upcoming picks even outside strict near-term window.
+        nearest_candidates = []
+        now_utc = datetime.now(timezone.utc)
+        for p in all_upcoming:
+            if not isinstance(p, dict):
+                continue
+            pk = _pick_id_for_card(p, {"market": p.get("best_market")})
+            if pk in live_pick_keys:
+                continue
+            dt = _parse_utcdate_str(p.get("utcDate"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            if dt < now_utc:
+                continue
+            nearest_candidates.append(p)
+        top_picks = sorted(
+            nearest_candidates,
+            key=lambda p: (_parse_utcdate_str(p.get("utcDate")), -_pick_score(p)),
+        )[:4]
+        if top_picks:
+            top_picks_source = "nearest_upcoming"
+
+    if not top_picks:
+        # Fallback #3: last successful visible homepage picks snapshot.
+        snap_raw = read_json(HOME_VISIBLE_SNAPSHOT_FILE)
+        if isinstance(snap_raw, list):
+            snap_picks = [p for p in snap_raw if isinstance(p, dict)]
+            if snap_picks:
+                top_picks = snap_picks[:4]
+                top_picks_source = "snapshot"
+
+    # Persist only successful live results; never overwrite snapshot with empty data.
+    if top_picks and top_picks_source != "snapshot":
+        try:
+            write_json(HOME_VISIBLE_SNAPSHOT_FILE, top_picks[:8])
+        except Exception as e:
+            logger.warning("home_page: snapshot write failed: %s", e)
+
+    active_picks_now = len(live_picks) + len(picks_near_term)
+    top_picks_source_note = ""
+    if top_picks_source == "nearest_upcoming":
+        top_picks_source_note = "Mostrando los próximos picks disponibles fuera de la ventana corta."
+    elif top_picks_source == "snapshot":
+        top_picks_source_note = "Mostrando la última selección visible guardada mientras llegan nuevos picks activos."
     top_picks_empty_html = (
         '<p class="home-empty muted">No hay picks activos para hoy/próximas horas.</p>'
         if total_picks <= 0
@@ -3456,6 +3502,7 @@ def home_page(request: Request) -> str:
 
       <section class="home-section" id="top-picks">
       <h2 class="home-h2">Mejores Picks del Día</h2>
+      {f'<p class="home-empty muted">{html_lib.escape(top_picks_source_note)}</p>' if top_picks_source_note else ''}
       <div class="home-picks-grid">
         {''.join(top_pick_cards) if top_pick_cards else top_picks_empty_html}
       </div>
