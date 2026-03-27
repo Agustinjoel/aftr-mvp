@@ -465,7 +465,11 @@ def run_odds_refresh_job() -> JobOutcome:
         touched = 0
         with football_data_refresh_cycle():
             for code in batch:
-                if not _league_in_prematch_window(code, prematch_h):
+                # Cold-start bootstrap: when cache is empty, allow one upcoming refresh
+                # to seed daily_matches/daily_picks before prematch-window filtering.
+                league_matches = read_json(f"daily_matches_{code}.json")
+                league_has_matches_cache = isinstance(league_matches, list) and len(league_matches) > 0
+                if league_has_matches_cache and not _league_in_prematch_window(code, prematch_h):
                     logger.info("AUTO REFRESH ODDS skip league %s (no match in prematch window)", code)
                     continue
                 if skip_fresh_min > 0 and _league_is_fresh(code, last_ok, skip_fresh_min):

@@ -157,7 +157,7 @@ def _env_bool(name: str, default: bool = False) -> bool:
 
 
 # Background refresh (same as `python -m app.cli refresh` → services.refresh.refresh_all)
-AUTO_REFRESH: bool = _env_bool("AUTO_REFRESH", False)
+AUTO_REFRESH: bool = _env_bool("AUTO_REFRESH", True)
 
 # Auto-refresh (light mode): skip leagues refreshed recently; batch size 0 = all per cycle
 try:
