@@ -3093,6 +3093,12 @@ def home_page(request: Request) -> str:
         picks_near_term,
         key=lambda p: (-(p.get("aftr_score") or 0), -_pick_score(p)),
     )[:4]
+    active_picks_now = len(live_picks) + len(top_picks)
+    top_picks_empty_html = (
+        '<p class="home-empty muted">No hay picks activos para hoy/próximas horas.</p>'
+        if total_picks <= 0
+        else '<p class="home-empty muted">No hay picks activos ahora. Las métricas del encabezado son históricas (incluyen picks ya resueltos).</p>'
+    )
     for p in top_picks:
         if p.get("home") and p.get("away"):
             continue
@@ -3434,10 +3440,10 @@ def home_page(request: Request) -> str:
           <h1>Picks con IA, apuestas de valor y combinadas inteligentes</h1>
           <p>Las mejores oportunidades del día, filtradas por AFTR Score, ventaja y confianza.</p>
           <div class="hero-stats home-hero-kpis">
-            <div class="home-hero-kpi"><span>ROI GLOBAL</span><strong>{roi_str}</strong></div>
-            <div class="home-hero-kpi"><span>GANANCIA NETA</span><strong>{net:+.1f}u</strong></div>
-            <div class="home-hero-kpi"><span>TASA DE ACIERTO</span><strong>{winrate_str}</strong></div>
-            <div class="home-hero-kpi"><span>PICKS TOTALES</span><strong>{total_picks}</strong></div>
+            <div class="home-hero-kpi"><span>ROI HISTÓRICO</span><strong>{roi_str}</strong></div>
+            <div class="home-hero-kpi"><span>GANANCIA NETA HIST.</span><strong>{net:+.1f}u</strong></div>
+            <div class="home-hero-kpi"><span>ACIERTO HISTÓRICO</span><strong>{winrate_str}</strong></div>
+            <div class="home-hero-kpi"><span>PICKS ACTIVOS AHORA</span><strong>{active_picks_now}</strong></div>
           </div>
           <div class="hero-buttons">
             <a href="#top-picks" class="btn-secondary">Ver picks de hoy</a>
@@ -3451,7 +3457,7 @@ def home_page(request: Request) -> str:
       <section class="home-section" id="top-picks">
       <h2 class="home-h2">Mejores Picks del Día</h2>
       <div class="home-picks-grid">
-        {''.join(top_pick_cards) if top_pick_cards else '<p class="home-empty muted">No hay picks pendientes.</p>'}
+        {''.join(top_pick_cards) if top_pick_cards else top_picks_empty_html}
       </div>
       </section>
 
@@ -3471,7 +3477,7 @@ def home_page(request: Request) -> str:
 
       <section class="home-section home-perf-section perf-panel-section">
       <div class="perf-panel-head perf-panel-head--home">
-        <h2 class="home-h2 perf-panel-title">Rendimiento AFTR</h2>
+        <h2 class="home-h2 perf-panel-title">Rendimiento AFTR (histórico)</h2>
         <p class="home-perf-intro muted perf-panel-sub">Evolución del ROI y unidades netas (últimos 7 días).</p>
       </div>
       <div class="home-perf-inner">
