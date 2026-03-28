@@ -74,7 +74,6 @@ def _account_created_display(created_at) -> str:
     return html_lib.escape(s)
 
 
-@router.get("/account", response_class=HTMLResponse)
 def account_page(request: Request):
     """Phase 2 account dashboard: greeting, plan, stats (from /user/*), quick actions, history preview."""
     user, _, plan_badge = _account_header(request)

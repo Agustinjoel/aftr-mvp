@@ -144,6 +144,9 @@ logger = logging.getLogger("aftr.ui")
 # _finished_card_debug_logged → importado de app.ui_card
 HOME_VISIBLE_SNAPSHOT_FILE = "home_visible_picks_snapshot.json"
 
+# Registrar rutas de módulos extraídos en el router principal
+router.get("/account", response_class=HTMLResponse)(account_page)
+
 
 # AUTH_BOOTSTRAP_JS, AUTH_BOOTSTRAP_SCRIPT, _serializer, _get_user_id,
 # _get_plan_from_cookie, _norm_market, _pick_market → importados de app.ui_helpers
