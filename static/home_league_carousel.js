@@ -14,8 +14,8 @@
   var TOUCH_PAUSE_MS = 1800;
 
   /* Card fixed dimensions — must match CSS */
-  var CARD_W  = 96;   /* px  (width of .league-item__card) */
-  var CARD_H  = 124;  /* px  (height of .league-item__card) */
+  var CARD_W  = 96;   /* px  (width of .league-carousel__card) */
+  var CARD_H  = 124;  /* px  (height of .league-carousel__card) */
   var ARC_GAP = 18;   /* extra arc spacing between items    */
 
   function reducedMotion() {
@@ -26,7 +26,7 @@
   function init(root) {
     var viewport = root.querySelector("[data-carousel-viewport]");
     var track    = root.querySelector("[data-track]");
-    var items    = [].slice.call(root.querySelectorAll(".league-item"));
+    var items    = [].slice.call(root.querySelectorAll(".league-carousel__item"));
     if (!viewport || !track || !items.length) return;
 
     var n = items.length;
@@ -43,6 +43,13 @@
     /* Radius: enough that adjacent items don't overlap on the arc */
     var arcPerItem = CARD_W + ARC_GAP;
     var radius = Math.max(180, Math.round((n * arcPerItem) / (2 * Math.PI)));
+
+    /* ── Give viewport explicit size so absolutely-placed items show ─ */
+    var vpH = CARD_H + 44;  /* card height + breathing room */
+    viewport.style.cssText +=
+      ";position:relative;height:" + vpH + "px;" +
+      "overflow:hidden;perspective:920px;perspective-origin:50% 42%;" +
+      "touch-action:pan-y;";
 
     /* ── Convert each item into a drum position ───────────────────── */
     /* Track becomes a 0×0 pivot at the centre of the viewport */
@@ -64,6 +71,9 @@
         "transform:rotateY(" + angle + "deg) translateZ(" + radius + "px);";
     });
 
+    /* Mark ready so CSS distance classes apply */
+    root.classList.add("league-carousel--ready");
+
     /* ── State ────────────────────────────────────────────────────── */
     var dragging        = false;
     var dragStartX      = 0;
@@ -83,7 +93,7 @@
       return Math.round(d);
     }
 
-    /* ── Update CSS distance classes (glow, scale, opacity via CSS) ─ */
+    /* ── Update CSS distance classes (glow, opacity via CSS) ─────── */
     function setDistanceClasses() {
       items.forEach(function (el, i) {
         var d = circDist(i);
@@ -91,16 +101,15 @@
         el.classList.toggle("active",    d === 0);
         el.setAttribute("aria-current", d === 0 ? "true" : "false");
         el.classList.remove(
-          "league-item--d0",  "league-item--dn1", "league-item--dp1",
-          "league-item--dn2", "league-item--dp2", "league-item--far"
+          "league-carousel__item--d0",  "league-carousel__item--dn1", "league-carousel__item--dp1",
+          "league-carousel__item--dn2", "league-carousel__item--dp2", "league-carousel__item--far"
         );
-        var ad = Math.abs(d);
-        if (d  ===  0) el.classList.add("league-item--d0");
-        else if (d === -1) el.classList.add("league-item--dn1");
-        else if (d ===  1) el.classList.add("league-item--dp1");
-        else if (d === -2) el.classList.add("league-item--dn2");
-        else if (d ===  2) el.classList.add("league-item--dp2");
-        else               el.classList.add("league-item--far");
+        if (d  ===  0) el.classList.add("league-carousel__item--d0");
+        else if (d === -1) el.classList.add("league-carousel__item--dn1");
+        else if (d ===  1) el.classList.add("league-carousel__item--dp1");
+        else if (d === -2) el.classList.add("league-carousel__item--dn2");
+        else if (d ===  2) el.classList.add("league-carousel__item--dp2");
+        else               el.classList.add("league-carousel__item--far");
       });
     }
 
@@ -211,7 +220,7 @@
 
     /* Suppress navigation click after a drag gesture */
     root.addEventListener("click", function (e) {
-      var a = e.target.closest("a.league-item, a.league-card");
+      var a = e.target.closest("a.league-carousel__item");
       if (!a || !root.contains(a)) return;
       if (suppressClick) { e.preventDefault(); e.stopImmediatePropagation(); }
     }, true);

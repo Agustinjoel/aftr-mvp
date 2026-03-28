@@ -91,13 +91,13 @@ def _build_home_league_snap_carousel_html(
         logo = f"/static/leagues/{logo_slug}.png"
         initial = (name or code or "?")[:1].upper()
         items.append(
-            f'<a class="league-card league-item{act}" href="/?league={html_lib.escape(code)}" data-code="{html_lib.escape(code)}" data-index="{ix}">'
-            f'<span class="league-item__card">'
-            f'<span class="league-item__glow" aria-hidden="true"></span>'
-            f'<img class="league-item__logo" src="{html_lib.escape(logo)}" alt="" width="56" height="56" loading="lazy" '
+            f'<a class="league-carousel__item{act}" href="/?league={html_lib.escape(code)}" data-code="{html_lib.escape(code)}" data-index="{ix}">'
+            f'<span class="league-carousel__card">'
+            f'<span class="league-carousel__glow" aria-hidden="true"></span>'
+            f'<img class="league-carousel__logo" src="{html_lib.escape(logo)}" alt="" width="56" height="56" loading="lazy" '
             "onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\" />"
-            f'<span class="league-item__fallback" aria-hidden="true">{html_lib.escape(initial)}</span>'
-            f'<span class="league-item__name">{html_lib.escape(name)}</span>'
+            f'<span class="league-carousel__logo-fallback" aria-hidden="true">{html_lib.escape(initial)}</span>'
+            f'<span class="league-carousel__name">{html_lib.escape(name)}</span>'
             f"</span></a>"
         )
         ix += 1
@@ -105,11 +105,11 @@ def _build_home_league_snap_carousel_html(
     core = (
         f'<div class="league-carousel league-carousel--3d" id="{cid}" '
         f'data-active-code="{html_lib.escape(active)}">'
-        f'<div class="league-carousel__viewport3d" data-carousel-viewport>'
-        f'<div class="league-track" data-track>{"".join(items)}</div></div></div>'
+        f'<div class="league-carousel__viewport" data-carousel-viewport>'
+        f'<div class="league-carousel__track" data-track>{"".join(items)}</div></div></div>'
     )
     script = (
-        '<script src="/static/home_league_carousel.js?v=7" defer></script>'
+        '<script src="/static/home_league_carousel.js?v=8" defer></script>'
         if include_script
         else ""
     )
