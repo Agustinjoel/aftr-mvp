@@ -1,22 +1,15 @@
 /**
- * Home league carousel — drum/wheel 3D.
- * Items are placed on a cylinder: each at rotateY(i*step) translateZ(radius).
- * Rotating the track container brings any item to the front.
- * Front item: full size, glowing. Others: fade + shrink into depth.
+ * Home league carousel — CSS scroll-snap based.
+ * Native scroll handles all touch/drag physics.
+ * JS adds: active classes, auto-advance, click-to-center.
  */
 (function () {
   "use strict";
 
-  var AUTO_MS      = 3800;
-  var SWIPE_THRESH = 36;
-  var CLICK_MAX_MOVE = 14;
-  var EASE         = "transform 0.58s cubic-bezier(0.22, 0.82, 0.24, 1)";
-  var TOUCH_PAUSE_MS = 1800;
-
-  /* Card fixed dimensions — must match CSS */
-  var CARD_W  = 96;   /* px  (width of .league-carousel__card) */
-  var CARD_H  = 124;  /* px  (height of .league-carousel__card) */
-  var ARC_GAP = 18;   /* extra arc spacing between items    */
+  var AUTO_MS       = 3800;
+  var TOUCH_PAUSE_MS = 2200;
+  var SETTLE_MS     = 140;   /* ms after scroll stops before we lock idx */
+  var CARD_W        = 96;    /* px — must match .league-carousel__card min-width */
 
   function reducedMotion() {
     try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
@@ -38,73 +31,40 @@
       if ((el.getAttribute("data-code") || "") === activeCode) idx = i;
     });
 
-    /* ── Drum geometry ────────────────────────────────────────────── */
-    var angleStep = 360 / n;
-    /* Radius: enough that adjacent items don't overlap on the arc */
-    var arcPerItem = CARD_W + ARC_GAP;
-    var radius = Math.max(180, Math.round((n * arcPerItem) / (2 * Math.PI)));
+    /* ── Padding so first/last items can be centred ───────────────── */
+    function applyPadding() {
+      var pad = Math.max(8, Math.floor(viewport.offsetWidth / 2 - CARD_W / 2));
+      track.style.paddingLeft  = pad + "px";
+      track.style.paddingRight = pad + "px";
+    }
+    applyPadding();
 
-    /* ── Give viewport explicit size so absolutely-placed items show ─ */
-    var vpH = CARD_H + 44;  /* card height + breathing room */
-    viewport.style.cssText +=
-      ";position:relative;height:" + vpH + "px;" +
-      "overflow:hidden;perspective:920px;perspective-origin:50% 42%;" +
-      "touch-action:pan-y;";
-
-    /* ── Convert each item into a drum position ───────────────────── */
-    /* Track becomes a 0×0 pivot at the centre of the viewport */
-    track.style.cssText +=
-      ";position:absolute;top:50%;left:50%;" +
-      "width:0;height:0;margin:0;padding:0;" +
-      "transform-style:preserve-3d;will-change:transform;";
-
-    items.forEach(function (el, i) {
-      var angle = angleStep * i;
-      el.style.cssText +=
-        ";position:absolute;" +
-        "top:0;left:0;" +
-        /* Centre the card on the pivot before the drum rotation */
-        "margin:" + (-CARD_H / 2) + "px 0 0 " + (-CARD_W / 2) + "px;" +
-        "width:" + CARD_W + "px;" +
-        "transform-style:preserve-3d;" +
-        "will-change:transform,opacity;" +
-        "transform:rotateY(" + angle + "deg) translateZ(" + radius + "px);";
-    });
-
-    /* Mark ready so CSS distance classes apply */
-    root.classList.add("league-carousel--ready");
-
-    /* ── State ────────────────────────────────────────────────────── */
-    var dragging        = false;
-    var dragStartX      = 0;
-    var dragMoved       = 0;
-    var suppressClick   = false;
-    var activePointerId = null;
-    var pointerCaptured = false;
-    var hoverPaused     = false;
-    var touchPauseTimer = null;
-    var autoTimer       = null;
-    var CAPTURE_AFTER   = 10;
-
-    /* ── Circular distance (-n/2 … n/2) ──────────────────────────── */
-    function circDist(i) {
-      var d = ((i - idx) % n + n) % n;
-      if (d > n / 2) d -= n;
-      return Math.round(d);
+    /* ── Find which item is closest to viewport centre ────────────── */
+    function centeredIdx() {
+      var vpMid = viewport.scrollLeft + viewport.offsetWidth / 2;
+      var best = 0, bestDist = Infinity;
+      items.forEach(function (el, i) {
+        var d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - vpMid);
+        if (d < bestDist) { bestDist = d; best = i; }
+      });
+      return best;
     }
 
-    /* ── Update CSS distance classes (glow, opacity via CSS) ─────── */
-    function setDistanceClasses() {
+    /* ── Distance CSS classes ─────────────────────────────────────── */
+    var DC = [
+      "league-carousel__item--d0",
+      "league-carousel__item--dn1", "league-carousel__item--dp1",
+      "league-carousel__item--dn2", "league-carousel__item--dp2",
+      "league-carousel__item--far"
+    ];
+    function updateClasses(ci) {
       items.forEach(function (el, i) {
-        var d = circDist(i);
+        var d = i - ci;
+        el.classList.remove.apply(el.classList, DC);
         el.classList.toggle("is-active", d === 0);
         el.classList.toggle("active",    d === 0);
         el.setAttribute("aria-current", d === 0 ? "true" : "false");
-        el.classList.remove(
-          "league-carousel__item--d0",  "league-carousel__item--dn1", "league-carousel__item--dp1",
-          "league-carousel__item--dn2", "league-carousel__item--dp2", "league-carousel__item--far"
-        );
-        if (d  ===  0) el.classList.add("league-carousel__item--d0");
+        if      (d ===  0) el.classList.add("league-carousel__item--d0");
         else if (d === -1) el.classList.add("league-carousel__item--dn1");
         else if (d ===  1) el.classList.add("league-carousel__item--dp1");
         else if (d === -2) el.classList.add("league-carousel__item--dn2");
@@ -113,26 +73,42 @@
       });
     }
 
-    /* ── Spin the drum ────────────────────────────────────────────── */
-    /* extraAngle: live drag offset in degrees */
-    function applyTrack(immediate, extraAngle) {
-      var angle = -(angleStep * idx) + (extraAngle || 0);
-      track.style.transition =
-        (immediate || reducedMotion()) ? "none" : EASE;
-      track.style.transform = "rotateY(" + angle + "deg)";
-      if (!dragging) setDistanceClasses();
+    /* ── Scroll item into centre ──────────────────────────────────── */
+    function scrollTo(i, smooth) {
+      var el = items[i];
+      if (!el) return;
+      var target = el.offsetLeft - (viewport.offsetWidth - el.offsetWidth) / 2;
+      try {
+        viewport.scrollTo({ left: Math.max(0, target), behavior: smooth ? "smooth" : "auto" });
+      } catch (_) {
+        viewport.scrollLeft = Math.max(0, target);
+      }
     }
 
-    function goTo(i, immediate) {
-      /* Wrap around — always go the shorter way */
+    /* ── Go to index ──────────────────────────────────────────────── */
+    function goTo(i, smooth) {
       idx = ((i % n) + n) % n;
-      dragging = false;
-      applyTrack(immediate);
-      setDistanceClasses();
+      scrollTo(idx, smooth);
+      updateClasses(idx);
       scheduleAuto();
     }
 
+    /* ── Scroll listener — live class updates while scrolling ─────── */
+    var settleTimer = null;
+    viewport.addEventListener("scroll", function () {
+      var ci = centeredIdx();
+      updateClasses(ci);
+      if (settleTimer) clearTimeout(settleTimer);
+      settleTimer = setTimeout(function () {
+        idx = centeredIdx();
+        settleTimer = null;
+      }, SETTLE_MS);
+    }, { passive: true });
+
     /* ── Auto-advance ─────────────────────────────────────────────── */
+    var autoTimer   = null;
+    var paused      = false;
+
     function clearAuto() {
       if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
     }
@@ -140,100 +116,55 @@
       clearAuto();
       if (reducedMotion() || n <= 1) return;
       autoTimer = window.setInterval(function () {
-        if (hoverPaused || dragging) return;
-        goTo(idx + 1, false);
+        if (paused) return;
+        goTo(idx + 1, true);
       }, AUTO_MS);
     }
 
-    /* ── Hover pause ──────────────────────────────────────────────── */
-    root.addEventListener("mouseenter", function () { hoverPaused = true;  });
-    root.addEventListener("mouseleave", function () { hoverPaused = false; });
+    /* Pause on hover (desktop) */
+    root.addEventListener("mouseenter", function () { paused = true; });
+    root.addEventListener("mouseleave", function () { paused = false; });
 
-    function touchPause() {
-      hoverPaused = true;
-      if (touchPauseTimer) clearTimeout(touchPauseTimer);
-      touchPauseTimer = setTimeout(function () {
-        hoverPaused = false; touchPauseTimer = null;
-      }, TOUCH_PAUSE_MS);
-    }
-    viewport.addEventListener("touchstart", function () { touchPause(); }, { passive: true });
-
-    /* ── Drag → rotation ──────────────────────────────────────────── */
-    /* How many degrees one pixel of horizontal drag rotates the drum */
-    var DEG_PER_PX = angleStep / arcPerItem;
-
-    viewport.addEventListener("pointerdown", function (e) {
-      if (e.pointerType === "mouse" && e.button !== 0) return;
-      dragging        = true;
-      dragStartX      = e.clientX;
-      dragMoved       = 0;
-      suppressClick   = false;
-      activePointerId = e.pointerId;
-      pointerCaptured = false;
+    /* Pause on touch, resume after idle */
+    var touchTimer = null;
+    viewport.addEventListener("touchstart", function () {
+      paused = true;
       clearAuto();
-      track.style.transition = "none";
+      if (touchTimer) clearTimeout(touchTimer);
+    }, { passive: true });
+    viewport.addEventListener("touchend", function () {
+      if (touchTimer) clearTimeout(touchTimer);
+      touchTimer = setTimeout(function () {
+        paused = false;
+        idx = centeredIdx();
+        scheduleAuto();
+      }, TOUCH_PAUSE_MS);
     }, { passive: true });
 
-    viewport.addEventListener("pointermove", function (e) {
-      if (!dragging) return;
-      var dx = e.clientX - dragStartX;
-      dragMoved = Math.max(dragMoved, Math.abs(dx));
-      if (!pointerCaptured && activePointerId === e.pointerId && dragMoved > CAPTURE_AFTER) {
-        pointerCaptured = true;
-        try { viewport.setPointerCapture(e.pointerId); } catch (_) {}
-      }
-      applyTrack(true, -dx * DEG_PER_PX);
-    });
-
-    function onPointerEnd(e) {
-      if (!dragging) return;
-      var dx = e.clientX - dragStartX;
-      var dm = dragMoved;
-      dragging  = false;
-      dragMoved = 0;
-      try {
-        if (pointerCaptured && activePointerId === e.pointerId)
-          viewport.releasePointerCapture(e.pointerId);
-      } catch (_) {}
-      pointerCaptured = false;
-      activePointerId = null;
-
-      if (dm > SWIPE_THRESH || dm > CLICK_MAX_MOVE) {
-        suppressClick = true;
-        /* Snap to the nearest item in the direction of drag */
-        var steps = Math.round(dx / arcPerItem);
-        goTo(idx - steps, false);
-        setTimeout(function () { suppressClick = false; }, 120);
-      } else {
-        goTo(idx, false);
-      }
-    }
-
-    viewport.addEventListener("pointerup",     onPointerEnd);
-    viewport.addEventListener("pointercancel", function (e) {
-      if (!dragging) return;
-      dragging = false; dragMoved = 0;
-      try { if (pointerCaptured) viewport.releasePointerCapture(e.pointerId); } catch (_) {}
-      pointerCaptured = false; activePointerId = null;
-      goTo(idx, false);
-    });
-
-    /* Suppress navigation click after a drag gesture */
+    /* ── Click: non-centre item → scroll to it, don't navigate ───── */
     root.addEventListener("click", function (e) {
       var a = e.target.closest("a.league-carousel__item");
       if (!a || !root.contains(a)) return;
-      if (suppressClick) { e.preventDefault(); e.stopImmediatePropagation(); }
+      var ci = centeredIdx();
+      var ti = items.indexOf(a);
+      if (ti === -1 || ti === ci) return;   /* already centred → let href fire */
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      goTo(ti, true);
     }, true);
 
-    window.addEventListener("resize", function () { applyTrack(true); });
+    window.addEventListener("resize", function () {
+      applyPadding();
+      scrollTo(idx, false);
+    });
 
     /* ── Boot ─────────────────────────────────────────────────────── */
-    setDistanceClasses();
+    root.classList.add("league-carousel--ready");
+    updateClasses(idx);
+    /* Use rAF so layout is complete before we scroll */
     requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        applyTrack(true);
-        scheduleAuto();
-      });
+      scrollTo(idx, false);
+      scheduleAuto();
     });
   }
 

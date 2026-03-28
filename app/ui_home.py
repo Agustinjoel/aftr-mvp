@@ -109,7 +109,7 @@ def _build_home_league_snap_carousel_html(
         f'<div class="league-carousel__track" data-track>{"".join(items)}</div></div></div>'
     )
     script = (
-        '<script src="/static/home_league_carousel.js?v=8" defer></script>'
+        '<script src="/static/home_league_carousel.js?v=9" defer></script>'
         if include_script
         else ""
     )
