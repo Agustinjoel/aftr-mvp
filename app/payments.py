@@ -105,7 +105,8 @@ def create_checkout_session(request: Request):
             return JSONResponse(content={"ok": False, "error": "stripe_not_configured"}, status_code=500)
 
         base_url = (getattr(settings, "app_base_url", None) or "").strip().rstrip("/") or str(request.base_url).rstrip("/")
-        success_url = f"{base_url}/billing/success"
+        # Stripe replaces {CHECKOUT_SESSION_ID} so /billing/success can verify payment without relying on webhooks alone.
+        success_url = f"{base_url}/billing/success?session_id={{CHECKOUT_SESSION_ID}}"
         cancel_url = base_url
 
         logger.info(
@@ -139,9 +140,69 @@ def create_checkout_session(request: Request):
 
 
 @router.get("/billing/success", include_in_schema=False)
-def billing_success():
-    """After Stripe Checkout success: redirect to dashboard with premium_activated so the success animation shows."""
-    return RedirectResponse(url="/?msg=premium_activated", status_code=302)
+def billing_success(request: Request, session_id: str | None = Query(None)):
+    """
+    After Stripe Checkout: redirect home with success UI.
+    If webhooks are missing/misconfigured, upgrade the user here by verifying the Checkout Session.
+    """
+    dest = "/?msg=premium_activated"
+
+    if (
+        session_id
+        and stripe
+        and settings.stripe_secret_key
+        and str(session_id).strip()
+    ):
+        try:
+            stripe.api_key = settings.stripe_secret_key
+            sess = stripe.checkout.Session.retrieve(str(session_id).strip())
+            pay_ok = getattr(sess, "payment_status", None) in ("paid", "no_payment_required")
+            complete = getattr(sess, "status", None) == "complete"
+            if pay_ok and complete:
+                ref = getattr(sess, "client_reference_id", None) or ""
+                try:
+                    uid_from_ref = int(str(ref).strip()) if str(ref).strip() else None
+                except (TypeError, ValueError):
+                    uid_from_ref = None
+                uid_cookie = get_user_id(request)
+                # Require session to belong to this browser's logged-in user (same id as checkout create).
+                if uid_from_ref is not None and uid_cookie is not None and uid_from_ref == uid_cookie:
+                    customer_id = getattr(sess, "customer", None)
+                    subscription_id = getattr(sess, "subscription", None)
+                    now = datetime.now(timezone.utc)
+                    exp_iso = (now + timedelta(days=30)).isoformat()
+                    if subscription_id:
+                        try:
+                            sub = stripe.Subscription.retrieve(subscription_id)
+                            if getattr(sub, "current_period_end", None):
+                                exp_iso = datetime.fromtimestamp(
+                                    sub.current_period_end, tz=timezone.utc
+                                ).isoformat()
+                        except Exception:
+                            pass
+                    _apply_premium_to_user(
+                        uid_from_ref,
+                        exp_iso,
+                        customer_id=str(customer_id) if customer_id else None,
+                        subscription_id=str(subscription_id) if subscription_id else None,
+                    )
+                    logger.info(
+                        "billing/success: premium applied via session verify | user_id=%s session=%s",
+                        uid_from_ref,
+                        session_id,
+                    )
+                else:
+                    logger.warning(
+                        "billing/success: session verified but user mismatch or missing cookie | "
+                        "ref_uid=%s cookie_uid=%s session=%s",
+                        uid_from_ref,
+                        uid_cookie,
+                        session_id,
+                    )
+        except Exception:
+            logger.exception("billing/success: session retrieve/apply failed | session_id=%s", session_id)
+
+    return RedirectResponse(url=dest, status_code=302)
 
 
 def _apply_premium_to_user(uid_int: int, expires_at_iso: str, customer_id: str | None = None, subscription_id: str | None = None) -> None:
