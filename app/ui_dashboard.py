@@ -1447,6 +1447,7 @@ def dashboard(request: Request, league: str):
     </script>
 
     </div> <!-- /page -->
+    <script src="/static/aftr-ui.js?v=1" defer></script>
     </body>
     </html>
     """

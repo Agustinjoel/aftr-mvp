@@ -394,10 +394,27 @@ def _render_pick_card(
     aftr_badges.append(
         f'<span class="aftr-badge aftr-badge-conf">{html_lib.escape(conf_badge_text)}</span>'
     )
+    # ── SVG circular gauge (r=28, C=175.93) ───────────────
+    _GAUGE_C = 175.93
+    _gauge_pct    = max(0, min(100, aftr_score_val)) / 100
+    _gauge_offset = _GAUGE_C * (1.0 - _gauge_pct)   # JS animates from C → this value
+    _gauge_svg = (
+        f'<svg class="aftr-gauge-svg" viewBox="0 0 64 64" width="58" height="58" aria-hidden="true">'
+        f'<circle class="aftr-gauge-bg" cx="32" cy="32" r="28"/>'
+        f'<circle class="aftr-gauge-arc" cx="32" cy="32" r="28"'
+        f' stroke="{tier_color}"'
+        f' stroke-dasharray="{_GAUGE_C:.2f}"'
+        f' stroke-dashoffset="{_GAUGE_C:.2f}"'
+        f' data-gauge-to="{_gauge_offset:.2f}"/>'
+        f'<text class="aftr-gauge-num" x="32" y="37">{aftr_score_val}</text>'
+        f'</svg>'
+    )
     aftr_block_html = (
-        f'<div class="aftr-score-block" style="border-left: 4px solid {tier_color};">'
-        f'<div class="aftr-score-label">AFTR Score</div>'
-        f'<div class="aftr-score-num">{aftr_score_val}</div>'
+        f'<div class="aftr-score-block">'
+        f'<div class="aftr-gauge-wrap">'
+        f'{_gauge_svg}'
+        f'<div class="aftr-score-label">AFTR</div>'
+        f'</div>'
         f'<div class="aftr-badges">{"".join(aftr_badges)}</div>'
         f'</div>'
     )
@@ -434,6 +451,8 @@ def _render_pick_card(
                 p.get("result") or "", p.get("status") or "",
             )
         outcome_badge = result if result in ("WIN", "LOSS", "PUSH") else "FINALIZADO"
+        _badge_extra  = (" pick-badge--win" if outcome_badge == "WIN"
+                         else " pick-badge--loss" if outcome_badge == "LOSS" else "")
         prob_line     = f'<div class="pick-finished-prob">{best_prob_pct:.1f}%</div>' if best_prob_present else ""
         pick_actions_html = (
             f'<div class="pick-finished-status pick-main-highlight">'
@@ -442,7 +461,7 @@ def _render_pick_card(
             f'{prob_line}'
             f'</div>'
             f'<div class="pick-finished-badge-row">'
-            f'<span class="pick-badge">{html_lib.escape(outcome_badge)}</span>'
+            f'<span class="pick-badge{_badge_extra}">{html_lib.escape(outcome_badge)}</span>'
             f'</div>'
             f'</div>'
         )

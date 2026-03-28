@@ -1177,6 +1177,7 @@ def home_page(request: Request) -> str:
           else { boot(); }
         })();
       </script>
+    <script src="/static/aftr-ui.js?v=1" defer></script>
     </body>
     </html>
     """
