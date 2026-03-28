@@ -4133,16 +4133,19 @@ canvas{
 }
 
 /* =========================
-   Home: 3D transform carousel (JS-centered; no scrollbar)
+   Home: drum/wheel 3D carousel
+   Items sit on a cylinder; track spins to bring active item front-centre.
    Dashboard coverflow unchanged (.league-carousel without --3d)
 ========================= */
+
+/* ── Wrapper ─────────────────────────────────────────────────────────── */
 .league-carousel.league-carousel--3d{
   display: block;
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 8px 0 12px;
-  background: linear-gradient(180deg, rgba(10,14,24,.88) 0%, rgba(8,12,20,.4) 100%);
+  padding: 4px 0 8px;
+  background: linear-gradient(180deg, rgba(10,14,24,.9) 0%, rgba(8,12,20,.5) 100%);
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.08);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 16px 48px rgba(0,0,0,.35);
@@ -4153,226 +4156,190 @@ canvas{
   max-width: 100%;
 }
 
+/* ── Viewport — perspective container ────────────────────────────────── */
 .league-carousel--3d .league-carousel__viewport3d{
   overflow: hidden;
   width: 100%;
+  /* Fixed height: card body (124px) + float headroom */
+  height: 168px;
   position: relative;
-  padding: 18px 0 22px;
   touch-action: pan-y;
   cursor: grab;
-  perspective: 1100px;
-  perspective-origin: 50% 45%;
+  /* Perspective from slightly above centre for that "looking at the wheel" feel */
+  perspective: 900px;
+  perspective-origin: 50% 42%;
 }
 .league-carousel--3d .league-carousel__viewport3d:active{
   cursor: grabbing;
 }
 
+/* ── Track — 0×0 pivot at centre; JS rotates this ───────────────────── */
+/* Most properties set inline by JS; these are the fallback/base. */
 .league-carousel--3d .league-track{
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 14px;
-  width: max-content;
-  padding: 0 24px;
-  margin: 0;
-  will-change: transform;
-  transform-style: preserve-3d;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.league-carousel--3d .league-track::-webkit-scrollbar{
-  display: none;
+  /* JS overrides display/flex properties; these prevent flash of unstyled */
+  display: block;
   width: 0;
   height: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
+/* ── Items — JS positions each on the drum ───────────────────────────── */
 .league-carousel--3d .league-item,
 .league-carousel--3d a.league-card{
-  flex: 0 0 auto;
+  display: block;
   text-decoration: none;
   color: inherit;
   transform-style: preserve-3d;
-  transition:
-    transform 0.4s ease,
-    opacity 0.4s ease,
-    filter 0.4s ease;
   -webkit-tap-highlight-color: transparent;
-  pointer-events: auto;
   cursor: pointer;
-  position: relative;
-}
-
-/* Distance-based 3D (classes set by JS) */
-.league-carousel--3d .league-item--d0{
-  transform: scale(1.15) rotateY(0deg) translateY(0) translateZ(0);
-  opacity: 1;
-  z-index: 12;
-  filter: none;
-  animation: league-3d-float 3.4s ease-in-out infinite;
-}
-.league-carousel--3d .league-item--dn1{
-  transform: scale(0.9) rotateY(20deg) translateY(10px) translateZ(-24px);
-  opacity: 0.62;
-  z-index: 6;
-  filter: blur(0.45px);
-}
-.league-carousel--3d .league-item--dp1{
-  transform: scale(0.9) rotateY(-20deg) translateY(10px) translateZ(-24px);
-  opacity: 0.62;
-  z-index: 6;
-  filter: blur(0.45px);
-}
-.league-carousel--3d .league-item--dn2{
-  transform: scale(0.85) rotateY(28deg) translateY(12px) translateZ(-40px);
-  opacity: 0.45;
-  z-index: 3;
-  filter: blur(1px);
-}
-.league-carousel--3d .league-item--dp2{
-  transform: scale(0.85) rotateY(-28deg) translateY(12px) translateZ(-40px);
-  opacity: 0.45;
-  z-index: 3;
-  filter: blur(1px);
-}
-.league-carousel--3d .league-item--far{
-  transform: scale(0.8) rotateY(34deg) translateY(14px) translateZ(-52px);
-  opacity: 0.32;
-  z-index: 1;
-  filter: blur(1.4px);
+  /* Opacity + filter driven by distance classes; transition on these only */
+  transition: opacity 0.5s ease, filter 0.5s ease;
   pointer-events: auto;
 }
 
+/* ── Distance classes — opacity & depth blur (JS owns the transform) ─── */
+.league-carousel--3d .league-item{ opacity: 0.22; filter: blur(1.8px); }
+.league-carousel--3d .league-item--d0 { opacity: 1;    filter: none; }
+.league-carousel--3d .league-item--dn1,
+.league-carousel--3d .league-item--dp1{ opacity: 0.68; filter: blur(0.3px); }
+.league-carousel--3d .league-item--dn2,
+.league-carousel--3d .league-item--dp2{ opacity: 0.42; filter: blur(1px); }
+.league-carousel--3d .league-item--far{ opacity: 0.2;  filter: blur(2px); }
+
+/* ── Card shell ──────────────────────────────────────────────────────── */
 .league-carousel--3d .league-item__card{
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 12px 16px 10px;
-  min-width: 92px;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,.12);
+  /* Fixed dims — must match JS CARD_W/CARD_H constants */
+  width: 96px;
+  height: 124px;
+  padding: 14px 0 10px;
+  border-radius: 50px;          /* pill shape for the "round" feel */
+  border: 1px solid rgba(255,255,255,.13);
   background: linear-gradient(155deg, rgba(255,255,255,.1), rgba(255,255,255,.03));
   box-shadow: 0 8px 28px rgba(0,0,0,.32);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   position: relative;
-  transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+  transition:
+    border-color 0.45s ease,
+    box-shadow   0.45s ease,
+    background   0.45s ease,
+    transform    0.45s ease;
+  transform: scale(0.78);       /* default: items not at front are small */
 }
 
+/* Front item card: full size + glow */
+.league-carousel--3d .league-item--d0 .league-item__card{
+  transform: scale(1.12);
+  border-color: rgba(120,180,255,.55);
+  background: linear-gradient(160deg, rgba(96,165,250,.24), rgba(120,170,255,.09), rgba(255,255,255,.05));
+  box-shadow:
+    0 0 0 1.5px rgba(120,180,255,.3),
+    0 16px 44px rgba(0,0,0,.5),
+    0 0 44px rgba(56,189,248,.28),
+    0 24px 54px rgba(56,189,248,.14);
+}
+.league-carousel--3d .league-item--dn1 .league-item__card,
+.league-carousel--3d .league-item--dp1 .league-item__card{ transform: scale(0.88); }
+.league-carousel--3d .league-item--dn2 .league-item__card,
+.league-carousel--3d .league-item--dp2 .league-item__card{ transform: scale(0.82); }
+
+/* ── Glow ring behind front card ─────────────────────────────────────── */
 .league-carousel--3d .league-item__glow{
   position: absolute;
-  inset: -8px;
-  border-radius: 24px;
+  inset: -10px;
+  border-radius: 60px;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(ellipse at 50% 75%, rgba(56,189,248,.45), transparent 62%);
-  transition: opacity 0.4s ease;
+  background: radial-gradient(ellipse at 50% 70%, rgba(56,189,248,.5), transparent 60%);
+  transition: opacity 0.45s ease;
   z-index: -1;
 }
 .league-carousel--3d .league-item--d0 .league-item__glow{
   opacity: 1;
 }
-
-.league-carousel--3d .league-item--d0 .league-item__card{
-  border-color: rgba(120,180,255,.5);
-  background: linear-gradient(160deg, rgba(96,165,250,.22), rgba(120,170,255,.08), rgba(255,255,255,.05));
-  box-shadow:
-    0 0 0 1px rgba(120,180,255,.28),
-    0 16px 44px rgba(0,0,0,.45),
-    0 0 40px rgba(56,189,248,.25),
-    0 20px 50px rgba(56,189,248,.12);
+.league-carousel--3d .league-item--d0:hover .league-item__glow{
+  background: radial-gradient(ellipse at 50% 68%, rgba(96,210,255,.6), transparent 56%);
 }
 
+/* ── Logo — round ────────────────────────────────────────────────────── */
 .league-carousel--3d .league-item__logo{
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
-  border-radius: 12px;
+  border-radius: 50%;           /* ← round logos */
   display: block;
+  background: rgba(255,255,255,.06);
 }
+.league-carousel--3d .league-item--d0 .league-item__logo{
+  /* Subtle ring on active logo */
+  box-shadow: 0 0 0 2px rgba(120,200,255,.5), 0 0 16px rgba(56,189,248,.3);
+  animation: drum-logo-float 3.2s ease-in-out infinite;
+}
+
 .league-carousel--3d .league-item__fallback{
   display: none;
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 50%;
   background: rgba(255,255,255,.12);
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
   color: rgba(234,242,255,.9);
 }
+
+/* ── Name ────────────────────────────────────────────────────────────── */
 .league-carousel--3d .league-item__name{
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-align: center;
-  max-width: 100px;
+  width: 80px;
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: rgba(234,242,255,.72);
-  transition: color 0.4s ease;
+  color: rgba(234,242,255,.65);
+  transition: color 0.45s ease;
 }
 .league-carousel--3d .league-item--d0 .league-item__name{
   color: rgba(234,242,255,.98);
+  font-size: 11px;
 }
 
-.league-carousel--3d .league-item:hover .league-item__card{
-  border-color: rgba(170,210,255,.38);
-  box-shadow: 0 0 24px rgba(56,189,248,.2);
-}
-.league-carousel--3d .league-item--d0:hover .league-item__glow{
-  opacity: 1;
-  background: radial-gradient(ellipse at 50% 72%, rgba(96,210,255,.55), transparent 58%);
+/* ── Hover on non-active items ───────────────────────────────────────── */
+.league-carousel--3d .league-item:not(.league-item--d0):hover .league-item__card{
+  border-color: rgba(170,210,255,.3);
+  box-shadow: 0 0 18px rgba(56,189,248,.15);
 }
 .league-carousel--3d .league-item--d0:hover .league-item__card{
   box-shadow:
-    0 0 0 1px rgba(150,200,255,.4),
-    0 18px 50px rgba(0,0,0,.5),
-    0 0 48px rgba(56,189,248,.35);
+    0 0 0 2px rgba(150,200,255,.45),
+    0 20px 52px rgba(0,0,0,.55),
+    0 0 52px rgba(56,189,248,.38);
 }
 
-@keyframes league-3d-float{
-  0%, 100%{ transform: scale(1.15) rotateY(0deg) translateY(0) translateZ(0); }
-  50%{ transform: scale(1.15) rotateY(0deg) translateY(-6px) translateZ(0); }
+/* ── Logo float animation (active item only) ─────────────────────────── */
+@keyframes drum-logo-float{
+  0%,100%{ transform: translateY(0); }
+  50%     { transform: translateY(-5px); }
 }
 
-@media (max-width: 540px){
-  .league-carousel--3d .league-track{
-    gap: 10px;
-    padding: 0 16px;
-  }
-  .league-carousel--3d .league-item__card{
-    min-width: 100px;
-    padding: 14px 18px 12px;
-  }
-  .league-carousel--3d .league-item__logo,
-  .league-carousel--3d .league-item__fallback{
-    width: 58px;
-    height: 58px;
-  }
-  .league-carousel--3d .league-item__name{
-    font-size: 12px;
-    max-width: 108px;
-  }
-  .league-carousel--3d .league-item--d0{
-    animation-duration: 3s;
-  }
-}
-
+/* ── Reduced motion ──────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce){
-  .league-carousel--3d .league-item{
-    transition-duration: 0.01ms;
-  }
-  .league-carousel--3d .league-item--d0{
-    animation: none;
-  }
+  .league-carousel--3d .league-item,
   .league-carousel--3d .league-item__card,
   .league-carousel--3d .league-item__glow{
     transition-duration: 0.01ms;
+  }
+  .league-carousel--3d .league-item--d0 .league-item__logo{
+    animation: none;
   }
 }
 
