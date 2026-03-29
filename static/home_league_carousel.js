@@ -1,15 +1,16 @@
 /**
- * Home league carousel — CSS scroll-snap based.
- * Native scroll handles all touch/drag physics.
- * JS adds: active classes, auto-advance, click-to-center.
+ * Home league carousel — CSS scroll-snap + mouse drag.
+ * Native scroll-snap handles touch physics.
+ * JS adds: mouse drag, active classes, auto-advance, click-to-center.
  */
 (function () {
   "use strict";
 
-  var AUTO_MS       = 3800;
+  var AUTO_MS        = 3800;
   var TOUCH_PAUSE_MS = 2200;
-  var SETTLE_MS     = 140;   /* ms after scroll stops before we lock idx */
-  var CARD_W        = 96;    /* px — must match .league-carousel__card min-width */
+  var SETTLE_MS      = 120;
+  var CLICK_THRESH   = 8;    /* px moved before we consider it a drag */
+  var CARD_W         = 96;
 
   function reducedMotion() {
     try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
@@ -74,7 +75,7 @@
     }
 
     /* ── Scroll item into centre ──────────────────────────────────── */
-    function scrollTo(i, smooth) {
+    function scrollToItem(i, smooth) {
       var el = items[i];
       if (!el) return;
       var target = el.offsetLeft - (viewport.offsetWidth - el.offsetWidth) / 2;
@@ -85,19 +86,17 @@
       }
     }
 
-    /* ── Go to index ──────────────────────────────────────────────── */
     function goTo(i, smooth) {
       idx = ((i % n) + n) % n;
-      scrollTo(idx, smooth);
+      scrollToItem(idx, smooth);
       updateClasses(idx);
       scheduleAuto();
     }
 
-    /* ── Scroll listener — live class updates while scrolling ─────── */
+    /* ── Scroll listener — live class updates ─────────────────────── */
     var settleTimer = null;
     viewport.addEventListener("scroll", function () {
-      var ci = centeredIdx();
-      updateClasses(ci);
+      updateClasses(centeredIdx());
       if (settleTimer) clearTimeout(settleTimer);
       settleTimer = setTimeout(function () {
         idx = centeredIdx();
@@ -105,9 +104,62 @@
       }, SETTLE_MS);
     }, { passive: true });
 
+    /* ── Mouse drag (pointer events) ─────────────────────────────── */
+    var dragging    = false;
+    var dragStartX  = 0;
+    var dragScrollX = 0;
+    var dragMoved   = 0;
+    var suppressClick = false;
+
+    viewport.addEventListener("pointerdown", function (e) {
+      if (e.pointerType !== "mouse") return;   /* touch handled natively */
+      dragging    = true;
+      dragStartX  = e.clientX;
+      dragScrollX = viewport.scrollLeft;
+      dragMoved   = 0;
+      suppressClick = false;
+      viewport.setPointerCapture(e.pointerId);
+      /* Disable snap during drag so it follows the cursor exactly */
+      viewport.style.scrollSnapType = "none";
+      viewport.style.cursor = "grabbing";
+      clearAuto();
+    });
+
+    viewport.addEventListener("pointermove", function (e) {
+      if (!dragging || e.pointerType !== "mouse") return;
+      var dx = e.clientX - dragStartX;
+      dragMoved = Math.max(dragMoved, Math.abs(dx));
+      viewport.scrollLeft = dragScrollX - dx;
+    });
+
+    function onDragEnd(e) {
+      if (!dragging || e.pointerType !== "mouse") return;
+      dragging = false;
+      /* Re-enable snap, then snap to nearest */
+      viewport.style.scrollSnapType = "";
+      viewport.style.cursor = "";
+      try { viewport.releasePointerCapture(e.pointerId); } catch (_) {}
+
+      if (dragMoved > CLICK_THRESH) {
+        suppressClick = true;
+        /* Determine direction from drag delta */
+        var dx = e.clientX - dragStartX;
+        var steps = Math.round(dx / CARD_W);
+        goTo(idx - steps, true);          /* snap to nearest */
+        setTimeout(function () { suppressClick = false; }, 200);
+      } else {
+        /* Tiny movement — treat as click, re-snap to current */
+        scrollToItem(idx, true);
+        scheduleAuto();
+      }
+    }
+
+    viewport.addEventListener("pointerup",     onDragEnd);
+    viewport.addEventListener("pointercancel", onDragEnd);
+
     /* ── Auto-advance ─────────────────────────────────────────────── */
-    var autoTimer   = null;
-    var paused      = false;
+    var autoTimer = null;
+    var paused    = false;
 
     function clearAuto() {
       if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
@@ -116,16 +168,14 @@
       clearAuto();
       if (reducedMotion() || n <= 1) return;
       autoTimer = window.setInterval(function () {
-        if (paused) return;
+        if (paused || dragging) return;
         goTo(idx + 1, true);
       }, AUTO_MS);
     }
 
-    /* Pause on hover (desktop) */
-    root.addEventListener("mouseenter", function () { paused = true; });
+    root.addEventListener("mouseenter", function () { paused = true;  });
     root.addEventListener("mouseleave", function () { paused = false; });
 
-    /* Pause on touch, resume after idle */
     var touchTimer = null;
     viewport.addEventListener("touchstart", function () {
       paused = true;
@@ -141,13 +191,14 @@
       }, TOUCH_PAUSE_MS);
     }, { passive: true });
 
-    /* ── Click: non-centre item → scroll to it, don't navigate ───── */
+    /* ── Click: non-centre item → centre it, don't navigate ──────── */
     root.addEventListener("click", function (e) {
+      if (suppressClick) { e.preventDefault(); e.stopImmediatePropagation(); return; }
       var a = e.target.closest("a.league-carousel__item");
       if (!a || !root.contains(a)) return;
       var ci = centeredIdx();
       var ti = items.indexOf(a);
-      if (ti === -1 || ti === ci) return;   /* already centred → let href fire */
+      if (ti === -1 || ti === ci) return;
       e.preventDefault();
       e.stopImmediatePropagation();
       goTo(ti, true);
@@ -155,15 +206,14 @@
 
     window.addEventListener("resize", function () {
       applyPadding();
-      scrollTo(idx, false);
+      scrollToItem(idx, false);
     });
 
     /* ── Boot ─────────────────────────────────────────────────────── */
     root.classList.add("league-carousel--ready");
     updateClasses(idx);
-    /* Use rAF so layout is complete before we scroll */
     requestAnimationFrame(function () {
-      scrollTo(idx, false);
+      scrollToItem(idx, false);
       scheduleAuto();
     });
   }

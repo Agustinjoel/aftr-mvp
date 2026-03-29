@@ -86,30 +86,31 @@ def _build_home_league_snap_carousel_html(
     for code, name in settings.leagues.items():
         if code in unsupported:
             continue
-        act = " is-active active" if code == active else ""
         logo_slug = {"EL": "uel"}.get(code, code.lower())
         logo = f"/static/leagues/{logo_slug}.png"
         initial = (name or code or "?")[:1].upper()
         items.append(
-            f'<a class="league-carousel__item{act}" href="/?league={html_lib.escape(code)}" data-code="{html_lib.escape(code)}" data-index="{ix}">'
-            f'<span class="league-carousel__card">'
-            f'<span class="league-carousel__glow" aria-hidden="true"></span>'
-            f'<img class="league-carousel__logo" src="{html_lib.escape(logo)}" alt="" width="56" height="56" loading="lazy" '
+            f'<a class="lc3d__item" href="/?league={html_lib.escape(code)}" '
+            f'data-code="{html_lib.escape(code)}" data-index="{ix}" aria-label="{html_lib.escape(name)}">'
+            f'<span class="lc3d__card">'
+            f'<span class="lc3d__glow" aria-hidden="true"></span>'
+            f'<img class="lc3d__logo" src="{html_lib.escape(logo)}" alt="" width="56" height="56" loading="eager" '
             "onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\" />"
-            f'<span class="league-carousel__logo-fallback" aria-hidden="true">{html_lib.escape(initial)}</span>'
-            f'<span class="league-carousel__name">{html_lib.escape(name)}</span>'
+            f'<span class="lc3d__logo-fallback" aria-hidden="true">{html_lib.escape(initial)}</span>'
+            f'<span class="lc3d__name">{html_lib.escape(name)}</span>'
             f"</span></a>"
         )
         ix += 1
     cid = html_lib.escape(carousel_id)
     core = (
-        f'<div class="league-carousel league-carousel--3d" id="{cid}" '
-        f'data-active-code="{html_lib.escape(active)}">'
-        f'<div class="league-carousel__viewport" data-carousel-viewport>'
-        f'<div class="league-carousel__track" data-track>{"".join(items)}</div></div></div>'
+        f'<div class="lc3d" id="{cid}" data-active-code="{html_lib.escape(active)}" role="region" aria-label="Selector de liga">'
+        f'<button type="button" class="lc3d__prev" aria-label="Liga anterior"><span aria-hidden="true">‹</span></button>'
+        f'<div class="lc3d__stage">{"".join(items)}</div>'
+        f'<button type="button" class="lc3d__next" aria-label="Liga siguiente"><span aria-hidden="true">›</span></button>'
+        f'</div>'
     )
     script = (
-        '<script src="/static/home_league_carousel.js?v=9" defer></script>'
+        '<script src="/static/home_lc3d.js?v=2" defer></script>'
         if include_script
         else ""
     )
@@ -793,7 +794,11 @@ def home_page(request: Request) -> str:
             {"<div class=\"premium-badge\">⭐ Premium activo</div>" if user_premium else '<button type="button" class="btn-primary" onclick="openPremium();">Obtener Premium</button>'}
           </div>
         </div>
-        <div class="hero-art"></div>
+        <div class="hero-art">
+          <div class="hero-art__frame">
+            <img class="hero-art__img" src="/static/hero/hero-aftr.png" alt="" draggable="false" />
+          </div>
+        </div>
       </section>
       {live_section_html}
 
