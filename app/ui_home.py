@@ -796,7 +796,7 @@ def home_page(request: Request) -> str:
         </div>
         <div class="hero-art">
           <div class="hero-art__frame">
-            <img class="hero-art__img" src="/static/hero/hero-aftr.png" alt="" draggable="false" />
+            <img class="hero-art__img" src="/static/hero/hero-aftr-bg.png" alt="" draggable="false" loading="eager" />
           </div>
         </div>
       </section>

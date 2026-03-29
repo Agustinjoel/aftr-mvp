@@ -1603,20 +1603,54 @@ body{
   cursor: pointer;
   display: inline-block;
 }
+/* ── Hero art — imagen 3D flotante ─────────────────────────── */
 .hero-art{
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 420px;
+}
+/* Glow vía pseudo-element: nunca dentro del frame para evitar conflictos de stacking context */
+.hero-art::before{
+  content: "";
+  position: absolute;
+  inset: 8% 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at 55% 50%,
+    rgba(56,189,248,0.42) 0%,
+    rgba(139,92,246,0.16) 52%,
+    transparent 72%
+  );
+  filter: blur(60px);
+  animation: hero-glow-pulse 4s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.hero-art__frame{
+  position: relative;
+  z-index: 1;
+  width: 380px;
   height: 380px;
-  background:
-    radial-gradient(
-      circle at center,
-      rgba(0,229,255,0.15),
-      transparent 60%
-    ),
-    url("/static/hero/hero-aftr-bg.png");
-  background-size: cover, contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  filter: drop-shadow(0 0 40px rgba(0,229,255,0.25));
+  animation: hero-float 6s ease-in-out infinite;
+}
+.hero-art__img{
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 40px rgba(56,189,248,0.65))
+    drop-shadow(0 0 80px rgba(139,92,246,0.40))
+    drop-shadow(0 22px 48px rgba(0,0,0,0.70));
+}
+@keyframes hero-float{
+  0%,100%{ transform: perspective(900px) rotateY(-18deg) rotateX(6deg) translateY(0px); }
+  50%     { transform: perspective(900px) rotateY(-12deg) rotateX(3deg) translateY(-14px); }
+}
+@keyframes hero-glow-pulse{
+  0%  { opacity: 0.58; }
+  100%{ opacity: 0.95; }
 }
 @media (max-width: 900px){
   .hero{
@@ -1626,7 +1660,16 @@ body{
   }
   .hero-art{
     order: 1;
-    height: 320px;
+    height: 300px;
+  }
+  .hero-art__frame{
+    width: 270px;
+    height: 270px;
+    animation: hero-float-sm 6s ease-in-out infinite;
+  }
+  @keyframes hero-float-sm{
+    0%,100%{ transform: perspective(800px) rotateY(-10deg) rotateX(4deg) translateY(0px); }
+    50%     { transform: perspective(800px) rotateY(-6deg) rotateX(2deg) translateY(-10px); }
   }
   .hero-copy{ order: 0; }
   .hero::after{
@@ -4032,7 +4075,7 @@ canvas{
 .league-carousel__viewport{
   flex: 1 1 auto;
   min-width: 0;
-  height: 164px;
+  height: 185px;
   overflow-x: scroll;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
@@ -4048,7 +4091,7 @@ canvas{
   display: flex;
   flex-direction: row;
   align-items: center;
-  min-height: 0;
+  height: 100%;
 }
 
 /* No-JS fallback: plain horizontal scroll */
@@ -4081,38 +4124,55 @@ canvas{
   flex: 0 0 auto;
   position: relative;
   scroll-snap-align: center;
+  will-change: transform, opacity;
   transition:
-    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity   0.28s ease,
-    filter    0.28s ease;
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity   0.38s ease,
+    filter    0.38s ease;
 }
 
-/* Distance classes — clean 2D scale + fade */
+/* Distance classes — scale depth + tilt suave (sin rotateY extremo que hace items invisibles) */
 .league-carousel--ready .league-carousel__item--d0{
-  transform: scale(1);
+  transform: scale(1.14);
   opacity: 1;
   filter: none;
   z-index: 10;
+  animation: carousel-item-float 3.8s ease-in-out infinite;
 }
-.league-carousel--ready .league-carousel__item--dn1,
-.league-carousel--ready .league-carousel__item--dp1{
-  transform: scale(0.84);
-  opacity: 0.55;
-  filter: blur(0.4px);
+.league-carousel--ready .league-carousel__item--dn1{
+  transform: perspective(900px) rotateY(16deg) scale(0.86);
+  opacity: 0.70;
+  filter: none;
   z-index: 5;
 }
-.league-carousel--ready .league-carousel__item--dn2,
+.league-carousel--ready .league-carousel__item--dp1{
+  transform: perspective(900px) rotateY(-16deg) scale(0.86);
+  opacity: 0.70;
+  filter: none;
+  z-index: 5;
+}
+.league-carousel--ready .league-carousel__item--dn2{
+  transform: perspective(900px) rotateY(26deg) scale(0.70);
+  opacity: 0.40;
+  filter: blur(0.5px);
+  z-index: 2;
+}
 .league-carousel--ready .league-carousel__item--dp2{
-  transform: scale(0.7);
-  opacity: 0.3;
-  filter: blur(1.2px);
+  transform: perspective(900px) rotateY(-26deg) scale(0.70);
+  opacity: 0.40;
+  filter: blur(0.5px);
   z-index: 2;
 }
 .league-carousel--ready .league-carousel__item--far{
-  transform: scale(0.58);
-  opacity: 0.1;
-  filter: blur(2px);
+  transform: perspective(900px) rotateY(35deg) scale(0.55);
+  opacity: 0.18;
+  filter: blur(1px);
   pointer-events: none;
+}
+
+@keyframes carousel-item-float{
+  0%,100%{ transform: scale(1.14) translateY(0); }
+  50%     { transform: scale(1.14) translateY(-5px); }
 }
 
 .league-carousel__card{
@@ -4130,24 +4190,37 @@ canvas{
   transition: border-color var(--lc-dur) var(--lc-ease), box-shadow var(--lc-dur) var(--lc-ease);
 }
 .league-carousel__item--d0 .league-carousel__card{
-  border-color: rgba(120,180,255,.42);
+  border-color: rgba(120,200,255,.65);
+  background: linear-gradient(165deg, rgba(56,189,248,.18), rgba(139,92,246,.10));
   box-shadow:
-    0 12px 40px rgba(0,0,0,.45),
-    0 0 0 1px rgba(120,180,255,.2),
-    0 0 32px rgba(56,189,248,.22);
+    0 16px 48px rgba(0,0,0,.55),
+    0 0 0 1px rgba(120,200,255,.35),
+    0 0 40px rgba(56,189,248,.35),
+    inset 0 1px 0 rgba(255,255,255,.18);
 }
 
 .league-carousel__glow{
   position: absolute;
-  inset: -6px;
-  border-radius: 22px;
+  inset: -12px;
+  border-radius: 26px;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(ellipse at 50% 40%, rgba(96,165,250,.35), transparent 65%);
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(56,189,248,.55) 0%,
+    rgba(139,92,246,.25) 50%,
+    transparent 72%
+  );
+  filter: blur(12px);
   transition: opacity var(--lc-dur) var(--lc-ease);
 }
 .league-carousel__item--d0 .league-carousel__glow{
   opacity: 1;
+  animation: carousel-glow-pulse 2.8s ease-in-out infinite alternate;
+}
+@keyframes carousel-glow-pulse{
+  0%  { opacity: 0.75; }
+  100%{ opacity: 1; filter: blur(16px); }
 }
 
 .league-carousel__logo{
@@ -4205,10 +4278,19 @@ canvas{
 @media (prefers-reduced-motion: reduce){
   .league-carousel__item{
     transition-duration: 0.01ms;
+    animation: none !important;
   }
   .league-carousel__glow,
   .league-carousel__card{
     transition-duration: 0.01ms;
+    animation: none !important;
+  }
+  .hero-art__frame{
+    animation: none !important;
+    transform: perspective(900px) rotateY(-18deg) rotateX(6deg);
+  }
+  .hero-art__glow{
+    animation: none !important;
   }
 }
 
@@ -4732,4 +4814,198 @@ canvas{
     background: rgba(255,255,255,.07);
   }
   .card-stagger{ animation: none; }
+}
+
+/* ==============================================
+   LC3D — Home carousel 3D coverflow
+   Perspectiva compartida en el stage; JS posiciona
+   cada item via transform (no scroll-snap).
+============================================== */
+.lc3d{
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 10px 8px 18px;
+  background: linear-gradient(180deg, rgba(10,14,26,.95) 0%, rgba(8,12,20,.55) 100%);
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 20px 60px rgba(0,0,0,.40);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.home-carousel-strip .lc3d{
+  max-width: 100%;
+}
+
+/* Arrows */
+.lc3d__prev,
+.lc3d__next{
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: rgba(234,242,255,.9);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s ease, border-color .2s ease;
+  flex-shrink: 0;
+}
+.lc3d__prev:hover,
+.lc3d__next:hover{
+  background: rgba(56,189,248,.14);
+  border-color: rgba(56,189,248,.40);
+}
+
+/* Stage — perspectiva compartida para verdadero 3D */
+.lc3d__stage{
+  flex: 1 1 auto;
+  position: relative;
+  height: 178px;
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+  overflow: hidden;
+}
+/* Spotlight detrás del item activo */
+.lc3d__stage::before{
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56,189,248,.10) 0%, transparent 72%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Items — absolute centrados; JS mueve con transform */
+.lc3d__item{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -52px;   /* -half(104px card width) */
+  margin-top:  -54px;   /* -half(108px card height) */
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  /* Transition-property y timing en CSS; duración la pone el JS */
+  transition-property: transform, opacity, filter;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1), ease, ease;
+  transition-duration: 0s;
+}
+
+/* Card visual */
+.lc3d__card{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: linear-gradient(165deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  width: 104px;
+  position: relative;
+  transition: border-color .45s ease, box-shadow .45s ease, background .45s ease;
+}
+.lc3d__item--active .lc3d__card{
+  border-color: rgba(56,189,248,.70);
+  background: linear-gradient(165deg, rgba(56,189,248,.20), rgba(139,92,246,.10));
+  box-shadow:
+    0 18px 52px rgba(0,0,0,.55),
+    0 0 0 1px rgba(56,189,248,.30),
+    0 0 44px rgba(56,189,248,.32),
+    inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+/* Glow tras la card activa */
+.lc3d__glow{
+  position: absolute;
+  inset: -14px;
+  border-radius: 26px;
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(56,189,248,.55) 0%,
+    rgba(139,92,246,.25) 52%,
+    transparent 74%
+  );
+  filter: blur(16px);
+  opacity: 0;
+  transition: opacity .45s ease;
+  pointer-events: none;
+}
+.lc3d__item--active .lc3d__glow{
+  opacity: 1;
+  animation: lc3d-glow-pulse 2.6s ease-in-out infinite alternate;
+}
+@keyframes lc3d-glow-pulse{
+  0%  { opacity: 0.72; filter: blur(14px); }
+  100%{ opacity: 1;    filter: blur(20px); }
+}
+
+/* Logo */
+.lc3d__logo{
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 10px;
+  display: block;
+}
+.lc3d__logo-fallback{
+  display: none;
+  width: 56px;
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(255,255,255,.08);
+  font-size: 22px;
+  font-weight: 900;
+  color: rgba(234,242,255,.85);
+}
+.lc3d__name{
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .03em;
+  text-align: center;
+  color: rgba(234,242,255,.82);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+  line-height: 1.2;
+}
+.lc3d__item--active .lc3d__name{
+  color: rgba(234,242,255,.98);
+}
+
+/* reduced-motion */
+@media (prefers-reduced-motion: reduce){
+  .lc3d__item{ transition: none !important; }
+  .hero-art__frame{ animation: none !important; transform: perspective(900px) rotateY(-18deg) rotateX(6deg); }
+  .hero-art::before{ animation: none !important; }
+  .lc3d__item--active .lc3d__glow{ animation: none !important; }
+}
+
+/* Mobile */
+@media (max-width: 520px){
+  .lc3d__prev,.lc3d__next{ width: 32px; height: 32px; font-size: 17px; }
+  .lc3d__stage{ height: 160px; }
+  .lc3d__card{ width: 90px; padding: 12px 12px 10px; }
+  .lc3d__logo,.lc3d__logo-fallback{ width: 48px; height: 48px; }
+  .lc3d__item{ margin-left: -45px; margin-top: -48px; }
 }
