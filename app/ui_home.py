@@ -812,8 +812,17 @@ def home_page(request: Request) -> str:
 
       <section class="home-section">
       <h2 class="home-h2">Combos de Hoy</h2>
-      <div class="home-combos-grid">
-        {combos_section_html}
+      <div class="combos-car" data-combos-carousel>
+        <div class="combos-car__viewport">
+          <div class="combos-car__track">
+            {combos_section_html}
+          </div>
+        </div>
+        <div class="combos-car__controls">
+          <button type="button" class="combos-car__btn combos-car__btn--prev" aria-label="Combo anterior">&#8249;</button>
+          <div class="combos-car__dots"></div>
+          <button type="button" class="combos-car__btn combos-car__btn--next" aria-label="Siguiente combo">&#8250;</button>
+        </div>
       </div>
       </section>
 
