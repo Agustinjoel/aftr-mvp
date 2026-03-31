@@ -95,11 +95,14 @@ a:hover{ filter: brightness(1.1); text-decoration: underline; }
    LAYOUT
 ========================= */
 .page{
-  max-width: 1120px;
+  max-width: 1140px;
   margin: 0 auto;
-  padding: 18px 14px 28px;
+  padding: 20px 28px 40px;
   width: 100%;
   box-sizing: border-box;
+}
+@media (max-width: 640px){
+  .page{ padding: 16px 14px 32px; }
 }
 
 h2{
@@ -1820,14 +1823,24 @@ body{
 ========================= */
 .home-bigmatch-grid{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
 }
 .home-bigmatch-card{
   display: block;
-  padding: 16px;
+  padding: 18px 20px;
   text-decoration: none;
   color: inherit;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: linear-gradient(145deg, rgba(255,255,255,.05), rgba(0,0,0,.10));
+  transition: transform .22s var(--ease-out), box-shadow .22s var(--ease-out), border-color .22s ease;
+}
+.home-bigmatch-card:hover{
+  transform: translateY(-4px);
+  border-color: rgba(56,189,248,.28);
+  box-shadow: 0 14px 40px rgba(0,0,0,.40), 0 0 24px rgba(56,189,248,.10);
+  text-decoration: none;
 }
 .home-bigmatch-league{
   font-size: 11px;
@@ -1860,15 +1873,39 @@ body{
    HOME — SECTIONS (spacing + hierarchy)
 ========================= */
 .home-section{
-  margin-bottom: 52px;
+  margin-bottom: 56px;
+  position: relative;
+}
+.home-section + .home-section::before{
+  content: "";
+  display: block;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.07) 30%, rgba(255,255,255,.07) 70%, transparent);
+  margin-bottom: 56px;
+  margin-top: -28px;
 }
 .home-section:last-of-type{ margin-bottom: 40px; }
+
+/* Heading con barra acento cyan/violeta */
 .home-h2{
-  margin: 0 0 20px;
+  margin: 0 0 22px;
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -.025em;
+  position: relative;
+  padding-left: 18px;
   color: var(--text);
+}
+.home-h2::before{
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #38bdf8 0%, #818cf8 100%);
+  box-shadow: 0 0 12px rgba(56,189,248,.55);
 }
 .home-card{ padding: 20px 22px; }
 .home-spark-wrap{ margin-top: 10px; }
@@ -1882,10 +1919,15 @@ body{
   position: relative;
   user-select: none;
   -webkit-user-select: none;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .combos-car__viewport{
   overflow: hidden;
   border-radius: 18px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, black 5%, black 95%, transparent 100%);
 }
 .combos-car__track{
   display: flex;
@@ -1937,16 +1979,17 @@ body{
 .combos-car__dot{
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: 999px;
   border: none;
-  background: rgba(255,255,255,.22);
+  background: rgba(255,255,255,.20);
   cursor: pointer;
   padding: 0;
-  transition: background .25s, transform .25s;
+  transition: background .3s ease, width .3s ease, box-shadow .3s ease;
 }
 .combos-car__dot.active{
-  background: rgba(56,189,248,.95);
-  transform: scale(1.35);
+  width: 24px;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  box-shadow: 0 0 10px rgba(56,189,248,.50);
 }
 
 /* Legacy grid (kept for backward compat, overridden by carousel) */
@@ -1967,7 +2010,22 @@ body{
   }
 }
 .home-premium-combo-card{
-  padding: 14px 16px;
+  padding: 20px 20px 18px;
+  border-radius: 20px !important;
+  border-left-width: 3px !important;
+}
+/* Borde izquierdo de color por tier */
+.home-premium-combo-card:has(.home-combo-tier--seguro){
+  border-left-color: rgba(34,197,94,.55) !important;
+  box-shadow: var(--shadow-soft), inset 3px 0 20px rgba(34,197,94,.05) !important;
+}
+.home-premium-combo-card:has(.home-combo-tier--balanceado){
+  border-left-color: rgba(234,179,8,.55) !important;
+  box-shadow: var(--shadow-soft), inset 3px 0 20px rgba(234,179,8,.05) !important;
+}
+.home-premium-combo-card:has(.home-combo-tier--value){
+  border-left-color: rgba(239,68,68,.55) !important;
+  box-shadow: var(--shadow-soft), inset 3px 0 20px rgba(239,68,68,.05) !important;
 }
 .home-combo-desc{
   font-size: 12.5px;

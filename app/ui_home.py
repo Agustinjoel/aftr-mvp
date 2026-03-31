@@ -10,7 +10,7 @@ from typing import Any
 from fastapi import Request
 
 from config.settings import settings
-from data.cache import read_json, read_json_with_fallback, read_cache_meta
+from data.cache import read_json, read_json_with_fallback, read_cache_meta, write_json
 from data.providers.football_data import get_unsupported_leagues
 from app.routes.matches import group_matches_by_day
 from app.timefmt import AFTR_DISPLAY_TZ, format_match_kickoff_ar, parse_utc_instant
@@ -168,8 +168,10 @@ def home_page(request: Request) -> str:
         # broken cookie: uid not in DB; treat as logged out (middleware clears cookie)
         uid, user = None, None
     auth_param = (request.query_params.get("auth") or "").strip().lower()
+    msg_param = (request.query_params.get("msg") or "").strip().lower()
     signup_modal_style = "display:flex" if auth_param == "register" else "display:none"
     login_modal_style = "display:flex" if auth_param == "login" else "display:none"
+    login_err_html = '<p style="color:#ef4444;font-size:13px;margin:8px 0 0;">Email o contraseña incorrectos.</p>' if msg_param == "login_fail" else ""
     auth_html = ""
     if user:
         display_name = html_lib.escape((user.get("username") or user.get("email") or ""))
@@ -753,6 +755,7 @@ def home_page(request: Request) -> str:
             <form action="/auth/login" method="post" enctype="application/x-www-form-urlencoded">
               <input type="email" name="email" required autocomplete="username" inputmode="email">
               <input type="password" name="password" required autocomplete="current-password">
+              {login_err_html}
               <button type="submit">Entrar</button>
             </form>
             <div class="modal-line" style="margin-top: 12px;">

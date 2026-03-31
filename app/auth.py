@@ -335,10 +335,10 @@ def login(request: Request, email: str = Form(...), password: str = Form(...)):
 
     if not email_normalized:
         logger.info("login: empty email, redirecting login_fail")
-        return RedirectResponse(url="/?msg=login_fail", status_code=302)
+        return RedirectResponse(url="/?auth=login&msg=login_fail", status_code=302)
     if _password_too_long(password or ""):
         logger.info("login: password too long, redirecting login_fail")
-        return RedirectResponse(url="/?msg=login_fail", status_code=302)
+        return RedirectResponse(url="/?auth=login&msg=login_fail", status_code=302)
 
     row = get_user_by_email(email_normalized)
     logger.info("login DEBUG: user lookup by email only, found=%s", bool(row))
@@ -348,7 +348,7 @@ def login(request: Request, email: str = Form(...), password: str = Form(...)):
 
     if not row:
         logger.info("login: no user found for email=%r, redirecting login_fail", email_normalized)
-        return RedirectResponse(url="/?msg=login_fail", status_code=302)
+        return RedirectResponse(url="/?auth=login&msg=login_fail", status_code=302)
 
     has_hash = "password_hash" in row and bool(row["password_hash"])
     logger.info("login DEBUG: password_hash column present=%s", has_hash)
@@ -366,7 +366,7 @@ def login(request: Request, email: str = Form(...), password: str = Form(...)):
 
     if not verify_ok:
         logger.info("login: password verification failed, redirecting login_fail (branch=fail)")
-        return RedirectResponse(url="/?msg=login_fail", status_code=302)
+        return RedirectResponse(url="/?auth=login&msg=login_fail", status_code=302)
 
     uid = int(row["id"])
     logger.info("login: set_session with uid=row[id]=%s (no reuse of any other uid)", uid)
