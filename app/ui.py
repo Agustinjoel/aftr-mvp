@@ -425,17 +425,26 @@ def admin_picks_debug(request: Request):
         """)
         no_match = [dict(r) for r in cur.fetchall()]
         cur.execute("""
-            SELECT p.league, p.match_id, p.result, p.best_fair, m."utcDate", m.home, m.away
+            SELECT p.league, p.match_id, p.result, p.best_market, p.best_fair,
+                   m."utcDate", m.status, m.home_goals, m.away_goals, m.home, m.away
             FROM picks p
             LEFT JOIN matches m ON m.league=p.league AND m.match_id=p.match_id
             LIMIT 10
         """)
         sample = [dict(r) for r in cur.fetchall()]
+        cur.execute("""
+            SELECT m.status, COUNT(*) AS n
+            FROM picks p
+            JOIN matches m ON m.league=p.league AND m.match_id=p.match_id
+            GROUP BY m.status ORDER BY n DESC
+        """)
+        matches_status = [dict(r) for r in cur.fetchall()]
         return _JSONResponse({
             "total_picks": total_picks,
             "total_matches": total_matches,
             "picks_by_result": by_result,
             "picks_without_match": no_match,
+            "matches_status_for_picks": matches_status,
             "sample_10": sample,
         })
     finally:
