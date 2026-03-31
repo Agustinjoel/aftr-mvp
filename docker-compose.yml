@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aftr
+      POSTGRES_USER: aftr
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aftrdev}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aftr -d aftr"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://aftr:${POSTGRES_PASSWORD:-aftrdev}@db:5432/aftr
+      AFTR_CACHE_DIR: /data/cache
+      AFTR_SECRET_KEY: ${AFTR_SECRET_KEY:-dev-secret-change-me}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8000}
+      AUTO_REFRESH: ${AUTO_REFRESH:-true}
+      FOOTBALL_DATA_API_KEY: ${FOOTBALL_DATA_API_KEY:-}
+      API_SPORTS_KEY: ${API_SPORTS_KEY:-}
+      ODDS_API_KEY: ${ODDS_API_KEY:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_PRICE_ID: ${STRIPE_PRICE_ID:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    volumes:
+      - appdata:/data
+    ports:
+      - "8000:8000"
+
+volumes:
+  pgdata:
+  appdata:

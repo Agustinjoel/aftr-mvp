@@ -1,5 +1,7 @@
-import sqlite3
+import threading
 from typing import Iterable
+
+import psycopg2.extras
 
 from fastapi import APIRouter, Query
 
@@ -8,6 +10,27 @@ from data.cache import read_json
 
 
 router = APIRouter()
+
+# Cache de schema de la tabla picks (nunca cambia en runtime sin reinicio)
+_picks_columns_cache: set[str] | None = None
+_picks_columns_lock = threading.Lock()
+
+
+def _get_picks_columns(conn) -> set[str]:
+    global _picks_columns_cache
+    if _picks_columns_cache is not None:
+        return _picks_columns_cache
+    with _picks_columns_lock:
+        if _picks_columns_cache is not None:
+            return _picks_columns_cache
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT column_name FROM information_schema.columns "
+            "WHERE table_name = 'picks' AND table_schema = 'public'"
+        )
+        rows = cur.fetchall()
+        _picks_columns_cache = {row["column_name"] for row in rows} if rows else set()
+        return _picks_columns_cache
 
 
 # =========================
@@ -96,40 +119,41 @@ def _safe_odds(fair: float | None, prob: float | None) -> float | None:
     return None
 
 
-def _read_pick_rows(league: str, db_path: str | None = None) -> tuple[list[sqlite3.Row], str]:
+def _read_pick_rows(league: str, db_path: str | None = None) -> tuple[list, str]:
     """
-    Returns rows + source tag. Uses settings.db_path (AFTR persistent DB) when db_path not given.
-    source: sqlite | json
+    Returns rows + source tag from PostgreSQL.
+    source: pg | json
     """
-    path = db_path or settings.db_path
+    import psycopg2
+    from config.settings import DATABASE_URL
     try:
-        with sqlite3.connect(path) as conn:
-            conn.row_factory = sqlite3.Row
-            table_info = conn.execute("PRAGMA table_info(picks)").fetchall()
-            if not table_info:
+        conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
+        try:
+            cols = _get_picks_columns(conn)
+            if not cols:
                 return [], "json"
-
-            cols = {row["name"] for row in table_info}
+            cur = conn.cursor()
             if "result" in cols:
-                rows = conn.execute(
-                    "SELECT result, best_fair, best_prob FROM picks WHERE league = ?",
+                cur.execute(
+                    "SELECT result, best_fair, best_prob FROM picks WHERE league = %s",
                     (league,),
-                ).fetchall()
-                return rows, "sqlite"
-
+                )
+                return cur.fetchall(), "pg"
             if "status" in cols:
-                rows = conn.execute(
-                    "SELECT status AS result, fair AS best_fair, prob AS best_prob FROM picks WHERE league = ?",
+                cur.execute(
+                    "SELECT status AS result, fair AS best_fair, prob AS best_prob FROM picks WHERE league = %s",
                     (league,),
-                ).fetchall()
-                return rows, "sqlite"
-    except sqlite3.Error:
+                )
+                return cur.fetchall(), "pg"
+        finally:
+            conn.close()
+    except psycopg2.Error:
         pass
 
     return [], "json"
 
 
-def _compute_metrics(rows: Iterable[sqlite3.Row]) -> dict[str, float | int]:
+def _compute_metrics(rows: Iterable) -> dict[str, float | int]:
     total_picks = wins = losses = push = pending = 0
     net_units = 0.0
 

@@ -27,7 +27,7 @@ def compute_team_form(team_id: int, matches: list[dict]) -> TeamForm:
             n += 1
         elif aid == team_id:
             gf += ag
-            ga += ag
+            ga += hg  # FIX: goals against for away team = home team's goals
             n += 1
 
     if n == 0:
@@ -87,26 +87,52 @@ def compute_team_form_split(team_id: int, matches: list[dict], mode: str) -> Tea
 
     return TeamForm(gf / wsum, ga / wsum, n)
 
-def estimate_xg_dynamic_split(home_id: int, away_id: int, home_matches: list[dict], away_matches: list[dict]) -> tuple[float, float]:
+def _blend_weight(n: int, min_w: float = 0.45, max_w: float = 0.85, scale: int = 8) -> float:
     """
-    xG con split real:
-    home usa sus stats jugando de local
-    away usa sus stats jugando de visitante
+    Peso para los datos de forma según tamaño de muestra.
+    Con n=0 → min_w, con n>=scale → max_w. Crece linealmente entre ambos.
+    Evita confiar mucho en pocos partidos y confiar poco en muchos.
     """
-    home_home = compute_team_form_split(home_id, home_matches, "home")
-    home_def = compute_team_form_split(home_id, home_matches, "home")  # mismo set, pero ga_avg sirve de defensa
-    away_away = compute_team_form_split(away_id, away_matches, "away")
-    away_def = compute_team_form_split(away_id, away_matches, "away")
+    if n <= 0:
+        return min_w
+    return min(max_w, min_w + (max_w - min_w) * (n / scale))
 
-    if home_home.n == 0 or away_away.n == 0:
+
+def estimate_xg_dynamic_split(
+    home_id: int,
+    away_id: int,
+    home_matches: list[dict],
+    away_matches: list[dict],
+) -> tuple[float, float]:
+    """
+    xG con split home/away real:
+    - home_home.gf_avg: goles que el local hace jugando en casa
+    - home_home.ga_avg: goles que el local recibe jugando en casa (su defensa local)
+    - away_away.gf_avg: goles que el visitante hace jugando afuera
+    - away_away.ga_avg: goles que el visitante recibe jugando afuera (su defensa visitante)
+
+    xG home = promedio entre (ataque del local en casa) y (defensa del visitante afuera)
+    xG away = promedio entre (ataque del visitante afuera) y (defensa del local en casa)
+
+    El blend con el default se ajusta por tamaño de muestra:
+    más partidos → más peso a los datos reales, menos al default global.
+    """
+    home_stats = compute_team_form_split(home_id, home_matches, "home")
+    away_stats = compute_team_form_split(away_id, away_matches, "away")
+
+    if home_stats.n == 0 or away_stats.n == 0:
         return settings.default_xg_home, settings.default_xg_away
 
-    raw_home = (home_home.gf_avg + away_def.ga_avg) / 2.0
-    raw_away = (away_away.gf_avg + home_def.ga_avg) / 2.0
+    raw_home = (home_stats.gf_avg + away_stats.ga_avg) / 2.0
+    raw_away = (away_stats.gf_avg + home_stats.ga_avg) / 2.0
 
-    # blend para estabilizar
-    xg_home = raw_home * 0.75 + settings.default_xg_home * 0.25
-    xg_away = raw_away * 0.75 + settings.default_xg_away * 0.25
+    # Blend adaptativo: más muestra → más confianza en los datos reales
+    min_n = min(home_stats.n, away_stats.n)
+    form_w = _blend_weight(min_n)
+    default_w = 1.0 - form_w
+
+    xg_home = raw_home * form_w + settings.default_xg_home * default_w
+    xg_away = raw_away * form_w + settings.default_xg_away * default_w
 
     xg_home = max(0.2, min(3.5, xg_home))
     xg_away = max(0.2, min(3.5, xg_away))

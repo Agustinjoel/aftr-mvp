@@ -7,7 +7,7 @@ from fastapi import APIRouter, Request, Query
 from fastapi.responses import RedirectResponse, JSONResponse
 
 from app.auth import get_user_id, get_user_by_id
-from app.db import get_conn
+from app.db import get_conn, put_conn
 from config.settings import settings
 
 router = APIRouter()
@@ -38,34 +38,36 @@ def manual_activate(request: Request, plan: str = Query("PREMIUM")):
     now_iso = now.isoformat()
     exp_iso = exp.isoformat()
     conn = get_conn()
-    cur = conn.cursor()
-    cur.execute(
-        """
-      INSERT INTO subscriptions(user_id, plan, expires_at, created_at)
-      VALUES (?,?,?,?)
-      ON CONFLICT(user_id) DO UPDATE SET
-        plan=excluded.plan,
-        expires_at=excluded.expires_at
-    """,
-        (uid, plan, exp_iso, now_iso),
-    )
     try:
+        cur = conn.cursor()
         cur.execute(
             """
-          UPDATE users SET
-            role = 'premium_user',
-            subscription_status = 'active',
-            subscription_start = ?,
-            subscription_end = ?,
-            updated_at = ?
-          WHERE id = ?
+          INSERT INTO subscriptions(user_id, plan, expires_at, created_at)
+          VALUES (%s,%s,%s,%s)
+          ON CONFLICT(user_id) DO UPDATE SET
+            plan=EXCLUDED.plan,
+            expires_at=EXCLUDED.expires_at
         """,
-            (now_iso, exp_iso, now_iso, uid),
+            (uid, plan, exp_iso, now_iso),
         )
-    except Exception:
-        logger.exception("Error updating user premium flags in manual_activate")
-    conn.commit()
-    conn.close()
+        try:
+            cur.execute(
+                """
+              UPDATE users SET
+                role = 'premium_user',
+                subscription_status = 'active',
+                subscription_start = %s,
+                subscription_end = %s,
+                updated_at = %s
+              WHERE id = %s
+            """,
+                (now_iso, exp_iso, now_iso, uid),
+            )
+        except Exception:
+            logger.exception("Error updating user premium flags in manual_activate")
+        conn.commit()
+    finally:
+        put_conn(conn)
 
     return RedirectResponse(url="/?msg=premium_on", status_code=302)
 
@@ -210,36 +212,42 @@ def _apply_premium_to_user(uid_int: int, expires_at_iso: str, customer_id: str |
     now = datetime.now(timezone.utc)
     now_iso = now.isoformat()
     conn = get_conn()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        INSERT INTO subscriptions(user_id, plan, expires_at, created_at)
-        VALUES (?,?,?,?)
-        ON CONFLICT(user_id) DO UPDATE SET plan=excluded.plan, expires_at=excluded.expires_at
-        """,
-        (uid_int, "PREMIUM", expires_at_iso, now_iso),
-    )
-    updates = [
-        "role = 'premium_user'",
-        "subscription_status = 'active'",
-        "subscription_start = COALESCE(subscription_start, ?)",
-        "subscription_end = ?",
-        "updated_at = ?",
-    ]
-    args = [now_iso, expires_at_iso, now_iso]
-    if customer_id is not None:
-        updates.append("stripe_customer_id = COALESCE(stripe_customer_id, ?)")
-        args.append(customer_id)
-    if subscription_id is not None:
-        updates.append("stripe_subscription_id = COALESCE(stripe_subscription_id, ?)")
-        args.append(subscription_id)
-    args.append(uid_int)
-    cur.execute(
-        "UPDATE users SET " + ", ".join(updates) + " WHERE id = ?",
-        tuple(args),
-    )
-    conn.commit()
-    conn.close()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO subscriptions(user_id, plan, expires_at, created_at)
+            VALUES (%s,%s,%s,%s)
+            ON CONFLICT(user_id) DO UPDATE SET plan=EXCLUDED.plan, expires_at=EXCLUDED.expires_at
+            """,
+            (uid_int, "PREMIUM", expires_at_iso, now_iso),
+        )
+        updates = [
+            "role = 'premium_user'",
+            "subscription_status = 'active'",
+            "subscription_start = COALESCE(subscription_start, %s)",
+            "subscription_end = %s",
+            "updated_at = %s",
+        ]
+        args = [now_iso, expires_at_iso, now_iso]
+        if customer_id is not None:
+            updates.append("stripe_customer_id = COALESCE(stripe_customer_id, %s)")
+            args.append(customer_id)
+        if subscription_id is not None:
+            updates.append("stripe_subscription_id = COALESCE(stripe_subscription_id, %s)")
+            args.append(subscription_id)
+        args.append(uid_int)
+        cur.execute(
+            "UPDATE users SET " + ", ".join(updates) + " WHERE id = %s",
+            tuple(args),
+        )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        logger.exception("_apply_premium_to_user: transaction failed for uid=%s; rolled back", uid_int)
+        raise
+    finally:
+        put_conn(conn)
 
 
 def _revoke_premium_for_user(uid_int: int) -> None:
@@ -247,29 +255,37 @@ def _revoke_premium_for_user(uid_int: int) -> None:
     now = datetime.now(timezone.utc)
     now_iso = now.isoformat()
     conn = get_conn()
-    cur = conn.cursor()
-    cur.execute(
-        "UPDATE subscriptions SET plan = 'FREE', expires_at = ? WHERE user_id = ?",
-        (now_iso, uid_int),
-    )
-    cur.execute(
-        """
-        UPDATE users SET role = 'free_user', subscription_status = 'inactive', updated_at = ?
-        WHERE id = ?
-        """,
-        (now_iso, uid_int),
-    )
-    conn.commit()
-    conn.close()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE subscriptions SET plan = 'FREE', expires_at = %s WHERE user_id = %s",
+            (now_iso, uid_int),
+        )
+        cur.execute(
+            """
+            UPDATE users SET role = 'free_user', subscription_status = 'inactive', updated_at = %s
+            WHERE id = %s
+            """,
+            (now_iso, uid_int),
+        )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        logger.exception("_revoke_premium_for_user: transaction failed for uid=%s; rolled back", uid_int)
+        raise
+    finally:
+        put_conn(conn)
 
 
 def _uid_from_subscription_id(stripe_subscription_id: str) -> int | None:
     """Resolve user_id from users.stripe_subscription_id."""
     conn = get_conn()
-    cur = conn.cursor()
-    cur.execute("SELECT id FROM users WHERE stripe_subscription_id = ?", (stripe_subscription_id,))
-    row = cur.fetchone()
-    conn.close()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id FROM users WHERE stripe_subscription_id = %s", (stripe_subscription_id,))
+        row = cur.fetchone()
+    finally:
+        put_conn(conn)
     return int(row["id"]) if row else None
 
 

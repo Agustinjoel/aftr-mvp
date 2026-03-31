@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import collections
 import logging
+import threading
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -9,16 +12,36 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from itsdangerous import URLSafeSerializer, BadSignature
 from passlib.hash import bcrypt
 
-import sqlite3
 import secrets
 import hashlib as _hashlib
 
-from app.db import get_conn
+import psycopg2.errors
+
+from app.db import get_conn, put_conn
 from config.settings import settings
 from app.email_utils import send_email
 
 router = APIRouter()
 logger = logging.getLogger("aftr.auth")
+
+# --- Rate limiting (token-bucket, stdlib only) ---
+_rl_lock = threading.Lock()
+_rl_attempts: dict[str, collections.deque] = {}
+_RL_MAX_ATTEMPTS = 10
+_RL_WINDOW_SECONDS = 60
+
+
+def _rate_limit_check(ip: str) -> bool:
+    """Returns True if request is allowed, False if IP exceeded the limit."""
+    now = time.monotonic()
+    with _rl_lock:
+        bucket = _rl_attempts.setdefault(ip, collections.deque())
+        while bucket and bucket[0] < now - _RL_WINDOW_SECONDS:
+            bucket.popleft()
+        if len(bucket) >= _RL_MAX_ATTEMPTS:
+            return False
+        bucket.append(now)
+        return True
 
 _AFTR_SESSION_MAX_AGE = 60 * 60 * 24 * 30
 
@@ -80,8 +103,11 @@ def get_user_id(request: Request) -> Optional[int]:
             logger.warning("get_user_id: uid=%s not found in DB, treating as no session (caller should clear cookie)", uid)
             return None
         return uid
-    except (BadSignature, Exception) as e:
-        logger.warning("get_user_id: aftr_session cookie present but decode failed: %s", e)
+    except BadSignature as e:
+        logger.warning("get_user_id: invalid session signature: %s", e)
+        return None
+    except (TypeError, ValueError) as e:
+        logger.warning("get_user_id: session data malformed: %s", e)
         return None
 
 
@@ -93,7 +119,7 @@ def clear_session_if_invalid(request: Request, response) -> None:
     try:
         data = _ser().loads(raw)
         uid = int(data.get("uid"))
-    except Exception:
+    except (BadSignature, TypeError, ValueError):
         return
     if get_user_by_id(uid) is None:
         kw = _aftr_session_cookie_flags()
@@ -122,16 +148,15 @@ def create_user(email: str, username: str, password: str) -> int:
             """INSERT INTO users(
                 email, username, password_hash, role, subscription_status,
                 created_at, updated_at
-            ) VALUES (?,?,?,?,?,?,?)""",
+            ) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
             (email, username or None, pw_hash, "free_user", "inactive", now, now),
         )
-        uid = cur.lastrowid
+        uid_int = int(cur.fetchone()["id"])
         conn.commit()
-        uid_int = int(uid)
-        logger.info("create_user: INSERT done, lastrowid=%s (returning this uid)", uid_int)
+        logger.info("create_user: INSERT done, id=%s (returning this uid)", uid_int)
         return uid_int
     finally:
-        conn.close()
+        put_conn(conn)
 
 def clear_session(resp: RedirectResponse):
     kw = _aftr_session_cookie_flags()
@@ -149,42 +174,33 @@ def get_user_by_email(email: str) -> dict | None:
     if not email:
         return None
     conn = get_conn()
-    cur = conn.cursor()
     try:
-        cur.execute(
-            "SELECT * FROM users WHERE email = ?",
-            (email,),
-        )
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
         row = cur.fetchone()
     finally:
-        conn.close()
+        put_conn(conn)
     if not row:
         return None
-    return {k: row[k] for k in row.keys()}
+    return dict(row)
 
 
 def get_user_by_id(user_id: int) -> dict | None:
     conn = get_conn()
-    cur = conn.cursor()
     try:
+        cur = conn.cursor()
         cur.execute(
             """SELECT id, email, username, role, subscription_status,
                subscription_start, subscription_end, created_at, updated_at
-               FROM users WHERE id=?""",
+               FROM users WHERE id = %s""",
             (user_id,),
         )
-    except sqlite3.OperationalError:
-        cur.execute("SELECT id, email, created_at FROM users WHERE id=?", (user_id,))
-    row = cur.fetchone()
-    conn.close()
+        row = cur.fetchone()
+    finally:
+        put_conn(conn)
     if not row:
         return None
     user = dict(row)
-    if "username" not in user:
-        user["username"] = None
-    for key in ("role", "subscription_status", "subscription_start", "subscription_end", "updated_at"):
-        if key not in user:
-            user[key] = "free_user" if key == "role" else ("inactive" if key == "subscription_status" else None)
     from app.models import get_active_plan
     plan = get_active_plan(user_id)
     if plan and plan.upper() in ("PREMIUM", "PRO"):
@@ -202,8 +218,12 @@ def _password_too_long(password: str) -> bool:
     return len((password or "").encode("utf-8")) > BCRYPT_MAX_PASSWORD_BYTES
 
 @router.post("/auth/register")
-def register(payload: dict = Body(...)):
-    print("REGISTER PAYLOAD:", payload)
+def register(request: Request, payload: dict = Body(...)):
+    client_ip = request.client.host if request.client else "unknown"
+    if not _rate_limit_check(client_ip):
+        logger.warning("rate_limit: /auth/register blocked ip=%s", client_ip)
+        return JSONResponse({"ok": False, "error": "demasiados_intentos"}, status_code=429)
+    logger.debug("register: endpoint hit")
     try:
         email = (payload.get("email") or "").strip().lower()
         username = (payload.get("username") or "").strip()
@@ -224,14 +244,14 @@ def register(payload: dict = Body(...)):
         conn = get_conn()
         try:
             cur = conn.cursor()
-            cur.execute("SELECT id FROM users WHERE email=?", (email,))
+            cur.execute("SELECT id FROM users WHERE email = %s", (email,))
             if cur.fetchone():
                 return JSONResponse(content={"ok": False, "error": "email_ya_registrado"}, status_code=400)
-            cur.execute("SELECT id FROM users WHERE username=?", (username,))
+            cur.execute("SELECT id FROM users WHERE username = %s", (username,))
             if cur.fetchone():
                 return JSONResponse(content={"ok": False, "error": "username_ya_usado"}, status_code=400)
         finally:
-            conn.close()
+            put_conn(conn)
 
         uid = create_user(email, username, password)
         logger.info("register: create_user returned uid=%s, passing to set_session_on_response", uid)
@@ -239,16 +259,16 @@ def register(payload: dict = Body(...)):
         set_session_on_response(resp, uid)
         return resp
     except ValueError as e:
-        print("REGISTER ERROR:", e)
+        logger.warning("register: validation error: %s", e)
         return JSONResponse(
             status_code=400,
-            content={"ok": False, "error": "La contraseña es demasiado larga. Usa una más corta."},
+            content={"ok": False, "error": "La contraseña es demasiado larga. Usá una más corta."},
         )
-    except Exception as e:
-        print("REGISTER ERROR:", e)
+    except Exception:
+        logger.exception("register: unexpected error")
         return JSONResponse(
             status_code=500,
-            content={"ok": False, "error": str(e)},
+            content={"ok": False, "error": "Error interno del servidor."},
         )
 
 @router.post("/auth/signup")
@@ -285,15 +305,16 @@ def signup_lead(payload: dict = Body(...)):
             """INSERT INTO users(
                 email, username, password_hash, role, subscription_status,
                 created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id""",
             (email, username or None, pw_hash, "free_user", "inactive", now, now),
         )
-        new_uid = int(cur.lastrowid)
+        new_uid = int(cur.fetchone()["id"])
         conn.commit()
-    except sqlite3.IntegrityError:
+    except psycopg2.errors.UniqueViolation:
+        conn.rollback()
         return JSONResponse(content={"ok": False, "error": "email_ya_registrado"}, status_code=400)
     finally:
-        conn.close()
+        put_conn(conn)
 
     resp = JSONResponse(content={"ok": True})
     if new_uid is not None:
@@ -301,8 +322,12 @@ def signup_lead(payload: dict = Body(...)):
     return resp
 
 @router.post("/auth/login")
-def login(email: str = Form(...), password: str = Form(...)):
+def login(request: Request, email: str = Form(...), password: str = Form(...)):
     """Form login (browser). Looks up user by email only. Sets aftr_session cookie and redirects."""
+    client_ip = request.client.host if request.client else "unknown"
+    if not _rate_limit_check(client_ip):
+        logger.warning("rate_limit: /auth/login blocked ip=%s", client_ip)
+        return RedirectResponse(url="/?msg=demasiados_intentos", status_code=302)
     logger.info("LOGIN ENDPOINT HIT: method=POST path=/auth/login")
     # Temporary debug logs for POST /auth/login code path
     email_normalized = (email or "").strip().lower()
@@ -352,8 +377,12 @@ def login(email: str = Form(...), password: str = Form(...)):
 
 
 @router.post("/auth/login/json")
-def login_json(payload: dict = Body(...)):
+def login_json(request: Request, payload: dict = Body(...)):
     """JSON login (API/Android). Looks up user by email only. Sets aftr_session cookie and returns user info."""
+    client_ip = request.client.host if request.client else "unknown"
+    if not _rate_limit_check(client_ip):
+        logger.warning("rate_limit: /auth/login/json blocked ip=%s", client_ip)
+        return JSONResponse({"ok": False, "error": "demasiados_intentos"}, status_code=429)
     email_raw = payload.get("email") or ""
     email_normalized = email_raw.strip().lower()
     password = payload.get("password") or ""
@@ -435,13 +464,13 @@ def _create_reset_token(user_id: int) -> str:
         cur = conn.cursor()
         cur.execute(
             """INSERT INTO password_reset_tokens (token_hash, user_id, expires_at, created_at)
-               VALUES (?, ?, ?, ?)""",
+               VALUES (%s, %s, %s, %s)""",
             (_token_hash(token), user_id, expires.isoformat(), now.isoformat()),
         )
         conn.commit()
         return token
     finally:
-        conn.close()
+        put_conn(conn)
 
 def _consume_reset_token(token: str) -> Optional[int]:
     """Validate token, mark used, return user_id or None."""
@@ -453,7 +482,7 @@ def _consume_reset_token(token: str) -> Optional[int]:
         cur = conn.cursor()
         cur.execute(
             """SELECT user_id FROM password_reset_tokens
-               WHERE token_hash = ? AND used_at IS NULL AND expires_at > ?""",
+               WHERE token_hash = %s AND used_at IS NULL AND expires_at > %s""",
             (h, datetime.now(timezone.utc).isoformat()),
         )
         row = cur.fetchone()
@@ -461,17 +490,21 @@ def _consume_reset_token(token: str) -> Optional[int]:
             return None
         user_id = int(row["user_id"])
         cur.execute(
-            "UPDATE password_reset_tokens SET used_at = ? WHERE token_hash = ?",
+            "UPDATE password_reset_tokens SET used_at = %s WHERE token_hash = %s",
             (datetime.now(timezone.utc).isoformat(), h),
         )
         conn.commit()
         return user_id
     finally:
-        conn.close()
+        put_conn(conn)
 
 
 @router.post("/auth/forgot-password")
 def forgot_password(request: Request, payload: dict = Body(...)):
+    client_ip = request.client.host if request.client else "unknown"
+    if not _rate_limit_check(client_ip):
+        logger.warning("rate_limit: /auth/forgot-password blocked ip=%s", client_ip)
+        return JSONResponse({"ok": True, "message": "Si el email existe, recibirás instrucciones."})
     email = (payload.get("email") or "").strip().lower()
     if not _email_valid(email):
         return JSONResponse({"ok": False, "error": "email_invalido"}, status_code=400)
@@ -479,7 +512,7 @@ def forgot_password(request: Request, payload: dict = Body(...)):
     conn = get_conn()
     try:
         cur = conn.cursor()
-        cur.execute("SELECT id FROM users WHERE email = ?", (email,))
+        cur.execute("SELECT id FROM users WHERE email = %s", (email,))
         row = cur.fetchone()
         if row:
             user_id = int(row["id"])
@@ -506,7 +539,7 @@ def forgot_password(request: Request, payload: dict = Body(...)):
         # Always return success to avoid leaking whether the email exists
         return JSONResponse({"ok": True, "message": "Si el email existe, recibirás instrucciones."})
     finally:
-        conn.close()
+        put_conn(conn)
 
 
 @router.get("/auth/reset-password")
@@ -545,12 +578,12 @@ def reset_password_submit(payload: dict = Body(...)):
     try:
         cur = conn.cursor()
         cur.execute(
-            "UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?",
+            "UPDATE users SET password_hash = %s, updated_at = %s WHERE id = %s",
             (pw_hash, now, user_id),
         )
         conn.commit()
     finally:
-        conn.close()
+        put_conn(conn)
 
     resp = JSONResponse({"ok": True, "message": "Contraseña actualizada. Ya podés iniciar sesión."})
     return resp

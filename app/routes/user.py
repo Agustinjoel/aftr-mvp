@@ -11,7 +11,7 @@ from fastapi import APIRouter, Request, Body
 from fastapi.responses import JSONResponse
 
 from app.auth import get_user_id, get_user_by_id
-from app.db import get_conn
+from app.db import get_conn, put_conn
 from config.settings import settings
 from core.basketball_evaluation import evaluate_basketball_market
 from core.evaluation import evaluate_market
@@ -42,12 +42,12 @@ def _premium_until(user_id: int) -> str | None:
     try:
         cur = conn.cursor()
         cur.execute(
-            "SELECT expires_at FROM subscriptions WHERE user_id = ?",
+            "SELECT expires_at FROM subscriptions WHERE user_id = %s",
             (user_id,),
         )
         row = cur.fetchone()
     finally:
-        conn.close()
+        put_conn(conn)
     if not row:
         return None
     exp = row["expires_at"]
@@ -367,8 +367,11 @@ def _lookup_pick_record(
 
 
 def _user_picks_extra_columns(cur) -> set[str]:
-    cur.execute("PRAGMA table_info(user_picks)")
-    return {str(r[1]) for r in cur.fetchall()}
+    cur.execute(
+        "SELECT column_name FROM information_schema.columns "
+        "WHERE table_name = 'user_picks' AND table_schema = 'public'"
+    )
+    return {str(r["column_name"]) for r in cur.fetchall()}
 
 
 def _sync_followed_picks_for_user(uid: int) -> None:
@@ -383,7 +386,7 @@ def _sync_followed_picks_for_user(uid: int) -> None:
         has_settled = "settled_at" in cols
         has_status = "status" in cols
         cur.execute(
-            "SELECT pick_id, market, COALESCE(result, '') AS result FROM user_picks WHERE user_id = ?",
+            "SELECT pick_id, market, COALESCE(result, '') AS result FROM user_picks WHERE user_id = %s",
             (uid,),
         )
         for row in cur.fetchall():
@@ -422,41 +425,41 @@ def _sync_followed_picks_for_user(uid: int) -> None:
             if has_scores and has_settled:
                 if has_status:
                     cur.execute(
-                        """UPDATE user_picks SET result = ?, score_home = ?, score_away = ?, settled_at = ?, status = ?
-                           WHERE user_id = ? AND pick_id = ?""",
+                        """UPDATE user_picks SET result = %s, score_home = %s, score_away = %s, settled_at = %s, status = %s
+                           WHERE user_id = %s AND pick_id = %s""",
                         (r, hs, aa, settled_at, "SETTLED", uid, pick_id),
                     )
                 else:
                     cur.execute(
-                        """UPDATE user_picks SET result = ?, score_home = ?, score_away = ?, settled_at = ?
-                           WHERE user_id = ? AND pick_id = ?""",
+                        """UPDATE user_picks SET result = %s, score_home = %s, score_away = %s, settled_at = %s
+                           WHERE user_id = %s AND pick_id = %s""",
                         (r, hs, aa, settled_at, uid, pick_id),
                     )
             elif has_settled:
                 if has_status:
                     cur.execute(
-                        "UPDATE user_picks SET result = ?, settled_at = ?, status = ? WHERE user_id = ? AND pick_id = ?",
+                        "UPDATE user_picks SET result = %s, settled_at = %s, status = %s WHERE user_id = %s AND pick_id = %s",
                         (r, settled_at, "SETTLED", uid, pick_id),
                     )
                 else:
                     cur.execute(
-                        "UPDATE user_picks SET result = ?, settled_at = ? WHERE user_id = ? AND pick_id = ?",
+                        "UPDATE user_picks SET result = %s, settled_at = %s WHERE user_id = %s AND pick_id = %s",
                         (r, settled_at, uid, pick_id),
                     )
             else:
                 if has_status:
                     cur.execute(
-                        "UPDATE user_picks SET result = ?, status = ? WHERE user_id = ? AND pick_id = ?",
+                        "UPDATE user_picks SET result = %s, status = %s WHERE user_id = %s AND pick_id = %s",
                         (r, "SETTLED", uid, pick_id),
                     )
                 else:
                     cur.execute(
-                        "UPDATE user_picks SET result = ? WHERE user_id = ? AND pick_id = ?",
+                        "UPDATE user_picks SET result = %s WHERE user_id = %s AND pick_id = %s",
                         (r, uid, pick_id),
                     )
         conn.commit()
     finally:
-        conn.close()
+        put_conn(conn)
 
 
 def _resolved_row_for_favorite(
@@ -531,19 +534,19 @@ def user_stats(request: Request):
     try:
         cur = conn.cursor()
         cur.execute(
-            "SELECT COUNT(*) AS n FROM user_favorites WHERE user_id = ?",
+            "SELECT COUNT(*) AS n FROM user_favorites WHERE user_id = %s",
             (uid,),
         )
         favorites_count = cur.fetchone()["n"]
 
         cur.execute(
-            "SELECT COUNT(*) AS n FROM user_picks WHERE user_id = ?",
+            "SELECT COUNT(*) AS n FROM user_picks WHERE user_id = %s",
             (uid,),
         )
         followed_picks = cur.fetchone()["n"]
 
         cur.execute(
-            """SELECT result, COUNT(*) AS n FROM user_picks WHERE user_id = ?
+            """SELECT result, COUNT(*) AS n FROM user_picks WHERE user_id = %s
                GROUP BY COALESCE(result, 'PENDING')""",
             (uid,),
         )
@@ -553,7 +556,7 @@ def user_stats(request: Request):
         push = by_result.get("PUSH", 0)
         pending = by_result.get("PENDING", 0)
     finally:
-        conn.close()
+        put_conn(conn)
 
     settled = wins + losses + push
     roi = None
@@ -612,22 +615,23 @@ def user_favorite(request: Request, payload: dict = Body(...)):
     try:
         cur = conn.cursor()
         cur.execute(
-            """INSERT OR IGNORE INTO user_favorites
+            """INSERT INTO user_favorites
                (user_id, pick_id, created_at, market, aftr_score, tier, edge, home_team, away_team)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+               ON CONFLICT(user_id, pick_id) DO NOTHING""",
             (uid, pick_id, now, market, aftr_score, tier, edge, home_team, away_team),
         )
         cur.execute(
             """UPDATE user_favorites SET
-               market = COALESCE(?, market), aftr_score = COALESCE(?, aftr_score),
-               tier = COALESCE(?, tier), edge = COALESCE(?, edge),
-               home_team = COALESCE(?, home_team), away_team = COALESCE(?, away_team)
-               WHERE user_id = ? AND pick_id = ?""",
+               market = COALESCE(%s, market), aftr_score = COALESCE(%s, aftr_score),
+               tier = COALESCE(%s, tier), edge = COALESCE(%s, edge),
+               home_team = COALESCE(%s, home_team), away_team = COALESCE(%s, away_team)
+               WHERE user_id = %s AND pick_id = %s""",
             (market, aftr_score, tier, edge, home_team, away_team, uid, pick_id),
         )
         conn.commit()
     finally:
-        conn.close()
+        put_conn(conn)
     return JSONResponse({"ok": True, "pick_id": pick_id})
 
 
@@ -644,44 +648,21 @@ def user_favorites(request: Request):
         try:
             cur = conn.cursor()
 
-            def _table_columns(table: str) -> set[str]:
-                # Introspect columns so missing tables/columns never crash.
-                cur2 = conn.cursor()
-                cur2.execute(f"PRAGMA table_info({table})")
-                cols = cur2.fetchall()
-                # SQLite returns columns with "name" as the second field.
-                out = set()
-                for c in cols:
-                    try:
-                        out.add(str(c.get("name")))
-                    except Exception:
-                        out.add(str(c[1]))
-                return out
-
-            uf_cols = _table_columns("user_favorites")
-            up_cols = _table_columns("user_picks")
-
-            has_home_away_in_favs = "home_team" in uf_cols and "away_team" in uf_cols
-            has_home_away_in_picks = "home_team" in up_cols and "away_team" in up_cols
-
-            base_cols = ["pick_id", "created_at", "market", "aftr_score", "tier", "edge"]
-            select_cols = base_cols[:]
-            if has_home_away_in_favs:
-                select_cols += ["home_team", "away_team"]
-
-            sql = "SELECT " + ", ".join(select_cols) + " FROM user_favorites WHERE user_id = ? ORDER BY created_at DESC"
+            # PostgreSQL schema is always fully up-to-date (no legacy column guards needed)
+            base_cols = ["pick_id", "created_at", "market", "aftr_score", "tier", "edge", "home_team", "away_team"]
+            sql = "SELECT " + ", ".join(base_cols) + " FROM user_favorites WHERE user_id = %s ORDER BY created_at DESC"
             cur.execute(sql, (uid,))
             rows = cur.fetchall()
 
             for row in rows:
                 r = dict(row)
                 pick_id = r.get("pick_id")
-                home = r.get("home_team") if has_home_away_in_favs else None
-                away = r.get("away_team") if has_home_away_in_favs else None
+                home = r.get("home_team")
+                away = r.get("away_team")
 
-                if (home is None or away is None) and has_home_away_in_picks:
+                if home is None or away is None:
                     cur.execute(
-                        "SELECT home_team, away_team FROM user_picks WHERE user_id = ? AND pick_id = ? LIMIT 1",
+                        "SELECT home_team, away_team FROM user_picks WHERE user_id = %s AND pick_id = %s LIMIT 1",
                         (uid, pick_id),
                     )
                     rr = cur.fetchone()
@@ -706,7 +687,7 @@ def user_favorites(request: Request):
                     "final_score": fscore,
                 })
         finally:
-            conn.close()
+            put_conn(conn)
     except Exception:
         # Never crash the user panel.
         items = []
@@ -730,13 +711,13 @@ def user_unfavorite(request: Request, payload: dict = Body(...)):
     try:
         cur = conn.cursor()
         cur.execute(
-            "DELETE FROM user_favorites WHERE user_id = ? AND pick_id = ?",
+            "DELETE FROM user_favorites WHERE user_id = %s AND pick_id = %s",
             (uid, pick_id),
         )
         conn.commit()
         deleted = cur.rowcount
     finally:
-        conn.close()
+        put_conn(conn)
     return JSONResponse({"ok": True, "removed": deleted > 0, "pick_id": pick_id})
 
 
@@ -750,12 +731,12 @@ def user_followed_ids(request: Request):
     try:
         cur = conn.cursor()
         cur.execute(
-            "SELECT pick_id FROM user_picks WHERE user_id = ?",
+            "SELECT pick_id FROM user_picks WHERE user_id = %s",
             (uid,),
         )
         rows = cur.fetchall()
     finally:
-        conn.close()
+        put_conn(conn)
     pick_ids = [row["pick_id"] for row in rows]
     return JSONResponse({"ok": True, "pick_ids": pick_ids})
 
@@ -793,22 +774,23 @@ def user_follow_pick(request: Request, payload: dict = Body(...)):
     try:
         cur = conn.cursor()
         cur.execute(
-            """INSERT OR IGNORE INTO user_picks
+            """INSERT INTO user_picks
                (user_id, pick_id, action, result, created_at, market, aftr_score, tier, edge, home_team, away_team)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+               ON CONFLICT(user_id, pick_id) DO NOTHING""",
             (uid, pick_id, "follow", "PENDING", now, market, aftr_score, tier, edge, home_team, away_team),
         )
         cur.execute(
             """UPDATE user_picks SET
-               market = COALESCE(?, market), aftr_score = COALESCE(?, aftr_score),
-               tier = COALESCE(?, tier), edge = COALESCE(?, edge),
-               home_team = COALESCE(?, home_team), away_team = COALESCE(?, away_team)
-               WHERE user_id = ? AND pick_id = ?""",
+               market = COALESCE(%s, market), aftr_score = COALESCE(%s, aftr_score),
+               tier = COALESCE(%s, tier), edge = COALESCE(%s, edge),
+               home_team = COALESCE(%s, home_team), away_team = COALESCE(%s, away_team)
+               WHERE user_id = %s AND pick_id = %s""",
             (market, aftr_score, tier, edge, home_team, away_team, uid, pick_id),
         )
         conn.commit()
     finally:
-        conn.close()
+        put_conn(conn)
     return JSONResponse({"ok": True, "pick_id": pick_id})
 
 
@@ -828,13 +810,13 @@ def user_unfollow(request: Request, payload: dict = Body(...)):
     try:
         cur = conn.cursor()
         cur.execute(
-            "DELETE FROM user_picks WHERE user_id = ? AND pick_id = ?",
+            "DELETE FROM user_picks WHERE user_id = %s AND pick_id = %s",
             (uid, pick_id),
         )
         conn.commit()
         deleted = cur.rowcount
     finally:
-        conn.close()
+        put_conn(conn)
     return JSONResponse({"ok": True, "removed": deleted > 0, "pick_id": pick_id})
 
 
@@ -851,27 +833,9 @@ def user_history(request: Request):
         try:
             cur = conn.cursor()
 
-            def _table_columns(table: str) -> set[str]:
-                cur2 = conn.cursor()
-                cur2.execute(f"PRAGMA table_info({table})")
-                cols = cur2.fetchall()
-                out = set()
-                for c in cols:
-                    try:
-                        out.add(str(c.get("name")))
-                    except Exception:
-                        out.add(str(c[1]))
-                return out
-
-            up_cols = _table_columns("user_picks")
-            has_home_away = "home_team" in up_cols and "away_team" in up_cols
-
-            base_cols = ["id", "pick_id", "action", "result", "created_at", "market", "aftr_score", "tier", "edge"]
-            select_cols = base_cols[:]
-            if has_home_away:
-                select_cols += ["home_team", "away_team"]
-
-            sql = "SELECT " + ", ".join(select_cols) + " FROM user_picks WHERE user_id = ? ORDER BY created_at DESC LIMIT 10"
+            # PostgreSQL schema always has home_team/away_team
+            base_cols = ["id", "pick_id", "action", "result", "created_at", "market", "aftr_score", "tier", "edge", "home_team", "away_team"]
+            sql = "SELECT " + ", ".join(base_cols) + " FROM user_picks WHERE user_id = %s ORDER BY created_at DESC LIMIT 10"
             cur.execute(sql, (uid,))
             rows = cur.fetchall()
 
@@ -929,8 +893,8 @@ def user_history(request: Request):
             for row in rows:
                 r = dict(row)
                 pick_id = r.get("pick_id")
-                home = r.get("home_team") if has_home_away else None
-                away = r.get("away_team") if has_home_away else None
+                home = r.get("home_team")
+                away = r.get("away_team")
 
                 result = _norm_result(r.get("result"))
                 final_score = None
@@ -942,11 +906,10 @@ def user_history(request: Request):
                             status_raw = str(dp.get("status") or "").strip().upper()
                             if status_raw in ("WIN", "LOSS", "PUSH"):
                                 result = status_raw
-                        if has_home_away:
-                            if _norm_team_name(home) is None:
-                                home = dp.get("home_team") or dp.get("home")
-                            if _norm_team_name(away) is None:
-                                away = dp.get("away_team") or dp.get("away")
+                        if _norm_team_name(home) is None:
+                            home = dp.get("home_team") or dp.get("home")
+                        if _norm_team_name(away) is None:
+                            away = dp.get("away_team") or dp.get("away")
                         if result in ("WIN", "LOSS", "PUSH"):
                             hs, a_s = _extract_score(dp)
                             if hs is not None and a_s is not None:
@@ -967,7 +930,7 @@ def user_history(request: Request):
                     "final_score": final_score,
                 })
         finally:
-            conn.close()
+            put_conn(conn)
     except Exception:
         items = []
 

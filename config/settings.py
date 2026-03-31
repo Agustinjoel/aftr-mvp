@@ -32,12 +32,21 @@ BASE_DIR: Path = Path(__file__).resolve().parents[1]
 # Cache: AFTR_CACHE_DIR (ej. /var/data/cache en Render); fallback "data/cache" local
 CACHE_DIR: Path = Path(os.getenv("AFTR_CACHE_DIR", "data/cache"))
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
-print("CACHE_DIR:", CACHE_DIR)
+_logger.debug("CACHE_DIR resolved: %s", CACHE_DIR)
 
 # Fallback legacy (solo lectura; no escribir aquí)
 DAILY_DIR: Path = BASE_DIR / "daily"
 
-# Base de datos SQLite. Siempre usa AFTR_DB_PATH si está definido y no vacío/"None"; si no, path local.
+# PostgreSQL connection URL.
+# En producción: postgresql://user:pass@host:5432/dbname
+# Fallback local para dev sin Docker (requiere PostgreSQL instalado localmente).
+DATABASE_URL: str = (
+    (os.getenv("DATABASE_URL") or "").strip()
+    or "postgresql://aftr:aftrdev@localhost:5432/aftr"
+)
+
+# Legacy SQLite path — usado SOLO por el script de migración scripts/migrate_sqlite_to_pg.py.
+# No se usa en la app principal.
 _aftr_db_env: str = (os.getenv("AFTR_DB_PATH") or "").strip()
 DB_PATH: str = (
     _aftr_db_env
@@ -278,7 +287,8 @@ class Settings:
         self.base_dir = BASE_DIR
         self.cache_dir = CACHE_DIR
         self.daily_dir = DAILY_DIR
-        self.db_path = DB_PATH
+        self.database_url = DATABASE_URL
+        self.db_path = DB_PATH  # legacy — solo para script de migración
         self.app_base_url = APP_BASE_URL
         self.football_data_api_key = FOOTBALL_DATA_API_KEY
         self.api_sports_key = API_SPORTS_KEY

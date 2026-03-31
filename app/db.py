@@ -1,170 +1,156 @@
 """
-AFTR user storage (no password hashes exposed outside this module/auth).
+AFTR user storage — PostgreSQL via psycopg2.
 
-- Database file: AFTR_DB_PATH env (or local base_dir/aftr.db) via config.settings.
-- Table: users + user_favorites, user_picks, subscriptions, password_reset_tokens.
+Tables: users, user_favorites, user_picks, subscriptions, password_reset_tokens.
+Connection pool: ThreadedConnectionPool (min=1, max=10).
 """
 from __future__ import annotations
 import logging
-import sqlite3
-from pathlib import Path
+import threading
 
-from config.settings import DB_PATH
+import psycopg2
+import psycopg2.extras
+import psycopg2.pool
+import psycopg2.errors
+
+from config.settings import DATABASE_URL
 
 logger = logging.getLogger("aftr.db")
-USERS_TABLE = "users"
+
+# ---------------------------------------------------------------------------
+# Connection pool (lazy-initialized once)
+# ---------------------------------------------------------------------------
+_pool: psycopg2.pool.ThreadedConnectionPool | None = None
+_pool_lock = threading.Lock()
 
 
-def get_conn():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
-def init_db():
-    logger.info("AFTR DB PATH IN USE: %s", DB_PATH)
-    db_file = Path(DB_PATH)
-    if db_file.suffix:
-        db_file.parent.mkdir(parents=True, exist_ok=True)
-    conn = get_conn()
-    cur = conn.cursor()
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT NOT NULL UNIQUE,
-        username TEXT UNIQUE,
-        password_hash TEXT NOT NULL,
-        role TEXT NOT NULL DEFAULT 'free_user',
-        subscription_status TEXT NOT NULL DEFAULT 'inactive',
-        subscription_start TEXT,
-        subscription_end TEXT,
-        created_at TEXT NOT NULL,
-        updated_at TEXT,
-        stripe_customer_id TEXT,
-        stripe_subscription_id TEXT
-    )
-    """)
-
-    # Migration: ensure password_hash exists (old DBs may have been created without it)
-    table_info = cur.execute("PRAGMA table_info(users)").fetchall()
-    column_names = [row[1] for row in table_info]
-    if "password_hash" not in column_names:
-        cur.execute("ALTER TABLE users ADD COLUMN password_hash TEXT")
-
-    for col_def in [
-        ("username", "TEXT"),
-        ("role", "TEXT NOT NULL DEFAULT 'free_user'"),
-        ("subscription_status", "TEXT NOT NULL DEFAULT 'inactive'"),
-        ("subscription_start", "TEXT"),
-        ("subscription_end", "TEXT"),
-        ("updated_at", "TEXT"),
-        ("stripe_customer_id", "TEXT"),
-        ("stripe_subscription_id", "TEXT"),
-    ]:
-        try:
-            cur.execute(
-                "ALTER TABLE users ADD COLUMN " + col_def[0] + " " + col_def[1]
+def _get_pool() -> psycopg2.pool.ThreadedConnectionPool:
+    global _pool
+    if _pool is not None:
+        return _pool
+    with _pool_lock:
+        if _pool is None:
+            _pool = psycopg2.pool.ThreadedConnectionPool(
+                minconn=1,
+                maxconn=10,
+                dsn=DATABASE_URL,
+                cursor_factory=psycopg2.extras.RealDictCursor,
             )
-        except sqlite3.OperationalError:
-            pass
+            logger.info("psycopg2 connection pool created (max=10) | %s", DATABASE_URL.split("@")[-1])
+    return _pool
 
+
+def get_conn() -> psycopg2.extensions.connection:
+    """Borrow a connection from the pool. Caller MUST call put_conn(conn) or conn.close()."""
+    return _get_pool().getconn()
+
+
+def put_conn(conn: psycopg2.extensions.connection) -> None:
+    """Return a borrowed connection to the pool."""
     try:
-        cur.execute(
-            "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username) WHERE username IS NOT NULL"
+        _get_pool().putconn(conn)
+    except Exception as e:
+        logger.warning("put_conn: error returning connection: %s", e)
+
+
+# ---------------------------------------------------------------------------
+# Schema init
+# ---------------------------------------------------------------------------
+
+def init_db() -> None:
+    logger.info("init_db: connecting to %s", DATABASE_URL.split("@")[-1])
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id                   SERIAL PRIMARY KEY,
+            email                TEXT NOT NULL UNIQUE,
+            username             TEXT UNIQUE,
+            password_hash        TEXT NOT NULL,
+            role                 TEXT NOT NULL DEFAULT 'free_user',
+            subscription_status  TEXT NOT NULL DEFAULT 'inactive',
+            subscription_start   TEXT,
+            subscription_end     TEXT,
+            created_at           TEXT NOT NULL,
+            updated_at           TEXT,
+            stripe_customer_id   TEXT,
+            stripe_subscription_id TEXT
         )
-    except sqlite3.OperationalError:
-        pass
+        """)
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS subscriptions (
-        user_id INTEGER PRIMARY KEY,
-        plan TEXT NOT NULL,
-        expires_at TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id)
-    )
-    """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS subscriptions (
+            user_id    INTEGER PRIMARY KEY REFERENCES users(id),
+            plan       TEXT NOT NULL,
+            expires_at TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+        """)
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS password_reset_tokens (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        token_hash TEXT NOT NULL UNIQUE,
-        user_id INTEGER NOT NULL,
-        expires_at TEXT NOT NULL,
-        used_at TEXT,
-        created_at TEXT NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id)
-    )
-    """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS password_reset_tokens (
+            id         SERIAL PRIMARY KEY,
+            token_hash TEXT NOT NULL UNIQUE,
+            user_id    INTEGER NOT NULL REFERENCES users(id),
+            expires_at TEXT NOT NULL,
+            used_at    TEXT,
+            created_at TEXT NOT NULL
+        )
+        """)
 
-    # Phase 1 user system: favorites and followed picks
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS user_favorites (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        pick_id TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        market TEXT,
-        aftr_score REAL,
-        tier TEXT,
-        edge REAL,
-        FOREIGN KEY(user_id) REFERENCES users(id),
-        UNIQUE(user_id, pick_id)
-    )
-    """)
-    for col in [("market", "TEXT"), ("aftr_score", "REAL"), ("tier", "TEXT"), ("edge", "REAL"), ("home_team", "TEXT"), ("away_team", "TEXT")]:
-        try:
-            cur.execute("ALTER TABLE user_favorites ADD COLUMN " + col[0] + " " + col[1])
-        except sqlite3.OperationalError:
-            pass
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS user_picks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        pick_id TEXT NOT NULL,
-        action TEXT NOT NULL,
-        result TEXT NULL,
-        created_at TEXT NOT NULL,
-        market TEXT,
-        aftr_score REAL,
-        tier TEXT,
-        edge REAL,
-        FOREIGN KEY(user_id) REFERENCES users(id),
-        UNIQUE(user_id, pick_id)
-    )
-    """)
-    for col in [("market", "TEXT"), ("aftr_score", "REAL"), ("tier", "TEXT"), ("edge", "REAL"), ("home_team", "TEXT"), ("away_team", "TEXT")]:
-        try:
-            cur.execute("ALTER TABLE user_picks ADD COLUMN " + col[0] + " " + col[1])
-        except sqlite3.OperationalError:
-            pass
-    for col in [("settled_at", "TEXT"), ("score_home", "INTEGER"), ("score_away", "INTEGER")]:
-        try:
-            cur.execute("ALTER TABLE user_picks ADD COLUMN " + col[0] + " " + col[1])
-        except sqlite3.OperationalError:
-            pass
-    # Migration: if legacy Spanish columns exist, copy to home_team/away_team so code only uses English names
-    for table in ("user_favorites", "user_picks"):
-        table_info = cur.execute(f"PRAGMA table_info({table})").fetchall()
-        col_names = [row[1] for row in table_info]
-        has_legacy = "equipo_de_casa" in col_names and "equipo_visitante" in col_names
-        has_english = "home_team" in col_names and "away_team" in col_names
-        if has_legacy and has_english:
-            try:
-                cur.execute(f"UPDATE {table} SET home_team = equipo_de_casa WHERE home_team IS NULL AND equipo_de_casa IS NOT NULL")
-                cur.execute(f"UPDATE {table} SET away_team = equipo_visitante WHERE away_team IS NULL AND equipo_visitante IS NOT NULL")
-            except sqlite3.OperationalError:
-                pass
-    try:
-        cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_user_picks_user_pick ON user_picks(user_id, pick_id)")
-    except sqlite3.OperationalError:
-        pass
-    try:
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_favorites (
+            id         SERIAL PRIMARY KEY,
+            user_id    INTEGER NOT NULL REFERENCES users(id),
+            pick_id    TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            market     TEXT,
+            aftr_score REAL,
+            tier       TEXT,
+            edge       REAL,
+            home_team  TEXT,
+            away_team  TEXT,
+            UNIQUE(user_id, pick_id)
+        )
+        """)
+
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_picks (
+            id         SERIAL PRIMARY KEY,
+            user_id    INTEGER NOT NULL REFERENCES users(id),
+            pick_id    TEXT NOT NULL,
+            action     TEXT NOT NULL,
+            result     TEXT,
+            created_at TEXT NOT NULL,
+            market     TEXT,
+            aftr_score REAL,
+            tier       TEXT,
+            edge       REAL,
+            home_team  TEXT,
+            away_team  TEXT,
+            settled_at TEXT,
+            score_home INTEGER,
+            score_away INTEGER,
+            status     TEXT,
+            UNIQUE(user_id, pick_id)
+        )
+        """)
+
+        # Indexes (IF NOT EXISTS is safe to re-run)
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_picks_user_id ON user_picks(user_id)")
-    except sqlite3.OperationalError:
-        pass
+        cur.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username) "
+            "WHERE username IS NOT NULL"
+        )
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+        logger.info("init_db: schema ready")
+    except Exception:
+        conn.rollback()
+        logger.exception("init_db: error initializing schema")
+        raise
+    finally:
+        put_conn(conn)

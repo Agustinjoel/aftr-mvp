@@ -1,0 +1,15 @@
+.env
+*.db
+*.sqlite3
+*.sqlite
+__pycache__
+**/__pycache__
+*.pyc
+*.pyo
+.git
+.gitignore
+data/cache
+daily
+*.log
+.venv
+venv
