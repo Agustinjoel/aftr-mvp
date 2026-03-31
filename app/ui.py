@@ -27,6 +27,7 @@ from app.auth import create_user
 from app.auth import get_user_id, get_user_by_id
 from app.models import get_active_plan
 from app.user_helpers import can_see_all_picks, is_admin, is_premium_active
+from app.ui_rendimiento import build_rendimiento_page
 from fastapi import Form
 
 # ── Helpers extraídos a módulos propios ──────────────────────────────────────
@@ -458,6 +459,12 @@ def _simple_page(title: str, body: str) -> str:
   """ + AUTH_BOOTSTRAP_SCRIPT + """
 </body>
 </html>"""
+
+
+@router.get("/rendimiento", response_class=HTMLResponse)
+def rendimiento_page(request: Request):
+    """Página de rendimiento histórico de picks desde la DB."""
+    return HTMLResponse(build_rendimiento_page(request))
 
 
 @router.get("/reset-password", response_class=HTMLResponse)

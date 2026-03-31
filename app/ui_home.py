@@ -870,6 +870,9 @@ def home_page(request: Request) -> str:
           <div class="roi-spark-canvas perf-chart-canvas-wrap home-spark-canvas-inner">
             {home_perf_chart_inner}
           </div>
+          <div style="text-align:right;padding:10px 4px 2px;">
+            <a href="/rendimiento" class="perf-hist-link muted" style="font-size:0.82rem;text-decoration:none;opacity:.7;">Ver rendimiento completo →</a>
+          </div>
         </div>
       </div>
       </section>
