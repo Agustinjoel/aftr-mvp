@@ -10,3 +10,4 @@ stripe
 itsdangerous
 tzdata
 jinja2
+psycopg2-binary
