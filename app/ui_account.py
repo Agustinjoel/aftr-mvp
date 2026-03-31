@@ -23,6 +23,23 @@ from app.ui_helpers import (
     _get_user_id, _get_plan_from_cookie, _format_cache_status,
     _pill_bar, _home_league_active_code,
 )
+
+
+def _simple_page(title: str, body: str) -> str:
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>{html_lib.escape(title)}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css?v=22">
+  <link rel="icon" type="image/png" href="/static/logo_aftr.png">
+</head>
+<body>
+  {body}
+  """ + AUTH_BOOTSTRAP_SCRIPT + """
+</body>
+</html>"""
 from app.ui_picks_calc import (
     _result_norm, _suggest_units, _unit_delta, _pick_stake_units,
     _risk_label_from_conf, _pick_score, _aftr_score, _profit_by_market,
