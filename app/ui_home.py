@@ -18,6 +18,8 @@ from app.auth import get_user_id, get_user_by_id
 from app.models import get_active_plan
 from app.user_helpers import can_see_all_picks, is_admin, is_premium_active
 
+HOME_VISIBLE_SNAPSHOT_FILE = "home_visible_picks_snapshot.json"
+
 from app.ui_helpers import (
     AUTH_BOOTSTRAP_JS, AUTH_BOOTSTRAP_SCRIPT,
     _safe_float, _safe_int, _parse_utcdate_str, _parse_utcdate_maybe,
