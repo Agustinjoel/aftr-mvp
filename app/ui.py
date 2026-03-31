@@ -252,63 +252,195 @@ def index_or_league(request: Request, league: str | None = Query(None)):
 
 @router.get("/admin/users", response_class=HTMLResponse)
 def admin_users_page(request: Request):
-    """Admin-only: list users (id, email, username, role, subscription_status, created_at). No password hashes."""
+    """Admin-only: user management panel with premium/role toggle."""
     user, _, plan_badge = _account_header(request)
     if not user:
         return RedirectResponse(url="/?auth=login", status_code=302)
     if not is_admin(user, request):
         return RedirectResponse(url="/", status_code=302)
-    from app.db import get_conn
+    from app.db import get_conn, put_conn
     conn = get_conn()
-    cur = conn.cursor()
-    cur.execute(
-        """SELECT id, email, username, role, subscription_status, created_at
-           FROM users ORDER BY id"""
-    )
-    rows = cur.fetchall()
-    conn.close()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """SELECT id, email, username, role, subscription_status,
+                      subscription_start, subscription_end, created_at
+               FROM users ORDER BY id"""
+        )
+        rows = cur.fetchall()
+    finally:
+        put_conn(conn)
+
+    msg = (request.query_params.get("msg") or "").strip()
+    msg_html = ""
+    if msg == "ok":
+        msg_html = '<div style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#22c55e;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;">✓ Usuario actualizado.</div>'
+    elif msg == "err":
+        msg_html = '<div style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:13px;">✗ Error al actualizar.</div>'
+
     user_rows = []
     for r in rows:
         uid = r["id"]
         email = html_lib.escape(str(r.get("email") or ""))
         username = html_lib.escape(str(r.get("username") or "—"))
-        role = html_lib.escape(str(r.get("role") or "—"))
-        sub = html_lib.escape(str(r.get("subscription_status") or "—"))
-        created = r.get("created_at") or "—"
-        if isinstance(created, str) and len(created) >= 10:
-            created = created[:10]
-        created = html_lib.escape(str(created))
-        user_rows.append(f"<tr><td>{uid}</td><td>{email}</td><td>{username}</td><td>{role}</td><td>{sub}</td><td>{created}</td></tr>")
+        role = str(r.get("role") or "free_user")
+        sub = str(r.get("subscription_status") or "inactive")
+        created = str(r.get("created_at") or "—")[:10]
+
+        is_prem = role in ("premium_user", "admin") or sub == "active"
+        is_adm = role == "admin"
+
+        prem_badge = (
+            '<span style="background:rgba(234,179,8,.2);color:#eab308;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;">PREMIUM</span>'
+            if is_prem else
+            '<span style="background:rgba(255,255,255,.06);color:#94a3b8;padding:2px 8px;border-radius:999px;font-size:11px;">FREE</span>'
+        )
+        adm_badge = (
+            '<span style="background:rgba(139,92,246,.2);color:#a78bfa;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;">ADMIN</span>'
+            if is_adm else ""
+        )
+
+        toggle_prem = (
+            f'<button onclick="setRole({uid},\'free\')" style="background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;">Quitar premium</button>'
+            if is_prem else
+            f'<button onclick="setRole({uid},\'premium\')" style="background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.3);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;">Dar premium</button>'
+        )
+        toggle_adm = (
+            f'<button onclick="setRole({uid},\'free\')" style="background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;">Quitar admin</button>'
+            if is_adm else
+            f'<button onclick="setRole({uid},\'admin\')" style="background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.3);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;">Hacer admin</button>'
+        )
+
+        user_rows.append(f"""
+        <tr style="border-bottom:1px solid rgba(255,255,255,.06);">
+          <td style="padding:10px 8px;color:#64748b;font-size:12px;">{uid}</td>
+          <td style="padding:10px 8px;font-size:13px;">{email}</td>
+          <td style="padding:10px 8px;font-size:13px;color:#94a3b8;">{username}</td>
+          <td style="padding:10px 8px;">{prem_badge} {adm_badge}</td>
+          <td style="padding:10px 8px;font-size:12px;color:#64748b;">{created}</td>
+          <td style="padding:10px 8px;display:flex;gap:6px;flex-wrap:wrap;">{toggle_prem} {toggle_adm}</td>
+        </tr>""")
+
     table_body = "\n".join(user_rows)
+    total = len(rows)
+    premium_count = sum(1 for r in rows if str(r.get("role") or "") in ("premium_user", "admin") or str(r.get("subscription_status") or "") == "active")
+
     body = f"""
-    <div class="top top-pro">
-      <div class="brand">
-        <img src="/static/logo_aftr.png" class="logo-aftr" alt="AFTR" />
-        <div class="brand-text">
-          <div class="brand-title">AFTR</div>
-          <div class="brand-tag">Admin — Usuarios</div>
+    <div style="background:var(--bg-deep,#05070c);min-height:100vh;padding:24px;">
+    <div style="max-width:1000px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <img src="/static/logo_aftr.png" style="width:32px;height:32px;" alt="AFTR"/>
+          <div>
+            <div style="font-weight:800;font-size:18px;">Panel de Admin</div>
+            <div style="font-size:12px;color:#64748b;">Gestión de usuarios</div>
+          </div>
         </div>
-        {plan_badge}
+        <div style="display:flex;gap:10px;">
+          <a href="/" style="color:#38bdf8;font-size:13px;text-decoration:none;">← Inicio</a>
+          <a href="/account" style="color:#64748b;font-size:13px;text-decoration:none;">Mi cuenta</a>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px;">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+          <div style="font-size:24px;font-weight:800;">{total}</div>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">Usuarios totales</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+          <div style="font-size:24px;font-weight:800;color:#eab308;">{premium_count}</div>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">Premium / Admin</div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+          <div style="font-size:24px;font-weight:800;color:#94a3b8;">{total - premium_count}</div>
+          <div style="font-size:12px;color:#64748b;margin-top:2px;">Free</div>
+        </div>
+      </div>
+
+      {msg_html}
+
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;">
+        <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;font-weight:700;">Usuarios</div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="border-bottom:1px solid rgba(255,255,255,.08);">
+                <th style="text-align:left;padding:10px 8px;font-size:11px;color:#64748b;font-weight:600;">ID</th>
+                <th style="text-align:left;padding:10px 8px;font-size:11px;color:#64748b;font-weight:600;">EMAIL</th>
+                <th style="text-align:left;padding:10px 8px;font-size:11px;color:#64748b;font-weight:600;">USUARIO</th>
+                <th style="text-align:left;padding:10px 8px;font-size:11px;color:#64748b;font-weight:600;">PLAN</th>
+                <th style="text-align:left;padding:10px 8px;font-size:11px;color:#64748b;font-weight:600;">CREADO</th>
+                <th style="text-align:left;padding:10px 8px;font-size:11px;color:#64748b;font-weight:600;">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody>{table_body}</tbody>
+          </table>
+        </div>
       </div>
     </div>
-    <div class="top-actions">
-      <div class="links">
-        <a href="/">Panel</a>
-        <a href="/account">Mi cuenta</a>
-      </div>
     </div>
-    <div class="page" style="max-width: 900px; margin: 24px auto;">
-      <h2>Usuarios</h2>
-      <p class="muted">Base de datos: aftr.sqlite3 — tabla: users. Sin contraseñas.</p>
-      <div class="card" style="padding: 12px; overflow-x: auto;">
-        <table style="width:100%; border-collapse: collapse; font-size: 13px;">
-          <thead><tr><th style="text-align:left;">id</th><th style="text-align:left;">email</th><th style="text-align:left;">username</th><th>role</th><th>suscripción</th><th>created_at</th></tr></thead>
-          <tbody>{table_body}</tbody>
-        </table>
-      </div>
-    </div>
+    <script>
+    function setRole(uid, role) {{
+      var labels = {{premium: 'dar Premium', admin: 'hacer Admin', free: 'quitar plan'}};
+      if (!confirm('¿Confirmar: ' + (labels[role] || role) + ' al usuario #' + uid + '?')) return;
+      fetch('/admin/set-role', {{
+        method: 'POST',
+        headers: {{'Content-Type': 'application/json'}},
+        body: JSON.stringify({{user_id: uid, role: role}})
+      }}).then(function(r){{ return r.json(); }}).then(function(d){{
+        if (d.ok) window.location.href = '/admin/users?msg=ok';
+        else window.location.href = '/admin/users?msg=err';
+      }}).catch(function(){{ window.location.href = '/admin/users?msg=err'; }});
+    }}
+    </script>
     """
-    return _simple_page("Usuarios — AFTR Admin", body)
+    return _simple_page("Admin — AFTR", body)
+
+
+@router.post("/admin/set-role")
+async def admin_set_role(request: Request):
+    """Admin-only: update user role and subscription_status."""
+    from fastapi.responses import JSONResponse
+    from app.db import get_conn, put_conn
+    from app.auth import get_user_id, get_user_by_id
+    uid = get_user_id(request)
+    acting_user = get_user_by_id(uid) if uid else None
+    if not is_admin(acting_user, request):
+        return JSONResponse({"ok": False, "error": "forbidden"}, status_code=403)
+    try:
+        body = await request.json()
+        target_id = int(body["user_id"])
+        role = str(body["role"]).strip().lower()
+    except Exception:
+        return JSONResponse({"ok": False, "error": "bad_request"}, status_code=400)
+
+    if role == "premium":
+        new_role = "premium_user"
+        new_sub = "active"
+    elif role == "admin":
+        new_role = "admin"
+        new_sub = "active"
+    elif role == "free":
+        new_role = "free_user"
+        new_sub = "inactive"
+    else:
+        return JSONResponse({"ok": False, "error": "invalid_role"}, status_code=400)
+
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE users SET role=%s, subscription_status=%s, updated_at=%s WHERE id=%s",
+            (new_role, new_sub, datetime.now(timezone.utc).isoformat(), target_id),
+        )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        put_conn(conn)
+        return JSONResponse({"ok": False, "error": "db_error"}, status_code=500)
+    finally:
+        put_conn(conn)
+    return JSONResponse({"ok": True})
 
 
 def _simple_page(title: str, body: str) -> str:
