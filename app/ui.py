@@ -398,6 +398,50 @@ def admin_users_page(request: Request):
     return _simple_page("Admin — AFTR", body)
 
 
+@router.get("/admin/picks-debug")
+def admin_picks_debug(request: Request):
+    """Admin-only: raw picks/matches counts for diagnostics."""
+    from fastapi.responses import JSONResponse as _JSONResponse
+    from app.db import get_conn, put_conn as _put
+    uid = get_user_id(request)
+    acting_user = get_user_by_id(uid) if uid else None
+    if not is_admin(acting_user, request):
+        return _JSONResponse({"ok": False, "error": "forbidden"}, status_code=403)
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) AS n FROM picks")
+        total_picks = cur.fetchone()["n"]
+        cur.execute("SELECT result, COUNT(*) AS n FROM picks GROUP BY result ORDER BY n DESC")
+        by_result = [dict(r) for r in cur.fetchall()]
+        cur.execute("SELECT COUNT(*) AS n FROM matches")
+        total_matches = cur.fetchone()["n"]
+        cur.execute("""
+            SELECT p.result, COUNT(*) AS n
+            FROM picks p
+            LEFT JOIN matches m ON m.league=p.league AND m.match_id=p.match_id
+            WHERE m.match_id IS NULL
+            GROUP BY p.result
+        """)
+        no_match = [dict(r) for r in cur.fetchall()]
+        cur.execute("""
+            SELECT p.league, p.match_id, p.result, p.best_fair, m."utcDate", m.home, m.away
+            FROM picks p
+            LEFT JOIN matches m ON m.league=p.league AND m.match_id=p.match_id
+            LIMIT 10
+        """)
+        sample = [dict(r) for r in cur.fetchall()]
+        return _JSONResponse({
+            "total_picks": total_picks,
+            "total_matches": total_matches,
+            "picks_by_result": by_result,
+            "picks_without_match": no_match,
+            "sample_10": sample,
+        })
+    finally:
+        _put(conn)
+
+
 @router.post("/admin/set-role")
 async def admin_set_role(request: Request):
     """Admin-only: update user role and subscription_status."""

@@ -96,7 +96,7 @@ def _load_picks_from_db() -> list[dict]:
             LEFT JOIN matches m
                    ON m.league = p.league
                   AND m.match_id = p.match_id
-            WHERE p.result IN ('WIN', 'LOSS', 'PUSH')
+            WHERE UPPER(p.result) IN ('WIN', 'LOSS', 'PUSH')
             ORDER BY m."utcDate" ASC NULLS LAST, p.created_at ASC
         """)
         rows = cur.fetchall()
@@ -108,18 +108,21 @@ def _load_picks_from_db() -> list[dict]:
         put_conn(conn)
 
 
-def _count_pending() -> int:
+def _count_pending() -> tuple[int, int]:
+    """Returns (pending_count, total_count)."""
     conn = get_conn()
     try:
         cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) AS n FROM picks")
+        total = int((cur.fetchone() or {}).get("n", 0))
         cur.execute("""
             SELECT COUNT(*) AS n FROM picks
-            WHERE result IS NULL OR result = '' OR result = 'PENDING'
+            WHERE result IS NULL OR result = '' OR UPPER(result) = 'PENDING'
         """)
-        row = cur.fetchone()
-        return int(row["n"]) if row else 0
+        pending = int((cur.fetchone() or {}).get("n", 0))
+        return pending, total
     except Exception:
-        return 0
+        return 0, 0
     finally:
         put_conn(conn)
 
@@ -222,7 +225,7 @@ def _league_breakdown(rows: list[dict]) -> list[dict]:
 
 def build_rendimiento_page(request: Request) -> str:
     rows = _load_picks_from_db()
-    pending = _count_pending()
+    pending, total_in_db = _count_pending()
     stats = _compute_stats(rows)
     chart_pts = _build_chart_points(rows)
     league_rows = _league_breakdown(rows)
@@ -340,8 +343,9 @@ def build_rendimiento_page(request: Request) -> str:
 
     pending_note = (
         f'<p class="muted" style="font-size:0.82rem;margin-top:4px;">'
-        f'{pending} pick{"s" if pending != 1 else ""} pendiente{"s" if pending != 1 else ""} de resolución.</p>'
-    ) if pending > 0 else ""
+        f'{pending} pick{"s" if pending != 1 else ""} pendiente{"s" if pending != 1 else ""} '
+        f'de resolución · {total_in_db} en total en la DB.</p>'
+    )
 
     # ── draw chart JS (same as dashboard) ───
     chart_js = """
