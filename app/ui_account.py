@@ -156,7 +156,7 @@ def account_page(request: Request):
     fav_team_html  = ""
     if fav_team_name:
         crest_img = (
-            f'<img src="{fav_team_crest}" class="hero-fav-crest" alt="" onerror="this.style.display=\'none\'">'
+            f'<img src="{fav_team_crest}" class="hero-fav-crest" alt="" onerror="this.remove()">'
             if fav_team_crest else ""
         )
         fav_team_html = (
@@ -750,7 +750,7 @@ def account_page(request: Request):
 
       function chipHtml(t) {{
         var crest = t.team_crest
-          ? '<img src="' + t.team_crest + '" class="team-chip-crest" alt="" onerror="this.style.display=\'none\'">'
+          ? '<img src="' + t.team_crest + '" class="team-chip-crest" alt="" onerror="this.remove()">'
           : '';
         var safeName  = t.team_name.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
         var safeCrest = (t.team_crest||'').replace(/"/g,'&quot;');
@@ -790,7 +790,7 @@ def account_page(request: Request):
         .then(function(r) {{ return r.json(); }})
         .then(function(d) {{
           if (d.ok) {{
-            var img = crest ? '<img src="' + crest + '" class="hero-fav-crest" alt="" onerror="this.style.display=\'none\'">' : '';
+            var img = crest ? '<img src="' + crest + '" class="hero-fav-crest" alt="" onerror="this.remove()">' : '';
             var inner = img + '<span class="hero-fav-name">' + name + '</span>';
             var heroEl = document.getElementById('hero-fav-team');
             if (heroEl) {{ heroEl.className='hero-fav-team'; heroEl.innerHTML=inner; }}
