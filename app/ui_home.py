@@ -175,9 +175,15 @@ def home_page(request: Request) -> str:
     auth_html = ""
     if user:
         display_name = html_lib.escape((user.get("username") or user.get("email") or ""))
+        fav_crest = user.get("favorite_team_crest") or ""
+        crest_img = (
+            f'<img src="{html_lib.escape(fav_crest)}" class="nav-fav-crest" alt="" '
+            f'onerror="this.style.display=\'none\'">'
+        ) if fav_crest else ""
         auth_html = (
-            f'<span class="plan-badge">{display_name}</span>'
-            f'<a class="plan-logout" href="/account">Mi cuenta</a>'
+            f'<a href="/account" class="nav-user-chip">'
+            f'{crest_img}<span class="nav-user-name">{display_name}</span>'
+            f'</a>'
             f'<a class="plan-logout" href="/auth/logout">Salir</a>'
         )
     else:
@@ -611,6 +617,38 @@ def home_page(request: Request) -> str:
       </section>
 """
 
+    # ── Tu equipo section ──────────────────────────────────────────────────────
+    team_section_html = ""
+    fav_team_name = user.get("favorite_team_name") if user else None
+    if fav_team_name:
+        fav_norm = fav_team_name.strip().lower()
+        team_picks = [
+            p for p in all_upcoming
+            if fav_norm in (p.get("home") or "").lower()
+            or fav_norm in (p.get("away") or "").lower()
+            or fav_norm in (p.get("home_team") or "").lower()
+            or fav_norm in (p.get("away_team") or "").lower()
+        ]
+        if team_picks:
+            team_cards = "".join(
+                _render_pick_card(p, user_premium, uid)
+                for p in team_picks[:6]
+            )
+            fav_crest_url = html_lib.escape(user.get("favorite_team_crest") or "")
+            crest_header = (
+                f'<img src="{fav_crest_url}" class="team-section-crest" alt="" '
+                f'onerror="this.style.display=\'none\'">'
+            ) if fav_crest_url else ""
+            team_section_html = f"""
+      <section class="home-section" id="tu-equipo">
+        <h2 class="home-h2 team-section-title">
+          {crest_header}
+          {html_lib.escape(fav_team_name)}
+        </h2>
+        <div class="home-picks-grid">{team_cards}</div>
+      </section>
+"""
+
     # Big matches HTML: [home crest] Home vs Away [away crest] (same helper as league pages)
     big_match_cards = []
     for b in big_matches:
@@ -772,6 +810,7 @@ def home_page(request: Request) -> str:
         </div>
       </section>
       {live_section_html}
+      {team_section_html}
 
       <section class="home-section" id="top-picks">
       <h2 class="home-h2">Mejores Picks del Día</h2>

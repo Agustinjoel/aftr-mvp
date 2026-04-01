@@ -191,7 +191,8 @@ def get_user_by_id(user_id: int) -> dict | None:
         cur = conn.cursor()
         cur.execute(
             """SELECT id, email, username, role, subscription_status,
-               subscription_start, subscription_end, created_at, updated_at
+               subscription_start, subscription_end, created_at, updated_at,
+               favorite_team_id, favorite_team_name, favorite_team_crest
                FROM users WHERE id = %s""",
             (user_id,),
         )

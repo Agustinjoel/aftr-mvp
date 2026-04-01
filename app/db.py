@@ -138,6 +138,18 @@ def init_db() -> None:
         )
         """)
 
+        # Favorite team columns (added after initial schema — safe to re-run)
+        for col, coltype in [
+            ("favorite_team_id",    "TEXT"),
+            ("favorite_team_name",  "TEXT"),
+            ("favorite_team_crest", "TEXT"),
+        ]:
+            try:
+                cur.execute(f"ALTER TABLE users ADD COLUMN {col} {coltype}")
+                conn.commit()
+            except Exception:
+                conn.rollback()  # column already exists — ignore
+
         # Indexes (IF NOT EXISTS is safe to re-run)
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_picks_user_id ON user_picks(user_id)")

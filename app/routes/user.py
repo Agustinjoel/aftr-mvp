@@ -935,3 +935,55 @@ def user_history(request: Request):
         items = []
 
     return JSONResponse({"ok": True, "history": items})
+
+
+@router.post("/favorite-team")
+def user_set_favorite_team(request: Request, payload: dict = Body(...)):
+    """Save the user's favorite team (team_id, team_name, team_crest)."""
+    uid, err = _require_user(request)
+    if err:
+        return err
+    team_id    = str(payload.get("team_id") or "").strip()
+    team_name  = str(payload.get("team_name") or "").strip()[:120]
+    team_crest = str(payload.get("team_crest") or "").strip()[:300]
+    if not team_name:
+        return JSONResponse({"ok": False, "error": "team_name required"}, status_code=400)
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """UPDATE users SET favorite_team_id=%s, favorite_team_name=%s, favorite_team_crest=%s
+               WHERE id=%s""",
+            (team_id or None, team_name, team_crest or None, uid),
+        )
+        conn.commit()
+    finally:
+        put_conn(conn)
+    return JSONResponse({"ok": True, "team_name": team_name})
+
+
+@router.get("/available-teams")
+def user_available_teams(request: Request):
+    """Return all unique teams found across cached picks/matches for team selector."""
+    from data.cache import read_json_with_fallback
+    from config.settings import settings
+    seen: dict[str, dict] = {}
+    for code in settings.league_codes():
+        for source in [f"daily_matches_{code}.json", f"daily_picks_{code}.json"]:
+            items = read_json_with_fallback(source)
+            if not isinstance(items, list):
+                continue
+            for item in items:
+                for prefix in [("home_team", "home_crest"), ("away_team", "away_crest")]:
+                    name = item.get(prefix[0]) or item.get("home") or item.get("away")
+                    crest = item.get(prefix[1]) or item.get("home_crest") or item.get("away_crest")
+                    if name and isinstance(name, str) and name.strip():
+                        key = name.strip().lower()
+                        if key not in seen:
+                            seen[key] = {
+                                "team_name": name.strip(),
+                                "team_crest": crest or "",
+                                "team_id": str(item.get("home_id") or item.get("away_id") or ""),
+                            }
+    teams = sorted(seen.values(), key=lambda t: t["team_name"])
+    return JSONResponse({"ok": True, "teams": teams})

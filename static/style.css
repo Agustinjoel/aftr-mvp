@@ -3469,6 +3469,81 @@ canvas{
   }
 }
 
+/* ── Nav favorite team crest ── */
+.nav-user-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: inherit;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  transition: background .15s;
+}
+.nav-user-chip:hover{ background: rgba(255,255,255,.1); }
+.nav-fav-crest{
+  width: 20px; height: 20px;
+  object-fit: contain; flex-shrink: 0;
+}
+.nav-user-name{ font-size: 13px; font-weight: 600; }
+
+/* ── Hero fav team ── */
+.hero-fav-team{
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 6px; font-size: 13px; font-weight: 600;
+}
+.hero-fav-team--empty{ font-size: 12px; font-weight: 400; }
+.hero-fav-crest{ width: 24px; height: 24px; object-fit: contain; flex-shrink: 0; }
+.hero-fav-name{ }
+.hero-fav-choose{ color: var(--accent,#38bdf8); text-decoration: none; }
+
+/* ── Team section on home ── */
+.team-section-title{
+  display: flex; align-items: center; gap: 10px;
+}
+.team-section-crest{
+  width: 28px; height: 28px; object-fit: contain;
+}
+
+/* ── Team selector (account page) ── */
+.team-selector-wrap{ display: flex; flex-direction: column; gap: 12px; }
+.team-current-display{ font-size: 14px; }
+.team-search-input{
+  width: 100%; box-sizing: border-box;
+  padding: 10px 14px; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: inherit; font-size: 14px;
+  outline: none;
+}
+.team-search-input:focus{ border-color: rgba(56,189,248,.5); }
+.team-grid{
+  display: flex; flex-wrap: wrap; gap: 8px;
+  max-height: 320px; overflow-y: auto;
+}
+.team-grid-hint{ font-size: 13px; }
+.team-chip{
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  cursor: pointer; font-size: 12px; font-weight: 500;
+  color: inherit; transition: background .12s, border-color .12s;
+}
+.team-chip:hover{ background: rgba(255,255,255,.09); border-color: rgba(56,189,248,.4); }
+.team-chip.active{
+  background: rgba(56,189,248,.15);
+  border-color: rgba(56,189,248,.6);
+  color: #38bdf8;
+}
+.team-chip-crest{ width: 18px; height: 18px; object-fit: contain; flex-shrink: 0; }
+.team-chip-name{ }
+.team-save-msg{ font-size: 13px; padding: 6px 0; }
+.team-save-msg--ok{ color: #4ade80; }
+.team-save-msg--err{ color: #f87171; }
+
 .account-insights-grid{
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

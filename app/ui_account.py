@@ -147,6 +147,25 @@ def account_page(request: Request):
     account_email_line = (
         f'<p class="account-email muted">{email_display}</p>' if email_display else ""
     )
+    fav_team_name  = html_lib.escape(str(user.get("favorite_team_name") or ""))
+    fav_team_crest = html_lib.escape(str(user.get("favorite_team_crest") or ""))
+    fav_team_html  = ""
+    if fav_team_name:
+        crest_img = (
+            f'<img src="{fav_team_crest}" class="hero-fav-crest" alt="" onerror="this.style.display=\'none\'">'
+            if fav_team_crest else ""
+        )
+        fav_team_html = (
+            f'<div class="hero-fav-team" id="hero-fav-team">'
+            f'{crest_img}<span class="hero-fav-name">{fav_team_name}</span>'
+            f'</div>'
+        )
+    else:
+        fav_team_html = (
+            '<div class="hero-fav-team hero-fav-team--empty" id="hero-fav-team">'
+            '<span class="muted">Sin equipo favorito — <a href="#mi-equipo" class="hero-fav-choose">elegir</a></span>'
+            '</div>'
+        )
     body = header_html + f"""
     <div class="page account-page account-page-wrapper{premium_wrapper_class}">
       <div class="card {hero_class} account-hero-card">
@@ -154,6 +173,7 @@ def account_page(request: Request):
         <div class="account-hero-ident">
           <p class="account-greeting">Hola, {display_name}</p>
           {account_email_line}
+          {fav_team_html}
         </div>
         <div class="account-hero-badge-row">
           {(
@@ -204,11 +224,27 @@ def account_page(request: Request):
       </section>
 
       <div class="account-actions">
+        <a href="#mi-equipo" class="pill account-action-pill">Mi equipo</a>
         <a href="#seguidas" class="pill account-action-pill">Seguidas activas</a>
         <a href="#favoritos" class="pill account-action-pill">Favoritos</a>
         <a href="#historial" class="pill account-action-pill">Historial</a>
         <a href="/auth/logout" class="pill account-action-pill">Cerrar sesión</a>
       </div>
+
+      <section id="mi-equipo" class="account-section account-section--team">
+        <h3 class="account-section-title"><span class="account-section-title-accent">Mi Equipo</span></h3>
+        <div class="team-selector-wrap">
+          <div class="team-current-display" id="team-current-display">
+            {fav_team_html}
+          </div>
+          <input type="text" id="team-search-input" class="team-search-input"
+            placeholder="Buscar equipo..." autocomplete="off">
+          <div id="team-grid" class="team-grid">
+            <p class="muted team-grid-hint">Escribí para buscar tu equipo</p>
+          </div>
+          <p id="team-save-msg" class="team-save-msg" style="display:none"></p>
+        </div>
+      </section>
 
       <section id="seguidas" class="account-section account-section--picks">
         <h3 class="account-section-title"><span class="account-section-title-accent">Activas</span> · seguidas</h3>
@@ -693,6 +729,81 @@ def account_page(request: Request):
         var favEl = document.getElementById("account-favorites");
         if (favEl) favEl.innerHTML = "<div class=\\"card\\" style=\\"padding: 16px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">Error al cargar favoritos.</p></div>";
       }});
+    }})();
+    </script>
+    <script>
+    // ── Team Selector ────────────────────────────────────────────
+    (function() {{
+      var base = window.location.origin;
+      var allTeams = [];
+      var searchInput = document.getElementById('team-search-input');
+      var grid       = document.getElementById('team-grid');
+      var saveMsg    = document.getElementById('team-save-msg');
+
+      function renderGrid(teams) {{
+        if (!grid) return;
+        if (!teams.length) {{
+          grid.innerHTML = '<p class="muted team-grid-hint">Sin resultados.</p>';
+          return;
+        }}
+        grid.innerHTML = teams.slice(0, 60).map(function(t) {{
+          var crest = t.team_crest
+            ? '<img src="' + t.team_crest + '" class="team-chip-crest" alt="" onerror="this.style.display=\'none\'">'
+            : '';
+          return '<button type="button" class="team-chip" data-name="' + t.team_name.replace(/"/g,'&quot;') + '" data-crest="' + (t.team_crest||'').replace(/"/g,'&quot;') + '" data-id="' + (t.team_id||'').replace(/"/g,'&quot;') + '">'
+            + crest + '<span class="team-chip-name">' + t.team_name + '</span></button>';
+        }}).join('');
+      }}
+
+      function saveTeam(name, crest, id) {{
+        fetch(base + '/user/favorite-team', {{
+          method: 'POST',
+          headers: {{ 'Content-Type': 'application/json' }},
+          credentials: 'include',
+          body: JSON.stringify({{ team_name: name, team_crest: crest, team_id: id }})
+        }}).then(function(r) {{ return r.json(); }}).then(function(d) {{
+          if (d.ok) {{
+            // update hero display
+            var heroEl = document.getElementById('hero-fav-team');
+            if (heroEl) {{
+              var img = crest ? '<img src="' + crest + '" class="hero-fav-crest" alt="" onerror="this.style.display=\'none\'">' : '';
+              heroEl.className = 'hero-fav-team';
+              heroEl.innerHTML = img + '<span class="hero-fav-name">' + name + '</span>';
+            }}
+            var curEl = document.getElementById('team-current-display');
+            if (curEl) {{
+              var img2 = crest ? '<img src="' + crest + '" class="hero-fav-crest" alt="" onerror="this.style.display=\'none\'">' : '';
+              curEl.innerHTML = '<div class="hero-fav-team">' + img2 + '<span class="hero-fav-name">' + name + '</span></div>';
+            }}
+            if (saveMsg) {{ saveMsg.textContent = '✓ Equipo guardado: ' + name; saveMsg.style.display='block'; saveMsg.className='team-save-msg team-save-msg--ok'; }}
+          }} else {{
+            if (saveMsg) {{ saveMsg.textContent = 'Error al guardar.'; saveMsg.style.display='block'; saveMsg.className='team-save-msg team-save-msg--err'; }}
+          }}
+          setTimeout(function() {{ if(saveMsg) saveMsg.style.display='none'; }}, 3000);
+        }});
+      }}
+
+      if (grid) grid.addEventListener('click', function(e) {{
+        var btn = e.target.closest('.team-chip');
+        if (!btn) return;
+        saveTeam(btn.dataset.name, btn.dataset.crest, btn.dataset.id);
+        grid.querySelectorAll('.team-chip').forEach(function(b) {{ b.classList.remove('active'); }});
+        btn.classList.add('active');
+      }});
+
+      if (searchInput) searchInput.addEventListener('input', function() {{
+        var q = this.value.trim().toLowerCase();
+        if (!q) {{ renderGrid([]); grid.innerHTML='<p class="muted team-grid-hint">Escribí para buscar tu equipo</p>'; return; }}
+        if (!allTeams.length) {{
+          fetch(base + '/user/available-teams', {{ credentials: 'include' }})
+            .then(function(r) {{ return r.json(); }})
+            .then(function(d) {{ allTeams = d.teams || []; filter(q); }});
+        }} else {{ filter(q); }}
+      }});
+
+      function filter(q) {{
+        renderGrid(allTeams.filter(function(t) {{ return t.team_name.toLowerCase().indexOf(q) !== -1; }}));
+      }}
     }})();
     </script>"""
     return _simple_page("Mi cuenta — AFTR", body)
