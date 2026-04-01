@@ -569,74 +569,110 @@ def _build_home_premium_combos(
 # Rendering
 # =========================================================
 
+def _cv2_short_name(name: str) -> str:
+    """Nombre de equipo acortado para cards compactos."""
+    n = (name or "").strip()
+    n = n.replace("Football Club", "FC").replace("Club Atlético", "Atl.")
+    n = " ".join(w for w in n.split() if w.lower() != "hotspur")
+    return n.strip()
+
+
 def _render_home_premium_combo_card(combo: dict) -> str:
-    """Renderiza uno de los 3 combo cards premium de la home."""
+    """Renderiza uno de los 3 combo cards premium de la home (diseño cv2 compacto)."""
     if not combo or not isinstance(combo, dict):
         return ""
+
     title      = combo.get("title") or "Combo"
-    description = combo.get("description") or ""
     tier_badge = combo.get("tier_badge") or "—"
     tier_class = combo.get("tier_class") or "seguro"
     legs       = combo.get("legs") or []
     n          = len(legs)
 
     prob_pct      = combo.get("combo_prob_pct")
+    prob_clamped  = min(100, max(0, float(prob_pct or 0)))
     prob_str      = f"{prob_pct:.1f}%" if prob_pct is not None else "—"
     combined_odds = combo.get("combined_odds")
-    odds_str      = f"~{combined_odds:.2f}" if combined_odds is not None else "—"
+    odds_str      = f"{combined_odds:.2f}×" if combined_odds is not None else "—"
     score         = combo.get("combo_score")
     score_str     = str(score) if score is not None else "—"
 
+    tc = html_lib.escape(tier_class)
+    tb = html_lib.escape(tier_badge)
+    ti = html_lib.escape(title)
+
     if n == 0:
         return (
-            f'<div class="card combo-card home-premium-combo-card">'
-            f'<div class="combo-head">'
-            f'<div class="combo-title">{html_lib.escape(title)}</div>'
-            f'<span class="combo-tier home-combo-tier home-combo-tier--{html_lib.escape(tier_class)}">'
-            f'{html_lib.escape(tier_badge)}</span></div>'
-            f'<div class="combo-sub"><div class="home-combo-desc">{html_lib.escape(description)}</div>'
-            f'<div class="home-combo-empty muted">No hay inventario suficiente.</div></div></div>'
+            f'<div class="card cv2 cv2--{tc} home-premium-combo-card">'
+            f'<div class="cv2-head">'
+            f'<span class="cv2-badge cv2-badge--{tc}">{tb}</span>'
+            f'<span class="cv2-title">{ti}</span>'
+            f'</div>'
+            f'<div class="cv2-empty muted">No hay inventario suficiente.</div>'
+            f'</div>'
         )
+
+    _FALLBACK = "/static/teams/default.svg"
+    _fb_esc   = html_lib.escape(_FALLBACK)
 
     rows = []
     for it in legs:
         if not isinstance(it, dict):
             continue
-        home   = it.get("home") or "—"
-        away   = it.get("away") or "—"
-        market = it.get("market") or "—"
-        prob   = _safe_float(it.get("prob"), 0)
-        p_pct  = round(prob * 100, 0)
+        home   = html_lib.escape(_cv2_short_name(it.get("home") or "—"))
+        away   = html_lib.escape(_cv2_short_name(it.get("away") or "—"))
+        market = html_lib.escape(str(it.get("market") or "—"))
+        pct    = round(_safe_float(it.get("prob"), 0) * 100)
+        h_src  = html_lib.escape((it.get("home_crest") or "").strip() or _FALLBACK)
+        a_src  = html_lib.escape((it.get("away_crest") or "").strip() or _FALLBACK)
+
         rows.append(
-            f'<div class="combo-leg">'
-            f'<div class="combo-leg-top">'
-            f'<span class="combo-match">'
-            f'{_team_with_crest(it.get("home_crest"), home)}'
-            f'<span class="vs">vs</span>'
-            f'{_team_with_crest(it.get("away_crest"), away)}'
-            f'</span>'
-            f'<span class="combo-pct">{p_pct:.0f}%</span>'
+            f'<div class="cv2-leg">'
+            f'<div class="cv2-leg-match">'
+            f'<img src="{h_src}" class="cv2-crest" loading="lazy" width="16" height="16" '
+            f'onerror="this.src=\'{_fb_esc}\';this.onerror=null;"/>'
+            f'<span class="cv2-team">{home}</span>'
+            f'<span class="cv2-vs">vs</span>'
+            f'<img src="{a_src}" class="cv2-crest" loading="lazy" width="16" height="16" '
+            f'onerror="this.src=\'{_fb_esc}\';this.onerror=null;"/>'
+            f'<span class="cv2-team">{away}</span>'
             f'</div>'
-            f'<div class="combo-market">{html_lib.escape(str(market))}</div>'
-            f'{_combo_leg_kickoff_html(it)}'
+            f'<span class="cv2-mkt">{market}</span>'
+            f'<span class="cv2-leg-pct">{pct}%</span>'
             f'</div>'
         )
 
     return (
-        f'<div class="card combo-card home-premium-combo-card">'
-        f'<div class="combo-head">'
-        f'<div class="combo-title">{html_lib.escape(title)}</div>'
-        f'<span class="combo-tier home-combo-tier home-combo-tier--{html_lib.escape(tier_class)}">'
-        f'{html_lib.escape(tier_badge)}</span></div>'
-        f'<div class="combo-sub">'
-        f'<div class="home-combo-desc">{html_lib.escape(description)}</div>'
-        f'<div class="home-combo-stats muted">'
-        f'<span><b>{n}</b> selecciones</span>'
-        f'<span>Cuota total: <b>{html_lib.escape(odds_str)}</b></span>'
-        f'<span>Prob: <b>{html_lib.escape(prob_str)}</b></span>'
-        f'<span>AFTR combo: <b>{html_lib.escape(score_str)}</b></span>'
-        f'</div></div>'
-        f'<div class="combo-legs">{"".join(rows)}</div>'
+        f'<div class="card cv2 cv2--{tc} home-premium-combo-card">'
+        # Cabecera: badge de tier + título
+        f'<div class="cv2-head">'
+        f'<span class="cv2-badge cv2-badge--{tc}">{tb}</span>'
+        f'<span class="cv2-title">{ti}</span>'
+        f'</div>'
+        # Hero: cuota grande + barra de probabilidad
+        f'<div class="cv2-hero">'
+        f'<div class="cv2-odds-block">'
+        f'<div class="cv2-odds-num">{html_lib.escape(odds_str)}</div>'
+        f'<div class="cv2-odds-lbl">cuota</div>'
+        f'</div>'
+        f'<div class="cv2-prob-block">'
+        f'<div class="cv2-prob-row">'
+        f'<span class="cv2-prob-lbl">Probabilidad</span>'
+        f'<span class="cv2-prob-val">{html_lib.escape(prob_str)}</span>'
+        f'</div>'
+        f'<div class="cv2-bar">'
+        f'<div class="cv2-bar-fill cv2-bar-fill--{tc}" style="width:{prob_clamped:.0f}%"></div>'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+        # Separador tipo ticket
+        f'<div class="cv2-sep"></div>'
+        # Legs compactos
+        f'<div class="cv2-legs">{"".join(rows)}</div>'
+        # Footer: conteo + AFTR score badge
+        f'<div class="cv2-foot">'
+        f'<span class="cv2-count">{n} sel.</span>'
+        f'<span class="cv2-aftr-badge">AFTR {html_lib.escape(score_str)}</span>'
+        f'</div>'
         f'</div>'
     )
 

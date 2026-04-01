@@ -2070,10 +2070,229 @@ body{
   box-shadow: 0 0 14px rgba(239,68,68,.16);
 }
 
-/* Make legs list compact */
+/* Make legs list compact (legacy) */
 .home-premium-combo-card .combo-legs{ gap: 8px; }
 .home-premium-combo-card .combo-leg{ padding: 6px 0; }
 .home-premium-combo-card .combo-market{ font-size: 12px; }
+
+/* =========================
+   COMBO V2 — Cards compactos y visuales
+========================= */
+.cv2{
+  padding: 16px 18px 14px;
+  border-radius: 18px !important;
+  position: relative;
+  overflow: hidden;
+}
+.cv2--seguro{
+  background: linear-gradient(140deg, rgba(34,197,94,.09) 0%, var(--card-bg,#0f1520) 48%);
+  border-color: rgba(34,197,94,.22) !important;
+}
+.cv2--balanceado{
+  background: linear-gradient(140deg, rgba(234,179,8,.09) 0%, var(--card-bg,#0f1520) 48%);
+  border-color: rgba(234,179,8,.22) !important;
+}
+.cv2--value{
+  background: linear-gradient(140deg, rgba(239,68,68,.08) 0%, var(--card-bg,#0f1520) 48%);
+  border-color: rgba(239,68,68,.2) !important;
+}
+/* Cabecera */
+.cv2-head{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.cv2-badge{
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+.cv2-badge--seguro{
+  background: rgba(34,197,94,.2);
+  border-color: rgba(34,197,94,.4);
+  color: #4ade80;
+  box-shadow: 0 0 12px rgba(34,197,94,.22);
+}
+.cv2-badge--balanceado{
+  background: rgba(234,179,8,.18);
+  border-color: rgba(234,179,8,.4);
+  color: #fbbf24;
+  box-shadow: 0 0 12px rgba(234,179,8,.2);
+}
+.cv2-badge--value{
+  background: rgba(239,68,68,.15);
+  border-color: rgba(239,68,68,.38);
+  color: #f87171;
+  box-shadow: 0 0 10px rgba(239,68,68,.18);
+}
+.cv2-title{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(234,242,255,.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Hero: cuota + barra de probabilidad */
+.cv2-hero{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.cv2-odds-block{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 66px;
+  flex-shrink: 0;
+}
+.cv2-odds-num{
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.02em;
+}
+.cv2--seguro    .cv2-odds-num{ color: #4ade80; text-shadow: 0 0 22px rgba(34,197,94,.45); }
+.cv2--balanceado .cv2-odds-num{ color: #fbbf24; text-shadow: 0 0 22px rgba(234,179,8,.35); }
+.cv2--value     .cv2-odds-num{ color: #f87171; text-shadow: 0 0 18px rgba(239,68,68,.35); }
+.cv2-odds-lbl{
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted,rgba(148,163,184,.65));
+  margin-top: 3px;
+}
+.cv2-prob-block{
+  flex: 1;
+  min-width: 0;
+}
+.cv2-prob-row{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.cv2-prob-lbl{
+  font-size: 11px;
+  color: var(--muted,rgba(148,163,184,.65));
+}
+.cv2-prob-val{
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text,#eaf2ff);
+}
+.cv2-bar{
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.cv2-bar-fill{
+  height: 100%;
+  border-radius: 999px;
+}
+.cv2-bar-fill--seguro    { background: linear-gradient(90deg,#16a34a,#4ade80); }
+.cv2-bar-fill--balanceado{ background: linear-gradient(90deg,#b45309,#fbbf24); }
+.cv2-bar-fill--value     { background: linear-gradient(90deg,#b91c1c,#f87171); }
+/* Separador tipo ticket */
+.cv2-sep{
+  margin: 0 0 12px;
+  border-top: 1px dashed rgba(255,255,255,.09);
+}
+/* Legs compactos */
+.cv2-legs{
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.cv2-leg{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.cv2-leg-match{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.cv2-crest{
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.cv2-team{
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70px;
+}
+.cv2-vs{
+  font-size: 10px;
+  color: var(--muted,rgba(148,163,184,.6));
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.cv2-mkt{
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: rgba(234,242,255,.72);
+}
+.cv2-leg-pct{
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text,#eaf2ff);
+  flex-shrink: 0;
+  min-width: 30px;
+  text-align: right;
+}
+/* Footer */
+.cv2-foot{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cv2-count{
+  font-size: 11px;
+  color: var(--muted,rgba(148,163,184,.6));
+}
+.cv2-aftr-badge{
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  background: rgba(56,189,248,.12);
+  border: 1px solid rgba(56,189,248,.28);
+  color: #38bdf8;
+  letter-spacing: .03em;
+}
+.cv2-empty{
+  font-size: 13px;
+  padding: 20px 0 8px;
+  text-align: center;
+}
+
 .combo-card-slot{
   padding: 18px;
 }
