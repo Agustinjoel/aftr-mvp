@@ -234,14 +234,24 @@
 // Match Detail Drawer
 // ─────────────────────────────────────────────
 (function() {
-  var drawer = document.getElementById('match-drawer');
-  if (!drawer) return;
+  var drawer, body;
 
-  var body    = document.getElementById('match-drawer-body');
-  var overlay = drawer.querySelector('.match-drawer-overlay');
-  var closeBtn = drawer.querySelector('.match-drawer-close');
+  function initTabs(container) {
+    var tabs   = container.querySelectorAll('.md-tab');
+    var panels = container.querySelectorAll('.md-panel');
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        tabs.forEach(function(t) { t.classList.remove('active'); });
+        panels.forEach(function(p) { p.classList.add('md-panel--hidden'); });
+        tab.classList.add('active');
+        var panel = container.querySelector('[data-panel="' + tab.dataset.tab + '"]');
+        if (panel) panel.classList.remove('md-panel--hidden');
+      });
+    });
+  }
 
   function open(league, matchId) {
+    if (!drawer) return;
     drawer.classList.add('open');
     drawer.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -258,13 +268,22 @@
   }
 
   function close() {
+    if (!drawer) return;
     drawer.classList.remove('open');
     drawer.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   }
 
-  if (overlay) overlay.addEventListener('click', close);
-  if (closeBtn) closeBtn.addEventListener('click', close);
+  function bootDrawer() {
+    drawer = document.getElementById('match-drawer');
+    if (!drawer) return;
+    body = document.getElementById('match-drawer-body');
+    var overlay  = drawer.querySelector('.match-drawer-overlay');
+    var closeBtn = drawer.querySelector('.match-drawer-close');
+    if (overlay)  overlay.addEventListener('click', close);
+    if (closeBtn) closeBtn.addEventListener('click', close);
+  }
+
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') close();
   });
@@ -277,17 +296,9 @@
     if (league && matchId) open(league, matchId);
   });
 
-  function initTabs(container) {
-    var tabs   = container.querySelectorAll('.md-tab');
-    var panels = container.querySelectorAll('.md-panel');
-    tabs.forEach(function(tab) {
-      tab.addEventListener('click', function() {
-        tabs.forEach(function(t) { t.classList.remove('active'); });
-        panels.forEach(function(p) { p.classList.add('md-panel--hidden'); });
-        tab.classList.add('active');
-        var panel = container.querySelector('[data-panel= + tab.dataset.tab + ]');
-        if (panel) panel.classList.remove('md-panel--hidden');
-      });
-    });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootDrawer);
+  } else {
+    bootDrawer();
   }
 })();
