@@ -699,6 +699,24 @@ h2::after{
   opacity: .65;
   cursor: not-allowed;
 }
+.pick-actions-wrap{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pick-detail-link{
+  width: 100%;
+  background: none;
+  border: none;
+  color: rgba(148,163,184,.55);
+  font-size: 11px;
+  text-align: center;
+  cursor: pointer;
+  padding: 2px 0 0;
+  letter-spacing: .02em;
+  transition: color .15s;
+}
+.pick-detail-link:hover{ color: rgba(148,163,184,.9); }
 
 /* =========================
    FINISHED PICK STATUS

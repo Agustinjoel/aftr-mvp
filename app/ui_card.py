@@ -547,10 +547,11 @@ def _render_pick_card(
         league_attr  = html_lib.escape(str(p.get("_league") or p.get("league") or ""))
         mid_attr     = str(mid_val) if mid_val is not None else ""
         detail_btn   = (
-            f'<button type="button" class="btn-match-detail pill pick-action-btn"'
-            f' data-league="{league_attr}" data-match-id="{mid_attr}">📊 Ver partido</button>'
+            f'<button type="button" class="btn-match-detail pick-detail-link"'
+            f' data-league="{league_attr}" data-match-id="{mid_attr}">📊 Ver datos del partido →</button>'
         ) if league_attr and mid_attr else ""
         pick_actions_html = (
+            f'<div class="pick-actions-wrap">'
             f'<div class="pick-actions aftr-actions">'
             f'<button type="button" class="btn-favorite-pick pill pick-action-btn"'
             f' data-pick-id="{pick_id_attr}" data-market="{market_attr}"'
@@ -562,6 +563,7 @@ def _render_pick_card(
             f' data-aftr-score="{aftr_score_val}" data-tier="{html_lib.escape(tier)}"'
             f' data-edge="{edge_attr}" data-home-team="{home_team_attr}" data-away-team="{away_team_attr}">'
             f'📈 Seguir pick</button>'
+            f'</div>'
             f'{detail_btn}'
             f'</div>'
         )
