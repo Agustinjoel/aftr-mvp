@@ -970,10 +970,8 @@ def user_set_favorite_team(request: Request, payload: dict = Body(...)):
 
 @router.get("/available-teams")
 def user_available_teams(request: Request):
-    """Return all unique teams found across cached picks/matches + DB history for team selector."""
-    uid, err = _require_user(request)
-    if err is not None:
-        return err
+    """Return all unique teams found across cached picks/matches + DB history for team selector.
+    No auth required — team names are public data."""
     from data.cache import read_json_with_fallback
     from config.settings import settings
     seen: dict[str, dict] = {}

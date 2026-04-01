@@ -745,8 +745,22 @@ def account_page(request: Request):
       var base = window.location.origin;
       var allTeams = [];
       var searchInput = document.getElementById('team-search-input');
-      var grid       = document.getElementById('team-grid');
-      var saveMsg    = document.getElementById('team-save-msg');
+      var grid        = document.getElementById('team-grid');
+      var saveMsg     = document.getElementById('team-save-msg');
+
+      function chipHtml(t) {{
+        var crest = t.team_crest
+          ? '<img src="' + t.team_crest + '" class="team-chip-crest" alt="" onerror="this.style.display=\'none\'">'
+          : '';
+        var safeName  = t.team_name.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+        var safeCrest = (t.team_crest||'').replace(/"/g,'&quot;');
+        var safeId    = (t.team_id||'').replace(/"/g,'&quot;');
+        return '<button type="button" class="team-chip"'
+          + ' data-name="' + safeName + '"'
+          + ' data-crest="' + safeCrest + '"'
+          + ' data-id="' + safeId + '">'
+          + crest + '<span class="team-chip-name">' + t.team_name + '</span></button>';
+      }}
 
       function renderGrid(teams) {{
         if (!grid) return;
@@ -754,64 +768,71 @@ def account_page(request: Request):
           grid.innerHTML = '<p class="muted team-grid-hint">Sin resultados.</p>';
           return;
         }}
-        grid.innerHTML = teams.slice(0, 60).map(function(t) {{
-          var crest = t.team_crest
-            ? '<img src="' + t.team_crest + '" class="team-chip-crest" alt="" onerror="this.style.display=\'none\'">'
-            : '';
-          return '<button type="button" class="team-chip" data-name="' + t.team_name.replace(/"/g,'&quot;') + '" data-crest="' + (t.team_crest||'').replace(/"/g,'&quot;') + '" data-id="' + (t.team_id||'').replace(/"/g,'&quot;') + '">'
-            + crest + '<span class="team-chip-name">' + t.team_name + '</span></button>';
-        }}).join('');
+        grid.innerHTML = teams.slice(0, 80).map(chipHtml).join('');
+      }}
+
+      function filterAndRender() {{
+        var q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+        if (!q) {{ renderGrid(allTeams.slice(0, 80)); return; }}
+        renderGrid(allTeams.filter(function(t) {{
+          return t.team_name.toLowerCase().indexOf(q) !== -1;
+        }}));
       }}
 
       function saveTeam(name, crest, id) {{
+        if (saveMsg) {{ saveMsg.textContent = 'Guardando…'; saveMsg.style.display='block'; saveMsg.className='team-save-msg'; }}
         fetch(base + '/user/favorite-team', {{
           method: 'POST',
           headers: {{ 'Content-Type': 'application/json' }},
           credentials: 'include',
           body: JSON.stringify({{ team_name: name, team_crest: crest, team_id: id }})
-        }}).then(function(r) {{ return r.json(); }}).then(function(d) {{
+        }})
+        .then(function(r) {{ return r.json(); }})
+        .then(function(d) {{
           if (d.ok) {{
-            // update hero display
+            var img = crest ? '<img src="' + crest + '" class="hero-fav-crest" alt="" onerror="this.style.display=\'none\'">' : '';
+            var inner = img + '<span class="hero-fav-name">' + name + '</span>';
             var heroEl = document.getElementById('hero-fav-team');
-            if (heroEl) {{
-              var img = crest ? '<img src="' + crest + '" class="hero-fav-crest" alt="" onerror="this.style.display=\'none\'">' : '';
-              heroEl.className = 'hero-fav-team';
-              heroEl.innerHTML = img + '<span class="hero-fav-name">' + name + '</span>';
-            }}
+            if (heroEl) {{ heroEl.className='hero-fav-team'; heroEl.innerHTML=inner; }}
             var curEl = document.getElementById('team-current-display');
-            if (curEl) {{
-              var img2 = crest ? '<img src="' + crest + '" class="hero-fav-crest" alt="" onerror="this.style.display=\'none\'">' : '';
-              curEl.innerHTML = '<div class="hero-fav-team">' + img2 + '<span class="hero-fav-name">' + name + '</span></div>';
-            }}
-            if (saveMsg) {{ saveMsg.textContent = '✓ Equipo guardado: ' + name; saveMsg.style.display='block'; saveMsg.className='team-save-msg team-save-msg--ok'; }}
+            if (curEl) curEl.innerHTML = '<div class="hero-fav-team">' + inner + '</div>';
+            if (saveMsg) {{ saveMsg.textContent='✓ Guardado: ' + name; saveMsg.className='team-save-msg team-save-msg--ok'; }}
           }} else {{
-            if (saveMsg) {{ saveMsg.textContent = 'Error al guardar.'; saveMsg.style.display='block'; saveMsg.className='team-save-msg team-save-msg--err'; }}
+            if (saveMsg) {{ saveMsg.textContent='Error al guardar.'; saveMsg.className='team-save-msg team-save-msg--err'; }}
           }}
           setTimeout(function() {{ if(saveMsg) saveMsg.style.display='none'; }}, 3000);
+        }})
+        .catch(function() {{
+          if (saveMsg) {{ saveMsg.textContent='Error de red.'; saveMsg.className='team-save-msg team-save-msg--err'; saveMsg.style.display='block'; }}
         }});
       }}
 
+      // Click delegation on the grid
       if (grid) grid.addEventListener('click', function(e) {{
         var btn = e.target.closest('.team-chip');
         if (!btn) return;
-        saveTeam(btn.dataset.name, btn.dataset.crest, btn.dataset.id);
         grid.querySelectorAll('.team-chip').forEach(function(b) {{ b.classList.remove('active'); }});
         btn.classList.add('active');
+        saveTeam(btn.dataset.name || '', btn.dataset.crest || '', btn.dataset.id || '');
       }});
 
-      if (searchInput) searchInput.addEventListener('input', function() {{
-        var q = this.value.trim().toLowerCase();
-        if (!q) {{ renderGrid([]); grid.innerHTML='<p class="muted team-grid-hint">Escribí para buscar tu equipo</p>'; return; }}
-        if (!allTeams.length) {{
-          fetch(base + '/user/available-teams', {{ credentials: 'include' }})
-            .then(function(r) {{ return r.json(); }})
-            .then(function(d) {{ allTeams = d.teams || []; filter(q); }});
-        }} else {{ filter(q); }}
-      }});
+      if (searchInput) searchInput.addEventListener('input', filterAndRender);
 
-      function filter(q) {{
-        renderGrid(allTeams.filter(function(t) {{ return t.team_name.toLowerCase().indexOf(q) !== -1; }}));
-      }}
+      // Eager load — fetch teams on page load, no typing required
+      if (grid) grid.innerHTML = '<p class="muted team-grid-hint">Cargando equipos…</p>';
+      fetch(base + '/user/available-teams')
+        .then(function(r) {{ return r.json(); }})
+        .then(function(d) {{
+          allTeams = d.teams || [];
+          if (!allTeams.length) {{
+            if (grid) grid.innerHTML = '<p class="muted team-grid-hint">No hay equipos cargados aún. Volvé después del próximo refresh.</p>';
+            return;
+          }}
+          filterAndRender();
+        }})
+        .catch(function() {{
+          if (grid) grid.innerHTML = '<p class="muted team-grid-hint">No se pudieron cargar los equipos.</p>';
+        }});
     }})();
     </script>"""
     return _simple_page("Mi cuenta — AFTR", body)
