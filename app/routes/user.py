@@ -641,7 +641,10 @@ def user_favorites(request: Request):
     uid, err = _require_user(request)
     if err is not None:
         return err
-    by_id, by_triple, matches_idx, matches_by_team = _get_resolution_maps_cached()
+    try:
+        by_id, by_triple, matches_idx, matches_by_team = _get_resolution_maps_cached()
+    except Exception:
+        by_id, by_triple, matches_idx, matches_by_team = {}, {}, {}, {}
     items: list[dict] = []
     try:
         conn = get_conn()
@@ -826,7 +829,10 @@ def user_history(request: Request):
     uid, err = _require_user(request)
     if err is not None:
         return err
-    _sync_followed_picks_for_user(uid)
+    try:
+        _sync_followed_picks_for_user(uid)
+    except Exception:
+        pass
     items: list[dict] = []
     try:
         conn = get_conn()
@@ -964,26 +970,53 @@ def user_set_favorite_team(request: Request, payload: dict = Body(...)):
 
 @router.get("/available-teams")
 def user_available_teams(request: Request):
-    """Return all unique teams found across cached picks/matches for team selector."""
+    """Return all unique teams found across cached picks/matches + DB history for team selector."""
+    uid, err = _require_user(request)
+    if err is not None:
+        return err
     from data.cache import read_json_with_fallback
     from config.settings import settings
     seen: dict[str, dict] = {}
+
+    def _add(name: str | None, crest: str | None, team_id: str = "") -> None:
+        if not name or not isinstance(name, str) or not name.strip():
+            return
+        key = name.strip().lower()
+        if key not in seen:
+            seen[key] = {"team_name": name.strip(), "team_crest": crest or "", "team_id": team_id}
+
+    # 1. From JSON cache files (fastest, most complete when populated)
     for code in settings.league_codes():
         for source in [f"daily_matches_{code}.json", f"daily_picks_{code}.json"]:
             items = read_json_with_fallback(source)
             if not isinstance(items, list):
                 continue
             for item in items:
-                for prefix in [("home_team", "home_crest"), ("away_team", "away_crest")]:
-                    name = item.get(prefix[0]) or item.get("home") or item.get("away")
-                    crest = item.get(prefix[1]) or item.get("home_crest") or item.get("away_crest")
-                    if name and isinstance(name, str) and name.strip():
-                        key = name.strip().lower()
-                        if key not in seen:
-                            seen[key] = {
-                                "team_name": name.strip(),
-                                "team_crest": crest or "",
-                                "team_id": str(item.get("home_id") or item.get("away_id") or ""),
-                            }
+                _add(item.get("home_team") or item.get("home"),
+                     item.get("home_crest"),
+                     str(item.get("home_id") or ""))
+                _add(item.get("away_team") or item.get("away"),
+                     item.get("away_crest"),
+                     str(item.get("away_id") or ""))
+
+    # 2. Fallback: from DB user_picks/user_favorites (always available, no crest)
+    if len(seen) < 10:
+        try:
+            conn = get_conn()
+            try:
+                cur = conn.cursor()
+                cur.execute("SELECT DISTINCT home_team, away_team FROM user_picks WHERE home_team IS NOT NULL LIMIT 500")
+                for row in cur.fetchall():
+                    _add(row.get("home_team"), None)
+                    _add(row.get("away_team"), None)
+                cur.execute("SELECT DISTINCT home_team, away_team FROM user_favorites WHERE home_team IS NOT NULL LIMIT 500")
+                for row in cur.fetchall():
+                    _add(row.get("home_team"), None)
+                    _add(row.get("away_team"), None)
+            finally:
+                put_conn(conn)
+        except Exception:
+            pass
+
     teams = sorted(seen.values(), key=lambda t: t["team_name"])
     return JSONResponse({"ok": True, "teams": teams})

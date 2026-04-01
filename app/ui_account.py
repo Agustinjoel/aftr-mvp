@@ -119,7 +119,11 @@ def account_page(request: Request):
     email_display = html_lib.escape(str(user.get("email") or "").strip())
     created_display = _account_created_display(user.get("created_at"))
     uid = user.get("id")
-    is_premium = is_premium_active(user) or (get_active_plan(uid) if uid else "") in (settings.plan_premium, settings.plan_pro)
+    is_premium = (
+        is_admin(user, request)
+        or is_premium_active(user)
+        or (get_active_plan(uid) if uid else "") in (settings.plan_premium, settings.plan_pro)
+    )
     plan_label = "⭐ AFTR Premium activo" if is_premium else "Free plan"
     plan_class = "account-plan-premium" if is_premium else "account-plan-free"
     upgrade_cta = (
@@ -493,7 +497,11 @@ def account_page(request: Request):
             .catch(function() {{ unfollowBtn.disabled = false; }});
         }}
       }});
-      Promise.all([fetchJSON(base + "/user/stats"), fetchJSON(base + "/user/history"), fetchJSON(base + "/user/favorites")]).then(function(results) {{
+      Promise.all([
+        fetchJSON(base + "/user/stats").catch(function() {{ return {{ok:false}}; }}),
+        fetchJSON(base + "/user/history").catch(function() {{ return {{ok:false, history:[]}}; }}),
+        fetchJSON(base + "/user/favorites").catch(function() {{ return {{ok:false, favorites:[]}}; }})
+      ]).then(function(results) {{
         var stats = results[0];
         var history = results[1];
         var favorites = results[2];
@@ -724,10 +732,10 @@ def account_page(request: Request):
           if (c) c.innerHTML = "<div class=\\"card\\" style=\\"padding: 20px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No se pudo cargar el historial.</p></div>";
         }}
       }}).catch(function() {{
-        var c = document.getElementById("account-history");
-        if (c) c.innerHTML = "<p class=\\"muted\\" style=\\"margin: 0;\\">Error al cargar datos.</p>";
-        var favEl = document.getElementById("account-favorites");
-        if (favEl) favEl.innerHTML = "<div class=\\"card\\" style=\\"padding: 16px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">Error al cargar favoritos.</p></div>";
+        // Individual catches above should prevent this from firing
+        var emptyMsg = "<div class=\\"card\\" style=\\"padding:16px;\\"><p class=\\"muted\\" style=\\"margin:0;\\">Sin datos por ahora.</p></div>";
+        var els = ["account-history","account-favorites","account-active-picks"];
+        els.forEach(function(id) {{ var el=document.getElementById(id); if(el && el.innerHTML.indexOf("Cargando")>-1) el.innerHTML=emptyMsg; }});
       }});
     }})();
     </script>
