@@ -284,8 +284,17 @@ def dashboard(request: Request, league: str):
     league_combos_html = f"""
     <section class="home-section">
       <h2 class="home-h2">Combos de Hoy</h2>
-      <div class="home-combos-grid">
-        {combos_section_html}
+      <div class="combos-car" data-combos-carousel>
+        <div class="combos-car__viewport">
+          <div class="combos-car__track">
+            {combos_section_html}
+          </div>
+        </div>
+        <div class="combos-car__controls">
+          <button type="button" class="combos-car__btn combos-car__btn--prev" aria-label="Combo anterior">&#8249;</button>
+          <div class="combos-car__dots"></div>
+          <button type="button" class="combos-car__btn combos-car__btn--next" aria-label="Siguiente combo">&#8250;</button>
+        </div>
       </div>
     </section>
     """
@@ -624,23 +633,39 @@ def dashboard(request: Request, league: str):
     </script>
     """
 
-    # summary bar + premium ROI / performance block
+    # Mercado rows compactos (inline) para panel unificado
+    market_slice = market_rows[:8]
+    market_inline_rows = ""
+    for r in market_slice:
+        net = r["net_units"]
+        net_cls = "mkt-row-net--pos" if net >= 0 else "mkt-row-net--neg"
+        wr_str = f"{r['winrate']}%" if r["winrate"] is not None else "—"
+        market_inline_rows += (
+            f'<div class="mkt-row">'
+            f'<span class="mkt-row-name">{html_lib.escape(str(r["market"]))}</span>'
+            f'<span class="mkt-row-wl muted">W{r["wins"]}-L{r["losses"]}</span>'
+            f'<span class="mkt-row-wr muted">{wr_str}</span>'
+            f'<span class="mkt-row-net {net_cls}">{("+" if net >= 0 else "")}{net}u</span>'
+            f'</div>'
+        )
+    if not market_inline_rows:
+        market_inline_rows = '<p class="muted" style="padding:8px 0">Sin datos todavía.</p>'
+
+    # Panel unificado: KPI oculto (JS lo sigue usando) + Rendimiento + Mercado expandible
     page_html += f"""
       <div class="league-dash-panel">
-      <div id="summary-bar" class="summary-bar league-kpi-strip" data-league="{league}">
-        <div class="kpi-grid league-kpi-grid">
-          <div class="kpi-card"><span class="kpi-label">ROI</span><span class="kpi-value" id="kpi-roi">—</span></div>
-          <div class="kpi-card"><span class="kpi-label">Selecciones totales</span><span class="kpi-value" id="kpi-total">—</span></div>
-          <div class="kpi-card"><span class="kpi-label">Gana</span><span class="kpi-value" id="kpi-wins">—</span></div>
-          <div class="kpi-card"><span class="kpi-label">Pérdidas</span><span class="kpi-value" id="kpi-losses">—</span></div>
-          <div class="kpi-card"><span class="kpi-label">Pendiente</span><span class="kpi-value" id="kpi-pending">—</span></div>
-          <div class="kpi-card"><span class="kpi-label">Beneficio neto</span><span class="kpi-value" id="kpi-net">—</span></div>
-        </div>
+
+      <!-- KPI strip oculto: el JS lo usa para actualizar valores via /api/stats/summary -->
+      <div id="summary-bar" class="league-kpi-hidden" data-league="{league}" aria-hidden="true">
+        <span id="kpi-roi"></span><span id="kpi-total"></span>
+        <span id="kpi-wins"></span><span id="kpi-losses"></span>
+        <span id="kpi-pending"></span><span id="kpi-net"></span>
       </div>
+
       <section class="league-perf-block perf-panel-premium" aria-label="Rendimiento">
         <div class="perf-panel-head">
           <h2 class="perf-panel-title">Rendimiento</h2>
-          <p class="perf-panel-sub muted">Últimos días · unidades netas en esta liga</p>
+          <p class="perf-panel-sub muted">Unidades netas · histórico de picks resueltos</p>
         </div>
         <div class="perf-panel-glass league-perf-chart-shell">
           <div class="perf-strip-stats" role="group" aria-label="Resumen de rendimiento">
@@ -652,11 +677,15 @@ def dashboard(request: Request, league: str):
             </div>
             <div class="perf-stat-tile{' perf-stat-tile--pos' if league_accum_pos else ''}{' perf-stat-tile--neg' if league_accum_neg else ''}">
               <span class="perf-stat-value" id="perf-strip-accum">{league_perf_accum:+.2f}u</span>
-              <span class="perf-stat-label">Profit acumulado</span>
+              <span class="perf-stat-label">Profit acum.</span>
             </div>
             <div class="perf-stat-tile{' perf-stat-tile--pos' if league_day_pos else ''}{' perf-stat-tile--neg' if league_day_neg else ''}">
               <span class="perf-stat-value" id="perf-strip-day">{league_perf_day:+.2f}u</span>
               <span class="perf-stat-label">Último día</span>
+            </div>
+            <div class="perf-stat-tile perf-stat-tile--neutral">
+              <span class="perf-stat-value"><span id="kpi-wins-v">—</span>/<span id="kpi-losses-v">—</span></span>
+              <span class="perf-stat-label">W / L</span>
             </div>
           </div>
           <div class="roi-spark-head perf-chart-head-inner">
@@ -668,14 +697,45 @@ def dashboard(request: Request, league: str):
           <div class="roi-spark-canvas perf-chart-canvas-wrap">
             {league_roi_chart_body}
           </div>
+          <details class="perf-market-details">
+            <summary class="perf-market-toggle">
+              Por mercado
+              <span class="perf-market-count">{len(market_slice)} mercados</span>
+              <span class="perf-market-chevron">›</span>
+            </summary>
+            <div class="perf-market-rows">
+              {market_inline_rows}
+            </div>
+          </details>
         </div>
       </section>
       </div>
 
       <script>
         window.AFTR_ROI_POINTS = {json.dumps(spark_points)};
+        // Populate W/L tiles from async KPI data once loaded
+        (function() {{
+          var bar = document.getElementById('summary-bar');
+          if (!bar) return;
+          var league = bar.dataset.league;
+          fetch('/api/stats/summary?league=' + league)
+            .then(function(r){{ return r.json(); }})
+            .then(function(d){{
+              var wins = d.wins ?? d.won ?? '—';
+              var losses = d.losses ?? d.lost ?? '—';
+              var wv = document.getElementById('kpi-wins-v');
+              var lv = document.getElementById('kpi-losses-v');
+              if (wv) wv.textContent = wins;
+              if (lv) lv.textContent = losses;
+              // Also populate hidden spans for any other JS that uses them
+              ['roi','total','wins','losses','pending','net'].forEach(function(k){{
+                var el = document.getElementById('kpi-' + k);
+                if (el && d[k] !== undefined) el.textContent = d[k];
+              }});
+            }}).catch(function(){{}});
+        }})();
       </script>
-    
+
       <script>
         if ("serviceWorker" in navigator) {{
           window.addEventListener("load", function () {{
@@ -683,36 +743,6 @@ def dashboard(request: Request, league: str):
           }});
         }}
       </script>
-    """
-
-    # Profit por mercado — compact grid (2 cols on desktop), aligned with dashboard width
-    market_slice = market_rows[:8]
-    market_cards_html = ""
-    for r in market_slice:
-        wr = f" • {r['winrate']}%" if r["winrate"] is not None else ""
-        net_cls = "market-compact-net--pos" if r["net_units"] >= 0 else "market-compact-net--neg"
-        market_cards_html += f"""
-          <div class="market-compact-card card">
-            <div class="market-compact-top">
-              <div class="market-compact-name">{html_lib.escape(str(r["market"]))}</div>
-              <div class="market-compact-net {net_cls}">{("+" if r["net_units"]>=0 else "")}{r["net_units"]}u</div>
-            </div>
-            <div class="market-compact-meta muted">{r["picks"]} picks · W{r["wins"]}-L{r["losses"]}{wr}</div>
-            <div class="market-bar market-bar--compact">
-              <div class="market-fill" data-u="{r["net_units"]}"></div>
-              <div class="market-val">{("+" if r["net_units"]>=0 else "") + str(r["net_units"])}u</div>
-            </div>
-          </div>"""
-    if not market_cards_html:
-        market_cards_html = '<p class="muted market-compact-empty">Sin datos de mercado todavía.</p>'
-    page_html += f"""
-      <section class="league-market-section">
-        <h2 class="league-market-title home-h2">💰 Ganancia por mercado</h2>
-        <p class="league-market-intro muted">Unidades netas por mercado (histórico resuelto en esta liga).</p>
-        <div class="market-compact-grid">
-          {market_cards_html}
-        </div>
-      </section>
     """
 
     # Combos after performance blocks (ROI + mercado)

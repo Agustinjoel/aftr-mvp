@@ -3971,6 +3971,10 @@ canvas{
   margin: 0 auto 20px;
   padding: 0 2px;
 }
+/* KPI strip ahora oculto — JS sigue usándolo internamente */
+.league-kpi-hidden{
+  display: none !important;
+}
 .league-kpi-strip{
   margin-bottom: 16px;
 }
@@ -3983,6 +3987,88 @@ canvas{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Panel de Rendimiento: 4to tile W/L */
+.perf-stat-tile--neutral{
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+}
+
+/* Mercado expandible dentro del panel */
+.perf-market-details{
+  margin-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.07);
+  padding-top: 12px;
+}
+.perf-market-toggle{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(234,242,255,.8);
+  user-select: none;
+}
+.perf-market-toggle::-webkit-details-marker{ display: none; }
+.perf-market-count{
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted,rgba(148,163,184,.65));
+  background: rgba(255,255,255,.07);
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+.perf-market-chevron{
+  margin-left: auto;
+  font-size: 16px;
+  color: var(--muted,rgba(148,163,184,.5));
+  transition: transform .2s ease;
+}
+.perf-market-details[open] .perf-market-chevron{
+  transform: rotate(90deg);
+}
+.perf-market-rows{
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mkt-row{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  font-size: 13px;
+}
+.mkt-row:last-child{ border-bottom: none; }
+.mkt-row-name{
+  flex: 1;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mkt-row-wl{
+  font-size: 12px;
+  min-width: 52px;
+  text-align: center;
+}
+.mkt-row-wr{
+  font-size: 12px;
+  min-width: 36px;
+  text-align: right;
+}
+.mkt-row-net{
+  font-size: 13px;
+  font-weight: 800;
+  min-width: 44px;
+  text-align: right;
+}
+.mkt-row-net--pos{ color: #4ade80; }
+.mkt-row-net--neg{ color: #f87171; }
 .league-roi-panel{
   padding: 18px 16px 16px;
   margin-top: 0;
