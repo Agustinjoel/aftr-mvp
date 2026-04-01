@@ -212,14 +212,10 @@ def form_diff_from_stats(stats_home: dict, stats_away: dict) -> float:
             ga = 0.0
         return gf - ga
 
-    n = max(
-        1,
-        int(stats_home.get("n") or 0) if isinstance(stats_home.get("n"), (int, float)) else 1,
-        int(stats_away.get("n") or 0) if isinstance(stats_away.get("n"), (int, float)) else 1,
-    )
+    # gf/ga in stats are already per-game averages — diff is direct, no extra division needed
     home_gd = gd(stats_home or {})
     away_gd = gd(stats_away or {})
-    diff = (home_gd - away_gd) / n
+    diff = home_gd - away_gd
     return clamp(diff, -2.0, 2.0)
 
 

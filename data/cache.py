@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import logging
 import threading
+import time as _time
 from datetime import datetime, timezone
 from typing import Any
 
@@ -16,6 +17,10 @@ _logger = logging.getLogger("aftr.cache")
 
 # Debug: resolved CACHE_DIR at import (same as web/refresh process)
 _logger.info("CACHE_DIR resolved: %s", str(CACHE_DIR))
+
+# TTL cache de proceso para lecturas JSON (evita I/O repetido en el mismo ciclo de requests)
+_json_read_cache: dict[str, tuple[float, Any]] = {}
+_JSON_CACHE_TTL_SEC = 5.0
 
 
 def _is_valid_cache_data(data: Any, filename: str) -> bool:
@@ -32,13 +37,20 @@ def _is_valid_cache_data(data: Any, filename: str) -> bool:
 
 
 def read_json(filename: str) -> list[Any] | dict[str, Any]:
-    """Lee desde CACHE_DIR; si no existe, desde DAILY_DIR (fallback solo lectura). Si no encuentra nada, []."""
+    """Lee desde CACHE_DIR; si no existe, desde DAILY_DIR (fallback solo lectura). Si no encuentra nada, [].
+    Mantiene un TTL cache de proceso de 5s para evitar I/O repetido en el mismo ciclo de requests."""
+    now = _time.monotonic()
+    cached = _json_read_cache.get(filename)
+    if cached is not None and (now - cached[0]) < _JSON_CACHE_TTL_SEC:
+        return cached[1]
+
     path = CACHE_DIR / filename
     if path.exists():
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
         n = len(data) if isinstance(data, list) else (len(data) if isinstance(data, dict) else 0)
         _logger.info("read_json: %s -> %s items (from %s)", filename, n, str(path))
+        _json_read_cache[filename] = (now, data)
         return data
     daily_path = DAILY_DIR / filename
     if daily_path.exists():
@@ -46,6 +58,7 @@ def read_json(filename: str) -> list[Any] | dict[str, Any]:
             data = json.load(f)
         n = len(data) if isinstance(data, list) else (len(data) if isinstance(data, dict) else 0)
         _logger.info("read_json: %s -> %s items (from daily fallback %s)", filename, n, str(daily_path))
+        _json_read_cache[filename] = (now, data)
         return data
     _logger.info("read_json: %s -> not found (checked %s and %s)", filename, str(path), str(daily_path))
     return []
@@ -210,7 +223,8 @@ def try_begin_global_refresh_busy() -> bool:
 
 
 def write_json(filename: str, data: Any) -> None:
-    """Guarda en CACHE_DIR (AFTR_CACHE_DIR)."""
+    """Guarda en CACHE_DIR (AFTR_CACHE_DIR). Invalida el TTL cache del archivo al escribir."""
+    _json_read_cache.pop(filename, None)
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path = CACHE_DIR / filename
     with open(path, "w", encoding="utf-8") as f:

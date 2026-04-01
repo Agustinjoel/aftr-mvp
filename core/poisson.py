@@ -16,26 +16,60 @@ def _clamp(x: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, x))
 
 
+def _dixon_coles_tau(h: int, a: int, xg_home: float, xg_away: float, rho: float = -0.13) -> float:
+    """
+    Factor de corrección Dixon-Coles para scorelines de baja anotación.
+
+    El modelo Poisson estándar subestima 0-0 y 1-1 en fútbol (son más frecuentes
+    de lo que predice la distribución). Dixon & Coles (1997) propusieron ajustar
+    los primeros 4 scorelines con un parámetro ρ (rho).
+
+    Con ρ = -0.13 (valor empírico típico en fútbol europeo):
+      - τ(0,0) = 1 + 0.13·λ·μ  → infla el 0-0 (más probable de lo que dice Poisson)
+      - τ(1,1) = 1.13            → infla el 1-1
+      - τ(1,0) y τ(0,1) < 1     → deflaciona ligeramente 1-0 y 0-1
+
+    Para todos los demás scorelines (total ≥ 3), el factor es 1.0 (sin cambio).
+    """
+    if h == 0 and a == 0:
+        return 1.0 - xg_home * xg_away * rho
+    if h == 1 and a == 0:
+        return 1.0 + xg_away * rho
+    if h == 0 and a == 1:
+        return 1.0 + xg_home * rho
+    if h == 1 and a == 1:
+        return 1.0 - rho
+    return 1.0
+
+
 def match_probs(
     xg_home: float,
     xg_away: float,
     max_goals: int = 8,
+    dc_rho: float = -0.13,
 ) -> dict[str, float]:
     """
-    Probabilidades por scorelines (hasta max_goals):
+    Probabilidades por scorelines (hasta max_goals) con corrección Dixon-Coles.
+
     - p_home_win, p_draw, p_away_win (1X2)
     - Derivados: 1X = home+draw, X2 = away+draw, 12 = home+away
-    - Over/Under 2.5, Over 1.5, BTTS.
+    - Over/Under 1.5, Over/Under 2.5, Over 3.5, BTTS
+
+    dc_rho: parámetro Dixon-Coles (default -0.13, valor empírico para fútbol europeo).
+    Pasá dc_rho=0.0 para desactivar la corrección y usar Poisson puro.
     """
     p_home_win = p_draw = p_away_win = 0.0
-    p_under25 = p_over25 = p_over15 = 0.0
+    p_under15 = p_over15 = 0.0
+    p_under25 = p_over25 = 0.0
+    p_over35 = 0.0
     p_btts_yes = p_btts_no = 0.0
 
     for h in range(max_goals + 1):
         ph = poisson_pmf(xg_home, h)
         for a in range(max_goals + 1):
             pa = poisson_pmf(xg_away, a)
-            p = ph * pa
+            # Dixon-Coles: ajusta probabilidad de scorelines 0-0, 1-0, 0-1, 1-1
+            p = ph * pa * _dixon_coles_tau(h, a, xg_home, xg_away, dc_rho)
 
             if h > a:
                 p_home_win += p
@@ -45,26 +79,43 @@ def match_probs(
                 p_away_win += p
 
             total = h + a
+            if total <= 1:
+                p_under15 += p
+            else:
+                p_over15 += p
             if total <= 2:
                 p_under25 += p
             else:
                 p_over25 += p
-            if total >= 2:
-                p_over15 += p
+            if total > 3:
+                p_over35 += p
+
             if h >= 1 and a >= 1:
                 p_btts_yes += p
             else:
                 p_btts_no += p
 
+    # Normalizar cada mercado a probabilidades que suman 1
     s = p_home_win + p_draw + p_away_win
     if s > 0:
         p_home_win /= s
         p_draw /= s
         p_away_win /= s
+
+    s15 = p_under15 + p_over15
+    if s15 > 0:
+        p_under15 /= s15
+        p_over15 /= s15
+
     so = p_under25 + p_over25
     if so > 0:
         p_under25 /= so
         p_over25 /= so
+
+    # Over 3.5: complemento es la suma de todos los Under 3.5
+    s35 = (1.0 - (p_over35 / (s or 1.0))) + p_over35  # renormalizamos junto al total
+    p_over35 = p_over35 / (s or 1.0) if s > 0 else p_over35
+
     sb = p_btts_yes + p_btts_no
     if sb > 0:
         p_btts_yes /= sb
@@ -82,9 +133,11 @@ def match_probs(
         "1x": round(p_1x, 4),
         "x2": round(p_x2, 4),
         "12": round(p_12, 4),
+        "under_15": round(p_under15, 4),
+        "over_15": round(p_over15, 4),
         "under_25": round(p_under25, 4),
         "over_25": round(p_over25, 4),
-        "over_15": round(p_over15, 4),
+        "over_35": round(p_over35, 4),
         "btts_yes": round(p_btts_yes, 4),
         "btts_no": round(p_btts_no, 4),
     }
@@ -124,9 +177,11 @@ CANDIDATE_MARKETS = [
     ("1X", "1x"),
     ("X2", "x2"),
     ("12", "12"),
+    ("Under 1.5", "under_15"),
     ("Over 1.5", "over_15"),
-    ("Over 2.5", "over_25"),
     ("Under 2.5", "under_25"),
+    ("Over 2.5", "over_25"),
+    ("Over 3.5", "over_35"),
     ("BTTS Yes", "btts_yes"),
     ("BTTS No", "btts_no"),
 ]
@@ -142,6 +197,8 @@ MARKET_PRIORITY: dict[str, int] = {
     "OVER 2.5": 2,
     "UNDER 2.5": 2,
     "OVER 1.5": 2,
+    "UNDER 1.5": 2,
+    "OVER 3.5": 2,
     "BTTS YES": 3,
     "BTTS NO": 3,
     "DRAW": 4,

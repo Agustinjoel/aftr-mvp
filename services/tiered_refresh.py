@@ -54,6 +54,7 @@ _results_lock = threading.Lock()
 _rr_lock = threading.Lock()
 _rr_odds_idx = 0
 _rr_results_idx = 0
+_state_lock = threading.Lock()
 
 
 def _utc_iso() -> str:
@@ -74,9 +75,10 @@ def _load_state() -> dict:
 
 
 def _save_state_patch(patch: dict) -> None:
-    st = _load_state()
-    st.update(patch)
-    write_json(STATE_FILE, st)
+    with _state_lock:
+        st = _load_state()
+        st.update(patch)
+        write_json(STATE_FILE, st)
 
 
 def _seconds_since(ts_key: str, state: dict) -> float:
@@ -94,34 +96,18 @@ def _last_odds_ts(state: dict) -> float:
         return 0.0
 
 
-def _leagues_with_live_hint_from_cache() -> list[str]:
-    """Ligas donde daily_matches ya marca explícitamente en juego."""
-    out: list[str] = []
-    for code in _football_league_codes():
-        data = read_json(f"daily_matches_{code}.json")
-        if not isinstance(data, list):
-            continue
-        for m in data:
-            if not isinstance(m, dict):
-                continue
-            st = (m.get("status") or "").upper()
-            if st in LIVE_HINT_STATUSES:
-                out.append(code)
-                break
-    return out
-
-
-def _leagues_with_kickoff_past_not_final(max_hours_after_kickoff: float = 5.0) -> list[str]:
+def _leagues_needing_live_poll(max_hours_after_kickoff: float = 5.0) -> list[str]:
     """
-    Ligas con al menos un fixture: kickoff <= ahora, estado no claramente final, dentro de ventana reciente.
-    Desbloquea poll de get_live_matches cuando la caché aún dice TIMED/SCHEDULED.
+    Unión de ligas con pista IN_PLAY y con kickoff pasado-no-final.
+    Loop único por liga: parsea cada JSON una sola vez para detectar ambas condiciones.
     """
-    out: list[str] = []
     now = datetime.now(timezone.utc)
     fin_like = frozenset(
         {"FINISHED", "FT", "FINAL", "AWARDED", "CANCELLED", "POSTPONED", "SETTLED", "FINALIZADO"},
     )
     max_sec = max_hours_after_kickoff * 3600
+    hinted: set[str] = set()
+
     for code in _football_league_codes():
         data = read_json(f"daily_matches_{code}.json")
         if not isinstance(data, list):
@@ -130,6 +116,11 @@ def _leagues_with_kickoff_past_not_final(max_hours_after_kickoff: float = 5.0) -
             if not isinstance(m, dict):
                 continue
             st = (m.get("status") or "").upper()
+            # Condición 1: live hint explícito
+            if st in LIVE_HINT_STATUSES:
+                hinted.add(code)
+                break
+            # Condición 2: kickoff pasado, estado no final, dentro de ventana
             if st in fin_like:
                 continue
             dt = _parse_utcdate_str(m.get("utcDate"))
@@ -139,21 +130,17 @@ def _leagues_with_kickoff_past_not_final(max_hours_after_kickoff: float = 5.0) -
                 continue
             if (now - dt).total_seconds() > max_sec:
                 continue
-            out.append(code)
+            hinted.add(code)
             break
-    return out
 
-
-def _leagues_needing_live_poll() -> list[str]:
-    """Unión de pista IN_PLAY y candidatos por kickoff pasado (sin duplicados, orden estable)."""
-    hinted = set(_leagues_with_live_hint_from_cache())
-    hinted.update(_leagues_with_kickoff_past_not_final())
     return sorted(hinted)
 
 
-def _league_in_prematch_window(league_code: str, hours: int) -> bool:
-    """True si hay partido en las próximas `hours` h (o empezó hace <2h), excl. FINISHED."""
-    data = read_json(f"daily_matches_{league_code}.json")
+def _league_in_prematch_window(league_code: str, hours: int, data: list | None = None) -> bool:
+    """True si hay partido en las próximas `hours` h (o empezó hace <2h), excl. FINISHED.
+    Acepta `data` pre-cargado para evitar doble parseo cuando el caller ya leyó el archivo."""
+    if data is None:
+        data = read_json(f"daily_matches_{league_code}.json")
     if not isinstance(data, list):
         return False
     now = datetime.now(timezone.utc)
@@ -469,7 +456,7 @@ def run_odds_refresh_job() -> JobOutcome:
                 # to seed daily_matches/daily_picks before prematch-window filtering.
                 league_matches = read_json(f"daily_matches_{code}.json")
                 league_has_matches_cache = isinstance(league_matches, list) and len(league_matches) > 0
-                if league_has_matches_cache and not _league_in_prematch_window(code, prematch_h):
+                if league_has_matches_cache and not _league_in_prematch_window(code, prematch_h, data=league_matches):
                     logger.info("AUTO REFRESH ODDS skip league %s (no match in prematch window)", code)
                     continue
                 if skip_fresh_min > 0 and _league_is_fresh(code, last_ok, skip_fresh_min):
