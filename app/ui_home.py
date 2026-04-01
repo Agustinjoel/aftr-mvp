@@ -61,7 +61,7 @@ from app.ui_stats import (
 from app.ui_card import (
     _finished_card_debug_logged, _pick_odds_display_value,
     _pick_odds_home_line_text, _locked_card, _locked_grid,
-    _premium_unlock_card, _render_pick_card,
+    _premium_unlock_card, _render_pick_card, _render_live_match_card,
 )
 
 logger = logging.getLogger("aftr.ui")
@@ -549,97 +549,63 @@ def home_page(request: Request) -> str:
                 p["away_crest"] = m.get("away_crest")
 
     live_pick_cards: list[str] = []
+    seen_match_ids: set = set()
     for p in live_picks:
-        league_code = p.get("_league") or "—"
-        league_name = html_lib.escape(settings.leagues.get(league_code, league_code))
-        home = html_lib.escape(str(p.get("home") or "—"))
-        away = html_lib.escape(str(p.get("away") or "—"))
-        market = html_lib.escape(str(p.get("best_market") or "—"))
-        score = p.get("aftr_score")
-        if score is None:
-            score = _aftr_score(p)
-        else:
-            try:
-                score = int(round(float(score)))
-            except (TypeError, ValueError):
-                score = _aftr_score(p)
-        edge = p.get("edge")
-        try:
-            edge_str = f"{float(edge)*100:+.1f}%" if edge is not None else "—"
-        except (TypeError, ValueError):
-            edge_str = "—"
-        conf_level = (p.get("confidence_level") or p.get("confidence") or "—")
-        conf_str = str(conf_level).upper() if conf_level != "—" else "—"
-        odds_line_text = html_lib.escape(_pick_odds_home_line_text(p))
-        try:
-            edge_pos = edge is not None and float(edge) > 0
-        except (TypeError, ValueError):
-            edge_pos = False
-        edge_class = " home-pick-edge-pos" if edge_pos else ""
-        _t = p.get("tier")
-        tier = (str(_t).strip().lower() if _t is not None else "pass") or "pass"
-        tier_colors = {"elite": "#FFD700", "strong": "#00C853", "risky": "#FF9800", "pass": "#9E9E9E"}
-        tier_color = tier_colors.get(tier, "#9E9E9E")
-        home_part = _team_with_crest(p.get("home_crest"), p.get("home") or "—")
-        away_part = _team_with_crest(p.get("away_crest"), p.get("away") or "—")
-        pick_id_val = _pick_id_for_card(p, {"market": p.get("best_market")})
-        pick_id_attr = html_lib.escape(pick_id_val)
-        market_raw = str(p.get("best_market") or "")
-        market_attr = html_lib.escape(market_raw)
-        edge_raw = p.get("edge")
-        edge_attr = html_lib.escape(str(edge_raw)) if edge_raw is not None else ""
         mid = _safe_int(p.get("match_id")) or _safe_int(p.get("id"))
-        league = p.get("_league")
-        m_live = match_by_key.get((league, mid)) if mid is not None and league else None
-        status_line = _format_live_status_line(m_live) if isinstance(m_live, dict) else "🔴 LIVE"
-        lh, la = _extract_score_from_match(m_live) if isinstance(m_live, dict) else (None, None)
-        if lh is not None and la is not None:
-            match_block = f"""
-          <div class="home-pick-match home-pick-match-live">
-            <div class="home-pick-live-team">{home_part}</div>
-            <div class="home-pick-live-score" aria-label="Marcador en vivo">{lh} - {la}</div>
-            <div class="home-pick-live-team">{away_part}</div>
-          </div>"""
-        else:
-            match_block = f"""
-          <div class="home-pick-match">
-            {home_part}
-            <span class="vs">vs</span>
-            {away_part}
-          </div>"""
-        live_pick_cards.append(f"""
-        <div class="card home-pick-card home-pick-card--live" style="border-left: 4px solid {tier_color};">
-          <div class="home-pick-live-status" role="status">{html_lib.escape(status_line)}</div>
-          <div class="home-pick-league">{league_name}</div>
-          {match_block}
-          <div class="home-pick-market">{market}</div>
-          <div class="home-pick-meta">
-            <span class="home-pick-score">AFTR {score}</span>
-            <span class="aftr-tier" style="color: {tier_color};">{html_lib.escape(tier.upper())}</span>
-            <span class="home-pick-edge{edge_class}">Ventaja {edge_str}</span>
-            <span>Conf {html_lib.escape(conf_str)}</span>
-            <span>{odds_line_text}</span>
-          </div>
-          <div class="pick-actions" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-            <button type="button" class="btn-favorite-pick pill"
-              data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}"
-              data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"
-              data-home-team="{home}" data-away-team="{away}"
-              style="padding:6px 12px; font-size:0.85rem;">⭐ Guardar</button>
-            <button type="button" class="btn-follow-pick pill"
-              data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}"
-              data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"
-              data-home-team="{home}" data-away-team="{away}"
-              style="padding:6px 12px; font-size:0.85rem;">📈 Seguir pick</button>
-          </div>
-        </div>""")
+        league_code = p.get("_league")
+        m_live = match_by_key.get((league_code, mid)) if mid is not None and league_code else None
+
+        # Enrich match with team crests from pick if missing
+        if isinstance(m_live, dict):
+            if not m_live.get("home_crest") and p.get("home_crest"):
+                m_live["home_crest"] = p["home_crest"]
+            if not m_live.get("away_crest") and p.get("away_crest"):
+                m_live["away_crest"] = p["away_crest"]
+            if not m_live.get("home") and p.get("home"):
+                m_live["home"] = p["home"]
+            if not m_live.get("away") and p.get("away"):
+                m_live["away"] = p["away"]
+
+        # Dedup por match (una card por partido, no por pick)
+        match_key = (league_code, mid)
+        if match_key in seen_match_ids:
+            continue
+        seen_match_ids.add(match_key)
+
+        # Build action buttons HTML to pass into the card
+        score = _aftr_score(p)
+        pick_id_attr = html_lib.escape(_pick_id_for_card(p, {"market": p.get("best_market")}))
+        market_attr  = html_lib.escape(str(p.get("best_market") or ""))
+        edge_attr    = html_lib.escape(str(p.get("edge") or ""))
+        home_esc     = html_lib.escape(str(p.get("home") or ""))
+        away_esc     = html_lib.escape(str(p.get("away") or ""))
+        _t           = p.get("tier")
+        tier         = (str(_t).strip().lower() if _t else "pass") or "pass"
+        league_name  = html_lib.escape(settings.leagues.get(league_code or "", league_code or ""))
+
+        actions_html = (
+            f'<div class="live-card-league">{league_name}</div>'
+            f'<div class="live-card-btn-row">'
+            f'<button type="button" class="btn-favorite-pick pill"'
+            f' data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}"'
+            f' data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"'
+            f' data-home-team="{home_esc}" data-away-team="{away_esc}">⭐ Guardar</button>'
+            f'<button type="button" class="btn-follow-pick pill"'
+            f' data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}"'
+            f' data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"'
+            f' data-home-team="{home_esc}" data-away-team="{away_esc}">📈 Seguir</button>'
+            f'</div>'
+        )
+
+        card_match = m_live if isinstance(m_live, dict) else p
+        live_pick_cards.append(_render_live_match_card(card_match, p, actions_html))
 
     live_section_html = ""
     if live_pick_cards:
         live_section_html = f"""
       <section class="home-section home-live-section" id="live-now">
-      <h2 class="home-h2 home-live-title">🔴 En vivo ahora</h2>
-      <div class="home-picks-grid home-live-grid">
+      <h2 class="home-h2 live-section-title"><span class="live-dot live-dot--title"></span> En Vivo</h2>
+      <div class="live-grid">
         {''.join(live_pick_cards)}
       </div>
       </section>

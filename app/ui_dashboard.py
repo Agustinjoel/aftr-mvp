@@ -59,7 +59,7 @@ from app.ui_stats import (
 from app.ui_card import (
     _finished_card_debug_logged, _pick_odds_display_value,
     _pick_odds_home_line_text, _locked_card, _locked_grid,
-    _premium_unlock_card, _render_pick_card,
+    _premium_unlock_card, _render_pick_card, _render_live_match_card,
 )
 from app.ui_home import _build_home_league_snap_carousel_html
 
@@ -747,6 +747,29 @@ def dashboard(request: Request, league: str):
 
     # Combos after performance blocks (ROI + mercado)
     page_html += league_combos_html
+
+    # Sección En Vivo (solo si hay partidos en vivo en esta liga)
+    live_matches_now = [m for m in matches if isMatchLive(m)]
+    if live_matches_now:
+        pick_by_match_id: dict[int, dict] = {}
+        for p in upcoming_picks:
+            mid = _safe_int(p.get("match_id") or p.get("id"))
+            if mid is None:
+                continue
+            existing = pick_by_match_id.get(mid)
+            if existing is None or _aftr_score(existing) < _aftr_score(p):
+                pick_by_match_id[mid] = p
+
+        live_cards = "".join(
+            _render_live_match_card(m, pick_by_match_id.get(_safe_int(m.get("match_id") or m.get("id"))))
+            for m in live_matches_now
+        )
+        page_html += f"""
+        <section class="live-section" id="live-section-league">
+          <h2 class="home-h2 live-section-title"><span class="live-dot live-dot--title"></span> En Vivo</h2>
+          <div class="live-grid">{live_cards}</div>
+        </section>
+        """
 
     # Upcoming: day filter by date (value=YYYY-MM-DD); default "Hoy" when available
     upcoming_filter_opts = ['<option value="ALL">Todos</option>']

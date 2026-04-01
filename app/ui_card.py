@@ -20,6 +20,83 @@ logger = logging.getLogger("aftr.ui.card")
 # Flag de debug: solo loguea la primera card finalizada por sesión
 _finished_card_debug_logged = False
 
+TEAM_LOGO_FALLBACK_PATH = "/static/teams/default.svg"
+
+
+# =========================================================
+# Live match card
+# =========================================================
+
+def _render_live_match_card(match: dict, pick: dict | None = None, actions_html: str = "") -> str:
+    """
+    Card de partido en vivo: score grande + estado + pick opcional.
+    Usada tanto en la home como en el dashboard de liga.
+    """
+    if not isinstance(match, dict):
+        return ""
+
+    home      = html_lib.escape(match.get("home") or "—")
+    away      = html_lib.escape(match.get("away") or "—")
+    h_crest   = html_lib.escape((match.get("home_crest") or "").strip() or TEAM_LOGO_FALLBACK_PATH)
+    a_crest   = html_lib.escape((match.get("away_crest") or "").strip() or TEAM_LOGO_FALLBACK_PATH)
+    fb        = html_lib.escape(TEAM_LOGO_FALLBACK_PATH)
+
+    lh, la   = _extract_score_from_match(match)
+    score_l  = str(lh) if lh is not None else "—"
+    score_r  = str(la) if la is not None else "—"
+
+    status_line = _format_live_status_line(match)
+    status_esc  = html_lib.escape(status_line)
+
+    pick_row = ""
+    if pick and isinstance(pick, dict):
+        market  = html_lib.escape(str(pick.get("best_market") or pick.get("market") or "—"))
+        _raw_sc = pick.get("aftr_score")
+        try:
+            sc = int(round(float(_raw_sc))) if _raw_sc is not None else _aftr_score(pick)
+        except (TypeError, ValueError):
+            sc = _aftr_score(pick)
+        edge    = _safe_float(pick.get("edge"), None)
+        if edge is not None:
+            edge_val = f"{edge * 100:+.1f}%"
+            edge_cls = " live-card-edge--pos" if edge > 0 else " live-card-edge--neg"
+            edge_html = f'<span class="live-card-edge{edge_cls}">{html_lib.escape(edge_val)}</span>'
+        else:
+            edge_html = ""
+        pick_row = (
+            f'<div class="live-card-pick">'
+            f'<span class="live-card-market">{market}</span>'
+            f'<span class="live-card-aftr">AFTR {sc}</span>'
+            f'{edge_html}'
+            f'</div>'
+        )
+
+    actions_block = f'<div class="live-card-actions">{actions_html}</div>' if actions_html else ""
+
+    return (
+        f'<div class="card live-card">'
+        f'<div class="live-card-header">'
+        f'<span class="live-dot-badge"><span class="live-dot"></span>EN VIVO</span>'
+        f'<span class="live-card-status">{status_esc}</span>'
+        f'</div>'
+        f'<div class="live-card-scoreboard">'
+        f'<div class="live-card-team">'
+        f'<img src="{h_crest}" class="live-card-crest" loading="lazy" width="28" height="28" '
+        f'onerror="this.src=\'{fb}\';this.onerror=null;"/>'
+        f'<span class="live-card-team-name">{home}</span>'
+        f'</div>'
+        f'<div class="live-card-score">{score_l} <span class="live-score-sep">—</span> {score_r}</div>'
+        f'<div class="live-card-team live-card-team--away">'
+        f'<img src="{a_crest}" class="live-card-crest" loading="lazy" width="28" height="28" '
+        f'onerror="this.src=\'{fb}\';this.onerror=null;"/>'
+        f'<span class="live-card-team-name">{away}</span>'
+        f'</div>'
+        f'</div>'
+        f'{pick_row}'
+        f'{actions_block}'
+        f'</div>'
+    )
+
 
 # =========================================================
 # Odds helpers

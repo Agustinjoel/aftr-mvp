@@ -1767,6 +1767,179 @@ body{
   box-shadow: 0 0 14px rgba(239,68,68,.12);
 }
 
+/* =========================
+   LIVE MATCH CARDS — shared between home + dashboard
+========================= */
+.live-section{
+  margin-bottom: 36px;
+}
+.live-section-title{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.live-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+/* Pulsing dot */
+.live-dot{
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 0 rgba(239,68,68,.6);
+  flex-shrink: 0;
+}
+.live-dot--title{
+  width: 10px;
+  height: 10px;
+}
+@media (prefers-reduced-motion: no-preference){
+  .live-dot{
+    animation: live-dot-pulse 1.6s ease-in-out infinite;
+  }
+}
+@keyframes live-dot-pulse{
+  0%  { box-shadow: 0 0 0 0 rgba(239,68,68,.65); }
+  60% { box-shadow: 0 0 0 7px rgba(239,68,68,0); }
+  100%{ box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+/* Card */
+.live-card{
+  padding: 14px 16px;
+  border-radius: 16px !important;
+  border-color: rgba(239,68,68,.25) !important;
+  background: linear-gradient(160deg, rgba(239,68,68,.07) 0%, var(--card-bg,#0f1520) 50%);
+  box-shadow: 0 0 0 1px rgba(239,68,68,.2), 0 8px 24px rgba(0,0,0,.22);
+}
+.live-card-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.live-dot-badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: #fca5a5;
+}
+.live-card-status{
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(254,226,226,.8);
+  background: rgba(239,68,68,.12);
+  border: 1px solid rgba(239,68,68,.22);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+/* Scoreboard */
+.live-card-scoreboard{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.live-card-team{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+.live-card-team--away{
+  align-items: center;
+}
+.live-card-crest{
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.live-card-team-name{
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+.live-card-score{
+  font-size: 28px;
+  font-weight: 900;
+  color: rgba(254,226,226,.98);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em;
+  flex-shrink: 0;
+  text-align: center;
+}
+.live-score-sep{
+  color: rgba(254,226,226,.4);
+  font-weight: 400;
+  margin: 0 2px;
+}
+/* Pick info row */
+.live-card-pick{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.07);
+  margin-bottom: 8px;
+}
+.live-card-market{
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 5px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(234,242,255,.8);
+  white-space: nowrap;
+}
+.live-card-aftr{
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(56,189,248,.12);
+  border: 1px solid rgba(56,189,248,.28);
+  color: #38bdf8;
+}
+.live-card-edge{
+  font-size: 11px;
+  font-weight: 700;
+}
+.live-card-edge--pos{ color: #4ade80; }
+.live-card-edge--neg{ color: #f87171; }
+/* Actions (home only) */
+.live-card-league{
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--muted,rgba(148,163,184,.65));
+  margin-bottom: 8px;
+}
+.live-card-btn-row{
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.live-card-btn-row .pill{
+  font-size: 11px;
+  padding: 5px 10px;
+}
+
 .home-pick-league{
   font-size: 12px;
   font-weight: 700;
