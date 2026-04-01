@@ -1501,6 +1501,17 @@ def dashboard(request: Request, league: str):
 
     </div> <!-- /page -->
     <script src="/static/aftr-ui.js?v=1" defer></script>
+    <div id="match-drawer" class="match-drawer" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="match-drawer-overlay"></div>
+      <div class="match-drawer-panel">
+        <div class="match-drawer-top">
+          <button class="match-drawer-close" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="match-drawer-body" id="match-drawer-body">
+          <div class="md-loading">Cargando...</div>
+        </div>
+      </div>
+    </div>
     </body>
     </html>
     """

@@ -411,3 +411,44 @@ def get_finished_matches(league_code: str, days_back: int = 5) -> list[dict]:
         })
 
     return out
+
+
+def get_standings(league_code: str) -> list[dict]:
+    """
+    Tabla de posiciones de la competición (TOTAL).
+    Retorna lista ordenada por posición:
+    {position, team_id, team_name, team_crest, played, won, draw, lost, gf, ga, gd, points}
+    """
+    comp = COMPETITIONS.get(league_code)
+    if not comp:
+        return []
+    try:
+        data = _get(f"/competitions/{comp}/standings")
+    except UnsupportedCompetitionError:
+        return []
+    except Exception as e:
+        logger.warning("get_standings %s: %s", league_code, e)
+        return []
+
+    for group in (data.get("standings") or []):
+        if (group.get("type") or "").upper() == "TOTAL":
+            out = []
+            for row in (group.get("table") or []):
+                team = row.get("team") or {}
+                tid = team.get("id")
+                out.append({
+                    "position":  row.get("position"),
+                    "team_id":   tid,
+                    "team_name": team.get("shortName") or team.get("name") or "—",
+                    "team_crest": team.get("crest") or _crest_from_team_id(tid),
+                    "played":    row.get("playedGames", 0),
+                    "won":       row.get("won", 0),
+                    "draw":      row.get("draw", 0),
+                    "lost":      row.get("lost", 0),
+                    "gf":        row.get("goalsFor", 0),
+                    "ga":        row.get("goalsAgainst", 0),
+                    "gd":        row.get("goalDifference", 0),
+                    "points":    row.get("points", 0),
+                })
+            return out
+    return []

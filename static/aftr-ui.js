@@ -228,3 +228,66 @@
     boot();
   }
 })();
+
+
+// ─────────────────────────────────────────────
+// Match Detail Drawer
+// ─────────────────────────────────────────────
+(function() {
+  var drawer = document.getElementById('match-drawer');
+  if (!drawer) return;
+
+  var body    = document.getElementById('match-drawer-body');
+  var overlay = drawer.querySelector('.match-drawer-overlay');
+  var closeBtn = drawer.querySelector('.match-drawer-close');
+
+  function open(league, matchId) {
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    body.innerHTML = '<div class="md-loading">Cargando datos del partido...</div>';
+    fetch('/api/match/' + encodeURIComponent(league) + '/' + encodeURIComponent(matchId) + '/detail')
+      .then(function(r) { return r.text(); })
+      .then(function(html) {
+        body.innerHTML = html;
+        initTabs(body);
+      })
+      .catch(function() {
+        body.innerHTML = '<p class="muted" style="padding:20px">No se pudieron cargar los datos.</p>';
+      });
+  }
+
+  function close() {
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (overlay) overlay.addEventListener('click', close);
+  if (closeBtn) closeBtn.addEventListener('click', close);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') close();
+  });
+
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.btn-match-detail');
+    if (!btn) return;
+    var league  = btn.dataset.league;
+    var matchId = btn.dataset.matchId;
+    if (league && matchId) open(league, matchId);
+  });
+
+  function initTabs(container) {
+    var tabs   = container.querySelectorAll('.md-tab');
+    var panels = container.querySelectorAll('.md-panel');
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        tabs.forEach(function(t) { t.classList.remove('active'); });
+        panels.forEach(function(p) { p.classList.add('md-panel--hidden'); });
+        tab.classList.add('active');
+        var panel = container.querySelector('[data-panel= + tab.dataset.tab + ]');
+        if (panel) panel.classList.remove('md-panel--hidden');
+      });
+    });
+  }
+})();

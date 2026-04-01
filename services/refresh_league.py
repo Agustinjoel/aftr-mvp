@@ -292,6 +292,17 @@ def _refresh_league_full(
     _save_history(league_code, picks_all)
     _save_team_names_cache(team_names)
 
+    # 9) Standings (best-effort, una vez por full refresh)
+    try:
+        from data.providers.football_data import get_standings
+        from data.cache import write_json
+        standings = get_standings(league_code)
+        if standings:
+            write_json(f"standings_{league_code}.json", standings)
+            logger.debug("standings %s: %d rows", league_code, len(standings))
+    except Exception as e:
+        logger.debug("standings fetch %s: %s", league_code, e)
+
     settled = sum(1 for p in picks_daily if (p.get("result") or "").upper() in ("WIN", "LOSS", "PUSH"))
     pending = sum(1 for p in picks_daily if (p.get("result") or "").upper() == "PENDING")
     logger.info(
