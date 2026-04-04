@@ -859,7 +859,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=28">
+      <link rel="stylesheet" href="/static/style.css?v=29">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
