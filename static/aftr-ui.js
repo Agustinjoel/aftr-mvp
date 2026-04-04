@@ -231,6 +231,149 @@
 
 
 // ─────────────────────────────────────────────
+// Win Celebration
+// ─────────────────────────────────────────────
+(function () {
+  var STORAGE_KEY = "aftr_celebrated_wins";
+  var cel = null;
+
+  function getCelebrated() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
+    catch (e) { return []; }
+  }
+
+  function saveCelebrated(ids) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ids.slice(-300))); }
+    catch (e) {}
+  }
+
+  function buildConfetti(container) {
+    var colors = ["#4ade80", "#22c55e", "#a7f3d0", "#fbbf24", "#facc15", "#fff"];
+    for (var i = 0; i < 36; i++) {
+      var d = document.createElement("div");
+      d.className = "win-confetti-dot";
+      var size = 5 + Math.random() * 7;
+      d.style.cssText = [
+        "left:" + (2 + Math.random() * 96) + "%;",
+        "background:" + colors[i % colors.length] + ";",
+        "width:" + size + "px;height:" + size + "px;",
+        "border-radius:" + (Math.random() > 0.5 ? "50%" : "2px") + ";",
+        "animation-delay:" + (Math.random() * 0.7) + "s;",
+        "animation-duration:" + (1.1 + Math.random() * 1) + "s;"
+      ].join("");
+      container.appendChild(d);
+    }
+  }
+
+  function closeOverlay() {
+    if (!cel) return;
+    cel.classList.add("win-cel-exit");
+    var removed = cel;
+    setTimeout(function () {
+      if (removed && removed.parentNode) removed.parentNode.removeChild(removed);
+      if (cel === removed) cel = null;
+      document.body.style.overflow = "";
+    }, 380);
+  }
+
+  function showCelebration(wins) {
+    if (!wins.length || cel) return;
+
+    var overlay = document.createElement("div");
+    overlay.className = "win-cel-overlay";
+
+    var confWrap = document.createElement("div");
+    confWrap.className = "win-cel-confetti";
+    buildConfetti(confWrap);
+    overlay.appendChild(confWrap);
+
+    var count = wins.length;
+    var title = count === 1 ? "¡Ganaste!" : "¡" + count + " victorias!";
+    var subtitle = count === 1 ? "Tu pick dio resultado" : "Tus picks dieron resultado";
+
+    var picksHtml = wins.slice(0, 3).map(function (w) {
+      var market = w.market || "—";
+      var home = w.home_team || w.home || "";
+      var away = w.away_team || w.away || "";
+      var score = (w.score_home != null && w.score_away != null)
+        ? (w.score_home + " - " + w.score_away) : "";
+      var matchPart = (home && away)
+        ? '<span class="win-cel-teams">' + home + " vs " + away + "</span>"
+        : "";
+      var scorePart = score
+        ? ' <span class="win-cel-score">' + score + "</span>"
+        : "";
+      return '<div class="win-cel-pick">'
+        + '<span class="win-cel-check">✓</span>'
+        + '<div><strong>' + market + "</strong>"
+        + (matchPart ? " · " + matchPart : "")
+        + scorePart + "</div></div>";
+    }).join("");
+
+    var box = document.createElement("div");
+    box.className = "win-cel-box";
+    box.innerHTML = [
+      '<div class="win-cel-emoji">🎉</div>',
+      '<div class="win-cel-title">' + title + "</div>",
+      '<div class="win-cel-subtitle">' + subtitle + "</div>",
+      '<div class="win-cel-picks">' + picksHtml + "</div>",
+      '<button class="win-cel-btn" id="win-cel-close">¡Genial!</button>'
+    ].join("");
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+    cel = overlay;
+    document.body.style.overflow = "hidden";
+
+    var timer = setTimeout(closeOverlay, 9000);
+    overlay.addEventListener("click", function (e) {
+      if (e.target === overlay || e.target.id === "win-cel-close") {
+        clearTimeout(timer);
+        closeOverlay();
+      }
+    });
+  }
+
+  function checkWins() {
+    fetch("/user/history", { credentials: "include" })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data || !data.ok || !Array.isArray(data.history)) return;
+        var celebrated = getCelebrated();
+        var seen = {};
+        celebrated.forEach(function (id) { seen[id] = true; });
+
+        var newWins = data.history.filter(function (item) {
+          var r = (item.result || "").toUpperCase();
+          var id = item.pick_id || "";
+          return r === "WIN" && id && !seen[id];
+        });
+
+        if (!newWins.length) return;
+
+        var allIds = celebrated.concat(newWins.map(function (w) { return w.pick_id; }));
+        saveCelebrated(allIds);
+        showCelebration(newWins);
+      })
+      .catch(function () {});
+  }
+
+  function bootCelebration() {
+    fetch("/user/me", { credentials: "include" })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (d && d.ok && d.user) checkWins(); })
+      .catch(function () {});
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootCelebration);
+  } else {
+    setTimeout(bootCelebration, 400);
+  }
+})();
+
+
+// ─────────────────────────────────────────────
 // Match Detail Drawer
 // ─────────────────────────────────────────────
 (function() {

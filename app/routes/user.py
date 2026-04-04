@@ -864,7 +864,12 @@ def user_history(request: Request):
 
             # PostgreSQL schema always has home_team/away_team
             base_cols = ["id", "pick_id", "action", "result", "created_at", "market", "aftr_score", "tier", "edge", "home_team", "away_team"]
-            sql = "SELECT " + ", ".join(base_cols) + " FROM user_picks WHERE user_id = %s ORDER BY created_at DESC LIMIT 10"
+            extra_cols = _user_picks_extra_columns(cur)
+            if "score_home" in extra_cols and "score_away" in extra_cols:
+                base_cols += ["score_home", "score_away"]
+            if "settled_at" in extra_cols:
+                base_cols += ["settled_at"]
+            sql = "SELECT " + ", ".join(base_cols) + " FROM user_picks WHERE user_id = %s ORDER BY created_at DESC LIMIT 50"
             cur.execute(sql, (uid,))
             rows = cur.fetchall()
 
