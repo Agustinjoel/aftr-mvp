@@ -150,6 +150,17 @@ def init_db() -> None:
             except Exception:
                 conn.rollback()  # column already exists — ignore
 
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS bankroll_settings (
+            user_id        INTEGER PRIMARY KEY REFERENCES users(id),
+            initial_amount REAL    NOT NULL DEFAULT 10000,
+            stake_per_unit REAL    NOT NULL DEFAULT 1000,
+            currency       TEXT    NOT NULL DEFAULT 'ARS',
+            created_at     TEXT    NOT NULL,
+            updated_at     TEXT
+        )
+        """)
+
         # Indexes (IF NOT EXISTS is safe to re-run)
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_picks_user_id ON user_picks(user_id)")

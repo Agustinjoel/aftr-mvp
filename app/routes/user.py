@@ -1046,3 +1046,98 @@ def user_available_teams(request: Request):
 
     teams = sorted(seen.values(), key=lambda t: t["team_name"])
     return JSONResponse({"ok": True, "teams": teams})
+
+
+# ─── Bankroll ────────────────────────────────────────────────────────────────
+
+@router.get("/bankroll")
+def user_bankroll_get(request: Request):
+    """Return bankroll settings + computed current balance. Premium only."""
+    uid, err = _require_user(request)
+    if err:
+        return err
+    from app.user_helpers import is_premium_active
+    user = get_user_by_id(uid)
+    if not user or not is_premium_active(user):
+        return JSONResponse({"ok": False, "error": "premium_required"}, status_code=403)
+
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM bankroll_settings WHERE user_id = %s", (uid,))
+        settings_row = cur.fetchone()
+        cur.execute(
+            "SELECT result, edge FROM user_picks WHERE user_id = %s AND result IN ('WIN','LOSS','PUSH')",
+            (uid,),
+        )
+        resolved = cur.fetchall()
+    finally:
+        put_conn(conn)
+
+    initial = float(settings_row["initial_amount"]) if settings_row else 10000.0
+    stake   = float(settings_row["stake_per_unit"]) if settings_row else 1000.0
+    currency = settings_row["currency"] if settings_row else "ARS"
+
+    # P&L: WIN=+1u, LOSS=-1u, PUSH=0u (multiplied by stake_per_unit)
+    pnl_units = 0.0
+    for row in resolved:
+        r = (row.get("result") or "").upper()
+        if r == "WIN":
+            pnl_units += 1.0
+        elif r == "LOSS":
+            pnl_units -= 1.0
+    pnl_money = round(pnl_units * stake, 2)
+    current = round(initial + pnl_money, 2)
+
+    return JSONResponse({
+        "ok": True,
+        "initial_amount": initial,
+        "stake_per_unit": stake,
+        "currency": currency,
+        "current_bankroll": current,
+        "total_pnl": pnl_money,
+        "total_picks_settled": len(resolved),
+        "configured": settings_row is not None,
+    })
+
+
+@router.post("/bankroll")
+def user_bankroll_post(request: Request, payload: dict = Body(...)):
+    """Save/update bankroll settings. Premium only."""
+    uid, err = _require_user(request)
+    if err:
+        return err
+    from app.user_helpers import is_premium_active
+    user = get_user_by_id(uid)
+    if not user or not is_premium_active(user):
+        return JSONResponse({"ok": False, "error": "premium_required"}, status_code=403)
+
+    try:
+        initial = float(payload.get("initial_amount", 10000))
+        stake   = float(payload.get("stake_per_unit", 1000))
+        if initial <= 0 or stake <= 0:
+            raise ValueError
+    except (TypeError, ValueError):
+        return JSONResponse({"ok": False, "error": "invalid_values"}, status_code=400)
+
+    currency = str(payload.get("currency", "ARS"))[:8]
+    now_str  = datetime.now(timezone.utc).isoformat()
+
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """INSERT INTO bankroll_settings (user_id, initial_amount, stake_per_unit, currency, created_at, updated_at)
+               VALUES (%s, %s, %s, %s, %s, %s)
+               ON CONFLICT (user_id) DO UPDATE SET
+                 initial_amount = EXCLUDED.initial_amount,
+                 stake_per_unit = EXCLUDED.stake_per_unit,
+                 currency       = EXCLUDED.currency,
+                 updated_at     = EXCLUDED.updated_at""",
+            (uid, initial, stake, currency, now_str, now_str),
+        )
+        conn.commit()
+    finally:
+        put_conn(conn)
+
+    return JSONResponse({"ok": True})

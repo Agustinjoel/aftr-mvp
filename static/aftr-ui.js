@@ -310,6 +310,17 @@
         + scorePart + "</div></div>";
     }).join("");
 
+    var firstWin = wins[0] || {};
+    var shareBtn = '<button class="win-cel-share aftr-share-trigger"'
+      + ' data-home="' + (firstWin.home_team || firstWin.home || "") + '"'
+      + ' data-away="' + (firstWin.away_team || firstWin.away || "") + '"'
+      + ' data-market="' + (firstWin.market || "") + '"'
+      + ' data-aftr-score="' + (firstWin.aftr_score || "") + '"'
+      + ' data-tier="' + (firstWin.tier || "") + '"'
+      + ' data-score-home="' + (firstWin.score_home != null ? firstWin.score_home : "") + '"'
+      + ' data-score-away="' + (firstWin.score_away != null ? firstWin.score_away : "") + '"'
+      + '>&#8679; Compartir</button>';
+
     var box = document.createElement("div");
     box.className = "win-cel-box";
     box.innerHTML = [
@@ -317,7 +328,10 @@
       '<div class="win-cel-title">' + title + "</div>",
       '<div class="win-cel-subtitle">' + subtitle + "</div>",
       '<div class="win-cel-picks">' + picksHtml + "</div>",
-      '<button class="win-cel-btn" id="win-cel-close">¡Genial!</button>'
+      '<div class="win-cel-foot">',
+        shareBtn,
+        '<button class="win-cel-btn" id="win-cel-close">¡Genial!</button>',
+      '</div>'
     ].join("");
 
     overlay.appendChild(box);

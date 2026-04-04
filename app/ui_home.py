@@ -548,6 +548,24 @@ def home_page(request: Request) -> str:
                 p["home_crest"] = m.get("home_crest")
             if not p.get("away_crest") and m.get("away_crest"):
                 p["away_crest"] = m.get("away_crest")
+    # Batch follow-count query for social proof (no N+1)
+    _all_top_pick_ids = [_pick_id_for_card(p, {"market": p.get("best_market")}) for p in top_picks]
+    _follow_counts: dict[str, int] = {}
+    if _all_top_pick_ids:
+        try:
+            _fc_conn = get_conn()
+            try:
+                _fc_cur = _fc_conn.cursor()
+                _fc_cur.execute(
+                    "SELECT pick_id, COUNT(*) AS n FROM user_picks WHERE pick_id = ANY(%s) GROUP BY pick_id",
+                    (_all_top_pick_ids,),
+                )
+                _follow_counts = {row["pick_id"]: int(row["n"]) for row in _fc_cur.fetchall()}
+            finally:
+                put_conn(_fc_conn)
+        except Exception as _e:
+            logger.warning("home_page: follow_counts query failed: %s", _e)
+
     top_pick_cards = []
     for p in top_picks:
         league_code = p.get("_league") or "—"
@@ -588,9 +606,11 @@ def home_page(request: Request) -> str:
         market_attr = html_lib.escape(market_raw)
         edge_raw = p.get("edge")
         edge_attr = html_lib.escape(str(edge_raw)) if edge_raw is not None else ""
+        _fc = _follow_counts.get(pick_id_val, 0)
+        _social_html = f'<span class="pick-social-proof">&#128101; {_fc} lo siguieron</span>' if _fc > 0 else ""
         top_pick_cards.append(f"""
         <div class="card home-pick-card" style="border-left: 4px solid {tier_color};">
-          <div class="home-pick-league">{league_name}</div>
+          <div class="home-pick-league">{league_name}{_social_html}</div>
           <div class="home-pick-match">
             {home_part}
             <span class="vs">vs</span>
@@ -859,7 +879,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=29">
+      <link rel="stylesheet" href="/static/style.css?v=30">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
@@ -1369,6 +1389,8 @@ def home_page(request: Request) -> str:
         })();
       </script>
     <script src="/static/aftr-ui.js?v=1" defer></script>
+    <script src="/static/aftr-share.js?v=1" defer></script>
+    <script src="/static/aftr-onboarding.js?v=1" defer></script>
     <!-- Match detail drawer -->
     <div id="match-drawer" class="match-drawer" aria-hidden="true" role="dialog" aria-modal="true">
       <div class="match-drawer-overlay"></div>

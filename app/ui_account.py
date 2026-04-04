@@ -32,7 +32,7 @@ def _simple_page(title: str, body: str) -> str:
   <meta charset="utf-8"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=26">
+  <link rel="stylesheet" href="/static/style.css?v=30">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 </head>
 <body>
@@ -288,6 +288,8 @@ def account_page(request: Request):
           <p class="muted">Cargando…</p>
         </div>
       </section>
+
+      {'<section id="bankroll" class="account-section account-section--bankroll"><h3 class="account-section-title"><span class="account-section-title-accent">Bankroll</span><span class="account-section-badge">Premium</span></h3><div id="bankroll-display"><p class="muted">Cargando…</p></div><form id="bankroll-form" class="bankroll-form" style="display:none"><div class="bankroll-form-row"><label>Capital inicial<input type="number" id="br-initial" class="bankroll-input" min="1" step="any" placeholder="10000"></label><label>Por unidad<input type="number" id="br-stake" class="bankroll-input" min="1" step="any" placeholder="1000"></label><label>Moneda<select id="br-currency" class="bankroll-input"><option value="ARS">ARS</option><option value="USD">USD</option><option value="EUR">EUR</option></select></label></div><button type="submit" class="pill bankroll-save-btn">Guardar</button></form></section>' if is_premium else ''}
     </div>
     <script>
     (function(){{
@@ -356,6 +358,18 @@ def account_page(request: Request):
         h += "</div>";
         h += "<div class=\\"ap-card-right\\">";
         if (opts.viewHref) h += "<a class=\\"ap-card-link\\" href=\\"" + esc(opts.viewHref) + "\\">Ver →</a>";
+        if (r === "WIN") {{
+          var sp = opts.shareOpts || {{}};
+          h += "<button class=\\"ap-share-btn aftr-share-trigger\\""
+            + " data-home=\\"" + esc(sp.home || "") + "\\""
+            + " data-away=\\"" + esc(sp.away || "") + "\\""
+            + " data-market=\\"" + esc(opts.market || "") + "\\""
+            + " data-aftr-score=\\"" + esc(String(opts.aftrScore || "")) + "\\""
+            + " data-tier=\\"" + esc(opts.tier || "") + "\\""
+            + " data-score-home=\\"" + esc(String(sp.score_home != null ? sp.score_home : "")) + "\\""
+            + " data-score-away=\\"" + esc(String(sp.score_away != null ? sp.score_away : "")) + "\\""
+            + " title=\\"Compartir\\">&#8679;</button>";
+        }}
         if (opts.unfollowBtn) h += opts.unfollowBtn;
         if (opts.removeBtn) h += opts.removeBtn;
         h += "</div>";
@@ -710,7 +724,8 @@ def account_page(request: Request):
                 when: timeAgo(item.created_at),
                 pickId: pickId,
                 viewHref: viewHref,
-                unfollowBtn: ufBtn
+                unfollowBtn: ufBtn,
+                shareOpts: {{ home: home, away: away, score_home: item.score_home, score_away: item.score_away }}
               }});
             }});
             histCont.innerHTML = hHtml;
@@ -819,7 +834,9 @@ def account_page(request: Request):
           if (grid) grid.innerHTML = '<p class="muted team-grid-hint">No se pudieron cargar los equipos.</p>';
         }});
     }})();
-    </script>"""
+    </script>
+    {'<script>/* Bankroll */(function(){var base=window.location.origin;fetch(base+"/user/bankroll").then(function(r){return r.json();}).then(function(d){var el=document.getElementById("bankroll-display");var form=document.getElementById("bankroll-form");if(!el)return;if(!d.ok){el.innerHTML=\'<p class="muted">Error al cargar bankroll.</p>\';return;}var cur=d.current_bankroll;var ini=d.initial_amount;var pnl=d.total_pnl;var cur2=d.currency||"ARS";var pnlStr=(pnl>=0?"+":"")+pnl.toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2});var curStr=cur.toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2});var pnlCls=pnl>=0?"bk-pnl--pos":"bk-pnl--neg";el.innerHTML=\'<div class="bankroll-display-inner"><div class="bk-current"><span class="bk-label">Capital actual</span><span class="bk-amount">\'+cur2+" "+curStr+\'</span></div><div class="bk-pnl \'+pnlCls+\'"><span class="bk-label">P&L total</span><span class="bk-pnl-val">\'+cur2+" "+pnlStr+\' ("+d.total_picks_settled+" picks)</span></div><button class="pill bk-edit-btn" type="button" id="bk-edit-btn">Editar configuración</button></div>\';if(form){var bi=document.getElementById("br-initial");var bs=document.getElementById("br-stake");var bc=document.getElementById("br-currency");if(bi)bi.value=ini;if(bs)bs.value=d.stake_per_unit||1000;if(bc)bc.value=cur2;document.getElementById("bk-edit-btn")&&document.getElementById("bk-edit-btn").addEventListener("click",function(){form.style.display=form.style.display==="none"?"block":"none";});}}).catch(function(){var el=document.getElementById("bankroll-display");if(el)el.innerHTML=\'<p class="muted">Sin datos.</p>\';});var form=document.getElementById("bankroll-form");if(form){form.addEventListener("submit",function(e){e.preventDefault();var ini=parseFloat(document.getElementById("br-initial").value);var stk=parseFloat(document.getElementById("br-stake").value);var cur=document.getElementById("br-currency").value;if(!ini||!stk)return;fetch(base+"/user/bankroll",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initial_amount:ini,stake_per_unit:stk,currency:cur})}).then(function(r){return r.json();}).then(function(d){if(d.ok)location.reload();}).catch(function(){});});}})();</script>' if is_premium else ''}
+    <script src="/static/aftr-share.js?v=1" defer></script>"""
     return _simple_page("Mi cuenta — AFTR", body)
 
 
