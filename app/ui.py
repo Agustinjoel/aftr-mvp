@@ -302,9 +302,9 @@ def admin_dashboard(request: Request):
         all_users = cur.fetchall()
         cur.execute("SELECT COUNT(*) AS n FROM user_picks")
         total_follows = cur.fetchone()["n"]
-        cur.execute("SELECT COUNT(*) AS n FROM user_picks WHERE created_at >= NOW() - INTERVAL '24 hours'")
+        cur.execute("SELECT COUNT(*) AS n FROM user_picks WHERE created_at::timestamptz >= NOW() - INTERVAL '24 hours'")
         follows_today = cur.fetchone()["n"]
-        cur.execute("SELECT COUNT(*) AS n FROM user_picks WHERE created_at >= NOW() - INTERVAL '7 days'")
+        cur.execute("SELECT COUNT(*) AS n FROM user_picks WHERE created_at::timestamptz >= NOW() - INTERVAL '7 days'")
         follows_7d = cur.fetchone()["n"]
         cur.execute("""
             SELECT pick_id, home_team, away_team, market, COUNT(*) AS n
@@ -312,7 +312,7 @@ def admin_dashboard(request: Request):
             ORDER BY n DESC LIMIT 8
         """)
         most_followed = cur.fetchall()
-        cur.execute("SELECT COUNT(*) AS n FROM users WHERE created_at >= NOW() - INTERVAL '7 days'")
+        cur.execute("SELECT COUNT(*) AS n FROM users WHERE created_at::timestamptz >= NOW() - INTERVAL '7 days'")
         new_7d = cur.fetchone()["n"]
         cur.execute("SELECT result, COUNT(*) AS n FROM user_picks WHERE result IN ('WIN','LOSS','PUSH') GROUP BY result")
         result_rows = {r["result"]: r["n"] for r in cur.fetchall()}
