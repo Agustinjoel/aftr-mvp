@@ -11,7 +11,7 @@ logger = logging.getLogger("aftr.email")
 
 APP_NAME = "AFTR"
 APP_URL  = (os.getenv("APP_BASE_URL") or "https://aftr-mvp-2.onrender.com").rstrip("/")
-FROM_EMAIL = f"{APP_NAME} <noreply@aftr.app>"
+FROM_EMAIL = f"{APP_NAME} Picks <onboarding@resend.dev>"
 
 _RESEND_SEND_URL = "https://api.resend.com/emails"
 
