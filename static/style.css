@@ -3311,6 +3311,154 @@ canvas{
   color: #f87171;
 }
 .home-streak-icon{ font-size: 1.4rem; line-height: 1; }
+
+/* ── Account page rediseño ───────────────────────────────── */
+.ap-stats-row{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 20px 0 10px;
+}
+.ap-stat{
+  background: #141920;
+  border-radius: 14px;
+  padding: 18px 12px 14px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,.06);
+}
+.ap-stat-num{
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.ap-stat-label{
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #6b7280;
+}
+.ap-stat--win .ap-stat-num{ color: #4ade80; }
+.ap-stat--loss .ap-stat-num{ color: #f87171; }
+.ap-stat--rate .ap-stat-num{ color: #60a5fa; }
+.ap-stat--streak .ap-stat-num{ font-size: 1.2rem; color: #fbbf24; }
+.ap-stats-secondary{
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+.ap-stats-secondary strong{ color: #d1d5db; }
+
+/* Cards de picks */
+.ap-card{
+  display: flex;
+  align-items: stretch;
+  background: #141920;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color .15s;
+}
+.ap-card--win{ border-left: 4px solid #4ade80; }
+.ap-card--loss{ border-left: 4px solid #f87171; }
+.ap-card--push{ border-left: 4px solid #fbbf24; }
+.ap-card--pending{ border-left: 4px solid #60a5fa; }
+.ap-card--fav, .ap-card-result-fav{ border-left: 4px solid #a78bfa; }
+.ap-card-left{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  min-width: 64px;
+}
+.ap-badge{
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: .5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+.ap-badge--win{ background: rgba(74,222,128,.15); color: #4ade80; }
+.ap-badge--loss{ background: rgba(248,113,113,.15); color: #f87171; }
+.ap-badge--push{ background: rgba(251,191,36,.15); color: #fbbf24; }
+.ap-badge--pending{ background: rgba(96,165,250,.12); color: #60a5fa; }
+.ap-card-body{
+  flex: 1;
+  padding: 12px 8px;
+  min-width: 0;
+}
+.ap-card-market{
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ap-card-score{
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-left: 6px;
+  font-weight: 400;
+}
+.ap-card-teams{
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ap-card-chips{ display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+.ap-card-chip{
+  font-size: 0.68rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.06);
+  color: #9ca3af;
+  font-weight: 600;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+.ap-chip-tier{ background: rgba(96,165,250,.1); color: #60a5fa; }
+.ap-chip-edge{ background: rgba(74,222,128,.1); color: #4ade80; }
+.ap-card-when{ font-size: 0.72rem; color: #4b5563; margin-top: 2px; }
+.ap-card-right{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+}
+.ap-card-link{
+  font-size: 0.75rem;
+  color: #4ade80;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.ap-remove-btn{
+  background: none;
+  border: none;
+  color: #4b5563;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+}
+.ap-remove-btn:hover{ color: #f87171; background: rgba(248,113,113,.1); }
+@media (max-width: 480px){
+  .ap-stats-row{ grid-template-columns: repeat(2, 1fr); }
+  .ap-stat-num{ font-size: 1.5rem; }
+}
 .account-stats{
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));

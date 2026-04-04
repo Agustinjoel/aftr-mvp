@@ -32,7 +32,7 @@ def _simple_page(title: str, body: str) -> str:
   <meta charset="utf-8"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=24">
+  <link rel="stylesheet" href="/static/style.css?v=26">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 </head>
 <body>
@@ -218,26 +218,39 @@ def account_page(request: Request):
         <span id="streak-banner-text" class="account-streak-banner-text"></span>
       </div>
 
-      <section class="account-block account-block--stats">
-      <h3 class="account-section-title"><span class="account-section-title-accent">Dashboard</span></h3>
-      <div id="account-stats" class="account-stats account-stats-grid">
-        <div class="account-stat-card"><span class="account-stat-label muted">Seguidos</span><span id="stat-followed" class="account-stat-value js-stat-anim">0</span></div>
-        <div class="account-stat-card"><span class="account-stat-label muted">Favoritos</span><span id="stat-favorites" class="account-stat-value js-stat-anim">0</span></div>
-        <div class="account-stat-card"><span class="account-stat-label muted">Victorias</span><span id="stat-wins" class="account-stat-value js-stat-anim">0</span></div>
-        <div class="account-stat-card"><span class="account-stat-label muted">Pérdidas</span><span id="stat-losses" class="account-stat-value js-stat-anim">0</span></div>
-        <div class="account-stat-card"><span class="account-stat-label muted">Pendientes</span><span id="stat-pending" class="account-stat-value js-stat-anim">0</span></div>
-        <div class="account-stat-card account-stat-card--pulse"><span class="account-stat-label muted">ROI</span><span id="stat-roi" class="account-stat-value js-stat-anim">0%</span></div>
-        <div class="account-stat-card account-stat-card--pulse"><span class="account-stat-label muted">Winrate</span><span id="stat-winrate" class="account-stat-value js-stat-anim">—</span></div>
-        <div class="account-stat-card"><span class="account-stat-label muted">Racha actual</span><span id="stat-streak" class="account-stat-value">—</span></div>
+      <!-- Stats grandes -->
+      <div class="ap-stats-row">
+        <div class="ap-stat ap-stat--win">
+          <span id="stat-wins" class="ap-stat-num js-stat-anim">0</span>
+          <label class="ap-stat-label">Victorias</label>
+        </div>
+        <div class="ap-stat ap-stat--loss">
+          <span id="stat-losses" class="ap-stat-num js-stat-anim">0</span>
+          <label class="ap-stat-label">Derrotas</label>
+        </div>
+        <div class="ap-stat ap-stat--rate">
+          <span id="stat-winrate" class="ap-stat-num js-stat-anim">—</span>
+          <label class="ap-stat-label">Winrate</label>
+        </div>
+        <div class="ap-stat ap-stat--streak">
+          <span id="stat-streak" class="ap-stat-num">—</span>
+          <label class="ap-stat-label">Racha</label>
+        </div>
       </div>
-      </section>
+      <!-- Stats secundarios -->
+      <div class="ap-stats-secondary">
+        <span>Seguidos: <strong id="stat-followed">0</strong></span>
+        <span>Favoritos: <strong id="stat-favorites">0</strong></span>
+        <span>Pendientes: <strong id="stat-pending">0</strong></span>
+        <span>ROI: <strong id="stat-roi">—</strong></span>
+      </div>
 
       <div class="account-actions">
         <a href="#mi-equipo" class="pill account-action-pill">Mi equipo</a>
-        <a href="#seguidas" class="pill account-action-pill">Seguidas activas</a>
+        <a href="#seguidas" class="pill account-action-pill">Seguidas</a>
         <a href="#favoritos" class="pill account-action-pill">Favoritos</a>
         <a href="#historial" class="pill account-action-pill">Historial</a>
-        <a href="/auth/logout" class="pill account-action-pill">Cerrar sesión</a>
+        <a href="/auth/logout" class="pill account-action-pill">Salir</a>
       </div>
 
       <section id="mi-equipo" class="account-section account-section--team">
@@ -256,45 +269,23 @@ def account_page(request: Request):
       </section>
 
       <section id="seguidas" class="account-section account-section--picks">
-        <h3 class="account-section-title"><span class="account-section-title-accent">Activas</span> · seguidas</h3>
-        <div id="account-active-picks" class="account-favorites">
+        <h3 class="account-section-title"><span class="account-section-title-accent">Activas</span></h3>
+        <div id="account-active-picks">
           <p class="muted">Cargando…</p>
         </div>
       </section>
 
       <section id="favoritos" class="account-section account-section--picks">
         <h3 class="account-section-title"><span class="account-section-title-accent">Favoritos</span></h3>
-        <div id="account-favorites" class="account-favorites">
+        <div id="account-favorites">
           <p class="muted">Cargando…</p>
         </div>
       </section>
 
       <section id="historial" class="account-section account-section--picks">
-        <h3 class="account-section-title"><span class="account-section-title-accent">Historial</span> · reciente</h3>
-        <div id="account-history" class="account-history">
+        <h3 class="account-section-title"><span class="account-section-title-accent">Historial</span></h3>
+        <div id="account-history">
           <p class="muted">Cargando…</p>
-        </div>
-      </section>
-
-      <section id="account-insights" class="account-section account-section--insights">
-        <h3 class="account-section-title"><span class="account-section-title-accent">Insights</span> · vos</h3>
-        <div class="account-insights-grid">
-          <div class="account-insight-card">
-            <div class="account-insight-label muted">Mejor mercado</div>
-            <div id="insight-best-market" class="account-insight-value">—</div>
-          </div>
-          <div class="account-insight-card">
-            <div class="account-insight-label muted">Más seguido</div>
-            <div id="insight-top-league" class="account-insight-value">—</div>
-          </div>
-          <div class="account-insight-card">
-            <div class="account-insight-label muted">Racha actual</div>
-            <div id="insight-streak" class="account-insight-value">—</div>
-          </div>
-          <div class="account-insight-card" style="grid-column: 1 / -1;">
-            <div class="account-insight-label muted">Actividad reciente</div>
-            <div id="insight-recent-activity" class="account-activity-list">Cargando…</div>
-          </div>
         </div>
       </section>
     </div>
@@ -340,6 +331,36 @@ def account_page(request: Request):
           if (!el) return;
           animateValueEl(el, el.textContent);
         }});
+      }}
+      function apResultBadge(result) {{
+        var r = (result || "PENDING").toUpperCase();
+        var cls = {{ "WIN": "ap-badge--win", "LOSS": "ap-badge--loss", "PUSH": "ap-badge--push" }}[r] || "ap-badge--pending";
+        var label = {{ "WIN": "WIN", "LOSS": "LOSS", "PUSH": "PUSH", "PENDING": "Pendiente" }}[r] || r;
+        return "<span class=\\"ap-badge " + cls + "\\">" + label + "</span>";
+      }}
+      function apCard(opts) {{
+        // opts: result, market, teams, score, aftrScore, tier, edge, when, pickId, viewHref, removeBtn, unfollowBtn
+        var r = (opts.result || "PENDING").toUpperCase();
+        var borderCls = {{ "WIN": "ap-card--win", "LOSS": "ap-card--loss", "PUSH": "ap-card--push" }}[r] || "ap-card--pending";
+        var scoreStr = opts.score ? " <span class=\\"ap-card-score\\">" + esc(opts.score) + "</span>" : "";
+        var tierStr = opts.tier && opts.tier !== "—" ? "<span class=\\"ap-card-chip ap-chip-tier\\">" + esc(opts.tier) + "</span>" : "";
+        var edgeStr = opts.edge && opts.edge !== "—" ? "<span class=\\"ap-card-chip ap-chip-edge\\">" + esc(opts.edge) + "</span>" : "";
+        var aftrStr = opts.aftrScore && opts.aftrScore !== "—" ? "<span class=\\"ap-card-chip\\">AFTR " + esc(String(opts.aftrScore)) + "</span>" : "";
+        var h = "<div class=\\"ap-card " + borderCls + "\\">";
+        h += "<div class=\\"ap-card-left\\">" + apResultBadge(r) + "</div>";
+        h += "<div class=\\"ap-card-body\\">";
+        h += "<div class=\\"ap-card-market\\">" + esc(opts.market || "—") + scoreStr + "</div>";
+        h += "<div class=\\"ap-card-teams\\">" + esc(opts.teams || "") + "</div>";
+        h += "<div class=\\"ap-card-chips\\">" + aftrStr + tierStr + edgeStr + "</div>";
+        if (opts.when) h += "<div class=\\"ap-card-when muted\\">" + esc(opts.when) + "</div>";
+        h += "</div>";
+        h += "<div class=\\"ap-card-right\\">";
+        if (opts.viewHref) h += "<a class=\\"ap-card-link\\" href=\\"" + esc(opts.viewHref) + "\\">Ver →</a>";
+        if (opts.unfollowBtn) h += opts.unfollowBtn;
+        if (opts.removeBtn) h += opts.removeBtn;
+        h += "</div>";
+        h += "</div>";
+        return h;
       }}
       function accountPickHeadHtml(market, teams, viewHref) {{
         var h = "<div class=\\"account-pick-head\\">";
@@ -435,39 +456,34 @@ def account_page(request: Request):
         var totalWL = (num(s.wins) + num(s.losses));
         var winrate = totalWL > 0 ? (num(s.wins) / totalWL) * 100.0 : null;
 
-        if (el("stat-followed")) el("stat-followed").textContent = num(s.followed_picks);
-        if (el("stat-favorites")) el("stat-favorites").textContent = num(s.favorites_count);
         if (el("stat-wins")) el("stat-wins").textContent = num(s.wins);
         if (el("stat-losses")) el("stat-losses").textContent = num(s.losses);
-        if (el("stat-pending")) el("stat-pending").textContent = num(s.pending);
-        if (el("stat-roi")) el("stat-roi").textContent = roiVal.toFixed(1) + "%";
         if (el("stat-winrate")) el("stat-winrate").textContent = winrate != null ? winrate.toFixed(1) + "%" : "—";
+        if (el("stat-followed")) el("stat-followed").textContent = num(s.followed_picks);
+        if (el("stat-favorites")) el("stat-favorites").textContent = num(s.favorites_count);
+        if (el("stat-pending")) el("stat-pending").textContent = num(s.pending);
+        if (el("stat-roi")) el("stat-roi").textContent = roiVal !== 0 ? (roiVal > 0 ? "+" : "") + roiVal.toFixed(1) + "%" : "—";
 
         if (el("hero-followed")) el("hero-followed").textContent = num(s.followed_picks);
         if (el("hero-favorites")) el("hero-favorites").textContent = num(s.favorites_count);
-        if (el("hero-roi")) el("hero-roi").textContent = roiVal.toFixed(1) + "%";
+        if (el("hero-roi")) el("hero-roi").textContent = (roiVal > 0 ? "+" : "") + roiVal.toFixed(1) + "%";
         if (el("hero-winrate")) el("hero-winrate").textContent = winrate != null ? winrate.toFixed(1) + "%" : "—";
 
-        // Streak (server-side)
         var sc = (s.streak_count != null && s.streak_count > 0) ? Number(s.streak_count) : 0;
         var sk = (s.streak_kind && typeof s.streak_kind === "string") ? s.streak_kind.toUpperCase() : null;
-        var streakTxt = (sc > 0 && sk) ? (sc + " " + sk) : "—";
+        var streakIcon = sc >= 2 && sk === "WIN" ? "🔥 " : (sc >= 2 && sk === "LOSS" ? "📉 " : "");
+        var streakTxt = (sc > 0 && sk) ? (streakIcon + sc + " " + sk) : "—";
         if (el("stat-streak")) el("stat-streak").textContent = streakTxt;
         if (el("hero-streak")) el("hero-streak").textContent = streakTxt;
-        if (el("insight-streak")) el("insight-streak").textContent = streakTxt;
 
-        // Streak banner — show when streak >= 2
         var banner = el("streak-banner");
-        var bannerIcon = el("streak-banner-icon");
-        var bannerText = el("streak-banner-text");
         if (banner) {{
           if (sc >= 2 && sk) {{
             var isWin = sk === "WIN";
-            var label = isWin
-              ? (sc + " victorias seguidas")
-              : (sc + " derrotas seguidas");
+            var bannerIcon = el("streak-banner-icon");
+            var bannerText = el("streak-banner-text");
             if (bannerIcon) bannerIcon.textContent = isWin ? "🔥" : "📉";
-            if (bannerText) bannerText.textContent = label;
+            if (bannerText) bannerText.textContent = sc + (isWin ? " victorias seguidas" : " derrotas seguidas");
             banner.className = "account-streak-banner account-streak-banner--" + (isWin ? "win" : "loss");
             banner.style.display = "";
           }} else {{
@@ -599,162 +615,106 @@ def account_page(request: Request):
         var activityEl = document.getElementById("insight-recent-activity");
         if (activityEl) activityEl.innerHTML = recentHtml || "<span class=\\"muted\\">—</span>";
 
-        if (favorites && favorites.ok && Array.isArray(favorites.favorites)) {{
-          var list = favorites.favorites;
-          var container = document.getElementById("account-favorites");
-          if (container) {{
-            if (list.length === 0) {{
-              container.innerHTML = "<div class=\\"card\\" style=\\"padding: 20px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No tenés favoritos todavía.</p></div>";
-            }} else {{
-              var html = "";
-              list.forEach(function(item) {{
-                var market = esc(item.market || "—");
-                var aftrScore = item.aftr_score != null ? item.aftr_score : "—";
-                var tierTxt = tierNice(item.tier);
-                var tierKey = (item.tier || "").toString().trim().toLowerCase();
-                if (tierKey === "pass") tierKey = "watch";
-                if (!tierKey) tierKey = "watch";
-                var edgeTxt = edgeNice(item.edge);
-                var edgeNum = item.edge != null ? Number(item.edge) : null;
-                var edgeKey = edgeTxt === "—" ? "neutral" : (edgeNum >= 0 ? "pos" : "neg");
-                var home = esc(item.home || "");
-                var away = esc(item.away || "");
-                var teams = (home && away) ? (home + " vs " + away) : "Partido no disponible";
-                var savedWhen = timeAgo(item.created_at);
-                var pickId = esc(item.pick_id || "");
-                var viewHref = panelHrefForPick(item.pick_id || "");
-                var highlightClass = (tierKey === "elite" || tierKey === "strong") ? " account-pick-highlight" : "";
-                html += "<div class=\\"account-pick-card account-pick-fav" + highlightClass + "\\" data-pick-id=\\"" + pickId + "\\">";
-                html += accountPickHeadHtml(market, teams, viewHref);
-                html += "<div class=\\"account-badge-row\\">";
-                html += "<span class=\\"account-mini-badge account-badge-aftr\\">AFTR <b>" + esc(aftrScore) + "</b></span>";
-                html += "<span class=\\"account-mini-badge account-badge-tier account-badge-tier-" + esc(tierKey) + "\\">" + esc(tierTxt) + "</span>";
-                html += "<span class=\\"account-mini-badge account-badge-edge account-badge-edge-" + esc(edgeKey) + "\\">" + esc(edgeTxt) + " EDGE</span>";
-                html += "</div>";
-                html += "<div class=\\"account-pick-bottom\\">";
-                html += "<span class=\\"account-pick-muted\\">Guardado " + savedWhen + "</span>";
-                if (viewHref) {{
-                  html += "<a class=\\"account-card-link\\" href=\\"" + esc(viewHref) + "\\">Ver en panel</a>";
-                }}
-                html += "<button type=\\"button\\" class=\\"btn-remove-fav account-card-action account-card-action--warn\\" data-pick-id=\\"" + pickId + "\\">Quitar favoritos</button>";
-                html += "</div>";
-                html += "</div>";
+        // ── Favoritos ──────────────────────────────────────────────
+        var favCont = document.getElementById("account-favorites");
+        if (favCont) {{
+          var favList2 = (favorites && favorites.ok && Array.isArray(favorites.favorites)) ? favorites.favorites : [];
+          if (!favList2.length) {{
+            favCont.innerHTML = "<p class=\\"muted\\">No tenés favoritos todavía.</p>";
+          }} else {{
+            var fHtml = "";
+            favList2.forEach(function(item) {{
+              var pickId = esc(item.pick_id || "");
+              var viewHref = panelHrefForPick(item.pick_id || "");
+              var home = item.home_team || item.home || "";
+              var away = item.away_team || item.away || "";
+              var teams = (home && away) ? (home + " vs " + away) : "";
+              var rmBtn = "<button type=\\"button\\" class=\\"ap-remove-btn btn-remove-fav\\" data-pick-id=\\"" + pickId + "\\" title=\\"Quitar\\">✕</button>";
+              fHtml += apCard({{
+                result: "FAV",
+                market: item.market || "—",
+                teams: teams,
+                aftrScore: item.aftr_score != null ? Math.round(item.aftr_score) : "—",
+                tier: tierNice(item.tier),
+                edge: edgeNice(item.edge),
+                when: "Guardado " + timeAgo(item.created_at),
+                pickId: pickId,
+                viewHref: viewHref,
+                removeBtn: rmBtn
               }});
-              container.innerHTML = html;
-            }}
+            }});
+            favCont.innerHTML = fHtml;
           }}
-        }} else {{
-          var favEl = document.getElementById("account-favorites");
-          if (favEl) favEl.innerHTML = "<div class=\\"card\\" style=\\"padding: 20px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No tenés favoritos todavía.</p></div>";
         }}
 
-        // Active followed picks (PENDING only)
+        // ── Picks activas (PENDING) ────────────────────────────────
         var activeCont = document.getElementById("account-active-picks");
         if (activeCont) {{
           var active = (histList || []).filter(function(it){{
-            var r = (it && it.result) ? String(it.result).toUpperCase() : "PENDING";
-            return r === "PENDING";
+            return (it && (it.result || "PENDING").toUpperCase()) === "PENDING";
           }});
           if (!active.length) {{
-            activeCont.innerHTML = "<div class=\\"card\\" style=\\"padding: 20px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No tenés picks activos.</p></div>";
+            activeCont.innerHTML = "<p class=\\"muted\\">No tenés picks activos por ahora.</p>";
           }} else {{
-            var html = "";
-            active.slice(0, 6).forEach(function(item){{
-              var market = esc(item.market || "—");
-              var aftrScore = item.aftr_score != null ? item.aftr_score : "—";
-              var tierTxt = tierNice(item.tier);
-              var tierKey = (item.tier || "").toString().trim().toLowerCase();
-              if (tierKey === "pass") tierKey = "watch";
-              if (!tierKey) tierKey = "watch";
-              var edgeTxt = edgeNice(item.edge);
-              var edgeNum = item.edge != null ? Number(item.edge) : null;
-              var edgeKey = edgeTxt === "—" ? "neutral" : (edgeNum >= 0 ? "pos" : "neg");
-              var home = esc(item.home || "");
-              var away = esc(item.away || "");
-              var teams = (home && away) ? (home + " vs " + away) : "Partido no disponible";
-              var result = "PENDING";
-              var date = esc((item.created_at || "").slice(0, 10));
+            var aHtml = "";
+            active.slice(0, 8).forEach(function(item){{
               var pickId = esc(item.pick_id || "");
               var viewHref = panelHrefForPick(item.pick_id || "");
-              var highlightClassA = (tierKey === "elite" || tierKey === "strong") ? " account-pick-highlight" : "";
-
-              html += "<div class=\\"account-pick-card account-pick-active" + highlightClassA + "\\" data-pick-id=\\"" + pickId + "\\">";
-              html += accountPickHeadHtml(market, teams, viewHref);
-              html += "<div class=\\"account-badge-row\\">";
-              html += "<span class=\\"account-mini-badge account-badge-aftr\\">AFTR <b>" + esc(aftrScore) + "</b></span>";
-              html += "<span class=\\"account-mini-badge account-badge-tier account-badge-tier-" + esc(tierKey) + "\\">" + esc(tierTxt) + "</span>";
-              html += "<span class=\\"account-mini-badge account-badge-edge account-badge-edge-" + esc(edgeKey) + "\\">" + esc(edgeTxt) + " EDGE</span>";
-              html += "</div>";
-              html += "<div class=\\"account-pick-bottom\\">";
-              html += "<span class=\\"account-status-badge account-status-pending account-live-pulse\\"><span class=\\"account-live-dot\\" aria-hidden=\\"true\\"></span>Pendiente</span>";
-              html += "<span class=\\"account-pick-date\\">" + date + "</span>";
-              if (viewHref) {{
-                html += "<a class=\\"account-card-link\\" href=\\"" + esc(viewHref) + "\\">Panel</a>";
-              }}
-              html += "<button type=\\"button\\" class=\\"btn-unfollow account-card-action account-card-action--warn\\" data-pick-id=\\"" + pickId + "\\">Dejar de seguir</button>";
-              html += "</div>";
-              html += "</div>";
+              var home = item.home_team || item.home || "";
+              var away = item.away_team || item.away || "";
+              var teams = (home && away) ? (home + " vs " + away) : "";
+              var ufBtn = "<button type=\\"button\\" class=\\"ap-remove-btn btn-unfollow\\" data-pick-id=\\"" + pickId + "\\" title=\\"Dejar de seguir\\">✕</button>";
+              aHtml += apCard({{
+                result: "PENDING",
+                market: item.market || "—",
+                teams: teams,
+                aftrScore: item.aftr_score != null ? Math.round(item.aftr_score) : "—",
+                tier: tierNice(item.tier),
+                edge: edgeNice(item.edge),
+                when: "Seguido " + timeAgo(item.created_at),
+                pickId: pickId,
+                viewHref: viewHref,
+                unfollowBtn: ufBtn
+              }});
             }});
-            activeCont.innerHTML = html;
+            activeCont.innerHTML = aHtml;
           }}
         }}
 
-        if (history && history.ok && Array.isArray(history.history)) {{
-          var list = history.history.filter(function(item){{
-            var r = (item && item.result) ? String(item.result).toUpperCase() : "PENDING";
+        // ── Historial (resueltos) ──────────────────────────────────
+        var histCont = document.getElementById("account-history");
+        if (histCont) {{
+          var resolved = (histList || []).filter(function(it){{
+            var r = (it && it.result) ? String(it.result).toUpperCase() : "PENDING";
             return r !== "PENDING";
           }});
-          var container = document.getElementById("account-history");
-          if (!container) return;
-          if (list.length === 0) {{
-            container.innerHTML = "<div class=\\"card\\" style=\\"padding: 20px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No hay historial reciente.</p></div>";
+          if (!resolved.length) {{
+            histCont.innerHTML = "<p class=\\"muted\\">Sin historial todavía.</p>";
           }} else {{
-            var html = "";
-            list.forEach(function(item) {{
-              var market = esc(item.market || "—");
-              var aftrScore = item.aftr_score != null ? item.aftr_score : "—";
-              var tierTxt = tierNice(item.tier);
-              var tierKey = (item.tier || "").toString().trim().toLowerCase();
-              if (tierKey === "pass") tierKey = "watch";
-              if (!tierKey) tierKey = "watch";
-              var edgeTxt = edgeNice(item.edge);
-              var edgeNum = item.edge != null ? Number(item.edge) : null;
-              var edgeKey = edgeTxt === "—" ? "neutral" : (edgeNum >= 0 ? "pos" : "neg");
-              var home = esc(item.home || "");
-              var away = esc(item.away || "");
-              var finalScore = esc(item.final_score || "");
-              var teams = (home && away) ? (home + " vs " + away) : "Partido no disponible";
-              if(finalScore){{
-                if(home && away) teams = teams + " · " + finalScore;
-                else teams = "Final " + finalScore;
-              }}
-              var result = (item.result || "PENDING").toUpperCase();
-              var date = esc((item.created_at || "").slice(0, 10));
+            var hHtml = "";
+            resolved.forEach(function(item) {{
               var pickId = esc(item.pick_id || "");
               var viewHref = panelHrefForPick(item.pick_id || "");
-              var highlightClassH = (tierKey === "elite" || tierKey === "strong") ? " account-pick-highlight" : "";
-              html += "<div class=\\"account-pick-card account-pick-history" + highlightClassH + "\\" data-pick-id=\\"" + pickId + "\\">";
-              html += accountPickHeadHtml(market, teams, viewHref);
-              html += "<div class=\\"account-badge-row\\">";
-              html += "<span class=\\"account-mini-badge account-badge-aftr\\">AFTR <b>" + esc(aftrScore) + "</b></span>";
-              html += "<span class=\\"account-mini-badge account-badge-tier account-badge-tier-" + esc(tierKey) + "\\">" + esc(tierTxt) + "</span>";
-              html += "<span class=\\"account-mini-badge account-badge-edge account-badge-edge-" + esc(edgeKey) + "\\">" + esc(edgeTxt) + " EDGE</span>";
-              html += "</div>";
-              html += "<div class=\\"account-pick-bottom account-history-bottom\\">";
-              html += "<span class=\\"account-status-badge account-status-" + esc(result.toLowerCase()) + " account-status-finished\\">" + result + "</span>";
-              html += "<span class=\\"account-pick-date\\">" + date + "</span>";
-              if (viewHref) {{
-                html += "<a class=\\"account-card-link\\" href=\\"" + esc(viewHref) + "\\">Ver en panel</a>";
-              }}
-              html += "<button type=\\"button\\" class=\\"btn-unfollow account-card-action account-card-action--warn\\" data-pick-id=\\"" + pickId + "\\">Dejar de seguir</button>";
-              html += "</div>";
-              html += "</div>";
+              var home = item.home_team || item.home || "";
+              var away = item.away_team || item.away || "";
+              var finalScore = item.final_score ? " · " + item.final_score : "";
+              var teams = (home && away) ? (home + " vs " + away + finalScore) : "";
+              var ufBtn = "<button type=\\"button\\" class=\\"ap-remove-btn btn-unfollow\\" data-pick-id=\\"" + pickId + "\\" title=\\"Eliminar\\">✕</button>";
+              hHtml += apCard({{
+                result: item.result || "PENDING",
+                market: item.market || "—",
+                teams: teams,
+                aftrScore: item.aftr_score != null ? Math.round(item.aftr_score) : "—",
+                tier: tierNice(item.tier),
+                edge: edgeNice(item.edge),
+                when: timeAgo(item.created_at),
+                pickId: pickId,
+                viewHref: viewHref,
+                unfollowBtn: ufBtn
+              }});
             }});
-            container.innerHTML = html;
+            histCont.innerHTML = hHtml;
           }}
-        }} else {{
-          var c = document.getElementById("account-history");
-          if (c) c.innerHTML = "<div class=\\"card\\" style=\\"padding: 20px;\\"><p class=\\"muted\\" style=\\"margin: 0;\\">No se pudo cargar el historial.</p></div>";
         }}
       }}).catch(function() {{
         // Individual catches above should prevent this from firing
