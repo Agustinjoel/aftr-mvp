@@ -877,8 +877,21 @@ def home_page(request: Request) -> str:
     <html>
     <head>
       <meta charset="utf-8"/>
-      <title>AFTR — AI Picks</title>
+      <title>AFTR — Picks con ventaja estadística</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+      <meta name="description" content="Picks de fútbol y básquet con IA. Análisis estadístico en tiempo real — AFTR Score, edge y tier para cada apuesta.">
+      <!-- Open Graph -->
+      <meta property="og:type"        content="website">
+      <meta property="og:title"       content="AFTR — Picks con ventaja estadística">
+      <meta property="og:description" content="Apostá con ventaja real. IA analiza cada partido y te dice cuándo el mercado está equivocado.">
+      <meta property="og:url"         content="https://aftr-mvp-2.onrender.com">
+      <meta property="og:image"       content="https://aftr-mvp-2.onrender.com/static/logo_aftr.png">
+      <meta property="og:locale"      content="es_AR">
+      <!-- Twitter / X -->
+      <meta name="twitter:card"        content="summary">
+      <meta name="twitter:title"       content="AFTR — Picks con ventaja estadística">
+      <meta name="twitter:description" content="Apostá con ventaja real. IA analiza cada partido y te dice cuándo el mercado está equivocado.">
+      <meta name="twitter:image"       content="https://aftr-mvp-2.onrender.com/static/logo_aftr.png">
       <link rel="stylesheet" href="/static/style.css?v=30">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
@@ -1388,6 +1401,20 @@ def home_page(request: Request) -> str:
           else { boot(); }
         })();
       </script>
+    <footer class="aftr-footer">
+      <div class="aftr-footer-inner">
+        <div class="aftr-footer-brand">
+          <span class="aftr-footer-logo">AFTR</span>
+          <span class="aftr-footer-tagline">Picks con ventaja estadística</span>
+        </div>
+        <nav class="aftr-footer-links">
+          <a href="/terminos">Términos de uso</a>
+          <a href="/privacidad">Privacidad</a>
+          <a href="mailto:aftrapp@outlook.com">Contacto</a>
+        </nav>
+        <p class="aftr-footer-copy">© 2026 AFTR · Herramienta de análisis. Apostá con responsabilidad.</p>
+      </div>
+    </footer>
     <script src="/static/aftr-ui.js?v=1" defer></script>
     <script src="/static/aftr-share.js?v=1" defer></script>
     <script src="/static/aftr-onboarding.js?v=1" defer></script>

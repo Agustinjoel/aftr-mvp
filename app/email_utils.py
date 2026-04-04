@@ -257,6 +257,40 @@ def send_premium_welcome_email(to_email: str, username: str) -> bool:
     return send_email(to_email, f"⭐ Bienvenido a {APP_NAME} Premium", _email_wrapper(content))
 
 
+def send_pick_follow_email(to_email: str, username: str, home: str, away: str, market: str, aftr_score: float | None, tier: str | None, kickoff_str: str | None) -> bool:
+    """Email de confirmación cuando el usuario sigue un pick."""
+    tier_label = (tier or "").upper()
+    tier_badge = ""
+    if tier_label in ("ELITE", "STRONG"):
+        tier_color = "#22c55e" if tier_label == "STRONG" else "#FFD700"
+        tier_badge = f'<span style="background:rgba(255,255,255,.07);color:{tier_color};border-radius:5px;padding:2px 8px;font-size:12px;font-weight:700;margin-left:8px;">{tier_label}</span>'
+    score_line = f'<p style="margin:6px 0 0;font-size:13px;color:#9ca3af;">AFTR Score: <strong style="color:#38bdf8;">{int(round(aftr_score))}</strong>{tier_badge}</p>' if aftr_score is not None else ""
+    kickoff_line = f'<p style="margin:6px 0 0;font-size:13px;color:#9ca3af;">Inicio: <strong style="color:#fff;">{kickoff_str}</strong></p>' if kickoff_str else ""
+    match_text = f"{home} vs {away}" if home and away else (home or away or "Partido")
+    content = f"""
+      <h2 style="margin:0 0 6px;color:#ffffff;font-size:19px;">Pick guardado ✓</h2>
+      <p style="margin:0 0 22px;color:#9ca3af;font-size:14px;">Hola {username}, este es tu pick:</p>
+
+      <table width="100%" style="background:#1f2937;border-radius:12px;padding:18px 20px;margin-bottom:22px;">
+        <tr><td>
+          <p style="margin:0 0 4px;font-size:16px;font-weight:700;color:#ffffff;">{match_text}</p>
+          <p style="margin:0 0 0;font-size:14px;color:#4ade80;font-weight:600;">{market}</p>
+          {score_line}
+          {kickoff_line}
+        </td></tr>
+      </table>
+
+      <a href="{APP_URL}"
+         style="display:block;background:#38bdf8;color:#000;text-align:center;padding:13px 24px;border-radius:10px;font-weight:700;font-size:14px;text-decoration:none;margin-bottom:18px;">
+        Ver todos los picks →
+      </a>
+      <p style="margin:0;color:#4b5563;font-size:12px;text-align:center;">
+        Podés ver el resultado de este pick en tu panel de cuenta.
+      </p>
+    """
+    return send_email(to_email, f"Pick guardado: {match_text} · {market}", _email_wrapper(content))
+
+
 def send_reset_email(to_email: str, reset_link: str) -> bool:
     """Email de recuperación de contraseña."""
     content = f"""

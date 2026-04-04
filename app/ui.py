@@ -585,3 +585,57 @@ def reset_password_form_page(request: Request, token: str = Query("")):
     </script>
     """
     return _simple_page("Nueva contraseña — AFTR", body)
+
+
+@router.get("/terminos", response_class=HTMLResponse)
+def terminos_page(request: Request):
+    body = """
+    <div class="page" style="max-width:720px;margin:40px auto;padding:24px 20px;">
+      <a href="/" style="color:rgba(180,220,255,.8);font-size:.85rem;">← Volver al inicio</a>
+      <h1 style="margin:24px 0 8px;font-size:1.6rem;">Términos de Uso</h1>
+      <p class="muted" style="margin:0 0 28px;font-size:.85rem;">Última actualización: Abril 2026</p>
+
+      <h2 style="font-size:1.1rem;margin:24px 0 8px;">1. Descripción del servicio</h2>
+      <p class="muted">AFTR es una herramienta de análisis estadístico deportivo. Las predicciones y picks publicados son el resultado de modelos cuantitativos y no constituyen asesoramiento financiero ni garantía de resultados.</p>
+
+      <h2 style="font-size:1.1rem;margin:24px 0 8px;">2. Uso responsable</h2>
+      <p class="muted">El usuario es responsable de sus propias decisiones de apuesta. AFTR no se hace responsable por pérdidas económicas derivadas del uso del servicio. Las apuestas deportivas son actividades de riesgo — apostá solo lo que podés permitirte perder.</p>
+
+      <h2 style="font-size:1.1rem;margin:24px 0 8px;">3. Suscripción Premium</h2>
+      <p class="muted">El plan Premium es una suscripción mensual de renovación automática procesada por Lemon Squeezy. Podés cancelarla en cualquier momento desde tu cuenta. No ofrecemos reembolsos por períodos ya transcurridos.</p>
+
+      <h2 style="font-size:1.1rem;margin:24px 0 8px;">4. Propiedad intelectual</h2>
+      <p class="muted">Todo el contenido, marca y código de AFTR son propiedad de sus creadores. Está prohibida la reproducción parcial o total sin autorización.</p>
+
+      <h2 style="font-size:1.1rem;margin:24px 0 8px;">5. Contacto</h2>
+      <p class="muted">Consultas: <a href="mailto:aftrapp@outlook.com">aftrapp@outlook.com</a></p>
+    </div>
+    """
+    return _simple_page("Términos de Uso — AFTR", body)
+
+
+@router.get("/privacidad", response_class=HTMLResponse)
+def privacidad_page(request: Request):
+    body = """
+    <div class="page" style="max-width:720px;margin:40px auto;padding:24px 20px;">
+      <a href="/" style="color:rgba(180,220,255,.8);font-size:.85rem;">← Volver al inicio</a>
+      <h1 style="margin:24px 0 8px;font-size:1.6rem;">Política de Privacidad</h1>
+      <p class="muted" style="margin:0 0 28px;font-size:.85rem;">Última actualización: Abril 2026</p>
+
+      <h2 style="font-size:1.1rem;margin:24px 0 8px;">Datos que recopilamos</h2>
+      <p class="muted">Recopilamos el email y nombre de usuario al registrarse, picks que el usuario guarda/sigue, y datos de suscripción (procesados por Lemon Squeezy). No almacenamos datos de tarjetas de crédito.</p>
+
+      <h2 style="font-size:1.1rem;margin:24px 0 8px;">Uso de los datos</h2>
+      <p class="muted">Usamos tus datos para: operar el servicio, enviar emails transaccionales (bienvenida, confirmación de picks), y procesar pagos. No vendemos ni compartimos datos con terceros con fines publicitarios.</p>
+
+      <h2 style="font-size:1.1rem;margin:24px 0 8px;">Cookies</h2>
+      <p class="muted">Usamos una única cookie de sesión (<code>aftr_session</code>) necesaria para mantener tu sesión iniciada. No usamos cookies de rastreo ni publicidad.</p>
+
+      <h2 style="font-size:1.1rem;margin:24px 0 8px;">Tus derechos</h2>
+      <p class="muted">Podés solicitar la eliminación de tu cuenta y datos en cualquier momento escribiendo a <a href="mailto:aftrapp@outlook.com">aftrapp@outlook.com</a>.</p>
+
+      <h2 style="font-size:1.1rem;margin:24px 0 8px;">Contacto</h2>
+      <p class="muted"><a href="mailto:aftrapp@outlook.com">aftrapp@outlook.com</a></p>
+    </div>
+    """
+    return _simple_page("Privacidad — AFTR", body)

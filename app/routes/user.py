@@ -817,6 +817,22 @@ def user_follow_pick(request: Request, payload: dict = Body(...)):
         conn.commit()
     finally:
         put_conn(conn)
+
+    # Confirmation email (background, non-blocking)
+    try:
+        _u = get_user_by_id(uid)
+        if _u and _u.get("email"):
+            import threading
+            from app.email_utils import send_pick_follow_email
+            _uname = (_u.get("username") or _u.get("email", "").split("@")[0] or "").strip()
+            threading.Thread(
+                target=send_pick_follow_email,
+                args=(_u["email"], _uname, home_team or "", away_team or "", market or "", aftr_score, tier, None),
+                daemon=True,
+            ).start()
+    except Exception:
+        pass
+
     return JSONResponse({"ok": True, "pick_id": pick_id})
 
 

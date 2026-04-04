@@ -250,6 +250,7 @@ def account_page(request: Request):
         <a href="#seguidas" class="pill account-action-pill">Seguidas</a>
         <a href="#favoritos" class="pill account-action-pill">Favoritos</a>
         <a href="#historial" class="pill account-action-pill">Historial</a>
+        {'<a href="#bankroll" class="pill account-action-pill">Bankroll</a>' if is_premium else ''}
         <a href="/auth/logout" class="pill account-action-pill">Salir</a>
       </div>
 
