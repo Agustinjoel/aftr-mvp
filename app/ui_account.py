@@ -260,10 +260,13 @@ def account_page(request: Request):
           <div class="team-current-display" id="team-current-display">
             {fav_team_html}
           </div>
-          <input type="text" id="team-search-input" class="team-search-input"
-            placeholder="Buscar equipo..." autocomplete="off">
-          <div id="team-grid" class="team-grid">
-            <p class="muted team-grid-hint">Escribí para buscar tu equipo</p>
+          {'<button type="button" class="pill team-change-btn" id="team-change-btn" style="margin-top:8px;">Cambiar equipo</button>' if fav_team_name else ''}
+          <div id="team-selector-open" style="{'display:none' if fav_team_name else ''}">
+            <input type="text" id="team-search-input" class="team-search-input"
+              placeholder="Buscar equipo..." autocomplete="off">
+            <div id="team-grid" class="team-grid">
+              <p class="muted team-grid-hint">Cargando equipos…</p>
+            </div>
           </div>
           <p id="team-save-msg" class="team-save-msg" style="display:none"></p>
         </div>
@@ -798,6 +801,8 @@ def account_page(request: Request):
             var curEl = document.getElementById('team-current-display');
             if (curEl) curEl.innerHTML = '<div class="hero-fav-team">' + inner + '</div>';
             if (saveMsg) {{ saveMsg.textContent='✓ Guardado: ' + name; saveMsg.className='team-save-msg team-save-msg--ok'; }}
+            collapseSelector();
+            if (changeBtn) changeBtn.style.display = '';
           }} else {{
             if (saveMsg) {{ saveMsg.textContent='Error al guardar.'; saveMsg.className='team-save-msg team-save-msg--err'; }}
           }}
@@ -807,6 +812,22 @@ def account_page(request: Request):
           if (saveMsg) {{ saveMsg.textContent='Error de red.'; saveMsg.className='team-save-msg team-save-msg--err'; saveMsg.style.display='block'; }}
         }});
       }}
+
+      var selectorOpen = document.getElementById('team-selector-open');
+      var changeBtn    = document.getElementById('team-change-btn');
+
+      function collapseSelector() {{
+        if (selectorOpen) selectorOpen.style.display = 'none';
+        if (changeBtn) changeBtn.style.display = '';
+      }}
+      function expandSelector() {{
+        if (selectorOpen) selectorOpen.style.display = '';
+        if (changeBtn) changeBtn.style.display = 'none';
+        if (searchInput) {{ searchInput.value = ''; searchInput.focus(); }}
+        filterAndRender();
+      }}
+
+      if (changeBtn) changeBtn.addEventListener('click', expandSelector);
 
       // Click delegation on the grid
       if (grid) grid.addEventListener('click', function(e) {{
@@ -820,7 +841,6 @@ def account_page(request: Request):
       if (searchInput) searchInput.addEventListener('input', filterAndRender);
 
       // Eager load — fetch teams on page load, no typing required
-      if (grid) grid.innerHTML = '<p class="muted team-grid-hint">Cargando equipos…</p>';
       fetch(base + '/user/available-teams')
         .then(function(r) {{ return r.json(); }})
         .then(function(d) {{
@@ -836,7 +856,7 @@ def account_page(request: Request):
         }});
     }})();
     </script>
-    {'<script>/* Bankroll */(function(){var base=window.location.origin;fetch(base+"/user/bankroll").then(function(r){return r.json();}).then(function(d){var el=document.getElementById("bankroll-display");var form=document.getElementById("bankroll-form");if(!el)return;if(!d.ok){el.innerHTML=\'<p class="muted">\'+(d.error==="premium_required"?"Requiere suscripción premium activa.":"Error al cargar bankroll ("+( d.error||"desconocido")+")")+\'</p>\';return;}var cur=d.current_bankroll;var ini=d.initial_amount;var pnl=d.total_pnl;var cur2=d.currency||"ARS";var pnlStr=(pnl>=0?"+":"")+pnl.toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2});var curStr=cur.toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2});var pnlCls=pnl>=0?"bk-pnl--pos":"bk-pnl--neg";el.innerHTML=\'<div class="bankroll-display-inner"><div class="bk-current"><span class="bk-label">Capital actual</span><span class="bk-amount">\'+cur2+" "+curStr+\'</span></div><div class="bk-pnl \'+pnlCls+\'"><span class="bk-label">P&L total</span><span class="bk-pnl-val">\'+cur2+" "+pnlStr+\' ("+d.total_picks_settled+" picks)</span></div><button class="pill bk-edit-btn" type="button" id="bk-edit-btn">Editar configuración</button></div>\';if(form){var bi=document.getElementById("br-initial");var bs=document.getElementById("br-stake");var bc=document.getElementById("br-currency");if(bi)bi.value=ini;if(bs)bs.value=d.stake_per_unit||1000;if(bc)bc.value=cur2;document.getElementById("bk-edit-btn")&&document.getElementById("bk-edit-btn").addEventListener("click",function(){form.style.display=form.style.display==="none"?"block":"none";});}}).catch(function(){var el=document.getElementById("bankroll-display");if(el)el.innerHTML=\'<p class="muted">Sin datos.</p>\';});var form=document.getElementById("bankroll-form");if(form){form.addEventListener("submit",function(e){e.preventDefault();var ini=parseFloat(document.getElementById("br-initial").value);var stk=parseFloat(document.getElementById("br-stake").value);var cur=document.getElementById("br-currency").value;if(!ini||!stk)return;fetch(base+"/user/bankroll",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initial_amount:ini,stake_per_unit:stk,currency:cur})}).then(function(r){return r.json();}).then(function(d){if(d.ok)location.reload();}).catch(function(){});});}})();</script>' if is_premium else ''}
+    {'<script>/* Bankroll */(function(){var base=window.location.origin;fetch(base+"/user/bankroll").then(function(r){return r.json();}).then(function(d){var el=document.getElementById("bankroll-display");var form=document.getElementById("bankroll-form");if(!el)return;if(!d.ok){el.innerHTML=\'<p class="muted">\'+(d.error==="premium_required"?"Requiere suscripción premium activa.":"Error al cargar bankroll ("+( d.error||"desconocido")+")")+\'</p>\';return;}var cur=d.current_bankroll;var ini=d.initial_amount;var pnl=d.total_pnl;var cur2=d.currency||"ARS";var pnlStr=(pnl>=0?"+":"")+pnl.toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2});var curStr=cur.toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2});var pnlCls=pnl>=0?"bk-pnl--pos":"bk-pnl--neg";el.innerHTML=\'<div class="bankroll-display-inner"><div class="bk-current"><span class="bk-label">Capital actual</span><span class="bk-amount">\'+cur2+" "+curStr+\'</span></div><div class="bk-pnl \'+pnlCls+\'"><span class="bk-label">P&L total</span><span class="bk-pnl-val">\'+cur2+" "+pnlStr+\' ('"+d.total_picks_settled+"' picks)</span></div><button class="pill bk-edit-btn" type="button" id="bk-edit-btn">Editar configuración</button></div>\';if(form){var bi=document.getElementById("br-initial");var bs=document.getElementById("br-stake");var bc=document.getElementById("br-currency");if(bi)bi.value=ini;if(bs)bs.value=d.stake_per_unit||1000;if(bc)bc.value=cur2;document.getElementById("bk-edit-btn")&&document.getElementById("bk-edit-btn").addEventListener("click",function(){form.style.display=form.style.display==="none"?"block":"none";});}}).catch(function(){var el=document.getElementById("bankroll-display");if(el)el.innerHTML=\'<p class="muted">Sin datos.</p>\';});var form=document.getElementById("bankroll-form");if(form){form.addEventListener("submit",function(e){e.preventDefault();var ini=parseFloat(document.getElementById("br-initial").value);var stk=parseFloat(document.getElementById("br-stake").value);var cur=document.getElementById("br-currency").value;if(!ini||!stk)return;fetch(base+"/user/bankroll",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({initial_amount:ini,stake_per_unit:stk,currency:cur})}).then(function(r){return r.json();}).then(function(d){if(d.ok)location.reload();}).catch(function(){});});}})();</script>' if is_premium else ''}
     <script src="/static/aftr-share.js?v=1" defer></script>"""
     return _simple_page("Mi cuenta — AFTR", body)
 
