@@ -1073,9 +1073,9 @@ def user_bankroll_get(request: Request):
     uid, err = _require_user(request)
     if err:
         return err
-    from app.user_helpers import is_premium_active
+    from app.user_helpers import is_premium_active, is_admin
     user = get_user_by_id(uid)
-    if not user or not is_premium_active(user):
+    if not user or (not is_premium_active(user) and not is_admin(user, request)):
         return JSONResponse({"ok": False, "error": "premium_required"}, status_code=403)
 
     conn = get_conn()
@@ -1124,9 +1124,9 @@ def user_bankroll_post(request: Request, payload: dict = Body(...)):
     uid, err = _require_user(request)
     if err:
         return err
-    from app.user_helpers import is_premium_active
+    from app.user_helpers import is_premium_active, is_admin
     user = get_user_by_id(uid)
-    if not user or not is_premium_active(user):
+    if not user or (not is_premium_active(user) and not is_admin(user, request)):
         return JSONResponse({"ok": False, "error": "premium_required"}, status_code=403)
 
     try:
