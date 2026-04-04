@@ -939,7 +939,7 @@ def home_page(request: Request) -> str:
             .then(function(result){
               if (result.ok && result.data && result.data.url) { window.location.href = result.data.url; }
               else if (result.data && result.data.error === "need_login") { closePremium(); window.location.href = "/?auth=login"; }
-              else { alert("No se pudo iniciar el checkout. Intenta de nuevo."); }
+              else { alert("No se pudo iniciar el checkout: " + ((result.data && result.data.error) || "error desconocido")); }
             })
             .catch(function(){ alert("Error de conexión."); });
         }

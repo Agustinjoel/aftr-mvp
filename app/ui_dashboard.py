@@ -993,7 +993,7 @@ def dashboard(request: Request, league: str):
                     closePremium();
                     openLoginModal();
                   } else {
-                    alert('No se pudo iniciar el checkout de Premium. Intenta de nuevo más tarde.');
+                    alert('No se pudo iniciar el checkout: ' + ((result.data && result.data.error) || 'error desconocido'));
                   }
                 })
                 .catch(function(){
