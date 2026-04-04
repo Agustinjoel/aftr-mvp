@@ -91,6 +91,31 @@ def _apply_results_by_match_id(
     return picks
 
 
+def _apply_live_scores_only(
+    picks: list[dict], live_scores: dict[int, tuple[int, int]]
+) -> list[dict]:
+    """
+    Actualiza score_home/score_away en picks con scores parciales de un partido en vivo.
+    NO evalúa resultado (WIN/LOSS) — eso solo ocurre cuando el partido está FINISHED.
+    """
+    for p in picks or []:
+        if not isinstance(p, dict):
+            continue
+        mid = p.get("match_id")
+        if mid is None:
+            continue
+        try:
+            mid_i = int(mid)
+        except Exception:
+            continue
+        if mid_i not in live_scores:
+            continue
+        hg, ag = live_scores[mid_i]
+        p["score_home"] = int(hg)
+        p["score_away"] = int(ag)
+    return picks
+
+
 # -------------------------
 # Merge por match_id
 # -------------------------

@@ -555,6 +555,26 @@ def user_stats(request: Request):
         losses = by_result.get("LOSS", 0)
         push = by_result.get("PUSH", 0)
         pending = by_result.get("PENDING", 0)
+
+        cur.execute(
+            """SELECT result FROM user_picks
+               WHERE user_id = %s AND result IN ('WIN', 'LOSS', 'PUSH')
+               ORDER BY created_at DESC""",
+            (uid,),
+        )
+        streak_count = 0
+        streak_kind: str | None = None
+        for row in cur.fetchall():
+            r = str(row["result"]).upper()
+            if r == "PUSH":
+                continue
+            if streak_kind is None:
+                streak_kind = r
+                streak_count = 1
+            elif r == streak_kind:
+                streak_count += 1
+            else:
+                break
     finally:
         put_conn(conn)
 
@@ -578,6 +598,8 @@ def user_stats(request: Request):
             "pending": pending,
             "roi": roi,
             "winrate": winrate,
+            "streak_count": streak_count,
+            "streak_kind": streak_kind,
         },
     })
 

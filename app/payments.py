@@ -1,26 +1,38 @@
 from __future__ import annotations
-from datetime import datetime, timezone, timedelta
+
+import hashlib
+import hmac
 import json
 import logging
+from datetime import datetime, timezone, timedelta
+
+import requests as http_requests
 
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import RedirectResponse, JSONResponse
 
 from app.auth import get_user_id, get_user_by_id
 from app.db import get_conn, put_conn
+from app.email_utils import send_premium_welcome_email
 from config.settings import settings
 
 router = APIRouter()
 logger = logging.getLogger("aftr.payments")
 
-try:
-    import stripe  # type: ignore
-    if settings.stripe_secret_key:
-        stripe.api_key = settings.stripe_secret_key
-except Exception:  # pragma: no cover - optional dependency
-    stripe = None  # type: ignore
-    logger.warning("Stripe SDK not available; billing endpoints will be disabled.")
+_LS_API_BASE = "https://api.lemonsqueezy.com/v1"
 
+
+def _ls_headers() -> dict:
+    return {
+        "Authorization": f"Bearer {settings.lemonsqueezy_api_key}",
+        "Accept": "application/vnd.api+json",
+        "Content-Type": "application/vnd.api+json",
+    }
+
+
+# ─────────────────────────────────────────────
+# Manual activation (testing / admin)
+# ─────────────────────────────────────────────
 
 @router.get("/premium/manual-activate", include_in_schema=False)
 def manual_activate(request: Request, plan: str = Query("PREMIUM")):
@@ -34,37 +46,37 @@ def manual_activate(request: Request, plan: str = Query("PREMIUM")):
 
     now = datetime.now(timezone.utc)
     exp = now + timedelta(days=30)
-
     now_iso = now.isoformat()
     exp_iso = exp.isoformat()
+
     conn = get_conn()
     try:
         cur = conn.cursor()
         cur.execute(
             """
-          INSERT INTO subscriptions(user_id, plan, expires_at, created_at)
-          VALUES (%s,%s,%s,%s)
-          ON CONFLICT(user_id) DO UPDATE SET
-            plan=EXCLUDED.plan,
-            expires_at=EXCLUDED.expires_at
-        """,
+            INSERT INTO subscriptions(user_id, plan, expires_at, created_at)
+            VALUES (%s,%s,%s,%s)
+            ON CONFLICT(user_id) DO UPDATE SET
+              plan=EXCLUDED.plan,
+              expires_at=EXCLUDED.expires_at
+            """,
             (uid, plan, exp_iso, now_iso),
         )
         try:
             cur.execute(
                 """
-              UPDATE users SET
-                role = 'premium_user',
-                subscription_status = 'active',
-                subscription_start = %s,
-                subscription_end = %s,
-                updated_at = %s
-              WHERE id = %s
-            """,
+                UPDATE users SET
+                  role = 'premium_user',
+                  subscription_status = 'active',
+                  subscription_start = %s,
+                  subscription_end = %s,
+                  updated_at = %s
+                WHERE id = %s
+                """,
                 (now_iso, exp_iso, now_iso, uid),
             )
         except Exception:
-            logger.exception("Error updating user premium flags in manual_activate")
+            logger.exception("manual_activate: error updating user flags uid=%s", uid)
         conn.commit()
     finally:
         put_conn(conn)
@@ -72,145 +84,222 @@ def manual_activate(request: Request, plan: str = Query("PREMIUM")):
     return RedirectResponse(url="/?msg=premium_on", status_code=302)
 
 
+# ─────────────────────────────────────────────
+# Checkout — crea sesión en Lemon Squeezy
+# ─────────────────────────────────────────────
+
 @router.post("/billing/create-checkout-session")
 def create_checkout_session(request: Request):
-    try:
-        uid = get_user_id(request)
-        authenticated = uid is not None
-        has_secret = bool(settings.stripe_secret_key)
-        has_price_id = bool(settings.stripe_price_id)
-        has_app_base = bool(getattr(settings, "app_base_url", None) and (settings.app_base_url or "").strip())
+    uid = get_user_id(request)
+    if not uid:
+        return JSONResponse({"ok": False, "error": "need_login"}, status_code=401)
 
-        logger.info(
-            "create-checkout-session: pre-check",
-            extra={
-                "authenticated": authenticated,
-                "STRIPE_SECRET_KEY_exists": has_secret,
-                "STRIPE_PRICE_ID_exists": has_price_id,
-                "APP_BASE_URL_exists": has_app_base,
-            },
-        )
+    if not settings.lemonsqueezy_api_key:
+        logger.error("Lemon Squeezy API key not configured")
+        return JSONResponse({"ok": False, "error": "payments_not_configured"}, status_code=500)
 
-        if not uid:
-            logger.info("Checkout session denied: not authenticated")
-            return JSONResponse(content={"ok": False, "error": "need_login"}, status_code=401)
+    if not settings.lemonsqueezy_store_id or not settings.lemonsqueezy_variant_id:
+        logger.error("Lemon Squeezy store_id or variant_id missing")
+        return JSONResponse({"ok": False, "error": "payments_not_configured"}, status_code=500)
 
-        if not stripe or not settings.stripe_secret_key or not settings.stripe_price_id:
-            logger.error(
-                "Stripe not configured; cannot create checkout session",
-                extra={
-                    "has_stripe": bool(stripe),
-                    "has_secret": has_secret,
-                    "has_price_id": has_price_id,
+    base_url = (
+        (getattr(settings, "app_base_url", None) or "").strip().rstrip("/")
+        or str(request.base_url).rstrip("/")
+    )
+
+    user = get_user_by_id(uid) or {}
+    email = user.get("email") or ""
+
+    payload = {
+        "data": {
+            "type": "checkouts",
+            "attributes": {
+                "checkout_options": {
+                    "dark": True,
                 },
-            )
-            return JSONResponse(content={"ok": False, "error": "stripe_not_configured"}, status_code=500)
+                "checkout_data": {
+                    "email": email,
+                    "custom": {"user_id": str(uid)},
+                },
+                "product_options": {
+                    "redirect_url": f"{base_url}/?msg=premium_activated",
+                },
+            },
+            "relationships": {
+                "store": {
+                    "data": {"type": "stores", "id": str(settings.lemonsqueezy_store_id)}
+                },
+                "variant": {
+                    "data": {"type": "variants", "id": str(settings.lemonsqueezy_variant_id)}
+                },
+            },
+        }
+    }
 
-        base_url = (getattr(settings, "app_base_url", None) or "").strip().rstrip("/") or str(request.base_url).rstrip("/")
-        # Stripe replaces {CHECKOUT_SESSION_ID} so /billing/success can verify payment without relying on webhooks alone.
-        success_url = f"{base_url}/billing/success?session_id={{CHECKOUT_SESSION_ID}}"
-        cancel_url = base_url
-
-        logger.info(
-            "create-checkout-session: resolved URLs",
-            extra={"success_url": success_url, "cancel_url": cancel_url},
+    try:
+        r = http_requests.post(
+            f"{_LS_API_BASE}/checkouts",
+            headers=_ls_headers(),
+            json=payload,
+            timeout=10,
         )
-
-        stripe.api_key = settings.stripe_secret_key
-        user = get_user_by_id(uid) or {}
-        email = user.get("email") or None
-
-        session = stripe.checkout.Session.create(
-            mode="subscription",
-            line_items=[{"price": settings.stripe_price_id, "quantity": 1}],
-            success_url=success_url,
-            cancel_url=cancel_url,
-            client_reference_id=str(uid),
-            customer_email=email,
-        )
-        logger.info(
-            "Stripe checkout session created",
-            extra={"user_id": uid, "session_id": getattr(session, "id", None)},
-        )
-        return JSONResponse(content={"ok": True, "url": session.url})
+        if r.status_code not in (200, 201):
+            logger.error("LS checkout create failed: %s — %s", r.status_code, r.text[:300])
+            return JSONResponse({"ok": False, "error": "checkout_failed"}, status_code=500)
+        data = r.json()
+        url = data["data"]["attributes"]["url"]
+        logger.info("LS checkout created for uid=%s", uid)
+        return JSONResponse({"ok": True, "url": url})
     except Exception as e:
         logger.exception("create-checkout-session failed: %s", e)
-        return JSONResponse(
-            status_code=500,
-            content={"ok": False, "error": str(e)},
-        )
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
 
 
-@router.get("/billing/success", include_in_schema=False)
-def billing_success(request: Request, session_id: str | None = Query(None)):
-    """
-    After Stripe Checkout: redirect home with success UI.
-    If webhooks are missing/misconfigured, upgrade the user here by verifying the Checkout Session.
-    """
-    dest = "/?msg=premium_activated"
+# ─────────────────────────────────────────────
+# Webhook — Lemon Squeezy
+# ─────────────────────────────────────────────
 
-    if (
-        session_id
-        and stripe
-        and settings.stripe_secret_key
-        and str(session_id).strip()
-    ):
-        try:
-            stripe.api_key = settings.stripe_secret_key
-            sess = stripe.checkout.Session.retrieve(str(session_id).strip())
-            pay_ok = getattr(sess, "payment_status", None) in ("paid", "no_payment_required")
-            complete = getattr(sess, "status", None) == "complete"
-            if pay_ok and complete:
-                ref = getattr(sess, "client_reference_id", None) or ""
+@router.post("/webhooks/lemonsqueezy", include_in_schema=False)
+async def lemonsqueezy_webhook(request: Request):
+    payload = await request.body()
+    sig_header = request.headers.get("X-Signature", "")
+    wh_secret = settings.lemonsqueezy_webhook_secret
+
+    if wh_secret:
+        expected = hmac.new(wh_secret.encode("utf-8"), payload, hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(expected, sig_header):
+            logger.warning("LS webhook: invalid signature")
+            return JSONResponse({"ok": False}, status_code=400)
+
+    try:
+        data = json.loads(payload.decode("utf-8"))
+    except Exception:
+        logger.warning("LS webhook: invalid JSON")
+        return JSONResponse({"ok": False}, status_code=400)
+
+    ev_type: str = data.get("meta", {}).get("event_name", "")
+    custom_data: dict = data.get("meta", {}).get("custom_data") or {}
+    attrs: dict = data.get("data", {}).get("attributes", {})
+
+    logger.info("LS webhook received: %s", ev_type)
+
+    if ev_type in ("subscription_created", "subscription_updated"):
+        status = (attrs.get("status") or "").strip().lower()
+        ls_subscription_id = str(data.get("data", {}).get("id") or "")
+        ls_customer_id = str(attrs.get("customer_id") or "")
+        renews_at = attrs.get("renews_at") or attrs.get("trial_ends_at")
+
+        # Resolve user: prefer custom_data.user_id, fallback to DB lookup by subscription id
+        uid_int = _uid_from_custom_data(custom_data)
+        if uid_int is None and ls_subscription_id:
+            uid_int = _uid_from_ls_subscription_id(ls_subscription_id)
+
+        if uid_int:
+            if status in ("active", "on_trial"):
+                exp_iso = _parse_ls_date(renews_at) or (
+                    datetime.now(timezone.utc) + timedelta(days=30)
+                ).isoformat()
+                _apply_premium_to_user(
+                    uid_int,
+                    exp_iso,
+                    customer_id=ls_customer_id or None,
+                    subscription_id=ls_subscription_id or None,
+                )
+                logger.info("LS %s: premium applied uid=%s exp=%s", ev_type, uid_int, exp_iso)
+                # Bienvenida premium solo en subscription_created (no en renewals)
+                if ev_type == "subscription_created":
+                    try:
+                        user = get_user_by_id(uid_int) or {}
+                        email = user.get("email") or ""
+                        username = user.get("username") or user.get("name") or email.split("@")[0]
+                        if email:
+                            send_premium_welcome_email(email, username)
+                    except Exception:
+                        logger.warning("LS: no se pudo enviar email premium uid=%s", uid_int, exc_info=True)
+            else:
+                _revoke_premium_for_user(uid_int)
+                logger.info("LS %s: premium revoked uid=%s status=%s", ev_type, uid_int, status)
+        else:
+            logger.warning("LS %s: could not resolve user — custom_data=%s sub_id=%s", ev_type, custom_data, ls_subscription_id)
+
+    elif ev_type == "subscription_cancelled":
+        ls_subscription_id = str(data.get("data", {}).get("id") or "")
+        uid_int = _uid_from_custom_data(custom_data)
+        if uid_int is None and ls_subscription_id:
+            uid_int = _uid_from_ls_subscription_id(ls_subscription_id)
+        if uid_int:
+            _revoke_premium_for_user(uid_int)
+            logger.info("LS subscription_cancelled: premium revoked uid=%s", uid_int)
+
+    elif ev_type == "order_created":
+        # One-time purchase fallback (in case variant is one-time, not subscription)
+        status = (attrs.get("status") or "").strip().lower()
+        if status == "paid":
+            uid_int = _uid_from_custom_data(custom_data)
+            if uid_int:
+                exp_iso = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+                ls_customer_id = str(attrs.get("customer_id") or "")
+                _apply_premium_to_user(uid_int, exp_iso, customer_id=ls_customer_id or None)
+                logger.info("LS order_created: premium applied uid=%s", uid_int)
                 try:
-                    uid_from_ref = int(str(ref).strip()) if str(ref).strip() else None
-                except (TypeError, ValueError):
-                    uid_from_ref = None
-                uid_cookie = get_user_id(request)
-                # Require session to belong to this browser's logged-in user (same id as checkout create).
-                if uid_from_ref is not None and uid_cookie is not None and uid_from_ref == uid_cookie:
-                    customer_id = getattr(sess, "customer", None)
-                    subscription_id = getattr(sess, "subscription", None)
-                    now = datetime.now(timezone.utc)
-                    exp_iso = (now + timedelta(days=30)).isoformat()
-                    if subscription_id:
-                        try:
-                            sub = stripe.Subscription.retrieve(subscription_id)
-                            if getattr(sub, "current_period_end", None):
-                                exp_iso = datetime.fromtimestamp(
-                                    sub.current_period_end, tz=timezone.utc
-                                ).isoformat()
-                        except Exception:
-                            pass
-                    _apply_premium_to_user(
-                        uid_from_ref,
-                        exp_iso,
-                        customer_id=str(customer_id) if customer_id else None,
-                        subscription_id=str(subscription_id) if subscription_id else None,
-                    )
-                    logger.info(
-                        "billing/success: premium applied via session verify | user_id=%s session=%s",
-                        uid_from_ref,
-                        session_id,
-                    )
-                else:
-                    logger.warning(
-                        "billing/success: session verified but user mismatch or missing cookie | "
-                        "ref_uid=%s cookie_uid=%s session=%s",
-                        uid_from_ref,
-                        uid_cookie,
-                        session_id,
-                    )
-        except Exception:
-            logger.exception("billing/success: session retrieve/apply failed | session_id=%s", session_id)
+                    user = get_user_by_id(uid_int) or {}
+                    email = user.get("email") or ""
+                    username = user.get("username") or user.get("name") or email.split("@")[0]
+                    if email:
+                        send_premium_welcome_email(email, username)
+                except Exception:
+                    logger.warning("LS: no se pudo enviar email premium (order) uid=%s", uid_int, exc_info=True)
 
-    return RedirectResponse(url=dest, status_code=302)
+    return JSONResponse({"ok": True})
 
 
-def _apply_premium_to_user(uid_int: int, expires_at_iso: str, customer_id: str | None = None, subscription_id: str | None = None) -> None:
-    """Write PREMIUM into subscriptions and users for given user_id and expiry."""
-    now = datetime.now(timezone.utc)
-    now_iso = now.isoformat()
+# ─────────────────────────────────────────────
+# Helpers internos
+# ─────────────────────────────────────────────
+
+def _parse_ls_date(date_str: str | None) -> str | None:
+    """Convierte fecha ISO de LS (con Z o offset) a ISO string en UTC."""
+    if not date_str:
+        return None
+    try:
+        # LS envía "2026-05-03T00:00:00.000000Z"
+        dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+        return dt.astimezone(timezone.utc).isoformat()
+    except Exception:
+        return None
+
+
+def _uid_from_custom_data(custom_data: dict) -> int | None:
+    """Extrae user_id del campo custom_data del webhook."""
+    raw = custom_data.get("user_id")
+    if raw is None:
+        return None
+    try:
+        return int(str(raw).strip())
+    except (TypeError, ValueError):
+        return None
+
+
+def _uid_from_ls_subscription_id(ls_subscription_id: str) -> int | None:
+    """Busca user_id por LS subscription ID guardado en stripe_subscription_id."""
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id FROM users WHERE stripe_subscription_id = %s", (ls_subscription_id,))
+        row = cur.fetchone()
+    finally:
+        put_conn(conn)
+    return int(row["id"]) if row else None
+
+
+def _apply_premium_to_user(
+    uid_int: int,
+    expires_at_iso: str,
+    customer_id: str | None = None,
+    subscription_id: str | None = None,
+) -> None:
+    """Activa PREMIUM en subscriptions y users para el user_id dado."""
+    now_iso = datetime.now(timezone.utc).isoformat()
     conn = get_conn()
     try:
         cur = conn.cursor()
@@ -229,7 +318,7 @@ def _apply_premium_to_user(uid_int: int, expires_at_iso: str, customer_id: str |
             "subscription_end = %s",
             "updated_at = %s",
         ]
-        args = [now_iso, expires_at_iso, now_iso]
+        args: list = [now_iso, expires_at_iso, now_iso]
         if customer_id is not None:
             updates.append("stripe_customer_id = COALESCE(stripe_customer_id, %s)")
             args.append(customer_id)
@@ -244,16 +333,15 @@ def _apply_premium_to_user(uid_int: int, expires_at_iso: str, customer_id: str |
         conn.commit()
     except Exception:
         conn.rollback()
-        logger.exception("_apply_premium_to_user: transaction failed for uid=%s; rolled back", uid_int)
+        logger.exception("_apply_premium_to_user: rolled back uid=%s", uid_int)
         raise
     finally:
         put_conn(conn)
 
 
 def _revoke_premium_for_user(uid_int: int) -> None:
-    """Set subscription to expired/inactive in DB."""
-    now = datetime.now(timezone.utc)
-    now_iso = now.isoformat()
+    """Revoca el plan premium del usuario."""
+    now_iso = datetime.now(timezone.utc).isoformat()
     conn = get_conn()
     try:
         cur = conn.cursor()
@@ -271,86 +359,7 @@ def _revoke_premium_for_user(uid_int: int) -> None:
         conn.commit()
     except Exception:
         conn.rollback()
-        logger.exception("_revoke_premium_for_user: transaction failed for uid=%s; rolled back", uid_int)
+        logger.exception("_revoke_premium_for_user: rolled back uid=%s", uid_int)
         raise
     finally:
         put_conn(conn)
-
-
-def _uid_from_subscription_id(stripe_subscription_id: str) -> int | None:
-    """Resolve user_id from users.stripe_subscription_id."""
-    conn = get_conn()
-    try:
-        cur = conn.cursor()
-        cur.execute("SELECT id FROM users WHERE stripe_subscription_id = %s", (stripe_subscription_id,))
-        row = cur.fetchone()
-    finally:
-        put_conn(conn)
-    return int(row["id"]) if row else None
-
-
-@router.post("/webhooks/stripe", include_in_schema=False)
-async def stripe_webhook(request: Request):
-    if not stripe or not settings.stripe_secret_key:
-        logger.error("Stripe not configured; ignoring webhook")
-        return JSONResponse({"ok": False}, status_code=500)
-
-    payload = await request.body()
-    sig_header = request.headers.get("stripe-signature", "")
-    wh_secret = settings.stripe_webhook_secret
-
-    try:
-        if wh_secret:
-            event = stripe.Webhook.construct_event(payload, sig_header, wh_secret)
-        else:
-            data = json.loads(payload.decode("utf-8"))
-            event = stripe.Event.construct_from(data, stripe.api_key)
-    except Exception:  # pragma: no cover - signature / JSON issues
-        logger.warning("Invalid Stripe webhook", exc_info=True)
-        return JSONResponse({"ok": False}, status_code=400)
-
-    ev_type = event["type"]
-
-    if ev_type == "checkout.session.completed":
-        session = event["data"]["object"]
-        uid = session.get("client_reference_id")
-        customer_id = session.get("customer")
-        subscription_id = session.get("subscription")
-        if uid:
-            try:
-                uid_int = int(uid)
-            except (TypeError, ValueError):
-                uid_int = None
-            if uid_int:
-                now = datetime.now(timezone.utc)
-                exp_iso = (now + timedelta(days=30)).isoformat()
-                if subscription_id and wh_secret:
-                    try:
-                        sub = stripe.Subscription.retrieve(subscription_id)
-                        if getattr(sub, "current_period_end", None):
-                            exp_iso = datetime.fromtimestamp(sub.current_period_end, tz=timezone.utc).isoformat()
-                    except Exception:
-                        pass
-                _apply_premium_to_user(uid_int, exp_iso, customer_id=customer_id, subscription_id=subscription_id)
-
-    elif ev_type == "customer.subscription.updated":
-        sub = event["data"]["object"]
-        sub_id = sub.get("id")
-        status = (sub.get("status") or "").strip().lower()
-        uid_int = _uid_from_subscription_id(sub_id) if sub_id else None
-        if uid_int:
-            if status in ("active", "trialing"):
-                exp_ts = sub.get("current_period_end")
-                exp_iso = datetime.fromtimestamp(exp_ts, tz=timezone.utc).isoformat() if exp_ts else (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
-                _apply_premium_to_user(uid_int, exp_iso)
-            else:
-                _revoke_premium_for_user(uid_int)
-
-    elif ev_type == "customer.subscription.deleted":
-        sub = event["data"]["object"]
-        sub_id = sub.get("id")
-        uid_int = _uid_from_subscription_id(sub_id) if sub_id else None
-        if uid_int:
-            _revoke_premium_for_user(uid_int)
-
-    return JSONResponse({"ok": True})

@@ -32,6 +32,7 @@ from services.refresh_results import (
     _build_finished_lookup_by_id,
     _scores_lookup_from_match_list,
     _apply_results_by_match_id,
+    _apply_live_scores_only,
     _merge_by_match_id,
     _save_history,
     _window_daily,
@@ -100,7 +101,8 @@ def _refresh_league_live_only(
     partial_by_id = _scores_lookup_from_match_list(live_matches)
     if partial_by_id:
         existing_picks = _read_json_list(f"daily_picks_{league_code}.json")
-        picks_all = _apply_results_by_match_id(existing_picks, partial_by_id)
+        # Solo actualiza scores parciales — NO evalúa WIN/LOSS hasta que el partido finalice
+        picks_all = _apply_live_scores_only(existing_picks, partial_by_id)
         for p in picks_all:
             if isinstance(p, dict):
                 enrich_pick_with_aftr_score(p)
@@ -195,6 +197,17 @@ def _refresh_league_results_only(
     _write_league_cache(league_code, merged_matches, picks_daily)
     _save_history(league_code, picks_all)
     _save_team_names_cache(team_names)
+
+    # Standings: se actualiza en cada results refresh (una vez por ciclo de resultados)
+    try:
+        from data.providers.football_data import get_standings
+        from data.cache import write_json
+        standings = get_standings(league_code)
+        if standings:
+            write_json(f"standings_{league_code}.json", standings)
+            logger.info("standings %s: %d filas", league_code, len(standings))
+    except Exception as e:
+        logger.debug("standings fetch %s: %s", league_code, e)
 
     if metrics is not None:
         metrics.matches_updated += len(merged_matches)

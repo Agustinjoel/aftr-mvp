@@ -520,7 +520,7 @@ def build_rendimiento_page(request: Request) -> str:
   <meta charset="utf-8"/>
   <title>Rendimiento · AFTR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=22">
+  <link rel="stylesheet" href="/static/style.css?v=24">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
   <style>
     .rendimiento-page {{ max-width: 900px; margin: 0 auto; padding: 24px 16px 64px; }}

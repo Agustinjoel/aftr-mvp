@@ -295,6 +295,17 @@ def match_detail(league: str, match_id: int) -> HTMLResponse:
     picks     = read_json_with_fallback(f"daily_picks_{league}.json") or []
     standings = read_json_with_fallback(f"standings_{league}.json") or []
 
+    # Si no hay standings en cache, intentar fetchearlos on-demand y cachearlos
+    if not standings:
+        try:
+            from data.providers.football_data import get_standings
+            from data.cache import write_json
+            standings = get_standings(league) or []
+            if standings:
+                write_json(f"standings_{league}.json", standings)
+        except Exception:
+            standings = []
+
     match = next(
         (m for m in matches if isinstance(m, dict) and _safe_int(m.get("match_id") or m.get("id")) == match_id),
         None,

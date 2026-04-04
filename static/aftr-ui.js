@@ -99,7 +99,7 @@
      their entrance animation.
   ───────────────────────────────────────────────────────────── */
   function staggerCards() {
-    var cards = document.querySelectorAll(".flip-card");
+    var cards = document.querySelectorAll(".aftr-pick-card");
     cards.forEach(function (card, i) {
       card.classList.add("card-stagger");
       card.style.animationDelay = Math.min(i * 55, 550) + "ms";

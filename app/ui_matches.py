@@ -4,7 +4,7 @@ Sin dependencias de FastAPI ni renderizado HTML.
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from app.ui_helpers import _safe_int, _parse_utcdate_maybe
 from app.ui_picks_calc import _result_norm
@@ -111,8 +111,12 @@ def isMatchFinished(match: dict) -> bool:
     if status_raw in {"WIN", "LOSS", "PUSH"}:
         return True
 
-    # En curso → nunca tratar como finalizado solo por score+tiempo
+    # En curso → nunca tratar como finalizado solo por score+tiempo…
+    # …pero sí si el kickoff ya pasó hace más de 3h30 (partido seguro terminado aunque el cache no se actualizó)
     if status_raw in MATCH_LIVE_STATUSES:
+        dt = _parse_utcdate_maybe(match.get("utcDate"))
+        if dt is not None and datetime.now(timezone.utc) > dt + timedelta(hours=3, minutes=30):
+            return True
         return False
 
     raw_result = match.get("result")

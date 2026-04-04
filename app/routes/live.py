@@ -1,81 +1,23 @@
 from __future__ import annotations
 
+import time
 from typing import Any
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
-from data.cache import read_json
+from data.cache import read_json, write_json
+from data.providers.football_data import get_match_detail
 
 router = APIRouter()
 
-
-def _mock_live_match(match_id: int) -> dict[str, Any]:
-    # Mock structure intended to mirror your cached JSON shape.
-    # When you connect real data later, keep keys consistent with this object.
-    return {
-        "match_id": match_id,
-        "league": "PL",
-        "minute": 57,
-        "status": "LIVE",
-        "home": {"name": "Arsenal", "crest": "/static/logo_aftr.png"},
-        "away": {"name": "Liverpool", "crest": "/static/leagues/pl.png"},
-        "score": {"home": 2, "away": 1},
-        "aftr_live_signal": {
-            "title": "AFTR LIVE SIGNAL",
-            "live_probability": 0.67,
-            "confidence": 0.78,
-            "trend": {"label": "Strong Momentum", "kind": "UP"},
-            "reasons": [
-                "Live xG edge trending in favor of the home side",
-                "Market implied swing + momentum acceleration",
-                "Tactical pressure increased in the last ~10 minutes",
-            ],
-        },
-        "timeline": [
-            {"minute": 3, "side": "home", "text": "Early pressure: 1st corner conceded"},
-            {"minute": 12, "side": "away", "text": "Counter attack blocked (off target)"},
-            {"minute": 21, "side": "home", "text": "Goal! Home takes the lead"},
-            {"minute": 44, "side": "away", "text": "Goal! Away equalizes"},
-            {"minute": 57, "side": "home", "text": "Goal! Home scores again"},
-        ],
-        "stats": {
-            "possession": {"home": 55, "away": 45},
-            "shots": {"home": 11, "away": 8},
-            "shots_on_target": {"home": 6, "away": 3},
-            "corners": {"home": 7, "away": 4},
-            "yellow_cards": {"home": 1, "away": 2},
-        },
-        "picks": {
-            "prematch_pick": {
-                "market": "1X",
-                "prob": 0.61,
-                "status": "WIN",
-                "tier": "ELITE",
-            },
-            "live_opportunities": [
-                {"market": "Over 1.5", "status": "WATCH", "prob": 0.64},
-                {"market": "BTTS YES", "status": "WEAK", "prob": 0.52},
-            ],
-        },
-        "h2h": {
-            "title": "H2H (últimos 5)",
-            "rows": [
-                {"season": "2025", "home": 1, "away": 1},
-                {"season": "2024", "home": 2, "away": 0},
-                {"season": "2023", "home": 0, "away": 1},
-                {"season": "2022", "home": 1, "away": 2},
-                {"season": "2021", "home": 3, "away": 1},
-            ],
-        },
-    }
+# Cuántos segundos consideramos fresco el cache de detalle de partido
+_DETAIL_CACHE_TTL_SEC = 45
 
 
 def _safe_float(v: Any, default: float = 0.0) -> float:
     try:
-        if v is None:
-            return default
-        return float(v)
+        return float(v) if v is not None else default
     except Exception:
         return default
 
@@ -84,245 +26,287 @@ def _pct(v: float) -> str:
     return f"{round(v * 100.0, 1)}%"
 
 
-def _bar_pct(home_val: float, away_val: float) -> tuple[float, float]:
-    total = max(home_val + away_val, 1.0)
-    return (home_val / total) * 100.0, (away_val / total) * 100.0
+# ─────────────────────────────────────────────
+# Estado visible del partido
+# ─────────────────────────────────────────────
 
+def _status_label(status: str, minute: int | None) -> str:
+    s = (status or "").strip().upper()
+    if s in {"FINISHED", "FT"}:
+        return "Final del Partido"
+    if s in {"HT", "HALFTIME", "HALF_TIME", "BREAK", "PAUSED"}:
+        return "Descanso"
+    if s in {"IN_PLAY", "LIVE", "1H", "2H", "PLAYING"} and minute:
+        return f"🔴 {minute}'"
+    if s in {"IN_PLAY", "LIVE", "PLAYING"}:
+        return "🔴 En Vivo"
+    if s in {"TIMED", "SCHEDULED"}:
+        return "Próximo"
+    if s in {"CANCELLED", "POSTPONED", "SUSPENDED", "AWARDED"}:
+        return s.title()
+    return s or "—"
+
+
+# ─────────────────────────────────────────────
+# Fetch con cache TTL
+# ─────────────────────────────────────────────
+
+def _fetch_match_detail(match_id: int) -> dict:
+    """Devuelve detalle de partido. Usa cache de archivo si está fresco (<TTL)."""
+    cache_key = f"live_match_{match_id}.json"
+    cached = read_json(cache_key)
+    if isinstance(cached, dict) and cached:
+        cached_at = cached.get("_cached_at", 0)
+        if isinstance(cached_at, (int, float)) and (time.time() - cached_at) < _DETAIL_CACHE_TTL_SEC:
+            return cached
+
+    detail = get_match_detail(match_id)
+    if isinstance(detail, dict) and detail:
+        detail["_cached_at"] = time.time()
+        try:
+            write_json(cache_key, detail)
+        except Exception:
+            pass
+        return detail
+
+    # Si la API falla, devolver cache viejo aunque esté expirado
+    if isinstance(cached, dict) and cached:
+        return cached
+    return {}
+
+
+# ─────────────────────────────────────────────
+# Render de timeline de eventos
+# ─────────────────────────────────────────────
+
+def _build_timeline(match: dict) -> list[dict]:
+    """
+    Unifica goals + bookings + substitutions en una lista ordenada por minuto desc.
+    Cada evento: {minute, type, side, primary, secondary}
+    """
+    events: list[dict] = []
+
+    for g in (match.get("goals") or []):
+        assist = g.get("assist")
+        secondary = f"Asistencia: {assist}" if assist else None
+        events.append({
+            "minute":    g.get("minute"),
+            "type":      "goal",
+            "side":      g.get("side", "home"),
+            "primary":   g.get("player") or "—",
+            "secondary": secondary,
+        })
+
+    for b in (match.get("bookings") or []):
+        card = (b.get("card") or "YELLOW").upper()
+        events.append({
+            "minute":    b.get("minute"),
+            "type":      "yellow" if card == "YELLOW" else "red",
+            "side":      b.get("side", "home"),
+            "primary":   b.get("player") or "—",
+            "secondary": None,
+        })
+
+    for s in (match.get("substitutions") or []):
+        player_out = s.get("player_out")
+        secondary = f"por {player_out}" if player_out else None
+        events.append({
+            "minute":    s.get("minute"),
+            "type":      "sub",
+            "side":      s.get("side", "home"),
+            "primary":   s.get("player_in") or "—",
+            "secondary": secondary,
+        })
+
+    events.sort(key=lambda e: (e.get("minute") or 0), reverse=True)
+    return events
+
+
+_EVENT_ICONS = {
+    "goal":   "⚽",
+    "yellow": "🟨",
+    "red":    "🟥",
+    "sub":    "🔄",
+}
+
+
+def _render_timeline_html(events: list[dict]) -> str:
+    if not events:
+        return '<p class="muted live-empty">Sin eventos registrados todavía.</p>'
+
+    rows = []
+    for e in events:
+        minute  = e.get("minute")
+        etype   = e.get("type", "goal")
+        side    = e.get("side", "home")
+        primary = e.get("primary") or "—"
+        secondary = e.get("secondary")
+        icon    = _EVENT_ICONS.get(etype, "•")
+        min_str = f"{minute}'" if minute is not None else "—"
+        sec_html = f'<div class="lev-secondary">{secondary}</div>' if secondary else ""
+
+        if side == "home":
+            rows.append(
+                f'<div class="lev-row lev-row--home">'
+                f'<div class="lev-minute">{min_str}</div>'
+                f'<div class="lev-icon">{icon}</div>'
+                f'<div class="lev-info">'
+                f'<div class="lev-primary">{primary}</div>'
+                f'{sec_html}'
+                f'</div>'
+                f'<div class="lev-spacer"></div>'
+                f'</div>'
+            )
+        else:
+            rows.append(
+                f'<div class="lev-row lev-row--away">'
+                f'<div class="lev-spacer"></div>'
+                f'<div class="lev-info lev-info--away">'
+                f'<div class="lev-primary">{primary}</div>'
+                f'{sec_html}'
+                f'</div>'
+                f'<div class="lev-icon">{icon}</div>'
+                f'<div class="lev-minute">{min_str}</div>'
+                f'</div>'
+            )
+
+    return f'<div class="lev-list">{"".join(rows)}</div>'
+
+
+# ─────────────────────────────────────────────
+# Endpoint
+# ─────────────────────────────────────────────
 
 @router.get("/match/{match_id}", response_class=HTMLResponse)
 def live_match_page(request: Request, match_id: int):
-    # 1) Try cached JSON first (future real integration); 2) fallback to mock.
-    cached = read_json(f"live_match_{match_id}.json")
-    if not isinstance(cached, dict) or not cached:
-        match = _mock_live_match(match_id)
-    else:
-        match = cached
+    match = _fetch_match_detail(match_id)
 
-    home = match.get("home") or {}
-    away = match.get("away") or {}
-    score = match.get("score") or {}
-    minute = int(match.get("minute") or 0)
-    status = str(match.get("status") or "LIVE")
+    score     = match.get("score") or {}
+    hs        = score.get("home")
+    as_       = score.get("away")
+    score_l   = str(hs) if hs is not None else "—"
+    score_r   = str(as_) if as_ is not None else "—"
 
-    home_name = str(home.get("name") or "Home")
-    away_name = str(away.get("name") or "Away")
-    home_crest = str(home.get("crest") or "/static/logo_aftr.png")
-    away_crest = str(away.get("crest") or "/static/logo_aftr.png")
+    status    = match.get("status") or "—"
+    minute    = match.get("minute")
+    status_lbl = _status_label(status, minute)
 
-    hs = int(score.get("home") or 0)
-    as_ = int(score.get("away") or 0)
+    home_name  = str(match.get("home") or "Local")
+    away_name  = str(match.get("away") or "Visitante")
+    home_crest = str(match.get("home_crest") or "/static/logo_aftr.png")
+    away_crest = str(match.get("away_crest") or "/static/logo_aftr.png")
 
-    aftr = match.get("aftr_live_signal") or {}
-    live_prob = _safe_float(aftr.get("live_probability"), 0.0)
-    confidence = _safe_float(aftr.get("confidence"), 0.0)
-    trend = aftr.get("trend") or {}
-    trend_label = str(trend.get("label") or "—")
-    trend_kind = str(trend.get("kind") or "UP").upper()
-    trend_badge_kind = "live-trend-up" if trend_kind in {"UP", "UPWARD", "STRONG"} else "live-trend-dn"
+    timeline_events = _build_timeline(match)
+    timeline_html   = _render_timeline_html(timeline_events)
 
-    reasons = aftr.get("reasons") or []
-    timeline = match.get("timeline") or []
-    stats = match.get("stats") or {}
-    picks = match.get("picks") or {}
-    prematch = picks.get("prematch_pick") or {}
-    live_opps = picks.get("live_opportunities") or []
-    h2h = match.get("h2h") or {}
-    h2h_rows = h2h.get("rows") or []
-    prematch_status = str(prematch.get("status") or "WIN").strip().upper()
-    prematch_badge_class = f"live-pick-badge--{prematch_status.lower()}"
+    is_empty = not match or not match.get("home")
 
-    # Stats bars: use comparative segments (home/away in one track).
-    def stat_row(stat_key: str, label: str, invert: bool = False) -> str:
-        s = stats.get(stat_key) or {}
-        hv = float(s.get("home") or 0)
-        av = float(s.get("away") or 0)
-        if invert:
-            # e.g. yellow cards: "lower is better" visually; invert by swapping.
-            hv, av = av, hv
-        hp, ap = _bar_pct(hv, av)
-        return (
-            f'<div class="live-stat-row">'
-            f'  <div class="live-stat-label">{label}</div>'
-            f'  <div class="live-comparebar" aria-label="{label} home {hv} away {av}">'
-            f'    <div class="live-comparebar-home" style="width:{hp}%" title="{home_name}: {hv}"></div>'
-            f'    <div class="live-comparebar-away" style="width:{ap}%" title="{away_name}: {av}"></div>'
-            f'  </div>'
-            f'  <div class="live-stat-values"><span>{hv}</span><span class="live-muted">-</span><span>{av}</span></div>'
-            f'</div>'
-        )
-
-    page_html = f"""
-<!doctype html>
+    page_html = f"""<!doctype html>
 <html>
   <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>AFTR Live — Match {match_id}</title>
-    <link rel="stylesheet" href="/static/style.css?v=22">
+    <title>AFTR — Partido {match_id}</title>
+    <link rel="stylesheet" href="/static/style.css?v=23">
     <link rel="icon" type="image/png" href="/static/logo_aftr.png">
+    <style>
+      /* ── Live match detail ── */
+      .lmd-header {{
+        background: var(--card-bg, #1a1a2e);
+        padding: 16px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,.08);
+      }}
+      .lmd-scorebar {{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }}
+      .lmd-team {{ display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 80px; }}
+      .lmd-crest {{ width: 40px; height: 40px; object-fit: contain; }}
+      .lmd-team-name {{ font-size: .75rem; color: var(--muted, #aaa); max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
+      .lmd-score {{ font-size: 2.2rem; font-weight: 700; letter-spacing: 2px; }}
+      .lmd-status-lbl {{ font-size: .8rem; color: var(--muted, #aaa); margin-top: 4px; }}
+
+      /* ── Tabs ── */
+      .lmd-tabs {{ display: flex; overflow-x: auto; border-bottom: 1px solid rgba(255,255,255,.08); background: var(--card-bg, #1a1a2e); }}
+      .lmd-tab {{ flex: none; padding: 12px 16px; font-size: .82rem; color: var(--muted, #aaa); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; white-space: nowrap; }}
+      .lmd-tab--active {{ color: var(--accent, #fff); border-bottom-color: var(--accent, #fff); }}
+
+      /* ── Events (Minuto a minuto) ── */
+      .lev-list {{ padding: 8px 0; }}
+      .lev-row {{
+        display: flex;
+        align-items: flex-start;
+        padding: 8px 16px;
+        gap: 8px;
+        border-bottom: 1px solid rgba(255,255,255,.04);
+      }}
+      .lev-row--home {{ flex-direction: row; }}
+      .lev-row--away {{ flex-direction: row-reverse; }}
+      .lev-minute {{ min-width: 32px; font-size: .78rem; color: var(--muted, #aaa); font-variant-numeric: tabular-nums; }}
+      .lev-icon {{ font-size: 1rem; line-height: 1.4; }}
+      .lev-info {{ display: flex; flex-direction: column; flex: 1; }}
+      .lev-info--away {{ align-items: flex-end; }}
+      .lev-primary {{ font-size: .88rem; font-weight: 500; }}
+      .lev-secondary {{ font-size: .75rem; color: var(--muted, #aaa); margin-top: 1px; }}
+      .lev-spacer {{ flex: 1; }}
+      .live-empty {{ padding: 24px; text-align: center; }}
+
+      /* ── Panels ── */
+      .lmd-panel {{ padding: 16px; }}
+      .lmd-panel--hidden {{ display: none; }}
+    </style>
   </head>
   <body>
     <header class="top top-pro live-header">
-      <div class="live-header-inner">
-        <a href="/" class="muted live-back-link">Inicio</a>
-        <div class="live-matchbar" role="group" aria-label="Marcador en vivo">
-          <div class="live-team live-team--home">
-            <img class="crest" src="{home_crest}" alt=""/>
-            <div class="live-team-name">{home_name}</div>
+      <div class="lmd-header">
+        <div class="lmd-scorebar">
+          <div class="lmd-team">
+            <img class="lmd-crest" src="{home_crest}" alt="" onerror="this.src='/static/logo_aftr.png';this.onerror=null;"/>
+            <div class="lmd-team-name">{home_name}</div>
           </div>
-          <div class="live-scorecol">
-            <div class="live-score" aria-label="Marcador">{hs} - {as_}</div>
-            <div class="live-minute-row">
-              <span class="live-minute">{minute}’</span>
-              <span class="live-live-badge" aria-label="{status}">LIVE</span>
-            </div>
-          </div>
-          <div class="live-team live-team--away">
-            <img class="crest" src="{away_crest}" alt=""/>
-            <div class="live-team-name">{away_name}</div>
+          <div class="lmd-score">{score_l} — {score_r}</div>
+          <div class="lmd-team">
+            <img class="lmd-crest" src="{away_crest}" alt="" onerror="this.src='/static/logo_aftr.png';this.onerror=null;"/>
+            <div class="lmd-team-name">{away_name}</div>
           </div>
         </div>
-        <div class="live-header-right">
-          <span class="pill live-watch-hint" data-match-id="{match_id}">WATCH</span>
-        </div>
+        <div class="lmd-status-lbl">{status_lbl}</div>
       </div>
     </header>
 
-    <div class="page live-page">
-      <div class="live-tabs" role="tablist" aria-label="Secciones del partido">
-        <button class="live-tab" type="button" role="tab" aria-selected="true" data-tab="resumen">Resumen</button>
-        <button class="live-tab" type="button" role="tab" aria-selected="false" data-tab="timeline">Timeline</button>
-        <button class="live-tab" type="button" role="tab" aria-selected="false" data-tab="stats">Stats</button>
-        <button class="live-tab" type="button" role="tab" aria-selected="false" data-tab="picks">AFTR Picks</button>
-        <button class="live-tab" type="button" role="tab" aria-selected="false" data-tab="h2h">H2H</button>
+    <div class="lmd-tabs" role="tablist">
+      <button class="lmd-tab lmd-tab--active" type="button" data-tab="timeline">Minuto a minuto</button>
+      <button class="lmd-tab" type="button" data-tab="info">Info</button>
+    </div>
+
+    <div class="page">
+      <div class="lmd-panel" data-panel="timeline">
+        {timeline_html if not is_empty else '<p class="muted live-empty">No se pudo cargar el detalle del partido.</p>'}
       </div>
-
-      <section class="live-panel live-panel--active" data-panel="resumen">
-        <div class="card live-main-card">
-          <div class="live-main-top">
-            <div class="live-main-kicker">{aftr.get("title") or "AFTR LIVE SIGNAL"}</div>
-            <div class="live-trend-badge {trend_badge_kind}">{trend_label}</div>
-          </div>
-          <div class="live-main-metrics">
-            <div class="live-metric">
-              <div class="live-metric-label">Live probability</div>
-              <div class="live-metric-value">{_pct(live_prob)}</div>
-            </div>
-            <div class="live-metric">
-              <div class="live-metric-label">Confidence</div>
-              <div class="live-metric-value">{_pct(confidence)}</div>
-            </div>
-          </div>
-          <ul class="live-reasons">
-            {''.join(f'<li>{r}</li>' for r in reasons[:3])}
-          </ul>
-          <div class="live-actions">
-            <button type="button" class="pill live-watch-btn" data-match-id="{match_id}" aria-label="Watch (connect later)">WATCH</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="live-panel" data-panel="timeline" hidden>
-        <div class="card live-timeline-card">
-          <h2 class="live-h2">Timeline</h2>
-          <div class="live-timeline">
-            {''.join(
-              (lambda e: (
-                f'<div class="live-timeline-row">'
-                f'  <div class="live-timeline-side live-timeline-side--{str(e.get("side") or "home").lower()}"></div>'
-                f'  <div class="live-timeline-minute">{e.get("minute","—")}’</div>'
-                f'  <div class="live-timeline-text">{e.get("text","")}</div>'
-                f'</div>'
-              ))(e) for e in timeline
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section class="live-panel" data-panel="stats" hidden>
-        <div class="card live-stats-card">
-          <h2 class="live-h2">Stats</h2>
-          {stat_row("possession", "Possession")}
-          {stat_row("shots", "Shots")}
-          {stat_row("shots_on_target", "Shots on target")}
-          {stat_row("corners", "Corners")}
-          {stat_row("yellow_cards", "Yellow cards", invert=True)}
-        </div>
-      </section>
-
-      <section class="live-panel" data-panel="picks" hidden>
-        <div class="card live-picks-card">
-          <h2 class="live-h2">AFTR Picks</h2>
-
-          <div class="live-pick-block">
-            <div class="live-pick-title">Prematch pick</div>
-            <div class="live-pick-row">
-              <div class="live-pick-market">{prematch.get("market") or "—"}</div>
-              <div class="live-pick-prob">{_pct(_safe_float(prematch.get("prob"), 0.0))}</div>
-              <div class="live-pick-badge {prematch_badge_class}">{prematch_status}</div>
-            </div>
-            <div class="live-pick-sub muted">Tier: {prematch.get("tier") or "—"}</div>
-          </div>
-
-          <div class="live-pick-block">
-            <div class="live-pick-title">Live opportunities</div>
-            <div class="live-live-opps">
-              {''.join(
-                f'<div class="live-opportunity">'
-                f'  <div class="live-op-market">{o.get("market") or "—"}</div>'
-                f'  <div class="live-op-row">'
-                f'    <div class="live-pick-prob">{_pct(_safe_float(o.get("prob"), 0.0))}</div>'
-                f'    <div class="live-pick-badge live-pick-badge--{str(o.get("status","WATCH")).strip().lower()}">{str(o.get("status","WATCH")).strip().upper()}</div>'
-                f'  </div>'
-                f'</div>'
-                for o in live_opps
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="live-panel" data-panel="h2h" hidden>
-        <div class="card live-h2h-card">
-          <h2 class="live-h2">{h2h.get("title") or "H2H"}</h2>
-          <div class="live-h2h-table">
-            {''.join(
-              f'<div class="live-h2h-row">'
-              f'  <div class="live-h2h-season">{r.get("season","—")}</div>'
-              f'  <div class="live-h2h-score"><span>{r.get("home","0")}</span><span class="live-muted">-</span><span>{r.get("away","0")}</span></div>'
-              f'</div>'
-              for r in h2h_rows
-            )}
-          </div>
-        </div>
-      </section>
+      <div class="lmd-panel lmd-panel--hidden" data-panel="info">
+        <p class="muted" style="padding:16px 0; font-size:.85rem;">
+          Match ID: {match_id} · Status: {status}
+        </p>
+      </div>
     </div>
 
     <script>
-      (function(){{
-        var tabs = document.querySelectorAll(".live-tab");
-        var panels = document.querySelectorAll(".live-panel");
-        function setActive(tabKey){{
-          tabs.forEach(function(t){{
-            var on = t.getAttribute("data-tab") === tabKey;
-            t.setAttribute("aria-selected", on ? "true" : "false");
-            if(on) t.classList.add("live-tab--active"); else t.classList.remove("live-tab--active");
-          }});
-          panels.forEach(function(p){{
-            var on = p.getAttribute("data-panel") === tabKey;
-            if(on){{ p.hidden = false; p.classList.add("live-panel--active"); }}
-            else {{ p.hidden = true; p.classList.remove("live-panel--active"); }}
-          }});
-        }}
-        tabs.forEach(function(t){{
-          t.addEventListener("click", function(){{
-            setActive(t.getAttribute("data-tab"));
-          }});
+    (function(){{
+      var tabs   = document.querySelectorAll(".lmd-tab");
+      var panels = document.querySelectorAll(".lmd-panel");
+      tabs.forEach(function(t){{
+        t.addEventListener("click", function(){{
+          var key = t.getAttribute("data-tab");
+          tabs.forEach(function(x){{ x.classList.toggle("lmd-tab--active", x === t); }});
+          panels.forEach(function(p){{ p.classList.toggle("lmd-panel--hidden", p.getAttribute("data-panel") !== key); }});
         }});
-      }})();
+      }});
+    }})();
     </script>
   </body>
-</html>
-    """
+</html>"""
     return HTMLResponse(page_html)
-

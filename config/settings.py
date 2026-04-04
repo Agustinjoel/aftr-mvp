@@ -104,11 +104,17 @@ ODDS_LEAGUE_SPORT_KEYS: dict[str, str] = {
     "WC": "soccer_fifa_world_cup",
 }
 
-# Stripe (suscripciones)
+# Stripe (legacy — reemplazado por Lemon Squeezy)
 STRIPE_SECRET_KEY: str = (os.getenv("STRIPE_SECRET_KEY") or "").strip()
 STRIPE_PUBLISHABLE_KEY: str = (os.getenv("STRIPE_PUBLISHABLE_KEY") or "").strip()
 STRIPE_PRICE_ID: str = (os.getenv("STRIPE_PRICE_ID") or "").strip()
 STRIPE_WEBHOOK_SECRET: str = (os.getenv("STRIPE_WEBHOOK_SECRET") or "").strip()
+
+# Lemon Squeezy (pagos globales)
+LEMONSQUEEZY_API_KEY: str = (os.getenv("LEMONSQUEEZY_API_KEY") or "").strip()
+LEMONSQUEEZY_STORE_ID: str = (os.getenv("LEMONSQUEEZY_STORE_ID") or "").strip()
+LEMONSQUEEZY_VARIANT_ID: str = (os.getenv("LEMONSQUEEZY_VARIANT_ID") or "1485723").strip()
+LEMONSQUEEZY_WEBHOOK_SECRET: str = (os.getenv("LEMONSQUEEZY_WEBHOOK_SECRET") or "").strip()
 
 # Ligas soportadas (código -> nombre)
 LEAGUES: dict[str, str] = {
@@ -341,11 +347,17 @@ class Settings:
         self.price_premium_usd = PRICE_PREMIUM_USD
         self.price_pro_usd = PRICE_PRO_USD
 
-        # Stripe / billing
+        # Stripe (legacy)
         self.stripe_secret_key = STRIPE_SECRET_KEY
         self.stripe_publishable_key = STRIPE_PUBLISHABLE_KEY
         self.stripe_price_id = STRIPE_PRICE_ID
         self.stripe_webhook_secret = STRIPE_WEBHOOK_SECRET
+
+        # Lemon Squeezy
+        self.lemonsqueezy_api_key = LEMONSQUEEZY_API_KEY
+        self.lemonsqueezy_store_id = LEMONSQUEEZY_STORE_ID
+        self.lemonsqueezy_variant_id = LEMONSQUEEZY_VARIANT_ID
+        self.lemonsqueezy_webhook_secret = LEMONSQUEEZY_WEBHOOK_SECRET
 
     def league_codes(self) -> list[str]:
         return list(self.leagues.keys())

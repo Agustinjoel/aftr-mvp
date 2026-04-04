@@ -413,6 +413,84 @@ def get_finished_matches(league_code: str, days_back: int = 5) -> list[dict]:
     return out
 
 
+def get_match_detail(match_id: int) -> dict:
+    """
+    Detalle completo de un partido individual: score, status, minute, goals, bookings, substitutions.
+    Endpoint: GET /v4/matches/{match_id}
+    El HTTP-level TTL cache de _get evita exceder cuota si se llama varias veces seguidas.
+    """
+    try:
+        data = _get(f"/matches/{match_id}")
+    except Exception as e:
+        logger.debug("get_match_detail %s: %s", match_id, e)
+        return {}
+
+    if not isinstance(data, dict):
+        return {}
+
+    home_team = data.get("homeTeam") or {}
+    away_team = data.get("awayTeam") or {}
+    score_raw = data.get("score") or {}
+    ft        = score_raw.get("fullTime") or {}
+    home_id   = home_team.get("id")
+    away_id   = away_team.get("id")
+
+    goals: list[dict] = []
+    for g in (data.get("goals") or []):
+        team_obj = g.get("team") or {}
+        scorer   = g.get("scorer") or {}
+        assist   = g.get("assist") or {}
+        tid      = team_obj.get("id")
+        goals.append({
+            "minute": g.get("minute"),
+            "type":   (g.get("type") or "REGULAR").upper(),
+            "side":   "home" if tid == home_id else "away",
+            "player": scorer.get("shortName") or scorer.get("name") or "—",
+            "assist": assist.get("shortName") or assist.get("name") or None,
+        })
+
+    bookings: list[dict] = []
+    for b in (data.get("bookings") or []):
+        team_obj = b.get("team") or {}
+        player   = b.get("player") or {}
+        tid      = team_obj.get("id")
+        bookings.append({
+            "minute": b.get("minute"),
+            "card":   (b.get("card") or "YELLOW").upper(),
+            "side":   "home" if tid == home_id else "away",
+            "player": player.get("shortName") or player.get("name") or "—",
+        })
+
+    substitutions: list[dict] = []
+    for s in (data.get("substitutions") or []):
+        team_obj   = s.get("team") or {}
+        player_in  = s.get("player") or {}
+        player_out = s.get("playerOut") or {}
+        tid        = team_obj.get("id")
+        substitutions.append({
+            "minute":     s.get("minute"),
+            "side":       "home" if tid == home_id else "away",
+            "player_in":  player_in.get("shortName") or player_in.get("name") or "—",
+            "player_out": player_out.get("shortName") or player_out.get("name") or "—",
+        })
+
+    return {
+        "match_id":    data.get("id"),
+        "status":      (data.get("status") or "").strip().upper(),
+        "minute":      data.get("minute"),
+        "home":        home_team.get("shortName") or home_team.get("name") or "—",
+        "away":        away_team.get("shortName") or away_team.get("name") or "—",
+        "home_id":     home_id,
+        "away_id":     away_id,
+        "home_crest":  home_team.get("crest") or _crest_from_team_id(home_id),
+        "away_crest":  away_team.get("crest") or _crest_from_team_id(away_id),
+        "score":       {"home": ft.get("home"), "away": ft.get("away")},
+        "goals":        goals,
+        "bookings":     bookings,
+        "substitutions": substitutions,
+    }
+
+
 def get_standings(league_code: str) -> list[dict]:
     """
     Tabla de posiciones de la competición (TOTAL).

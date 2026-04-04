@@ -32,7 +32,7 @@ def _simple_page(title: str, body: str) -> str:
   <meta charset="utf-8"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=22">
+  <link rel="stylesheet" href="/static/style.css?v=24">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 </head>
 <body>
@@ -212,6 +212,11 @@ def account_page(request: Request):
         </div>
       </div>
 {premium_upsell_card}
+
+      <div id="streak-banner" class="account-streak-banner" style="display:none" aria-live="polite">
+        <span id="streak-banner-icon" class="account-streak-banner-icon"></span>
+        <span id="streak-banner-text" class="account-streak-banner-text"></span>
+      </div>
 
       <section class="account-block account-block--stats">
       <h3 class="account-section-title"><span class="account-section-title-accent">Dashboard</span></h3>
@@ -442,6 +447,33 @@ def account_page(request: Request):
         if (el("hero-favorites")) el("hero-favorites").textContent = num(s.favorites_count);
         if (el("hero-roi")) el("hero-roi").textContent = roiVal.toFixed(1) + "%";
         if (el("hero-winrate")) el("hero-winrate").textContent = winrate != null ? winrate.toFixed(1) + "%" : "—";
+
+        // Streak (server-side)
+        var sc = (s.streak_count != null && s.streak_count > 0) ? Number(s.streak_count) : 0;
+        var sk = (s.streak_kind && typeof s.streak_kind === "string") ? s.streak_kind.toUpperCase() : null;
+        var streakTxt = (sc > 0 && sk) ? (sc + " " + sk) : "—";
+        if (el("stat-streak")) el("stat-streak").textContent = streakTxt;
+        if (el("hero-streak")) el("hero-streak").textContent = streakTxt;
+        if (el("insight-streak")) el("insight-streak").textContent = streakTxt;
+
+        // Streak banner — show when streak >= 2
+        var banner = el("streak-banner");
+        var bannerIcon = el("streak-banner-icon");
+        var bannerText = el("streak-banner-text");
+        if (banner) {{
+          if (sc >= 2 && sk) {{
+            var isWin = sk === "WIN";
+            var label = isWin
+              ? (sc + " victorias seguidas")
+              : (sc + " derrotas seguidas");
+            if (bannerIcon) bannerIcon.textContent = isWin ? "🔥" : "📉";
+            if (bannerText) bannerText.textContent = label;
+            banner.className = "account-streak-banner account-streak-banner--" + (isWin ? "win" : "loss");
+            banner.style.display = "";
+          }} else {{
+            banner.style.display = "none";
+          }}
+        }}
       }}
       function refreshStats() {{
         fetchJSON(base + "/user/stats").then(function(stats) {{
@@ -509,13 +541,6 @@ def account_page(request: Request):
         var favList = (favorites && favorites.ok && Array.isArray(favorites.favorites)) ? favorites.favorites : [];
         if (stats && stats.ok && stats.stats) updateStatEls(stats.stats);
         runInitialStatCountUp();
-
-        // Current streak + insights (best-effort from available history/favorites data)
-        var streak = computeCurrentStreak(histList);
-        var streakTxt = (streak && streak.count > 0) ? streak.label : "—";
-        if (document.getElementById("stat-streak")) document.getElementById("stat-streak").textContent = streakTxt;
-        if (document.getElementById("hero-streak")) document.getElementById("hero-streak").textContent = streakTxt;
-        if (document.getElementById("insight-streak")) document.getElementById("insight-streak").textContent = streakTxt;
 
         // Best market (most frequent market across history + favorites)
         var marketCounts = {{}};

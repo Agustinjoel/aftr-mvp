@@ -548,10 +548,11 @@ def _render_pick_card(
         mid_attr     = str(mid_val) if mid_val is not None else ""
         detail_btn   = (
             f'<button type="button" class="btn-match-detail pick-detail-link"'
-            f' data-league="{league_attr}" data-match-id="{mid_attr}">📊 Ver datos del partido →</button>'
+            f' data-league="{league_attr}" data-match-id="{mid_attr}">Ver partido →</button>'
         ) if league_attr and mid_attr else ""
         pick_actions_html = (
             f'<div class="pick-actions-wrap">'
+            f'{detail_btn}'
             f'<div class="pick-actions aftr-actions">'
             f'<button type="button" class="btn-favorite-pick pill pick-action-btn"'
             f' data-pick-id="{pick_id_attr}" data-market="{market_attr}"'
@@ -564,7 +565,6 @@ def _render_pick_card(
             f' data-edge="{edge_attr}" data-home-team="{home_team_attr}" data-away-team="{away_team_attr}">'
             f'📈 Seguir pick</button>'
             f'</div>'
-            f'{detail_btn}'
             f'</div>'
         )
 
@@ -595,15 +595,4 @@ def _render_pick_card(
         f'</div>'
     )
 
-    market_for_back = (best or {}).get("market") or p.get("best_market") or ""
-    back_html       = _render_back_stats(p, market_for_back)
-
-    return (
-        f'<div class="flip-card" role="button" tabindex="0" aria-label="Ver stats"'
-        f' data-pick-id="{pick_id_attr}">'
-        f'<div class="flip-inner">'
-        f'<div class="flip-front">{front_html}</div>'
-        f'<div class="flip-back">{back_html}</div>'
-        f'</div>'
-        f'</div>'
-    )
+    return front_html

@@ -305,7 +305,7 @@ def dashboard(request: Request, league: str):
       <meta charset="utf-8"/>
       <title>AFTR Pick</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=22">
+      <link rel="stylesheet" href="/static/style.css?v=24">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
 
       <link rel="manifest" href="/static/manifest.webmanifest">
@@ -1007,20 +1007,6 @@ def dashboard(request: Request, league: str):
                 if (e.target === m) closePremium();
               });
 
-              document.addEventListener('click', function(e){
-                var fc = e.target.closest && e.target.closest('.flip-card');
-                if (!fc) return;
-                if (e.target.closest('a,button')) return;
-                fc.classList.toggle('is-flipped');
-              });
-
-              document.addEventListener('keydown', function(e){
-                if (e.key !== 'Enter' && e.key !== ' ') return;
-                var fc = document.activeElement && document.activeElement.closest && document.activeElement.closest('.flip-card');
-                if (!fc) return;
-                e.preventDefault();
-                fc.classList.toggle('is-flipped');
-              });
 
               (function pickActions(){
                 var base = window.location.origin || (window.location.protocol + '//' + window.location.host);
@@ -1429,73 +1415,13 @@ def dashboard(request: Request, league: str):
     <script>
     (function(){
       function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
-
-      // FRONT: cand-fill (candidatos)
       function paintFront(){
-        document.querySelectorAll('.flip-front .cand-fill[data-w]').forEach(function(el){
-          var w = el.getAttribute('data-w');
-          var pct = clamp(Number(w || 0), 0, 100);
-          el.style.width = pct + '%';
+        document.querySelectorAll('.cand-fill[data-w]').forEach(function(el){
+          el.style.width = clamp(Number(el.getAttribute('data-w') || 0), 0, 100) + '%';
         });
       }
-
-      // BACK: bar-fill (stats)
-      function paintBackBars(flipCard){
-        if (!flipCard) return;
-        flipCard.querySelectorAll('.flip-back .bar-fill[data-w]').forEach(function(el){
-          var w = el.getAttribute('data-w');
-          var pct = clamp(Number(w || 0), 0, 100);
-
-          // reset + anim
-          el.style.width = '0%';
-          void el.offsetWidth;
-          requestAnimationFrame(function(){
-            el.style.width = pct + '%';
-          });
-        });
-      }
-
-      // pinta front al cargar
-      document.addEventListener('DOMContentLoaded', function(){
-        paintFront();
-        setTimeout(paintFront, 60);
-      });
-
-      // si tu flip se hace por click y togglea .is-flipped
-      document.addEventListener('click', function(e){
-        var fc = e.target.closest && e.target.closest('.flip-card');
-        if (!fc) return;
-        if (e.target.closest('a,button')) return;
-
-        requestAnimationFrame(function(){
-          if (fc.classList.contains('is-flipped')) {
-            paintBackBars(fc);
-          } else {
-            paintFront();
-          }
-        });
-      });
-
-      // soporte teclado (enter/space)
-      document.addEventListener('keydown', function(e){
-        if (e.key !== 'Enter' && e.key !== ' ') return;
-        var fc = document.activeElement && document.activeElement.closest && document.activeElement.closest('.flip-card');
-        if (!fc) return;
-
-        requestAnimationFrame(function(){
-          if (fc.classList.contains('is-flipped')) {
-            paintBackBars(fc);
-          } else {
-            paintFront();
-          }
-        });
-      });
-
-      // por si querés llamarlo manual
+      document.addEventListener('DOMContentLoaded', function(){ paintFront(); setTimeout(paintFront, 60); });
       window.AFTR_paintFront = paintFront;
-      window.AFTR_paintBackBars = function(){
-        document.querySelectorAll('.flip-card.is-flipped').forEach(paintBackBars);
-      };
     })();
     </script>
 

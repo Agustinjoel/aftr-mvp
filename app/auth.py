@@ -19,7 +19,7 @@ import psycopg2.errors
 
 from app.db import get_conn, put_conn
 from config.settings import settings
-from app.email_utils import send_email
+from app.email_utils import send_email, send_welcome_email, send_reset_email
 
 router = APIRouter()
 logger = logging.getLogger("aftr.auth")
@@ -256,6 +256,10 @@ def register(request: Request, payload: dict = Body(...)):
 
         uid = create_user(email, username, password)
         logger.info("register: create_user returned uid=%s, passing to set_session_on_response", uid)
+        try:
+            send_welcome_email(email, username)
+        except Exception:
+            logger.warning("register: welcome email falló para %s", email, exc_info=True)
         resp = JSONResponse(content={"ok": True, "username": username})
         set_session_on_response(resp, uid)
         return resp
@@ -320,6 +324,10 @@ def signup_lead(payload: dict = Body(...)):
     resp = JSONResponse(content={"ok": True})
     if new_uid is not None:
         set_session_on_response(resp, new_uid)
+        try:
+            send_welcome_email(email, username or email.split("@")[0])
+        except Exception:
+            logger.warning("signup: welcome email falló para %s", email, exc_info=True)
     return resp
 
 @router.post("/auth/login")
@@ -520,23 +528,7 @@ def forgot_password(request: Request, payload: dict = Body(...)):
             token = _create_reset_token(user_id)
             base_url = (settings.app_base_url or str(request.base_url)).rstrip("/")
             reset_link = f"{base_url}/auth/reset-password?token={token}"
-            subject = "AFTR Picks - Reset your password"
-            html_body = f"""
-            <html>
-              <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color:#111; line-height:1.5;">
-                <p>Hello,</p>
-                <p>You requested a password reset for your AFTR account.</p>
-                <p>Click the link below to set a new password:</p>
-                <p><a href="{reset_link}" style="color:#0b5ed7;">Reset your password</a></p>
-                <p>If the button does not work, copy and paste this URL in your browser:</p>
-                <p style="font-size:13px; color:#555;">{reset_link}</p>
-                <p>If you did not request this, you can safely ignore this email.</p>
-                <p>AFTR Picks</p>
-              </body>
-            </html>
-            """
-            # Fire-and-forget; errors are logged inside send_email
-            send_email(email, subject, html_body)
+            send_reset_email(email, reset_link)
         # Always return success to avoid leaking whether the email exists
         return JSONResponse({"ok": True, "message": "Si el email existe, recibirás instrucciones."})
     finally:
