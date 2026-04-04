@@ -285,7 +285,22 @@ def admin_dashboard(request: Request):
         np = len(picks) if isinstance(picks, list) else 0
         nm = len(matches) if isinstance(matches, list) else 0
         if np or nm:
-            leagues_cache[code] = {"picks": np, "matches": nm, "name": settings.leagues.get(code, code)}
+            tiers = {"elite": 0, "strong": 0, "risky": 0, "pass": 0}
+            best_tier = None
+            if isinstance(picks, list):
+                for _p in picks:
+                    t = ((_p.get("tier") or "pass") if isinstance(_p, dict) else "pass").lower()
+                    if t in tiers:
+                        tiers[t] += 1
+                for _t in ("elite", "strong", "risky"):
+                    if tiers[_t] > 0:
+                        best_tier = _t
+                        break
+            leagues_cache[code] = {
+                "picks": np, "matches": nm,
+                "name": settings.leagues.get(code, code),
+                "tiers": tiers, "best_tier": best_tier,
+            }
         total_picks_cached += np
         total_matches_cached += nm
 
@@ -370,12 +385,43 @@ def admin_dashboard(request: Request):
         kpi(f"{wr}%" if wr is not None else "—", "Winrate", "#38bdf8"),
     ])
 
-    # League pills
-    league_pills = " ".join(
-        f'<span style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:4px 10px;font-size:12px;">'
-        f'<strong>{html_lib.escape(v["name"])}</strong> <span style="color:#64748b;">{v["picks"]}p</span></span>'
-        for v in leagues_cache.values()
-    )
+    # League cards
+    def _league_card(v: dict) -> str:
+        tiers = v.get("tiers", {})
+        total = v["picks"] or 1
+        best = v.get("best_tier")
+        badge_color = {"elite": "#FFD700", "strong": "#22c55e", "risky": "#f97316"}.get(best or "", "#475569")
+        badge_label = {"elite": "ELITE", "strong": "STRONG", "risky": "RISKY"}.get(best or "", "—")
+        # tier bar segments
+        def seg(key, color):
+            pct = round(tiers.get(key, 0) / total * 100)
+            return f'<span title="{key} {tiers.get(key,0)}" style="flex:{tiers.get(key,0)};background:{color};height:4px;border-radius:2px;min-width:{2 if tiers.get(key,0) else 0}px;"></span>'
+        bar = (
+            seg("elite", "#FFD700") +
+            seg("strong", "#22c55e") +
+            seg("risky", "#f97316") +
+            seg("pass", "rgba(255,255,255,.08)")
+        )
+        badge_html = (
+            f'<span style="font-size:10px;font-weight:700;color:{badge_color};'
+            f'background:rgba(255,255,255,.05);border-radius:4px;padding:1px 5px;">{badge_label}</span>'
+        ) if best else ''
+        return (
+            f'<div class="adm-league-card">'
+            f'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
+            f'<span style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;" title="{html_lib.escape(v["name"])}">{html_lib.escape(v["name"])}</span>'
+            f'{badge_html}'
+            f'</div>'
+            f'<div style="display:flex;gap:2px;margin-bottom:6px;">{bar}</div>'
+            f'<div style="display:flex;gap:8px;font-size:11px;color:#475569;">'
+            f'<span title="elite" style="color:#FFD700;">{tiers.get("elite",0)}e</span>'
+            f'<span title="strong" style="color:#22c55e;">{tiers.get("strong",0)}s</span>'
+            f'<span title="risky" style="color:#f97316;">{tiers.get("risky",0)}r</span>'
+            f'<span style="margin-left:auto;">{v["picks"]}p</span>'
+            f'</div>'
+            f'</div>'
+        )
+    league_pills = "".join(_league_card(v) for v in leagues_cache.values())
 
     # Top picks table rows
     def tier_clr(t):
@@ -571,7 +617,9 @@ def _admin_page_html(title: str, body: str) -> str:
     .adm-sys-bar{{display:flex;align-items:center;gap:10px;margin-bottom:14px;}}
     .adm-sys-dot{{width:10px;height:10px;border-radius:50%;flex-shrink:0;}}
     .adm-sys-label{{font-size:.9rem;font-weight:600;}}
-    .adm-league-pills{{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}}
+    .adm-league-pills{{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-top:12px;}}
+    .adm-league-card{{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;transition:border-color .15s;}}
+    .adm-league-card:hover{{border-color:rgba(255,255,255,.16);}}
     /* KPIs */
     .adm-kpi-row{{display:flex;gap:12px;flex-wrap:wrap;}}
     .adm-kpi{{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;min-width:110px;}}
