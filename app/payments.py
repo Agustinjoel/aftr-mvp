@@ -34,6 +34,24 @@ def _ls_headers() -> dict:
 # Manual activation (testing / admin)
 # ─────────────────────────────────────────────
 
+@router.get("/billing/ls-debug", include_in_schema=False)
+def ls_debug(request: Request):
+    """Endpoint temporal — muestra store_id configurado y stores reales de la cuenta LS."""
+    if not settings.lemonsqueezy_api_key:
+        return JSONResponse({"error": "no api key"})
+    try:
+        r = http_requests.get(f"{_LS_API_BASE}/stores", headers=_ls_headers(), timeout=10)
+        stores = r.json()
+    except Exception as e:
+        stores = {"error": str(e)}
+    return JSONResponse({
+        "configured_store_id": settings.lemonsqueezy_store_id,
+        "configured_variant_id": settings.lemonsqueezy_variant_id,
+        "api_key_set": bool(settings.lemonsqueezy_api_key),
+        "ls_stores_response": stores,
+    })
+
+
 @router.get("/premium/manual-activate", include_in_schema=False)
 def manual_activate(request: Request, plan: str = Query("PREMIUM")):
     uid = get_user_id(request)
@@ -136,6 +154,7 @@ def create_checkout_session(request: Request):
         }
     }
 
+    logger.info("LS checkout: store_id=%s variant_id=%s uid=%s", settings.lemonsqueezy_store_id, settings.lemonsqueezy_variant_id, uid)
     try:
         r = http_requests.post(
             f"{_LS_API_BASE}/checkouts",
