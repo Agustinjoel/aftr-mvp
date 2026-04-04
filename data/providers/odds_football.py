@@ -6,6 +6,7 @@ NBA/other sports: use separate provider later; this module is football-only.
 from __future__ import annotations
 
 import logging
+import re as _re
 from datetime import datetime, timezone
 from typing import Any
 
@@ -22,8 +23,28 @@ ODDS_MARKETS = "h2h,totals"
 ODDS_FORMAT = "decimal"
 
 
+# Club-type tokens to remove from the start or end of the name
+_CLUB_TOKENS = {"fc", "afc", "sc", "cf", "ac", "bfc", "sfc", "utd"}
+_PUNC_RE = _re.compile(r'[^a-z0-9 ]')
+
+
 def _normalize_team(s: str) -> str:
-    return (s or "").strip().lower()
+    """
+    Normalize team name for fuzzy matching.
+    Lowercases, removes punctuation (&, . etc.), strips common club suffixes/prefixes (FC, AFC…).
+    'Arsenal FC' == 'Arsenal', 'AFC Bournemouth' == 'Bournemouth'.
+    """
+    t = (s or "").strip().lower()
+    # & → and, remove remaining punctuation
+    t = t.replace("&", "and")
+    t = _PUNC_RE.sub('', t)
+    # Split and drop club-type tokens at the boundaries
+    tokens = t.split()
+    while tokens and tokens[0] in _CLUB_TOKENS:
+        tokens = tokens[1:]
+    while tokens and tokens[-1] in _CLUB_TOKENS:
+        tokens = tokens[:-1]
+    return ' '.join(tokens)
 
 
 def _parse_commence_date(commence_time: str) -> str | None:

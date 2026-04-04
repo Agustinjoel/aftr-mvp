@@ -547,11 +547,12 @@ def user_stats(request: Request):
         followed_picks = cur.fetchone()["n"]
 
         cur.execute(
-            """SELECT result, COUNT(*) AS n FROM user_picks WHERE user_id = %s
+            """SELECT COALESCE(result, 'PENDING') AS result, COUNT(*) AS n
+               FROM user_picks WHERE user_id = %s
                GROUP BY COALESCE(result, 'PENDING')""",
             (uid,),
         )
-        by_result = {str(row["result"] or "PENDING"): row["n"] for row in cur.fetchall()}
+        by_result = {str(row["result"]): row["n"] for row in cur.fetchall()}
         wins = by_result.get("WIN", 0)
         losses = by_result.get("LOSS", 0)
         push = by_result.get("PUSH", 0)

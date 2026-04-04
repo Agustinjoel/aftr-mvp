@@ -144,16 +144,64 @@ def _enrich_football_picks_with_odds(
                 )
             continue
 
-        decimal_odds, implied_prob = get_decimal_and_implied_for_market(odds_row, best_market)
+        # --- Market re-selection: pick the candidate with the highest edge ---
+        candidates = p.get("candidates") or []
+        best_edge_market = None
+        best_edge_val = None
+        best_edge_decimal = None
+        best_edge_implied = None
+        best_edge_prob = None
+
+        for cand in candidates:
+            cand_market = (cand.get("market") or "").strip()
+            cand_prob = _safe_float(cand.get("prob"))
+            if not cand_market or cand_prob is None:
+                continue
+            c_dec, c_impl = get_decimal_and_implied_for_market(odds_row, cand_market)
+            if c_dec is None or c_impl is None:
+                continue
+            c_edge = odds_edge(cand_prob, c_impl)
+            if c_edge is None:
+                continue
+            if best_edge_val is None or c_edge > best_edge_val:
+                best_edge_val = c_edge
+                best_edge_market = cand_market
+                best_edge_decimal = c_dec
+                best_edge_implied = c_impl
+                best_edge_prob = cand_prob
+
+        # Use best-edge market if it has a meaningful advantage (>= 1% edge)
+        if best_edge_market and best_edge_val is not None and best_edge_val >= 0.01:
+            use_market = best_edge_market
+            use_decimal = best_edge_decimal
+            use_implied = best_edge_implied
+            use_prob = best_edge_prob
+        else:
+            # Fall back to the already-selected best_market
+            use_market = best_market
+            use_decimal, use_implied = get_decimal_and_implied_for_market(odds_row, best_market)
+            use_prob = _safe_float(p.get("best_prob"))
+
+        decimal_odds, implied_prob = use_decimal, use_implied
         if decimal_odds is not None and implied_prob is not None:
             new_odds_decimal = round(float(decimal_odds), 2)
+            # Update pick to use the selected market
+            if use_market != best_market:
+                logger.debug(
+                    "Market re-selection %s vs %s: switching %s → %s (edge %.3f)",
+                    p.get("home"), p.get("away"), best_market, use_market, best_edge_val or 0,
+                )
+                p["best_market"] = use_market
+                if use_prob is not None:
+                    p["best_prob"] = round(float(use_prob), 4)
+                    p["best_fair"] = round(1.0 / float(use_prob), 2) if use_prob > 0 else None
             if watch:
                 logger.info(
                     "ODDS DEBUG update | league=%s pick=%s home=%s away=%s utcDate=%s"
                     " best_market=%s | old_odds_decimal=%s old_implied_prob=%s old_edge=%s"
                     " | provider_decimal=%s provider_implied_prob=%s bookmaker=%s",
                     league_code, key_pick, p.get("home"), p.get("away"),
-                    p.get("utcDate"), best_market,
+                    p.get("utcDate"), p.get("best_market"),
                     old_odds_decimal, old_implied_prob, old_edge,
                     decimal_odds, implied_prob,
                     (odds_row.get("bookmaker_title") or "").strip(),

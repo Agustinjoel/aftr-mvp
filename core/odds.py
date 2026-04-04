@@ -48,17 +48,62 @@ MARKET_TO_ODDS_KEY: dict[str, list[str]] = {
     "12": ["Home Win", "Away Win"],
 }
 
+# Double-chance markets: implied prob = sum of component implied probs (from h2h)
+_DOUBLE_CHANCE = {"1x", "x2", "12"}
+
+
+def _get_h2h_raw_probs(by_market: dict) -> dict[str, float]:
+    """Extract raw (pre-vig) h2h decimal odds as implied probs: {'Home Win': 0.4, ...}."""
+    h2h = by_market.get("h2h") or {}
+    out: dict[str, float] = {}
+    for name, dec in h2h.items():
+        try:
+            p = 1.0 / float(dec)
+            if 0 < p <= 1:
+                out[name] = p
+        except (TypeError, ValueError, ZeroDivisionError):
+            pass
+    return out
+
+
+def _implied_double_chance(by_market: dict, components: list[str]) -> tuple[float | None, float | None]:
+    """
+    For double-chance markets (1X, X2, 12), combine component implied probs from h2h.
+    Returns (synthetic_decimal, implied_prob) or (None, None) if data missing.
+    We use overround-adjusted (normalized) probabilities so the edge reflects true market view.
+    """
+    raw = _get_h2h_raw_probs(by_market)
+    if not raw:
+        return None, None
+    total_raw = sum(raw.values())
+    if total_raw <= 0:
+        return None, None
+    # Normalize to remove bookmaker overround
+    norm: dict[str, float] = {k: v / total_raw for k, v in raw.items()}
+    combined = sum(norm.get(c, 0.0) for c in components)
+    if combined <= 0 or combined > 1:
+        return None, None
+    synthetic_decimal = round(1.0 / combined, 3)
+    return synthetic_decimal, round(combined, 4)
+
 
 def get_decimal_and_implied_for_market(odds_row: dict, market_name: str) -> tuple[float | None, float | None]:
     """
     From a normalized odds row (from odds_football), get decimal odds and implied prob for the given market.
-    market_name: pick's best_market (e.g. "Home Win", "Over 2.5", "DRAW").
+    market_name: pick's best_market (e.g. "Home Win", "Over 2.5", "1X").
+    For double-chance markets (1X, X2, 12) computes combined normalized implied probability from h2h.
     Returns (decimal_odds, implied_prob); either can be None if not found.
     """
     if not odds_row or not market_name:
         return None, None
     by_market = odds_row.get("odds_by_market") or {}
     mkt_lower = (market_name or "").strip().lower()
+
+    # Double-chance: combine component probs from h2h (vig-adjusted)
+    if mkt_lower in _DOUBLE_CHANCE:
+        components = MARKET_TO_ODDS_KEY[mkt_lower]
+        return _implied_double_chance(by_market, components)
+
     candidates = MARKET_TO_ODDS_KEY.get(mkt_lower)
     if not candidates:
         candidates = [market_name.strip(), market_name.strip().title()]
