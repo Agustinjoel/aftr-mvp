@@ -199,7 +199,7 @@ def _format_cache_status(meta: dict) -> str:
     if meta.get("refresh_running"):
         return (
             '<div class="cache-status cache-status-updating aftr-cache-updating" role="status" '
-            'data-refresh-pending="1">Actualizando datos...</div>'
+            'data-refresh-pending="1"><span class="cs-dot cs-dot--updating"></span>Actualizando datos...</div>'
             "<script>(function(){document.querySelectorAll('[data-refresh-pending=\"1\"]').forEach(function(el){"
             "setTimeout(async function(){try{var r=await fetch('/api/status');var j=await r.json();"
             "el.classList.remove('cache-status-updating');if(j.refresh_running){"
@@ -212,13 +212,13 @@ def _format_cache_status(meta: dict) -> str:
         )
     last = meta.get("last_updated")
     if not last:
-        return '<div class="cache-status muted">Última actualización: —</div>'
+        return '<div class="cache-status"><span class="cs-dot cs-dot--stale"></span>Sin datos aún</div>'
     try:
         dt = datetime.fromisoformat(str(last).replace("Z", "+00:00"))
         formatted = dt.strftime("%d/%m/%Y %H:%M")
     except Exception:
         formatted = str(last)
-    return f'<div class="cache-status muted">Última actualización: {html_lib.escape(formatted)}</div>'
+    return f'<div class="cache-status"><span class="cs-dot cs-dot--ok"></span>Datos al {html_lib.escape(formatted)}</div>'
 
 
 # =========================================================

@@ -792,7 +792,7 @@ def home_page(request: Request) -> str:
         if team_picks:
             team_cards = "".join(
                 _render_pick_card(p, user_premium, uid)
-                for p in team_picks[:6]
+                for p in team_picks[:3]
             )
             fav_crest_url = html_lib.escape(user.get("favorite_team_crest") or "")
             crest_header = (
@@ -859,7 +859,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=27">
+      <link rel="stylesheet" href="/static/style.css?v=28">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
@@ -934,7 +934,7 @@ def home_page(request: Request) -> str:
           <img src="/static/logo_aftr.png" class="logo-aftr" alt="AFTR" />
           <div class="brand-text">
             <div class="brand-title">AFTR</div>
-            <div class="brand-tag">Motor de apuestas con IA</div>
+            <div class="brand-tag">Picks con ventaja estadística</div>
           </div>
         </div>
         <a href="/" class="home-header-inicio" aria-current="page">Inicio</a>
@@ -950,8 +950,8 @@ def home_page(request: Request) -> str:
 
       <section class="home-hero hero">
         <div class="hero-copy">
-          <h1>Picks con IA, apuestas de valor y combinadas inteligentes</h1>
-          <p>Las mejores oportunidades del día, filtradas por AFTR Score, ventaja y confianza.</p>
+          <h1>Apostá con ventaja real, no con fe</h1>
+          <p>Picks de valor con IA — analizamos cada partido y te decimos cuándo el mercado está equivocado.</p>
           <div class="hero-stats home-hero-kpis">
             <div class="home-hero-kpi"><span>ROI HISTÓRICO</span><strong>{roi_str}</strong></div>
             <div class="home-hero-kpi"><span>GANANCIA NETA HIST.</span><strong>{net:+.1f}u</strong></div>
