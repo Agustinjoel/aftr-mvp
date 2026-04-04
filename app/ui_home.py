@@ -15,6 +15,7 @@ from data.providers.football_data import get_unsupported_leagues
 from app.routes.matches import group_matches_by_day
 from app.timefmt import AFTR_DISPLAY_TZ, format_match_kickoff_ar, parse_utc_instant
 from app.auth import get_user_id, get_user_by_id
+from app.db import get_conn, put_conn
 from app.models import get_active_plan
 from app.user_helpers import can_see_all_picks, is_admin, is_premium_active
 
@@ -153,6 +154,33 @@ def _build_home_league_snap_carousel_html(
 
 
 
+def _get_user_streak(uid: int) -> tuple[int, str | None]:
+    """Devuelve (streak_count, streak_kind) para el usuario. PUSH se ignora."""
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT result FROM user_picks WHERE user_id = %s AND result IN ('WIN','LOSS','PUSH') ORDER BY created_at DESC",
+            (uid,),
+        )
+        count, kind = 0, None
+        for row in cur.fetchall():
+            r = str(row["result"]).upper()
+            if r == "PUSH":
+                continue
+            if kind is None:
+                kind, count = r, 1
+            elif r == kind:
+                count += 1
+            else:
+                break
+    except Exception:
+        count, kind = 0, None
+    finally:
+        put_conn(conn)
+    return count, kind
+
+
 def home_page(request: Request) -> str:
     """Global AFTR home: summary across all leagues, top picks, combo, big matches, featured leagues, premium CTA."""
     cookies = getattr(request, "cookies", None) or {}
@@ -202,6 +230,30 @@ def home_page(request: Request) -> str:
         plan_badge = '<span class="plan-badge premium">PREMIUM</span>' + auth_html
 
     user_premium = bool(uid and (is_premium_active(user) or get_active_plan(uid) == settings.plan_premium))
+
+    # Racha del usuario (server-side)
+    streak_count, streak_kind = (0, None)
+    if uid:
+        try:
+            streak_count, streak_kind = _get_user_streak(uid)
+        except Exception:
+            pass
+    if streak_count >= 2 and streak_kind == "WIN":
+        streak_banner_html = (
+            f'<div class="home-streak-banner home-streak-banner--win">'
+            f'<span class="home-streak-icon">🔥</span>'
+            f'<span>{streak_count} victorias seguidas — seguís en racha</span>'
+            f'</div>'
+        )
+    elif streak_count >= 2 and streak_kind == "LOSS":
+        streak_banner_html = (
+            f'<div class="home-streak-banner home-streak-banner--loss">'
+            f'<span class="home-streak-icon">📉</span>'
+            f'<span>{streak_count} derrotas seguidas — el modelo sigue analizando</span>'
+            f'</div>'
+        )
+    else:
+        streak_banner_html = ""
 
     (
         _all_picks,
@@ -699,7 +751,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=24">
+      <link rel="stylesheet" href="/static/style.css?v=25">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
@@ -809,6 +861,7 @@ def home_page(request: Request) -> str:
           </div>
         </div>
       </section>
+      {streak_banner_html}
       {live_section_html}
       {team_section_html}
 
