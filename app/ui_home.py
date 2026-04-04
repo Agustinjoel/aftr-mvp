@@ -973,7 +973,7 @@ def home_page(request: Request) -> str:
         <a href="/" class="home-header-inicio" aria-current="page">Inicio</a>
         <div class="home-header-auth">
           {plan_badge}
-          {'<a href="/admin/users" class="muted">Admin</a>' if is_admin_user else ''}
+          {'<a href="/admin" class="muted">Admin</a>' if is_admin_user else ''}
         </div>
       </header>
       {cache_status_html}

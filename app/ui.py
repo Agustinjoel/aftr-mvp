@@ -251,9 +251,370 @@ def index_or_league(request: Request, league: str | None = Query(None)):
 
 # _account_header, _account_created_display, account_page → importados de app.ui_account
 
+@router.get("/admin", response_class=HTMLResponse)
+def admin_dashboard(request: Request):
+    """Admin control center — sistema, métricas, picks del día, usuarios."""
+    from app.db import get_conn, put_conn
+    from data.cache import read_cache_meta, read_json_with_fallback
+    from app.ui_picks_calc import _aftr_score, _pick_score, _result_norm, _unit_delta, _pick_stake_units
+    from app.ui_data import _load_all_leagues_data
+
+    uid = get_user_id(request)
+    acting_user = get_user_by_id(uid) if uid else None
+    if not is_admin(acting_user, request):
+        return RedirectResponse(url="/", status_code=302)
+
+    # ── Sistema ──────────────────────────────────────────────────────────────
+    cache_meta = read_cache_meta()
+    last_upd   = cache_meta.get("last_updated") or ""
+    refreshing = bool(cache_meta.get("refresh_running"))
+    try:
+        last_upd_fmt = datetime.fromisoformat(str(last_upd).replace("Z", "+00:00")).strftime("%d/%m %H:%M")
+        from datetime import timezone as _tz
+        age_min = int((datetime.now(_tz.utc) - datetime.fromisoformat(str(last_upd).replace("Z", "+00:00"))).total_seconds() / 60)
+    except Exception:
+        last_upd_fmt = last_upd[:16] if last_upd else "—"
+        age_min = 9999
+
+    leagues_cache: dict[str, dict] = {}
+    total_picks_cached = 0
+    total_matches_cached = 0
+    for code in settings.league_codes():
+        picks = read_json_with_fallback(f"daily_picks_{code}.json")
+        matches = read_json_with_fallback(f"daily_matches_{code}.json")
+        np = len(picks) if isinstance(picks, list) else 0
+        nm = len(matches) if isinstance(matches, list) else 0
+        if np or nm:
+            leagues_cache[code] = {"picks": np, "matches": nm, "name": settings.leagues.get(code, code)}
+        total_picks_cached += np
+        total_matches_cached += nm
+
+    sys_ok = not refreshing and age_min < 120 and total_picks_cached > 0
+    sys_warn = not sys_ok and total_picks_cached > 0
+    sys_dot = "#22c55e" if sys_ok else ("#eab308" if sys_warn else "#ef4444")
+    sys_label = "Sistema operativo" if sys_ok else ("Actualizando / datos viejos" if sys_warn else "Sin datos en cache")
+
+    # ── DB stats ─────────────────────────────────────────────────────────────
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id, email, username, role, subscription_status, created_at FROM users ORDER BY id DESC")
+        all_users = cur.fetchall()
+        cur.execute("SELECT COUNT(*) AS n FROM user_picks")
+        total_follows = cur.fetchone()["n"]
+        cur.execute("SELECT COUNT(*) AS n FROM user_picks WHERE created_at >= NOW() - INTERVAL '24 hours'")
+        follows_today = cur.fetchone()["n"]
+        cur.execute("SELECT COUNT(*) AS n FROM user_picks WHERE created_at >= NOW() - INTERVAL '7 days'")
+        follows_7d = cur.fetchone()["n"]
+        cur.execute("""
+            SELECT pick_id, home_team, away_team, market, COUNT(*) AS n
+            FROM user_picks GROUP BY pick_id, home_team, away_team, market
+            ORDER BY n DESC LIMIT 8
+        """)
+        most_followed = cur.fetchall()
+        cur.execute("SELECT COUNT(*) AS n FROM users WHERE created_at >= NOW() - INTERVAL '7 days'")
+        new_7d = cur.fetchone()["n"]
+        cur.execute("SELECT result, COUNT(*) AS n FROM user_picks WHERE result IN ('WIN','LOSS','PUSH') GROUP BY result")
+        result_rows = {r["result"]: r["n"] for r in cur.fetchall()}
+    finally:
+        put_conn(conn)
+
+    total_users   = len(all_users)
+    premium_users = sum(1 for r in all_users if str(r.get("role","")) in ("premium_user","admin") or str(r.get("subscription_status","")) == "active")
+    free_users    = total_users - premium_users
+
+    wins   = result_rows.get("WIN",  0)
+    losses = result_rows.get("LOSS", 0)
+    pushes = result_rows.get("PUSH", 0)
+    wr     = round(wins / (wins + losses) * 100, 1) if (wins + losses) > 0 else None
+
+    # ── Top picks ─────────────────────────────────────────────────────────────
+    try:
+        _, _, _, all_upcoming, _, _ = _load_all_leagues_data()
+        top_admin = sorted(all_upcoming, key=lambda p: (-(p.get("aftr_score") or 0), -_pick_score(p)))[:12]
+    except Exception:
+        top_admin = []
+
+    # ── HTML helpers ──────────────────────────────────────────────────────────
+    def kpi(value, label, color="#eaf2ff"):
+        return f'<div class="adm-kpi"><span class="adm-kpi-val" style="color:{color};">{html_lib.escape(str(value))}</span><span class="adm-kpi-lbl">{html_lib.escape(label)}</span></div>'
+
+    def badge(text, color):
+        return f'<span style="background:rgba(255,255,255,.06);color:{color};border-radius:5px;padding:2px 9px;font-size:11px;font-weight:700;">{html_lib.escape(text)}</span>'
+
+    # Stat KPIs
+    kpis_system = "".join([
+        kpi(f"{total_picks_cached} picks", "En cache"),
+        kpi(f"{len(leagues_cache)} ligas", "Con datos"),
+        kpi(f"{last_upd_fmt}", "Última act."),
+        kpi("Refreshing..." if refreshing else f"{age_min}m", "Hace"),
+    ])
+
+    kpis_users = "".join([
+        kpi(total_users, "Usuarios"),
+        kpi(premium_users, "Premium", "#eab308"),
+        kpi(free_users, "Free", "#94a3b8"),
+        kpi(new_7d, "Nuevos 7d", "#22c55e"),
+    ])
+
+    kpis_activity = "".join([
+        kpi(total_follows, "Follows totales"),
+        kpi(follows_today, "Follows hoy", "#38bdf8"),
+        kpi(follows_7d, "Follows 7d"),
+    ])
+
+    kpis_perf = "".join([
+        kpi(wins, "Wins", "#22c55e"),
+        kpi(losses, "Losses", "#ef4444"),
+        kpi(pushes, "Pushes", "#94a3b8"),
+        kpi(f"{wr}%" if wr is not None else "—", "Winrate", "#38bdf8"),
+    ])
+
+    # League pills
+    league_pills = " ".join(
+        f'<span style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:4px 10px;font-size:12px;">'
+        f'<strong>{html_lib.escape(v["name"])}</strong> <span style="color:#64748b;">{v["picks"]}p</span></span>'
+        for v in leagues_cache.values()
+    )
+
+    # Top picks table rows
+    def tier_clr(t):
+        return {"elite": "#FFD700", "strong": "#22c55e", "risky": "#FF9800"}.get((t or "").lower(), "#64748b")
+
+    pick_rows = []
+    for p in top_admin:
+        lc   = html_lib.escape(settings.leagues.get(p.get("_league",""), p.get("_league","—")))
+        home = html_lib.escape(str(p.get("home") or "—"))
+        away = html_lib.escape(str(p.get("away") or "—"))
+        mkt  = html_lib.escape(str(p.get("best_market") or "—"))
+        sc   = p.get("aftr_score")
+        try: sc = int(round(float(sc))) if sc is not None else _aftr_score(p)
+        except: sc = _aftr_score(p)
+        tier = str(p.get("tier") or "—").lower()
+        edge = p.get("edge")
+        try: edge_s = f"{float(edge)*100:+.1f}%" if edge is not None else "—"
+        except: edge_s = "—"
+        pick_rows.append(
+            f'<tr><td>{lc}</td><td>{home} vs {away}</td>'
+            f'<td>{mkt}</td>'
+            f'<td style="color:#38bdf8;font-weight:700;">{sc}</td>'
+            f'<td style="color:{tier_clr(tier)};font-weight:700;">{html_lib.escape(tier.upper())}</td>'
+            f'<td style="color:{"#22c55e" if edge and float(edge if edge else 0)>0 else "#94a3b8"};">{html_lib.escape(edge_s)}</td>'
+            f'</tr>'
+        )
+    picks_table = "\n".join(pick_rows) if pick_rows else '<tr><td colspan="6" style="color:#64748b;padding:16px;">Sin picks en cache</td></tr>'
+
+    # Most followed rows
+    followed_rows = "".join(
+        f'<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:#64748b;">'
+        f'{html_lib.escape(str(r.get("home_team") or ""))} vs {html_lib.escape(str(r.get("away_team") or ""))}</td>'
+        f'<td>{html_lib.escape(str(r.get("market") or "—"))}</td>'
+        f'<td style="color:#38bdf8;font-weight:700;">{r["n"]}</td></tr>'
+        for r in most_followed
+    ) or '<tr><td colspan="3" style="color:#64748b;padding:12px;">Sin datos</td></tr>'
+
+    # User management rows
+    user_rows_html = []
+    for r in list(reversed(all_users)):
+        u_id = r["id"]
+        email = html_lib.escape(str(r.get("email") or ""))
+        uname = html_lib.escape(str(r.get("username") or "—"))
+        role  = str(r.get("role") or "free_user")
+        sub   = str(r.get("subscription_status") or "inactive")
+        created = str(r.get("created_at") or "")[:10]
+        is_prem = role in ("premium_user","admin") or sub == "active"
+        is_adm  = role == "admin"
+        plan_badge = badge("ADMIN","#a78bfa") if is_adm else (badge("PREMIUM","#eab308") if is_prem else badge("FREE","#64748b"))
+        btn_prem = (
+            f'<button onclick="setRole({u_id},\'free\')" class="adm-btn adm-btn--danger">− Premium</button>'
+            if is_prem else
+            f'<button onclick="setRole({u_id},\'premium\')" class="adm-btn adm-btn--success">+ Premium</button>'
+        )
+        user_rows_html.append(
+            f'<tr><td style="color:#475569;">{u_id}</td>'
+            f'<td>{email}</td><td style="color:#94a3b8;">{uname}</td>'
+            f'<td>{plan_badge}</td>'
+            f'<td style="color:#475569;">{created}</td>'
+            f'<td>{btn_prem}</td></tr>'
+        )
+
+    msg = (request.query_params.get("msg") or "").strip()
+    msg_html = ""
+    if msg == "ok":
+        msg_html = '<div class="adm-alert adm-alert--ok">✓ Usuario actualizado.</div>'
+    elif msg == "err":
+        msg_html = '<div class="adm-alert adm-alert--err">✗ Error al actualizar.</div>'
+    elif msg == "refresh_ok":
+        msg_html = '<div class="adm-alert adm-alert--ok">✓ Refresh lanzado en background.</div>'
+
+    def section(title, content, extra_header=""):
+        return f'''<section class="adm-section">
+          <div class="adm-section-head"><span class="adm-section-title">{title}</span>{extra_header}</div>
+          {content}
+        </section>'''
+
+    body = f"""
+    <div class="adm-root">
+      <!-- Topbar -->
+      <div class="adm-topbar">
+        <div class="adm-topbar-brand">
+          <img src="/static/logo_aftr.png" class="adm-logo" alt="AFTR">
+          <div>
+            <div class="adm-topbar-title">Control Center</div>
+            <div class="adm-topbar-sub">Panel de administración</div>
+          </div>
+        </div>
+        <div class="adm-topbar-actions">
+          <form method="POST" action="/admin/trigger-refresh" style="display:inline;">
+            <button type="submit" class="adm-btn adm-btn--primary">⟳ Forzar refresh</button>
+          </form>
+          <a href="/" class="adm-btn">← Inicio</a>
+        </div>
+      </div>
+
+      {msg_html}
+
+      <!-- Sistema -->
+      {section("Sistema",
+        f'<div class="adm-sys-bar">'
+        f'<span class="adm-sys-dot" style="background:{sys_dot};box-shadow:0 0 8px {sys_dot};"></span>'
+        f'<span class="adm-sys-label">{html_lib.escape(sys_label)}</span>'
+        f'</div>'
+        f'<div class="adm-kpi-row">{kpis_system}</div>'
+        f'<div class="adm-league-pills">{league_pills if league_pills else "<span style=\'color:#64748b;\'>Sin ligas con datos</span>"}</div>'
+      )}
+
+      <!-- Métricas de usuarios -->
+      {section("Usuarios", f'<div class="adm-kpi-row">{kpis_users}</div>')}
+
+      <!-- Actividad -->
+      {section("Actividad",
+        f'<div class="adm-kpi-row">{kpis_activity}</div>'
+        f'<div class="adm-subsection-title">Picks más seguidos</div>'
+        f'<div class="adm-table-wrap"><table class="adm-table">'
+        f'<thead><tr><th>Partido</th><th>Mercado</th><th>Follows</th></tr></thead>'
+        f'<tbody>{followed_rows}</tbody></table></div>'
+      )}
+
+      <!-- Rendimiento del modelo -->
+      {section("Rendimiento del modelo (user_picks)",
+        f'<div class="adm-kpi-row">{kpis_perf}</div>'
+      )}
+
+      <!-- Picks de hoy -->
+      {section("Picks activos / próximos",
+        f'<div class="adm-table-wrap"><table class="adm-table adm-table--picks">'
+        f'<thead><tr><th>Liga</th><th>Partido</th><th>Mercado</th><th>AFTR</th><th>Tier</th><th>Edge</th></tr></thead>'
+        f'<tbody>{picks_table}</tbody></table></div>'
+      )}
+
+      <!-- Gestión de usuarios -->
+      {section("Gestión de usuarios",
+        f'{msg_html}'
+        f'<div class="adm-table-wrap"><table class="adm-table">'
+        f'<thead><tr><th>ID</th><th>Email</th><th>Usuario</th><th>Plan</th><th>Creado</th><th>Acción</th></tr></thead>'
+        f'<tbody>{"".join(user_rows_html)}</tbody></table></div>'
+      )}
+
+    </div>
+    <script>
+    function setRole(uid, role) {{
+      if (!confirm('¿Confirmar cambio de plan para usuario #' + uid + '?')) return;
+      fetch('/admin/set-role', {{
+        method:'POST', headers:{{'Content-Type':'application/json'}},
+        body: JSON.stringify({{user_id:uid, role:role}})
+      }}).then(r=>r.json()).then(d=>{{
+        window.location.href = '/admin?msg=' + (d.ok ? 'ok' : 'err');
+      }}).catch(()=>{{ window.location.href='/admin?msg=err'; }});
+    }}
+    </script>
+    """
+    return HTMLResponse(_admin_page_html("Admin — AFTR", body))
+
+
+def _admin_page_html(title: str, body: str) -> str:
+    return f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <title>{html_lib.escape(title)}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" type="image/png" href="/static/logo_aftr.png">
+  <style>
+    *{{box-sizing:border-box;margin:0;padding:0;}}
+    body{{background:#070a10;color:#eaf2ff;font-family:system-ui,-apple-system,sans-serif;min-height:100vh;}}
+    a{{color:#38bdf8;text-decoration:none;}} a:hover{{filter:brightness(1.15);}}
+    .adm-root{{max-width:1200px;margin:0 auto;padding:24px 20px 60px;}}
+    /* Topbar */
+    .adm-topbar{{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.08);}}
+    .adm-topbar-brand{{display:flex;align-items:center;gap:12px;}}
+    .adm-logo{{width:34px;height:34px;border-radius:8px;}}
+    .adm-topbar-title{{font-size:1.2rem;font-weight:800;}}
+    .adm-topbar-sub{{font-size:.75rem;color:#475569;}}
+    .adm-topbar-actions{{display:flex;gap:10px;flex-wrap:wrap;}}
+    /* Buttons */
+    .adm-btn{{background:rgba(255,255,255,.07);color:#eaf2ff;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:7px 14px;font-size:.82rem;font-weight:600;cursor:pointer;transition:background .18s;}}
+    .adm-btn:hover{{background:rgba(255,255,255,.12);}}
+    .adm-btn--primary{{background:#38bdf8;color:#000;border-color:#38bdf8;box-shadow:0 0 12px rgba(56,189,248,.25);}}
+    .adm-btn--primary:hover{{filter:brightness(1.1);}}
+    .adm-btn--success{{background:rgba(34,197,94,.15);color:#22c55e;border-color:rgba(34,197,94,.3);}}
+    .adm-btn--danger{{background:rgba(239,68,68,.12);color:#ef4444;border-color:rgba(239,68,68,.25);}}
+    /* Alerts */
+    .adm-alert{{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;}}
+    .adm-alert--ok{{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:#22c55e;}}
+    .adm-alert--err{{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#ef4444;}}
+    /* Sections */
+    .adm-section{{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px 20px;margin-bottom:18px;}}
+    .adm-section-head{{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}}
+    .adm-section-title{{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#475569;}}
+    /* System bar */
+    .adm-sys-bar{{display:flex;align-items:center;gap:10px;margin-bottom:14px;}}
+    .adm-sys-dot{{width:10px;height:10px;border-radius:50%;flex-shrink:0;}}
+    .adm-sys-label{{font-size:.9rem;font-weight:600;}}
+    .adm-league-pills{{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}}
+    /* KPIs */
+    .adm-kpi-row{{display:flex;gap:12px;flex-wrap:wrap;}}
+    .adm-kpi{{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;min-width:110px;}}
+    .adm-kpi-val{{display:block;font-size:1.4rem;font-weight:800;}}
+    .adm-kpi-lbl{{display:block;font-size:.72rem;color:#475569;margin-top:2px;}}
+    /* Tables */
+    .adm-subsection-title{{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#334155;margin:14px 0 8px;}}
+    .adm-table-wrap{{overflow-x:auto;border-radius:8px;border:1px solid rgba(255,255,255,.06);}}
+    .adm-table{{width:100%;border-collapse:collapse;font-size:13px;}}
+    .adm-table thead tr{{border-bottom:1px solid rgba(255,255,255,.08);}}
+    .adm-table th{{text-align:left;padding:9px 10px;font-size:11px;color:#475569;font-weight:600;letter-spacing:.04em;text-transform:uppercase;}}
+    .adm-table td{{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap;}}
+    .adm-table tbody tr:last-child td{{border-bottom:none;}}
+    .adm-table tbody tr:hover td{{background:rgba(255,255,255,.02);}}
+    .adm-table--picks td:nth-child(2){{max-width:200px;overflow:hidden;text-overflow:ellipsis;}}
+  </style>
+</head>
+<body>{body}</body>
+</html>"""
+
+
+@router.post("/admin/trigger-refresh", response_class=HTMLResponse)
+async def admin_trigger_refresh(request: Request):
+    """Admin-only: fire a full tiered refresh in background."""
+    uid = get_user_id(request)
+    acting_user = get_user_by_id(uid) if uid else None
+    if not is_admin(acting_user, request):
+        return RedirectResponse(url="/", status_code=302)
+    import threading
+    from services.tiered_refresh import run_tiered_refresh
+    threading.Thread(target=run_tiered_refresh, daemon=True).start()
+    return RedirectResponse(url="/admin?msg=refresh_ok", status_code=303)
+
+
 @router.get("/admin/users", response_class=HTMLResponse)
 def admin_users_page(request: Request):
-    """Admin-only: user management panel with premium/role toggle."""
+    """Redirect to unified admin dashboard."""
+    return RedirectResponse(url="/admin", status_code=302)
+
+
+@router.get("/admin/users-legacy", response_class=HTMLResponse)
+def admin_users_page_legacy(request: Request):
+    """Admin-only: user management panel with premium/role toggle (legacy)."""
     user, _, plan_badge = _account_header(request)
     if not user:
         return RedirectResponse(url="/?auth=login", status_code=302)
