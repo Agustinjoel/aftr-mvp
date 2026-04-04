@@ -320,6 +320,34 @@ def home_page(request: Request) -> str:
         roi_str,
     )
 
+    # Monthly track record (current calendar month)
+    _now = datetime.now(timezone.utc)
+    _month_wins, _month_losses = 0, 0
+    for _p in all_settled:
+        _d = _parse_utcdate_str(_p.get("utcDate"))
+        if _d and _d.year == _now.year and _d.month == _now.month:
+            _r = _result_norm(_p)
+            if _r == "WIN":
+                _month_wins += 1
+            elif _r == "LOSS":
+                _month_losses += 1
+    _month_total = _month_wins + _month_losses
+    _month_wr = round(_month_wins / _month_total * 100, 1) if _month_total > 0 else None
+    _month_names = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+    _month_label = _month_names[_now.month - 1]
+    if _month_total >= 3:
+        _wr_color = "#00C853" if (_month_wr or 0) >= 55 else ("#FF9800" if (_month_wr or 0) >= 45 else "#F44336")
+        monthly_strip_html = (
+            f'<div class="home-monthly-strip">'
+            f'<span class="hms-label">{_month_label} {_now.year}</span>'
+            f'<span class="hms-stat hms-win">{_month_wins}V</span>'
+            f'<span class="hms-stat hms-loss">{_month_losses}D</span>'
+            f'<span class="hms-wr" style="color:{_wr_color};">{_month_wr}% winrate</span>'
+            f'</div>'
+        )
+    else:
+        monthly_strip_html = ""
+
     # Performance chart (global)
     settled_sorted = sorted(all_settled, key=lambda p: _parse_utcdate_str(p.get("utcDate")), reverse=True)
     settled_groups = group_picks_recent_by_day_desc(settled_sorted, days=7)
@@ -590,6 +618,86 @@ def home_page(request: Request) -> str:
           </div>
         </div>""")
 
+    # Pick del Día: featured card from the top pick (highest AFTR score)
+    pick_del_dia_html = ""
+    if top_picks:
+        _fp = top_picks[0]
+        _fp_league_code = _fp.get("_league") or ""
+        _fp_league_name = html_lib.escape(settings.leagues.get(_fp_league_code, _fp_league_code))
+        _fp_home = html_lib.escape(str(_fp.get("home") or "—"))
+        _fp_away = html_lib.escape(str(_fp.get("away") or "—"))
+        _fp_market = html_lib.escape(str(_fp.get("best_market") or "—"))
+        _fp_score = _fp.get("aftr_score")
+        try:
+            _fp_score = int(round(float(_fp_score))) if _fp_score is not None else _aftr_score(_fp)
+        except (TypeError, ValueError):
+            _fp_score = _aftr_score(_fp)
+        _fp_edge = _fp.get("edge")
+        try:
+            _fp_edge_f = float(_fp_edge) if _fp_edge is not None else None
+        except (TypeError, ValueError):
+            _fp_edge_f = None
+        _fp_edge_str = f"{_fp_edge_f*100:+.1f}%" if _fp_edge_f is not None else "—"
+        _fp_tier = (str(_fp.get("tier") or "pass").strip().lower()) or "pass"
+        _fp_conf = str(_fp.get("confidence_level") or _fp.get("confidence") or "—").upper()
+        _fp_tier_colors = {"elite": "#FFD700", "strong": "#00C853", "risky": "#FF9800", "pass": "#9E9E9E"}
+        _fp_tier_color = _fp_tier_colors.get(_fp_tier, "#9E9E9E")
+        _fp_pick_id = html_lib.escape(_pick_id_for_card(_fp, {"market": _fp.get("best_market")}))
+        _fp_market_attr = html_lib.escape(str(_fp.get("best_market") or ""))
+        _fp_edge_attr = html_lib.escape(str(_fp.get("edge") or ""))
+        _fp_home_part = _team_with_crest(_fp.get("home_crest"), _fp.get("home") or "—")
+        _fp_away_part = _team_with_crest(_fp.get("away_crest"), _fp.get("away") or "—")
+        # Build reasoning bullets
+        _fp_bullets = []
+        if _fp_edge_f is not None and _fp_edge_f > 0:
+            _fp_bullets.append(f"Ventaja de valor positiva: el modelo detecta {_fp_edge_f*100:.1f}% de edge sobre las cuotas del mercado.")
+        if _fp_tier in ("elite", "strong"):
+            _tier_label = "ELITE" if _fp_tier == "elite" else "STRONG"
+            _fp_bullets.append(f"Clasificado {_tier_label} por el modelo — señal de alta convicción.")
+        if _fp_score and _fp_score >= 70:
+            _fp_bullets.append(f"AFTR Score {_fp_score}/100 — en el percentil superior de picks de hoy.")
+        elif _fp_score and _fp_score >= 50:
+            _fp_bullets.append(f"AFTR Score {_fp_score}/100 — pick con señal estadística positiva.")
+        if _fp_conf and _fp_conf not in ("—", ""):
+            _fp_bullets.append(f"Nivel de confianza del modelo: {html_lib.escape(_fp_conf)}.")
+        _fp_bullets_html = "".join(f'<li>{b}</li>' for b in _fp_bullets[:3])
+        pick_del_dia_html = f"""
+        <div class="home-pod-wrap">
+          <div class="home-pod-header">
+            <span class="home-pod-crown">&#11088;</span>
+            <span class="home-pod-title">Pick del Día</span>
+            <span class="home-pod-league">{_fp_league_name}</span>
+          </div>
+          <div class="home-pod-card">
+            <div class="home-pod-match">
+              {_fp_home_part}
+              <span class="vs">vs</span>
+              {_fp_away_part}
+            </div>
+            <div class="home-pod-market">{_fp_market}</div>
+            <div class="home-pod-badges">
+              <span class="home-pod-score">AFTR {_fp_score}</span>
+              <span class="home-pod-tier" style="color:{_fp_tier_color};">{html_lib.escape(_fp_tier.upper())}</span>
+              <span class="home-pod-edge">Edge {_fp_edge_str}</span>
+            </div>
+            <ul class="home-pod-reasons">{_fp_bullets_html}</ul>
+            <div class="home-pod-actions">
+              <button type="button" class="btn-follow-pick pill home-pod-btn-follow"
+                data-pick-id="{_fp_pick_id}" data-market="{_fp_market_attr}" data-aftr-score="{_fp_score}"
+                data-tier="{html_lib.escape(_fp_tier)}" data-edge="{_fp_edge_attr}"
+                data-home-team="{_fp_home}" data-away-team="{_fp_away}">
+                &#128200; Seguir este pick
+              </button>
+              <button type="button" class="btn-favorite-pick pill home-pod-btn-save"
+                data-pick-id="{_fp_pick_id}" data-market="{_fp_market_attr}" data-aftr-score="{_fp_score}"
+                data-tier="{html_lib.escape(_fp_tier)}" data-edge="{_fp_edge_attr}"
+                data-home-team="{_fp_home}" data-away-team="{_fp_away}">
+                &#11088; Guardar
+              </button>
+            </div>
+          </div>
+        </div>"""
+
     for p in live_picks:
         if p.get("home") and p.get("away"):
             continue
@@ -751,7 +859,7 @@ def home_page(request: Request) -> str:
       <meta charset="utf-8"/>
       <title>AFTR — AI Picks</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=25">
+      <link rel="stylesheet" href="/static/style.css?v=27">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.webmanifest">
       <meta name="theme-color" content="#0b0f14">
@@ -864,6 +972,9 @@ def home_page(request: Request) -> str:
       {streak_banner_html}
       {live_section_html}
       {team_section_html}
+
+      {monthly_strip_html}
+      {pick_del_dia_html}
 
       <section class="home-section" id="top-picks">
       <h2 class="home-h2">Mejores Picks del Día</h2>

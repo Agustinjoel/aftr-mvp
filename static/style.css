@@ -6041,4 +6041,151 @@ canvas{
 .md-table-row--home td{background:rgba(34,197,94,.07);}
 .md-table-row--away td{background:rgba(56,189,248,.06);}
 .md-table-row--home .md-table-name,.md-table-row--home .md-td-pts{color:#4ade80;}
+
+/* ── Win Celebration ──────────────────────────────────────── */
+.win-cel-overlay{
+  position:fixed;inset:0;z-index:10000;
+  background:rgba(0,0,0,.88);
+  display:flex;align-items:center;justify-content:center;
+  animation:winFadeIn .3s ease;
+}
+.win-cel-overlay.win-cel-exit{animation:winFadeOut .38s ease forwards;}
+@keyframes winFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes winFadeOut{from{opacity:1}to{opacity:0}}
+.win-cel-box{
+  background:linear-gradient(160deg,#052e16 0%,#0d3321 55%,#111827 100%);
+  border:1.5px solid rgba(74,222,128,.45);
+  border-radius:22px;
+  padding:32px 24px 28px;
+  text-align:center;
+  max-width:360px;
+  width:calc(100vw - 32px);
+  position:relative;
+  z-index:1;
+  box-shadow:0 0 80px rgba(74,222,128,.18),0 20px 60px rgba(0,0,0,.5);
+  animation:winPop .45s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes winPop{
+  from{transform:scale(.8) translateY(20px);opacity:0}
+  to{transform:scale(1) translateY(0);opacity:1}
+}
+.win-cel-emoji{font-size:3.5rem;line-height:1;margin-bottom:10px;}
+.win-cel-title{font-size:1.9rem;font-weight:800;color:#4ade80;letter-spacing:-1px;margin-bottom:4px;}
+.win-cel-subtitle{font-size:.85rem;color:#6b7280;margin-bottom:20px;}
+.win-cel-picks{text-align:left;margin-bottom:22px;}
+.win-cel-pick{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);
+  font-size:.87rem;color:#d1d5db;line-height:1.4;
+}
+.win-cel-pick:last-child{border-bottom:none;}
+.win-cel-check{color:#4ade80;font-size:1rem;font-weight:700;flex-shrink:0;margin-top:2px;}
+.win-cel-teams{color:#9ca3af;}
+.win-cel-score{color:#4ade80;font-weight:700;margin-left:4px;}
+.win-cel-btn{
+  background:#4ade80;color:#000;border:none;
+  border-radius:12px;padding:13px 0;
+  font-size:.95rem;font-weight:700;cursor:pointer;
+  width:100%;transition:background .15s,transform .1s;
+}
+.win-cel-btn:hover{background:#22c55e;}
+.win-cel-btn:active{transform:scale(.97);}
+.win-cel-confetti{
+  position:absolute;inset:0;overflow:hidden;
+  pointer-events:none;border-radius:22px;
+}
+.win-confetti-dot{
+  position:absolute;top:-12px;
+  animation:confettiFall linear forwards;
+}
+@keyframes confettiFall{
+  0%{transform:translateY(0) rotate(0deg);opacity:1}
+  80%{opacity:.9}
+  100%{transform:translateY(130vh) rotate(800deg);opacity:0}
+}
+
+/* ── Monthly strip ─────────────────────────────────────── */
+.home-monthly-strip{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:var(--card-bg,#1a1a2e);border:1px solid var(--border,#2a2a4a);
+  border-radius:10px;padding:9px 16px;margin:0 0 12px;font-size:.82rem;
+}
+.hms-label{color:var(--muted,#888);font-weight:600;letter-spacing:.03em;}
+.hms-stat{font-weight:700;padding:2px 8px;border-radius:5px;font-size:.8rem;}
+.hms-win{background:rgba(0,200,83,.15);color:#00C853;}
+.hms-loss{background:rgba(244,67,54,.12);color:#F44336;}
+.hms-wr{font-weight:700;font-size:.85rem;margin-left:auto;}
+
+/* ── Pick del Día ──────────────────────────────────────── */
+.home-pod-wrap{margin:0 0 20px;}
+.home-pod-header{
+  display:flex;align-items:center;gap:8px;margin-bottom:8px;
+}
+.home-pod-crown{font-size:1rem;}
+.home-pod-title{
+  font-size:.95rem;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:#FFD700;
+}
+.home-pod-league{
+  margin-left:auto;font-size:.78rem;color:var(--muted,#888);
+  background:var(--card-bg,#1a1a2e);
+  border:1px solid var(--border,#2a2a4a);
+  border-radius:6px;padding:2px 8px;
+}
+.home-pod-card{
+  background:var(--card-bg,#1a1a2e);
+  border:2px solid #FFD700;
+  border-radius:14px;padding:18px 20px;
+  position:relative;overflow:hidden;
+}
+.home-pod-card::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse at top left,rgba(255,215,0,.07) 0%,transparent 60%);
+  pointer-events:none;
+}
+.home-pod-match{
+  display:flex;align-items:center;gap:8px;
+  font-size:1rem;font-weight:600;margin-bottom:8px;flex-wrap:wrap;
+}
+.home-pod-market{
+  font-size:.88rem;color:var(--muted,#888);margin-bottom:10px;
+}
+.home-pod-badges{
+  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;
+}
+.home-pod-score{
+  background:rgba(255,215,0,.15);color:#FFD700;
+  border-radius:6px;padding:3px 10px;font-size:.8rem;font-weight:700;
+}
+.home-pod-tier{
+  border-radius:6px;padding:3px 10px;font-size:.8rem;font-weight:700;
+  background:rgba(255,255,255,.07);
+}
+.home-pod-edge{
+  background:rgba(0,200,83,.12);color:#00C853;
+  border-radius:6px;padding:3px 10px;font-size:.8rem;font-weight:600;
+}
+.home-pod-reasons{
+  list-style:none;padding:0;margin:0 0 14px;
+  display:flex;flex-direction:column;gap:5px;
+}
+.home-pod-reasons li{
+  font-size:.82rem;color:var(--muted,#aaa);
+  padding-left:14px;position:relative;line-height:1.4;
+}
+.home-pod-reasons li::before{
+  content:"›";position:absolute;left:0;color:#FFD700;font-weight:700;
+}
+.home-pod-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.home-pod-btn-follow{
+  background:#00C853;color:#000;font-weight:700;
+  padding:9px 18px;font-size:.88rem;border-radius:8px;
+}
+.home-pod-btn-follow:hover{background:#00e562;}
+.home-pod-btn-save{
+  background:transparent;color:#FFD700;
+  border:1px solid #FFD700;
+  padding:9px 18px;font-size:.88rem;border-radius:8px;
+}
+.home-pod-btn-save:hover{background:rgba(255,215,0,.1);}
 .md-table-row--away .md-table-name,.md-table-row--away .md-td-pts{color:#38bdf8;}
