@@ -5,7 +5,7 @@ All endpoints require session; return 401 JSON when not logged in.
 from __future__ import annotations
 
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from fastapi import APIRouter, Request, Body
 from fastapi.responses import JSONResponse
@@ -220,8 +220,9 @@ def _dashboard_match_finished(m: dict) -> bool:
     dt = _parse_utcdate_maybe(m.get("utcDate"))
     if dt is None:
         return False
-    # Only mark finished if kickoff time is already past (and no live token above).
-    if dt <= datetime.now(timezone.utc):
+    # Fallback conservador: solo marcar como terminado si pasaron al menos 2h del kickoff
+    # (evita evaluar partidos que están en vivo con score parcial).
+    if dt <= datetime.now(timezone.utc) - timedelta(hours=2):
         return True
     return False
 

@@ -218,6 +218,8 @@ def _league_breakdown(rows: list[dict]) -> list[dict]:
             "roi": round(b["net"] / settled * 100, 1) if settled > 0 else None,
         })
     out.sort(key=lambda x: x["net"], reverse=True)
+    # Solo ligas con al menos 5 picks resueltos (evita mostrar NBA/EL sin datos)
+    out = [r for r in out if r["settled"] >= 5]
     return out
 
 

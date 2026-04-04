@@ -82,11 +82,11 @@ def _apply_results_by_match_id(
         p["score_home"] = int(hg)
         p["score_away"] = int(ag)
 
-        res = (p.get("result") or "").strip().upper()
-        if res in ("", "PENDING", "NONE"):
-            market = (p.get("best_market") or "").strip()
-            result, _reason = evaluate_market(market, hg, ag)
-            p["result"] = result
+        # Siempre re-evaluar cuando el partido está confirmado FINISHED.
+        # Evita que resultados parciales (de live) queden como definitivos.
+        market = (p.get("best_market") or "").strip()
+        result, _reason = evaluate_market(market, hg, ag)
+        p["result"] = result
 
     return picks
 
