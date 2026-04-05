@@ -3400,6 +3400,65 @@ canvas{
 }
 .ap-stats-secondary strong{ color: #d1d5db; }
 
+/* Streak card */
+.streak-card{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.streak-card--win{
+  background: linear-gradient(135deg, rgba(34,197,94,.12) 0%, rgba(16,185,129,.06) 100%);
+  border-color: rgba(34,197,94,.30);
+}
+.streak-card--loss{
+  background: linear-gradient(135deg, rgba(239,68,68,.10) 0%, rgba(220,38,38,.05) 100%);
+  border-color: rgba(239,68,68,.25);
+}
+.streak-card-main{
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.streak-card-icon{ font-size: 2rem; line-height: 1; }
+.streak-card-num{
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.streak-card--win .streak-card-num{ color: #4ade80; }
+.streak-card--loss .streak-card-num{ color: #f87171; }
+.streak-card-label{
+  font-size: 1rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.streak-card-dots{
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.streak-dot{
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.streak-dot--win{ background: #4ade80; }
+.streak-dot--loss{ background: #f87171; }
+.streak-card-best{
+  font-size: 0.8rem;
+  color: #6b7280;
+  letter-spacing: .03em;
+}
+
 /* Cards de picks */
 .ap-card{
   display: flex;

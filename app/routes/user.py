@@ -564,10 +564,12 @@ def user_stats(request: Request):
                ORDER BY created_at DESC""",
             (uid,),
         )
+        all_results = [str(row["result"]).upper() for row in cur.fetchall()]
+
+        # Current streak (ignoring PUSH)
         streak_count = 0
         streak_kind: str | None = None
-        for row in cur.fetchall():
-            r = str(row["result"]).upper()
+        for r in all_results:
             if r == "PUSH":
                 continue
             if streak_kind is None:
@@ -577,6 +579,27 @@ def user_stats(request: Request):
                 streak_count += 1
             else:
                 break
+
+        # Best streak ever
+        best_streak = 0
+        _bs_count = 0
+        _bs_kind: str | None = None
+        for r in reversed(all_results):
+            if r == "PUSH":
+                continue
+            if _bs_kind is None:
+                _bs_kind = r
+                _bs_count = 1
+            elif r == _bs_kind:
+                _bs_count += 1
+            else:
+                _bs_kind = r
+                _bs_count = 1
+            if _bs_kind == "WIN" and _bs_count > best_streak:
+                best_streak = _bs_count
+
+        # Last 10 settled results for display (newest first)
+        recent_results = [r for r in all_results if r in ("WIN", "LOSS")][:10]
     finally:
         put_conn(conn)
 
@@ -602,6 +625,8 @@ def user_stats(request: Request):
             "winrate": winrate,
             "streak_count": streak_count,
             "streak_kind": streak_kind,
+            "best_streak": best_streak,
+            "recent_results": recent_results,
         },
     })
 

@@ -213,11 +213,6 @@ def account_page(request: Request):
       </div>
 {premium_upsell_card}
 
-      <div id="streak-banner" class="account-streak-banner" style="display:none" aria-live="polite">
-        <span id="streak-banner-icon" class="account-streak-banner-icon"></span>
-        <span id="streak-banner-text" class="account-streak-banner-text"></span>
-      </div>
-
       <!-- Stats grandes -->
       <div class="ap-stats-row">
         <div class="ap-stat ap-stat--win">
@@ -232,10 +227,6 @@ def account_page(request: Request):
           <span id="stat-winrate" class="ap-stat-num js-stat-anim">—</span>
           <label class="ap-stat-label">Winrate</label>
         </div>
-        <div class="ap-stat ap-stat--streak">
-          <span id="stat-streak" class="ap-stat-num">—</span>
-          <label class="ap-stat-label">Racha</label>
-        </div>
       </div>
       <!-- Stats secundarios -->
       <div class="ap-stats-secondary">
@@ -243,6 +234,17 @@ def account_page(request: Request):
         <span>Favoritos: <strong id="stat-favorites">0</strong></span>
         <span>Pendientes: <strong id="stat-pending">0</strong></span>
         <span>ROI: <strong id="stat-roi">—</strong></span>
+      </div>
+
+      <!-- Racha card -->
+      <div id="streak-card" class="streak-card" style="display:none">
+        <div class="streak-card-main">
+          <span id="streak-card-icon" class="streak-card-icon"></span>
+          <span id="streak-card-num" class="streak-card-num">0</span>
+          <span id="streak-card-label" class="streak-card-label">racha</span>
+        </div>
+        <div id="streak-card-dots" class="streak-card-dots"></div>
+        <div id="streak-card-best" class="streak-card-best"></div>
       </div>
 
       <div class="account-actions">
@@ -491,22 +493,34 @@ def account_page(request: Request):
         var sk = (s.streak_kind && typeof s.streak_kind === "string") ? s.streak_kind.toUpperCase() : null;
         var streakIcon = sc >= 2 && sk === "WIN" ? "🔥 " : (sc >= 2 && sk === "LOSS" ? "📉 " : "");
         var streakTxt = (sc > 0 && sk) ? (streakIcon + sc + " " + sk) : "—";
-        if (el("stat-streak")) el("stat-streak").textContent = streakTxt;
         if (el("hero-streak")) el("hero-streak").textContent = streakTxt;
 
-        var banner = el("streak-banner");
-        if (banner) {{
-          if (sc >= 2 && sk) {{
-            var isWin = sk === "WIN";
-            var bannerIcon = el("streak-banner-icon");
-            var bannerText = el("streak-banner-text");
-            if (bannerIcon) bannerIcon.textContent = isWin ? "🔥" : "📉";
-            if (bannerText) bannerText.textContent = sc + (isWin ? " victorias seguidas" : " derrotas seguidas");
-            banner.className = "account-streak-banner account-streak-banner--" + (isWin ? "win" : "loss");
-            banner.style.display = "";
-          }} else {{
-            banner.style.display = "none";
+        // Streak card
+        var card = el("streak-card");
+        if (card && sc > 0 && sk) {{
+          var isWin = sk === "WIN";
+          el("streak-card-icon").textContent = sc >= 3 && isWin ? "🔥" : sc >= 3 && !isWin ? "📉" : "";
+          el("streak-card-num").textContent = sc;
+          el("streak-card-label").textContent = isWin ? (sc === 1 ? "victoria seguida" : "victorias seguidas") : (sc === 1 ? "derrota seguida" : "derrotas seguidas");
+          card.className = "streak-card streak-card--" + (isWin ? "win" : "loss");
+          card.style.display = "";
+          // Colored dots for last 10 results
+          var dots = el("streak-card-dots");
+          if (dots) {{
+            var rr = Array.isArray(s.recent_results) ? s.recent_results : [];
+            dots.innerHTML = rr.map(function(r) {{
+              return '<span class="streak-dot streak-dot--' + r.toLowerCase() + '"></span>';
+            }}).join("");
           }}
+          // Best WIN streak
+          var best = el("streak-card-best");
+          if (best) {{
+            var bs = s.best_streak || 0;
+            best.textContent = bs > 0 ? ("Mejor racha: " + bs + " victorias") : "";
+            best.style.display = bs > 0 ? "" : "none";
+          }}
+        }} else if (card) {{
+          card.style.display = "none";
         }}
       }}
       function refreshStats() {{
