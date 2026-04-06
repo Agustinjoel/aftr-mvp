@@ -478,12 +478,13 @@ def admin_dashboard(request: Request):
             if is_prem else
             f'<button onclick="setRole({u_id},\'premium\')" class="adm-btn adm-btn--success">+ Premium</button>'
         )
+        btn_del = f'<button onclick="deleteUser({u_id},\'{email}\')" class="adm-btn adm-btn--danger" style="margin-left:4px;">🗑</button>'
         user_rows_html.append(
             f'<tr><td style="color:#475569;">{u_id}</td>'
             f'<td>{email}</td><td style="color:#94a3b8;">{uname}</td>'
             f'<td>{plan_badge}</td>'
             f'<td style="color:#475569;">{created}</td>'
-            f'<td>{btn_prem}</td></tr>'
+            f'<td>{btn_prem}{btn_del}</td></tr>'
         )
 
     msg = (request.query_params.get("msg") or "").strip()
@@ -494,6 +495,8 @@ def admin_dashboard(request: Request):
         msg_html = '<div class="adm-alert adm-alert--err">✗ Error al actualizar.</div>'
     elif msg == "refresh_ok":
         msg_html = '<div class="adm-alert adm-alert--ok">✓ Refresh lanzado en background.</div>'
+    elif msg == "deleted":
+        msg_html = '<div class="adm-alert adm-alert--ok">✓ Cuenta eliminada.</div>'
 
     def section(title, content, extra_header=""):
         return f'''<section class="adm-section">
@@ -573,6 +576,15 @@ def admin_dashboard(request: Request):
         body: JSON.stringify({{user_id:uid, role:role}})
       }}).then(r=>r.json()).then(d=>{{
         window.location.href = '/admin?msg=' + (d.ok ? 'ok' : 'err');
+      }}).catch(()=>{{ window.location.href='/admin?msg=err'; }});
+    }}
+    function deleteUser(uid, email) {{
+      if (!confirm('⚠️ Borrar cuenta de ' + email + ' (#' + uid + ')?\nEsta acción no se puede deshacer.')) return;
+      fetch('/admin/delete-user', {{
+        method:'POST', headers:{{'Content-Type':'application/json'}},
+        body: JSON.stringify({{user_id:uid}})
+      }}).then(r=>r.json()).then(d=>{{
+        window.location.href = '/admin?msg=' + (d.ok ? 'deleted' : 'err');
       }}).catch(()=>{{ window.location.href='/admin?msg=err'; }});
     }}
     </script>
@@ -905,6 +917,41 @@ async def admin_set_role(request: Request):
         return JSONResponse({"ok": False, "error": "db_error"}, status_code=500)
     finally:
         put_conn(conn)
+    return JSONResponse({"ok": True})
+
+
+@router.post("/admin/delete-user")
+async def admin_delete_user(request: Request):
+    """Admin-only: permanently delete a user account and all related data."""
+    from fastapi.responses import JSONResponse
+    from app.db import get_conn, put_conn
+    from app.auth import get_user_id, get_user_by_id
+    uid = get_user_id(request)
+    acting_user = get_user_by_id(uid) if uid else None
+    if not is_admin(acting_user, request):
+        return JSONResponse({"ok": False, "error": "forbidden"}, status_code=403)
+    try:
+        body = await request.json()
+        target_id = int(body["user_id"])
+    except Exception:
+        return JSONResponse({"ok": False, "error": "bad_request"}, status_code=400)
+    # Prevent self-deletion
+    if target_id == uid:
+        return JSONResponse({"ok": False, "error": "cannot_delete_self"}, status_code=400)
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM subscriptions WHERE user_id = %s", (target_id,))
+        cur.execute("DELETE FROM user_picks WHERE user_id = %s", (target_id,))
+        cur.execute("DELETE FROM users WHERE id = %s", (target_id,))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        put_conn(conn)
+        return JSONResponse({"ok": False, "error": "db_error"}, status_code=500)
+    finally:
+        put_conn(conn)
+    logger.info("admin_delete_user: uid=%s deleted by admin uid=%s", target_id, uid)
     return JSONResponse({"ok": True})
 
 
