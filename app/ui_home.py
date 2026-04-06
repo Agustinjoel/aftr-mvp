@@ -957,14 +957,14 @@ def home_page(request: Request) -> str:
       <meta property="og:type"        content="website">
       <meta property="og:title"       content="AFTR — Picks con ventaja estadística">
       <meta property="og:description" content="Apostá con ventaja real. IA analiza cada partido y te dice cuándo el mercado está equivocado.">
-      <meta property="og:url"         content="https://aftr-mvp-2.onrender.com">
-      <meta property="og:image"       content="https://aftr-mvp-2.onrender.com/static/logo_aftr.png">
+      <meta property="og:url"         content="https://aftrapp.online">
+      <meta property="og:image"       content="https://aftrapp.online/static/logo_aftr.png">
       <meta property="og:locale"      content="es_AR">
       <!-- Twitter / X -->
       <meta name="twitter:card"        content="summary">
       <meta name="twitter:title"       content="AFTR — Picks con ventaja estadística">
       <meta name="twitter:description" content="Apostá con ventaja real. IA analiza cada partido y te dice cuándo el mercado está equivocado.">
-      <meta name="twitter:image"       content="https://aftr-mvp-2.onrender.com/static/logo_aftr.png">
+      <meta name="twitter:image"       content="https://aftrapp.online/static/logo_aftr.png">
       <link rel="stylesheet" href="/static/style.css?v=36">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.json">
@@ -1566,7 +1566,7 @@ def home_page(request: Request) -> str:
               <div class="sc-stat"><span class="sc-stat-label">Tier</span><strong id="sc-tier" class="sc-stat-val"></strong></div>
               <div class="sc-stat"><span class="sc-stat-label">Edge</span><strong id="sc-edge" class="sc-stat-val sc-val-green"></strong></div>
             </div>
-            <div class="sc-footer">aftrapp.com</div>
+            <div class="sc-footer">aftrapp.online</div>
           </div>
           <div class="share-modal-actions">
             <button class="pill share-btn-wa" onclick="shareToWhatsApp()">📲 WhatsApp</button>
@@ -1594,7 +1594,7 @@ def home_page(request: Request) -> str:
             <div class="streak-card-fires" id="sc-streak-fires"></div>
             <div class="streak-card-num" id="sc-streak-num"></div>
             <div class="streak-card-label">picks ganadores seguidos</div>
-            <div class="sc-footer">aftrapp.com — Picks con ventaja estadística</div>
+            <div class="sc-footer">aftrapp.online — Picks con ventaja estadística</div>
           </div>
           <div class="share-modal-actions">
             <button class="pill share-btn-wa" onclick="shareStreakWhatsApp()">📲 WhatsApp</button>
@@ -1644,14 +1644,14 @@ def home_page(request: Request) -> str:
       var text = '⚽ ' + _shareData.home + ' vs ' + _shareData.away
         + '\n🎯 Mercado: ' + _shareData.market
         + '\n📊 AFTR Score: ' + _shareData.score + '/100 · ' + (_shareData.tier||'').toUpperCase()
-        + '\n\naftrapp.com';
+        + '\n\naftrapp.online';
       window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
     };
     window.shareCopyLink = function(){
       var text = '⚽ ' + _shareData.home + ' vs ' + _shareData.away
         + ' · ' + _shareData.market
         + ' · AFTR Score ' + _shareData.score + '/100'
-        + ' — aftrapp.com';
+        + ' — aftrapp.online';
       navigator.clipboard.writeText(text).then(function(){
         var el = document.getElementById('share-copy-confirm');
         if(el){ el.style.display='block'; setTimeout(function(){ el.style.display='none'; }, 2000); }
@@ -1665,8 +1665,8 @@ def home_page(request: Request) -> str:
         var text = '⚽ ' + _shareData.home + ' vs ' + _shareData.away
           + '\n🎯 ' + _shareData.market
           + '\n📊 AFTR Score: ' + _shareData.score + '/100'
-          + '\naftrapp.com';
-        navigator.share({ title: 'Pick AFTR', text: text, url: 'https://aftrapp.com' }).catch(function(){});
+          + '\naftrapp.online';
+        navigator.share({ title: 'Pick AFTR', text: text, url: 'https://aftrapp.online' }).catch(function(){});
       } else {
         alert('Tomá captura de pantalla de la tarjeta para compartirla.');
       }
@@ -1691,12 +1691,12 @@ def home_page(request: Request) -> str:
       var fires = '';
       for(var i=0;i<Math.min(_streakCount,5);i++) fires += '🔥';
       var text = fires + ' ' + _streakCount + ' picks ganadores seguidos con AFTR'
-        + '\n\naftrapp.com — Picks con ventaja estadística';
+        + '\n\naftrapp.online — Picks con ventaja estadística';
       window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
     };
     window.shareStreakCopy = function(){
       var fires = '🔥'.repeat(Math.min(_streakCount,5));
-      navigator.clipboard.writeText(fires + ' ' + _streakCount + ' en racha con AFTR — aftrapp.com').catch(function(){});
+      navigator.clipboard.writeText(fires + ' ' + _streakCount + ' en racha con AFTR — aftrapp.online').catch(function(){});
     };
 
     // PWA install banner

@@ -10,8 +10,9 @@ import requests
 logger = logging.getLogger("aftr.email")
 
 APP_NAME = "AFTR"
-APP_URL  = (os.getenv("APP_BASE_URL") or "https://aftr-mvp-2.onrender.com").rstrip("/")
-FROM_EMAIL = f"{APP_NAME} Picks <onboarding@resend.dev>"
+APP_URL  = (os.getenv("APP_BASE_URL") or "https://aftrapp.online").rstrip("/")
+_from_env = (os.getenv("RESEND_FROM_EMAIL") or "").strip()
+FROM_EMAIL = _from_env if _from_env else f"{APP_NAME} <picks@aftrapp.online>"
 
 _RESEND_SEND_URL = "https://api.resend.com/emails"
 
