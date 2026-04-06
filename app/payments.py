@@ -405,7 +405,7 @@ def mp_checkout(request: Request):
     else:
         # Crear suscripción inline (sin plan previo)
         payload = {
-            "reason": "AFTR Premium — Análisis deportivo mensual",
+            "reason": "AFTR Premium — Analisis deportivo mensual",
             "payer_email": email,
             "external_reference": str(uid),
             "auto_recurring": {
@@ -415,7 +415,7 @@ def mp_checkout(request: Request):
                 "currency_id": "ARS",
             },
             "back_url": f"{base_url}/?msg=premium_activated",
-            "status": "pending",
+            "notification_url": f"{base_url}/webhooks/mercadopago",
         }
 
     try:
@@ -426,8 +426,8 @@ def mp_checkout(request: Request):
             timeout=10,
         )
         if r.status_code not in (200, 201):
-            logger.error("MP checkout failed: %s — %s", r.status_code, r.text[:300])
-            return JSONResponse({"ok": False, "error": "checkout_failed"}, status_code=500)
+            logger.error("MP checkout failed: status=%s body=%s payload=%s", r.status_code, r.text[:500], payload)
+            return JSONResponse({"ok": False, "error": "checkout_failed", "detail": r.text[:200]}, status_code=500)
         data = r.json()
         init_point = data.get("init_point") or data.get("sandbox_init_point")
         if not init_point:
