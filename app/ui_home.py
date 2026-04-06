@@ -17,7 +17,7 @@ from app.timefmt import AFTR_DISPLAY_TZ, format_match_kickoff_ar, parse_utc_inst
 from app.auth import get_user_id, get_user_by_id
 from app.db import get_conn, put_conn
 from app.models import get_active_plan
-from app.user_helpers import can_see_all_picks, is_admin, is_premium_active
+from app.user_helpers import can_see_all_picks, is_admin, is_premium_active, trial_days_remaining
 
 HOME_VISIBLE_SNAPSHOT_FILE = "home_visible_picks_snapshot.json"
 
@@ -230,6 +230,8 @@ def home_page(request: Request) -> str:
         plan_badge = '<span class="plan-badge premium">PREMIUM</span>' + auth_html
 
     user_premium = bool(uid and (is_premium_active(user) or get_active_plan(uid) == settings.plan_premium))
+    trial_days = trial_days_remaining(user) if user else None
+    user_on_trial = bool(user and (user.get("subscription_status") or "").strip().lower() == "trial" and user_premium)
 
     # Racha del usuario (server-side)
     streak_count, streak_kind = (0, None)
@@ -566,8 +568,52 @@ def home_page(request: Request) -> str:
         except Exception as _e:
             logger.warning("home_page: follow_counts query failed: %s", _e)
 
+    # For free users: select up to 5 picks from varied leagues
+    FREE_PICKS_LIMIT = 5
+    all_picks_pool = picks_near_term or top_picks  # full pool before :4 cut
+    total_picks_today = len(all_picks_pool)
+
+    if not user_premium and all_picks_pool:
+        seen_leagues: set = set()
+        free_picks_display: list = []
+        for p in sorted(all_picks_pool, key=lambda x: (-(x.get("aftr_score") or 0), -_pick_score(x))):
+            lg = p.get("_league") or ""
+            if lg not in seen_leagues:
+                seen_leagues.add(lg)
+                free_picks_display.append(p)
+                if len(free_picks_display) >= FREE_PICKS_LIMIT:
+                    break
+        # Fill remaining slots if not enough varied leagues
+        if len(free_picks_display) < FREE_PICKS_LIMIT:
+            for p in sorted(all_picks_pool, key=lambda x: (-(x.get("aftr_score") or 0), -_pick_score(x))):
+                if p not in free_picks_display:
+                    free_picks_display.append(p)
+                    if len(free_picks_display) >= FREE_PICKS_LIMIT:
+                        break
+        picks_to_render = free_picks_display
+    else:
+        # Premium: show more picks (up to 10)
+        picks_to_render = sorted(all_picks_pool, key=lambda x: (-(x.get("aftr_score") or 0), -_pick_score(x)))[:10]
+
+    locked_count = max(0, total_picks_today - len(picks_to_render)) if not user_premium else 0
+
     top_pick_cards = []
-    for p in top_picks:
+    ad_slot_html = """<div class="aftr-ad-slot">
+      <span class="ad-label">Publicidad</span>
+      <div class="ad-house">
+        <div class="ad-house-inner">
+          <span class="ad-house-icon">⭐</span>
+          <div class="ad-house-copy">
+            <strong>AFTR Premium</strong>
+            <span>Todos los picks · todas las ligas · sin anuncios</span>
+          </div>
+          <button class="ad-house-btn pill" onclick="openPremium()">Ver planes</button>
+        </div>
+      </div>
+    </div>"""
+    ad_inserted = False
+
+    for _idx, p in enumerate(picks_to_render):
         league_code = p.get("_league") or "—"
         league_name = html_lib.escape(settings.leagues.get(league_code, league_code))
         home = html_lib.escape(str(p.get("home") or "—"))
@@ -608,6 +654,11 @@ def home_page(request: Request) -> str:
         edge_attr = html_lib.escape(str(edge_raw)) if edge_raw is not None else ""
         _fc = _follow_counts.get(pick_id_val, 0)
         _social_html = f'<span class="pick-social-proof">&#128101; {_fc} lo siguieron</span>' if _fc > 0 else ""
+        # Insert house ad after 2nd pick for free users
+        if not user_premium and _idx == 2 and not ad_inserted:
+            top_pick_cards.append(ad_slot_html)
+            ad_inserted = True
+
         top_pick_cards.append(f"""
         <div class="card home-pick-card" style="border-left: 4px solid {tier_color};">
           <div class="home-pick-league">{league_name}{_social_html}</div>
@@ -643,8 +694,9 @@ def home_page(request: Request) -> str:
 
     # Pick del Día: featured card from the top pick (highest AFTR score)
     pick_del_dia_html = ""
-    if top_picks:
-        _fp = top_picks[0]
+    _best_pick_pool = sorted(all_picks_pool, key=lambda x: (-(x.get("aftr_score") or 0), -_pick_score(x))) if all_picks_pool else top_picks
+    if _best_pick_pool:
+        _fp = _best_pick_pool[0]
         _fp_league_code = _fp.get("_league") or ""
         _fp_league_name = html_lib.escape(settings.leagues.get(_fp_league_code, _fp_league_code))
         _fp_home = html_lib.escape(str(_fp.get("home") or "—"))
@@ -898,7 +950,7 @@ def home_page(request: Request) -> str:
       <meta name="twitter:title"       content="AFTR — Picks con ventaja estadística">
       <meta name="twitter:description" content="Apostá con ventaja real. IA analiza cada partido y te dice cuándo el mercado está equivocado.">
       <meta name="twitter:image"       content="https://aftr-mvp-2.onrender.com/static/logo_aftr.png">
-      <link rel="stylesheet" href="/static/style.css?v=34">
+      <link rel="stylesheet" href="/static/style.css?v=35">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.json">
       <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -1018,6 +1070,11 @@ def home_page(request: Request) -> str:
         </div>
       </header>
       {cache_status_html}
+      {f'''<div class="trial-banner">
+        <span class="trial-banner-icon">🎁</span>
+        <span class="trial-banner-copy">Probás <strong>Premium gratis</strong> — te quedan <strong>{trial_days} día{"s" if trial_days != 1 else ""}</strong></span>
+        <button class="trial-banner-cta pill" onclick="openPremium()">Activar ahora →</button>
+      </div>''' if user_on_trial and trial_days is not None else ''}
       <div class="home-carousel-strip" role="navigation" aria-label="Elegir liga">
         {home_league_carousel_html}
       </div>
@@ -1051,10 +1108,16 @@ def home_page(request: Request) -> str:
       {pick_del_dia_html}
 
       <section class="home-section" id="top-picks">
-      <h2 class="home-h2">Mejores Picks del Día</h2>
+      <h2 class="home-h2">{'Mejores Picks del Día' if user_premium else f'Picks de Hoy <span class="picks-free-counter">({len(picks_to_render)} de {total_picks_today})</span>'}</h2>
       {f'<p class="home-empty muted">{html_lib.escape(top_picks_source_note)}</p>' if top_picks_source_note else ''}
       <div class="home-picks-grid">
         {''.join(top_pick_cards) if top_pick_cards else top_picks_empty_html}
+        {f'''<div class="locked-more-card" onclick="openPremium()" role="button" tabindex="0">
+          <div class="locked-more-icon">🔒</div>
+          <div class="locked-more-title">+{locked_count} picks más hoy</div>
+          <div class="locked-more-sub">Todas las ligas · AFTR Score completo · sin anuncios</div>
+          <button class="pill locked-more-btn" onclick="event.stopPropagation(); openPremium();">Activar Premium</button>
+        </div>''' if not user_premium and locked_count > 0 else ''}
       </div>
       </section>
 

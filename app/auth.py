@@ -139,7 +139,9 @@ def create_user(email: str, username: str, password: str) -> int:
     if len((password or "").encode("utf-8")) > 72:
         raise ValueError("La contraseña es demasiado larga. Usa una de hasta 72 bytes.")
     pw_hash = bcrypt.hash(password)
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
+    trial_end_iso = (now + timedelta(days=7)).isoformat()
 
     conn = get_conn()
     try:
@@ -147,13 +149,14 @@ def create_user(email: str, username: str, password: str) -> int:
         cur.execute(
             """INSERT INTO users(
                 email, username, password_hash, role, subscription_status,
-                created_at, updated_at
-            ) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
-            (email, username or None, pw_hash, "free_user", "inactive", now, now),
+                subscription_start, subscription_end, created_at, updated_at
+            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id""",
+            (email, username or None, pw_hash, "premium_user", "trial",
+             now_iso, trial_end_iso, now_iso, now_iso),
         )
         uid_int = int(cur.fetchone()["id"])
         conn.commit()
-        logger.info("create_user: INSERT done, id=%s (returning this uid)", uid_int)
+        logger.info("create_user: INSERT done, id=%s trial until=%s", uid_int, trial_end_iso)
         return uid_int
     finally:
         put_conn(conn)
@@ -301,7 +304,9 @@ def signup_lead(payload: dict = Body(...)):
 
     logger.info("signup: password_hash generated OK")
 
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(timezone.utc)
+    now_iso = now.isoformat()
+    trial_end_iso = (now + timedelta(days=7)).isoformat()
     conn = get_conn()
     new_uid: int | None = None
     try:
@@ -309,9 +314,10 @@ def signup_lead(payload: dict = Body(...)):
         cur.execute(
             """INSERT INTO users(
                 email, username, password_hash, role, subscription_status,
-                created_at, updated_at
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id""",
-            (email, username or None, pw_hash, "free_user", "inactive", now, now),
+                subscription_start, subscription_end, created_at, updated_at
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id""",
+            (email, username or None, pw_hash, "premium_user", "trial",
+             now_iso, trial_end_iso, now_iso, now_iso),
         )
         new_uid = int(cur.fetchone()["id"])
         conn.commit()
