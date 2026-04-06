@@ -275,15 +275,24 @@
 
   function buildLegHtml(idx) {
     var removeable = idx > 0;
+    var n = idx + 1;
     return '<div class="leg-form" id="leg-form-' + idx + '">' +
-      (removeable ? '<button type="button" class="leg-remove-btn" data-idx="' + idx + '">&times;</button>' : '') +
+      '<div class="leg-form-header">' +
+        '<span class="leg-form-num">Selecci\u00f3n ' + n + '</span>' +
+        (removeable ? '<button type="button" class="leg-remove-btn" data-idx="' + idx + '">&times; Quitar</button>' : '') +
+      '</div>' +
       '<div class="leg-form-row">' +
-        '<input type="text" class="tracker-input leg-home" placeholder="Local (ej: Real Madrid)" autocomplete="off">' +
-        '<input type="text" class="tracker-input leg-away" placeholder="Visitante (ej: Barcelona)" autocomplete="off">' +
+        '<input type="text" class="tracker-input leg-home" placeholder="Local" autocomplete="off">' +
+        '<input type="text" class="tracker-input leg-away" placeholder="Visitante" autocomplete="off">' +
       '</div>' +
       '<div class="leg-form-row">' +
         '<select class="tracker-select leg-market">' + marketOptions() + '</select>' +
-        '<input type="number" class="tracker-input leg-odds" placeholder="Cuota (ej: 1.85)" min="1" step="0.01">' +
+      '</div>' +
+      '<div class="leg-form-row">' +
+        '<div class="leg-odds-wrap">' +
+          '<label class="leg-odds-label">Cuota decimal</label>' +
+          '<input type="number" class="tracker-input leg-odds" placeholder="Ej: 1.85" min="1" step="0.01">' +
+        '</div>' +
       '</div>' +
     '</div>';
   }

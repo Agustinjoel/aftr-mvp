@@ -3652,14 +3652,18 @@ canvas{
 .tracker-type-btn--active{ background:#1e3a5f; border-color:#3b82f6; color:#93c5fd; }
 
 /* Leg form */
-.leg-form{ background:#0d1117; border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:12px; margin-bottom:10px; position:relative; }
+.leg-form{ background:#0d1117; border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:12px; margin-bottom:10px; }
+.leg-form-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.leg-form-num{ font-size:0.75rem; font-weight:600; color:#6b7280; text-transform:uppercase; letter-spacing:.04em; }
 .leg-form-row{ display:flex; gap:8px; margin-bottom:8px; }
 .leg-form-row:last-child{ margin-bottom:0; }
 .leg-form-row .tracker-input{ flex:1; }
-.leg-form-row .tracker-select{ flex:1.5; }
+.leg-form-row .tracker-select{ width:100%; }
+.leg-odds-wrap{ display:flex; flex-direction:column; gap:4px; width:100%; }
+.leg-odds-label{ font-size:0.75rem; color:#6b7280; }
+.leg-odds-wrap .tracker-input{ max-width:160px; }
 .leg-remove-btn{
-  position:absolute; top:8px; right:8px; background:none; border:none;
-  color:#4b5563; font-size:1.1rem; cursor:pointer; line-height:1;
+  background:none; border:none; color:#4b5563; font-size:0.78rem; cursor:pointer; padding:0;
 }
 .leg-remove-btn:hover{ color:#f87171; }
 
