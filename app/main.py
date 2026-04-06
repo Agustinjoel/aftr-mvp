@@ -96,7 +96,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         # Remove server fingerprint
-        response.headers.pop("server", None)
+        try:
+            del response.headers["server"]
+        except (KeyError, Exception):
+            pass
         return response
 
 
