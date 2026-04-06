@@ -217,8 +217,8 @@ def notify_trial_expiring() -> None:
             """SELECT id, username, email FROM users
                WHERE subscription_status = 'trial'
                  AND subscription_end IS NOT NULL
-                 AND subscription_end > %s
-                 AND subscription_end <= %s""",
+                 AND subscription_end::timestamptz > %s
+                 AND subscription_end::timestamptz <= %s""",
             (now, window_end),
         )
         users = list(cur.fetchall())
