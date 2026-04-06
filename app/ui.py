@@ -580,7 +580,7 @@ def admin_dashboard(request: Request):
     }}
     function deleteUser(uid, btn) {{
       var email = btn ? btn.getAttribute('data-email') : uid;
-      var ok = window.confirm('Borrar cuenta #' + uid + ' (' + email + ')\n\nEsta accion no se puede deshacer.');
+      var ok = window.confirm('Borrar cuenta #' + uid + ' (' + email + '). Esta accion no se puede deshacer.');
       if (!ok) return;
       fetch('/admin/delete-user', {{
         method:'POST', credentials:'include',
