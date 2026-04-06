@@ -293,6 +293,10 @@
           '<label class="leg-odds-label">Cuota decimal</label>' +
           '<input type="number" class="tracker-input leg-odds" placeholder="Ej: 1.85" min="1" step="0.01">' +
         '</div>' +
+        '<div class="leg-kickoff-wrap">' +
+          '<label class="leg-odds-label">Fecha y hora del partido</label>' +
+          '<input type="datetime-local" class="tracker-input leg-kickoff">' +
+        '</div>' +
       '</div>' +
     '</div>';
   }
@@ -392,7 +396,9 @@
       var odds = parseFloat(form.querySelector('.leg-odds').value);
       if (!home || !away) { errEl.textContent = 'Complet\u00e1 los equipos en todas las selecciones.'; errEl.style.display = ''; hasError = true; return; }
       if (!odds || odds < 1) { errEl.textContent = 'La cuota debe ser mayor a 1.00.'; errEl.style.display = ''; hasError = true; return; }
-      legs.push({ home_team: home, away_team: away, market: market, odds: odds });
+      var kickoffEl = form.querySelector('.leg-kickoff');
+      var kickoff = kickoffEl && kickoffEl.value ? kickoffEl.value : null;
+      legs.push({ home_team: home, away_team: away, market: market, odds: odds, kickoff_time: kickoff });
     });
     if (hasError) return;
     if (!legs.length) { errEl.textContent = 'Agreg\u00e1 al menos una selecci\u00f3n.'; errEl.style.display = ''; return; }

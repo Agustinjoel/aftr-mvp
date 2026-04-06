@@ -3660,8 +3660,10 @@ canvas{
 .leg-form-row .tracker-input{ flex:1; }
 .leg-form-row .tracker-select{ width:100%; }
 .leg-odds-wrap{ display:flex; flex-direction:column; gap:4px; width:100%; }
+.leg-kickoff-wrap{ display:flex; flex-direction:column; gap:4px; width:100%; margin-top:4px; }
 .leg-odds-label{ font-size:0.75rem; color:#6b7280; }
 .leg-odds-wrap .tracker-input{ max-width:160px; }
+input[type="datetime-local"].tracker-input{ color-scheme:dark; }
 .leg-remove-btn{
   background:none; border:none; color:#4b5563; font-size:0.78rem; cursor:pointer; padding:0;
 }

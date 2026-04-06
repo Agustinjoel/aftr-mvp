@@ -116,11 +116,12 @@ def create_bet(request: Request, payload: dict = Body(...)):
         )
         bet_id = cur.fetchone()["id"]
         for i, leg in enumerate(legs):
+            kickoff = leg.get("kickoff_time") or None
             cur.execute(
                 """INSERT INTO bet_legs
-                   (bet_id, home_team, away_team, market, odds, status, sort_order)
-                   VALUES (%s, %s, %s, %s, %s, 'PENDING', %s)""",
-                (bet_id, leg["home_team"], leg["away_team"], leg["market"], float(leg["odds"]), i),
+                   (bet_id, home_team, away_team, market, odds, status, sort_order, kickoff_time)
+                   VALUES (%s, %s, %s, %s, %s, 'PENDING', %s, %s)""",
+                (bet_id, leg["home_team"], leg["away_team"], leg["market"], float(leg["odds"]), i, kickoff),
             )
         conn.commit()
         return JSONResponse({"ok": True, "bet_id": bet_id})

@@ -144,6 +144,63 @@ def notify_upcoming_picks(picks: list[dict], user_follows: dict[str, list[int]])
                 logger.info("push sent pick=%s user=%s", pick_id, uid)
 
 
+def notify_tracker_bets() -> None:
+    """
+    Revisa bet_legs con kickoff_time en los próximos NOTIFY_BEFORE_MIN minutos
+    y notifica al dueño de la apuesta.
+    """
+    from app.db import get_conn, put_conn
+    now = datetime.now(timezone.utc)
+    window_end = now + timedelta(minutes=NOTIFY_BEFORE_MIN)
+
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """SELECT bl.id, bl.home_team, bl.away_team, bl.market,
+                      bl.kickoff_time, ub.user_id, ub.id AS bet_id, ub.bet_type
+               FROM bet_legs bl
+               JOIN user_bets ub ON bl.bet_id = ub.id
+               WHERE bl.status = 'PENDING'
+                 AND bl.kickoff_time IS NOT NULL
+                 AND bl.kickoff_time BETWEEN %s AND %s""",
+            (now, window_end),
+        )
+        rows = list(cur.fetchall())
+    finally:
+        put_conn(conn)
+
+    for row in rows:
+        uid = row["user_id"]
+        leg_id = row["id"]
+        kickoff = row["kickoff_time"]
+        if kickoff.tzinfo is None:
+            kickoff = kickoff.replace(tzinfo=timezone.utc)
+        mins_left = max(1, int((kickoff - now).total_seconds() / 60))
+
+        cache_key = f"tracker:{leg_id}:{uid}"
+        if cache_key in _notified_cache:
+            continue
+
+        home = row["home_team"]
+        away = row["away_team"]
+        market = row["market"] or ""
+        bet_type = row["bet_type"]
+
+        payload = {
+            "title": f"{home} vs {away}",
+            "body": f"Tu {'combinada' if bet_type == 'combinada' else 'apuesta'} empieza en {mins_left} min"
+                    + (f" — {market}" if market else ""),
+            "tag": f"tracker-leg-{leg_id}",
+            "url": "/tracker",
+        }
+
+        sent = send_to_user(uid, payload)
+        if sent > 0:
+            _notified_cache.add(cache_key)
+            logger.info("push tracker leg=%s user=%s", leg_id, uid)
+
+
 def load_user_follows_index() -> dict[str, list[int]]:
     """
     Construye {pick_id: [user_id, ...]} desde la tabla user_picks (seguidas).

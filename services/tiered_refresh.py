@@ -261,7 +261,8 @@ def run_live_refresh_job() -> JobOutcome:
 
         # Push notifications: avisar a usuarios que siguen picks próximas
         try:
-            from services.push_notifications import notify_upcoming_picks, load_user_follows_index
+            from services.push_notifications import notify_upcoming_picks, load_user_follows_index, notify_tracker_bets
+            notify_tracker_bets()
             from config.settings import settings as _s
             from data.cache import read_json_with_fallback
             follows_index = load_user_follows_index()

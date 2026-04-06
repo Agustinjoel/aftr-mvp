@@ -188,9 +188,16 @@ def init_db() -> None:
             odds         NUMERIC(8,3) NOT NULL,
             status       TEXT NOT NULL DEFAULT 'PENDING',
             sort_order   INTEGER DEFAULT 0,
-            resolved_at  TIMESTAMPTZ
+            resolved_at  TIMESTAMPTZ,
+            kickoff_time TIMESTAMPTZ
         )
         """)
+        # Add kickoff_time to existing tables (safe to re-run)
+        try:
+            cur.execute("ALTER TABLE bet_legs ADD COLUMN kickoff_time TIMESTAMPTZ")
+            conn.commit()
+        except Exception:
+            conn.rollback()
 
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_bets_user_id ON user_bets(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_bet_legs_bet_id ON bet_legs(bet_id)")
