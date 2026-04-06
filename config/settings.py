@@ -73,6 +73,11 @@ SMTP_USER: str = (os.getenv("SMTP_USER") or "").strip()
 SMTP_PASSWORD: str = (os.getenv("SMTP_PASSWORD") or "").strip()
 EMAIL_FROM: str = (os.getenv("EMAIL_FROM") or "").strip()
 
+# Push notifications (VAPID)
+VAPID_PUBLIC_KEY: str  = (os.getenv("VAPID_PUBLIC_KEY")  or "").strip()
+VAPID_PRIVATE_KEY: str = (os.getenv("VAPID_PRIVATE_KEY") or "").strip()
+VAPID_EMAIL: str       = (os.getenv("VAPID_EMAIL")       or "mailto:aftrapp@outlook.com").strip()
+
 # API Football-Data.org
 FOOTBALL_DATA_API_KEY: str = (os.getenv("FOOTBALL_DATA_API_KEY") or "").strip()
 

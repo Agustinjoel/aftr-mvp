@@ -249,6 +249,7 @@ def account_page(request: Request):
 
       <div class="account-actions">
         <a href="/tracker" class="pill account-action-pill">📊 Tracker</a>
+        <button id="push-enable-btn" class="pill account-action-pill" style="display:none">🔔 Activar notificaciones</button>
         <a href="#mi-equipo" class="pill account-action-pill">Mi equipo</a>
         <a href="#seguidas" class="pill account-action-pill">Seguidas</a>
         <a href="#favoritos" class="pill account-action-pill">Favoritos</a>
@@ -872,7 +873,8 @@ def account_page(request: Request):
     }})();
     </script>
     {'<script src="/static/aftr-bankroll.js" defer></script>' if is_premium else '' if is_premium else ''}
-    <script src="/static/aftr-share.js?v=1" defer></script>"""
+    <script src="/static/aftr-share.js?v=1" defer></script>
+    <script src="/static/aftr-push.js" defer></script>"""
     return _simple_page("Mi cuenta — AFTR", body)
 
 

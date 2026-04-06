@@ -631,6 +631,57 @@ def user_stats(request: Request):
     })
 
 
+@router.post("/push/subscribe")
+def push_subscribe(request: Request, payload: dict = Body(...)):
+    """Store a browser push subscription for the logged-in user."""
+    uid, err = _require_user(request)
+    if err is not None:
+        return err
+    endpoint = (payload.get("endpoint") or "").strip()
+    keys = payload.get("keys") or {}
+    p256dh = (keys.get("p256dh") or "").strip()
+    auth   = (keys.get("auth")   or "").strip()
+    if not endpoint or not p256dh or not auth:
+        return JSONResponse({"ok": False, "error": "missing_fields"}, status_code=400)
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth)
+               VALUES (%s, %s, %s, %s)
+               ON CONFLICT (endpoint) DO UPDATE SET user_id=%s, p256dh=%s, auth=%s""",
+            (uid, endpoint, p256dh, auth, uid, p256dh, auth),
+        )
+        conn.commit()
+        return JSONResponse({"ok": True})
+    except Exception as e:
+        conn.rollback()
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+    finally:
+        put_conn(conn)
+
+
+@router.delete("/push/unsubscribe")
+def push_unsubscribe(request: Request, payload: dict = Body(...)):
+    uid, err = _require_user(request)
+    if err is not None:
+        return err
+    endpoint = (payload.get("endpoint") or "").strip()
+    if not endpoint:
+        return JSONResponse({"ok": False, "error": "missing_endpoint"}, status_code=400)
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "DELETE FROM push_subscriptions WHERE user_id=%s AND endpoint=%s",
+            (uid, endpoint),
+        )
+        conn.commit()
+        return JSONResponse({"ok": True})
+    finally:
+        put_conn(conn)
+
+
 @router.post("/favorite")
 def user_favorite(request: Request, payload: dict = Body(...)):
     """Store a favorite pick_id for the current user. Optional: market, aftr_score, tier, edge, home_team, away_team."""

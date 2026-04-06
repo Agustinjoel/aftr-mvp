@@ -258,6 +258,23 @@ def run_live_refresh_job() -> JobOutcome:
         apply_backoff_seconds(register_rate_pressure_from_stats(stats), cap)
 
         _save_state_patch({"last_live_ts": time.time()})
+
+        # Push notifications: avisar a usuarios que siguen picks próximas
+        try:
+            from services.push_notifications import notify_upcoming_picks, load_user_follows_index
+            from config.settings import settings as _s
+            from data.cache import read_json_with_fallback
+            follows_index = load_user_follows_index()
+            if follows_index:
+                all_picks: list[dict] = []
+                for code in _s.league_codes():
+                    picks = read_json_with_fallback(f"daily_picks_{code}.json")
+                    if isinstance(picks, list):
+                        all_picks.extend(picks)
+                notify_upcoming_picks(all_picks, follows_index)
+        except Exception as _push_err:
+            logger.warning("push_notifications error (non-fatal): %s", _push_err)
+
         logger.info(
             "AUTO REFRESH LIVE SUCCESS | http=%d rate_sleep_s=%d matches_updated=%d | %s",
             out.http_requests,
