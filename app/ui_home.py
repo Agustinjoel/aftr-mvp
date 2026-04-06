@@ -898,7 +898,7 @@ def home_page(request: Request) -> str:
       <meta name="twitter:title"       content="AFTR — Picks con ventaja estadística">
       <meta name="twitter:description" content="Apostá con ventaja real. IA analiza cada partido y te dice cuándo el mercado está equivocado.">
       <meta name="twitter:image"       content="https://aftr-mvp-2.onrender.com/static/logo_aftr.png">
-      <link rel="stylesheet" href="/static/style.css?v=33">
+      <link rel="stylesheet" href="/static/style.css?v=34">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.json">
       <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -1445,6 +1445,26 @@ def home_page(request: Request) -> str:
           else { boot(); }
         })();
       </script>
+    <!-- PWA install banner -->
+    <div id="pwa-banner" class="pwa-banner" style="display:none;" role="complementary" aria-label="Instalar app">
+      <div class="pwa-banner-inner">
+        <img src="/static/logo_aftr.png" class="pwa-banner-icon" alt="AFTR" />
+        <div class="pwa-banner-copy">
+          <strong class="pwa-banner-title">Instalá AFTR en tu celular</strong>
+          <span id="pwa-banner-sub" class="pwa-banner-sub muted">Acceso directo, sin browser</span>
+        </div>
+        <div class="pwa-banner-actions">
+          <button id="pwa-install-btn" class="pwa-install-btn" style="display:none;">Instalar</button>
+          <button id="pwa-ios-btn" class="pwa-install-btn" style="display:none;" onclick="document.getElementById('pwa-ios-tip').style.display='block';">Cómo instalar</button>
+        </div>
+        <button class="pwa-banner-dismiss" onclick="dismissPwaBanner()" aria-label="Cerrar">✕</button>
+      </div>
+      <!-- iOS instructions popover -->
+      <div id="pwa-ios-tip" class="pwa-ios-tip" style="display:none;">
+        <p>En Safari, tocá <strong>⬆ Compartir</strong> → <strong>Añadir a pantalla de inicio</strong></p>
+        <button onclick="document.getElementById('pwa-ios-tip').style.display='none'" class="pwa-ios-close">Entendido</button>
+      </div>
+    </div>
     <footer class="aftr-footer">
       <div class="aftr-footer-inner">
         <div class="aftr-footer-brand">
@@ -1468,6 +1488,63 @@ def home_page(request: Request) -> str:
         if(wrap){ wrap.classList.toggle('tip-open'); e.stopPropagation(); return; }
         document.querySelectorAll('.aftr-score-wrap.tip-open').forEach(function(el){ el.classList.remove('tip-open'); });
       });
+    })();
+
+    // PWA install banner
+    (function(){
+      var DISMISS_KEY = 'aftr_pwa_dismissed';
+      var deferredPrompt = null;
+
+      function isStandalone(){
+        return window.matchMedia('(display-mode: standalone)').matches
+          || window.navigator.standalone === true;
+      }
+      function isIOS(){
+        return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+      }
+      function dismissed(){
+        try { return localStorage.getItem(DISMISS_KEY) === '1'; } catch(e){ return false; }
+      }
+      function showBanner(){
+        var b = document.getElementById('pwa-banner');
+        if(b) b.style.display = 'block';
+      }
+
+      window.dismissPwaBanner = function(){
+        var b = document.getElementById('pwa-banner');
+        if(b) b.style.display = 'none';
+        try { localStorage.setItem(DISMISS_KEY, '1'); } catch(e){}
+      };
+
+      // Android: intercept native prompt
+      window.addEventListener('beforeinstallprompt', function(e){
+        e.preventDefault();
+        deferredPrompt = e;
+        if(dismissed() || isStandalone()) return;
+        var btn = document.getElementById('pwa-install-btn');
+        if(btn){
+          btn.style.display = 'inline-block';
+          btn.addEventListener('click', function(){
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function(){ deferredPrompt = null; dismissPwaBanner(); });
+          });
+        }
+        showBanner();
+      });
+
+      // iOS Safari: show manual instructions
+      if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', initIOS);
+      } else { initIOS(); }
+
+      function initIOS(){
+        if(dismissed() || isStandalone() || !isIOS()) return;
+        var sub = document.getElementById('pwa-banner-sub');
+        if(sub) sub.textContent = 'Safari · Tocá ⬆ → Añadir a pantalla de inicio';
+        var btn = document.getElementById('pwa-ios-btn');
+        if(btn) btn.style.display = 'inline-block';
+        showBanner();
+      }
     })();
     </script>
     <script src="/static/aftr-ui.js?v=1" defer></script>
