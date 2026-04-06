@@ -32,7 +32,10 @@ async def _live_loop() -> None:
     # Defer first job so uvicorn can finish binding and health checks before heavy work.
     await asyncio.sleep(5.0)
     while True:
-        await asyncio.to_thread(run_live_refresh_job)
+        try:
+            await asyncio.to_thread(run_live_refresh_job)
+        except Exception as e:
+            logger.exception("AUTO REFRESH LIVE loop unhandled error (continuing): %s", e)
         await asyncio.sleep(sec)
 
 
@@ -45,7 +48,10 @@ async def _odds_loop() -> None:
         _utc_iso(),
     )
     while True:
-        await asyncio.to_thread(run_odds_refresh_job)
+        try:
+            await asyncio.to_thread(run_odds_refresh_job)
+        except Exception as e:
+            logger.exception("AUTO REFRESH ODDS loop unhandled error (continuing): %s", e)
         await asyncio.sleep(sec)
 
 
@@ -58,7 +64,10 @@ async def _results_loop() -> None:
         _utc_iso(),
     )
     while True:
-        await asyncio.to_thread(run_results_refresh_job)
+        try:
+            await asyncio.to_thread(run_results_refresh_job)
+        except Exception as e:
+            logger.exception("AUTO REFRESH RESULTS loop unhandled error (continuing): %s", e)
         await asyncio.sleep(sec)
 
 

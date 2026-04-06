@@ -434,8 +434,76 @@
     });
   });
 
+  // ── Market key mapper (pick display name → tracker key) ──────────────────
+  var MARKET_KEY_MAP = {
+    'home win': '1', 'local gana': '1', '1': '1',
+    'draw': 'X', 'empate': 'X', 'x': 'X',
+    'away win': '2', 'visitante gana': '2', '2': '2',
+    '1x': '1X', 'x2': 'X2', '12': '12',
+    'over 1.5': 'over_1.5', 'over_1.5': 'over_1.5',
+    'over 2.5': 'over_2.5', 'over_2.5': 'over_2.5',
+    'over 3.5': 'over_3.5', 'over_3.5': 'over_3.5',
+    'under 1.5': 'under_1.5', 'under_1.5': 'under_1.5',
+    'under 2.5': 'under_2.5', 'under_2.5': 'under_2.5',
+    'btts yes': 'btts_yes', 'btts_yes': 'btts_yes',
+    'btts no': 'btts_no', 'btts_no': 'btts_no',
+    'dnb home': 'dnb_1', 'dnb_1': 'dnb_1',
+    'dnb away': 'dnb_2', 'dnb_2': 'dnb_2',
+  };
+
+  function resolveMarketKey(raw) {
+    return MARKET_KEY_MAP[(raw || '').toLowerCase().trim()] || 'over_1.5';
+  }
+
+  function utcIsoToLocalDatetimeInput(utcIso) {
+    if (!utcIso) return '';
+    try {
+      var d = new Date(utcIso);
+      if (isNaN(d.getTime())) return '';
+      var pad = function (n) { return String(n).padStart(2, '0'); };
+      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+             'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+    } catch (e) { return ''; }
+  }
+
+  function prefillLeg(legIdx, home, away, marketKey, localDatetime) {
+    var form = el('legs-container').querySelectorAll('.leg-form')[legIdx];
+    if (!form) return;
+    form.querySelector('.leg-home').value = home || '';
+    form.querySelector('.leg-away').value = away || '';
+    var sel = form.querySelector('.leg-market');
+    if (sel) sel.value = marketKey;
+    var kickoffEl = form.querySelector('.leg-kickoff');
+    if (kickoffEl && localDatetime) kickoffEl.value = localDatetime;
+  }
+
+  // ── Check localStorage for pick prefill ──────────────────────────────────
+  function checkPrefill() {
+    var raw = localStorage.getItem('aftr_tracker_prefill');
+    if (!raw) return;
+    localStorage.removeItem('aftr_tracker_prefill');
+    try {
+      var data = JSON.parse(raw);
+      resetForm();
+      prefillLeg(0, data.home, data.away, resolveMarketKey(data.market), utcIsoToLocalDatetimeInput(data.utcDate));
+      el('tracker-modal').style.display = '';
+      el('tracker-overlay').style.display = '';
+    } catch (e) {}
+  }
+
   // ── Init ──────────────────────────────────────────────────────────────────
   resetForm();
   loadBets();
+  checkPrefill();
 
 })();
+
+// ── Global: called from pick cards on any page ────────────────────────────
+window.addPickToTracker = function (btn) {
+  var home    = btn.getAttribute('data-home') || '';
+  var away    = btn.getAttribute('data-away') || '';
+  var market  = btn.getAttribute('data-market') || '';
+  var utcDate = btn.getAttribute('data-utcdate') || '';
+  localStorage.setItem('aftr_tracker_prefill', JSON.stringify({ home: home, away: away, market: market, utcDate: utcDate }));
+  window.location.href = '/tracker';
+};

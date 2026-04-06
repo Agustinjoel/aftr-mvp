@@ -517,6 +517,7 @@ def _render_pick_card(
     pick_id_attr = html_lib.escape(_pick_id_for_card(p, best))
     market_attr  = html_lib.escape(str((best or {}).get("market") or p.get("best_market") or ""))
     edge_attr    = html_lib.escape(str(edge_val)) if edge_val is not None else ""
+    utc_date_attr = html_lib.escape(str(p.get("utcDate") or ""))
 
     # ── Actions / finished state ───────────────────────────
     if is_finished:
@@ -564,6 +565,11 @@ def _render_pick_card(
             f' data-aftr-score="{aftr_score_val}" data-tier="{html_lib.escape(tier)}"'
             f' data-edge="{edge_attr}" data-home-team="{home_team_attr}" data-away-team="{away_team_attr}">'
             f'📈 Seguir pick</button>'
+            f'<button type="button" class="btn-add-tracker pill pick-action-btn"'
+            f' data-home="{home_team_attr}" data-away="{away_team_attr}"'
+            f' data-market="{market_attr}" data-utcdate="{utc_date_attr}"'
+            f' onclick="addPickToTracker(this)">'
+            f'📊 Tracker</button>'
             f'</div>'
             f'</div>'
         )

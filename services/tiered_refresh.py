@@ -382,6 +382,16 @@ def run_results_refresh_job() -> JobOutcome:
         apply_backoff_seconds(register_rate_pressure_from_stats(stats), cap)
 
         _save_state_patch({"last_results_ts": time.time()})
+
+        # Auto-settle tracker bet legs whose matches are now finished
+        try:
+            from services.auto_settle import auto_settle_tracker_legs
+            n_settled = auto_settle_tracker_legs()
+            if n_settled:
+                logger.info("auto_settle resolved %d tracker legs", n_settled)
+        except Exception as _settle_err:
+            logger.warning("auto_settle error (non-fatal): %s", _settle_err)
+
         logger.info(
             "AUTO REFRESH RESULTS SUCCESS | leagues=%d http=%d matches_updated=%d | %s",
             touched,
