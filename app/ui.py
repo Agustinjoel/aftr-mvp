@@ -478,7 +478,7 @@ def admin_dashboard(request: Request):
             if is_prem else
             f'<button onclick="setRole({u_id},\'premium\')" class="adm-btn adm-btn--success">+ Premium</button>'
         )
-        btn_del = f'<button onclick="deleteUser({u_id},\'{email}\')" class="adm-btn adm-btn--danger" style="margin-left:4px;">🗑</button>'
+        btn_del = f'<button onclick="deleteUser({u_id},this)" data-email="{email}" class="adm-btn adm-btn--danger" style="margin-left:4px;" title="Borrar cuenta">🗑</button>'
         user_rows_html.append(
             f'<tr><td style="color:#475569;">{u_id}</td>'
             f'<td>{email}</td><td style="color:#94a3b8;">{uname}</td>'
@@ -578,14 +578,17 @@ def admin_dashboard(request: Request):
         window.location.href = '/admin?msg=' + (d.ok ? 'ok' : 'err');
       }}).catch(()=>{{ window.location.href='/admin?msg=err'; }});
     }}
-    function deleteUser(uid, email) {{
-      if (!confirm('⚠️ Borrar cuenta de ' + email + ' (#' + uid + ')?\nEsta acción no se puede deshacer.')) return;
+    function deleteUser(uid, btn) {{
+      var email = btn ? btn.getAttribute('data-email') : uid;
+      var ok = window.confirm('Borrar cuenta #' + uid + ' (' + email + ')\n\nEsta accion no se puede deshacer.');
+      if (!ok) return;
       fetch('/admin/delete-user', {{
-        method:'POST', headers:{{'Content-Type':'application/json'}},
-        body: JSON.stringify({{user_id:uid}})
-      }}).then(r=>r.json()).then(d=>{{
+        method:'POST', credentials:'include',
+        headers:{{'Content-Type':'application/json'}},
+        body: JSON.stringify({{user_id: Number(uid)}})
+      }}).then(function(r){{ return r.json(); }}).then(function(d){{
         window.location.href = '/admin?msg=' + (d.ok ? 'deleted' : 'err');
-      }}).catch(()=>{{ window.location.href='/admin?msg=err'; }});
+      }}).catch(function(){{ window.location.href='/admin?msg=err'; }});
     }}
     </script>
     """

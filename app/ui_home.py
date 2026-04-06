@@ -1081,6 +1081,22 @@ def home_page(request: Request) -> str:
           </div>
         </div>
       </div>
+      <!-- Forgot Password Modal -->
+      <div id="forgot-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeForgotModal()">
+        <div class="modal">
+          <div class="modal-head">
+            <div class="modal-title">Recuperar contraseña</div>
+            <button class="modal-x" onclick="closeForgotModal()">✕</button>
+          </div>
+          <div class="modal-body">
+            <p class="muted" style="font-size:13px;margin-bottom:12px;">Ingresá tu email y te mandamos un enlace para resetear la contraseña.</p>
+            <input type="email" id="forgot-email" class="email-input" placeholder="tu@email.com">
+            <div id="forgot-error"  style="color:#ef4444;font-size:13px;margin:8px 0;display:none;"></div>
+            <div id="forgot-success" style="color:#22c55e;font-size:13px;margin:8px 0;display:none;"></div>
+            <button class="pill modal-cta" onclick="forgotSubmit()" style="width:100%;margin-top:8px;">Enviar enlace</button>
+          </div>
+        </div>
+      </div>
       <div class="page">
       <header class="top top-pro home-header">
         <div class="brand">
@@ -1861,6 +1877,41 @@ def home_page(request: Request) -> str:
     <script src="/static/aftr-onboarding.js?v=1" defer></script>
     <script src="/static/aftr-bankroll.js" defer></script>
     <script>
+    function openForgotModal() {
+      document.getElementById('forgot-modal').style.display = 'flex';
+    }
+    function closeForgotModal() {
+      document.getElementById('forgot-modal').style.display = 'none';
+      document.getElementById('forgot-error').style.display = 'none';
+      document.getElementById('forgot-success').style.display = 'none';
+    }
+    function closeLoginModal() {
+      var m = document.getElementById('login-modal');
+      if (m) m.style.display = 'none';
+    }
+    async function forgotSubmit() {
+      var email = document.getElementById('forgot-email').value.trim();
+      var errEl = document.getElementById('forgot-error');
+      var okEl  = document.getElementById('forgot-success');
+      errEl.style.display = 'none'; okEl.style.display = 'none';
+      if (!email) { errEl.textContent = 'Ingresá tu email.'; errEl.style.display = 'block'; return; }
+      try {
+        var r = await fetch('/auth/forgot-password', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({email: email})
+        });
+        var d = await r.json();
+        if (d.ok) {
+          okEl.textContent = 'Revisá tu email — te mandamos el enlace.';
+          okEl.style.display = 'block';
+        } else {
+          errEl.textContent = d.error === 'not_found' ? 'No encontramos ese email.' : 'Error al enviar. Intentá de nuevo.';
+          errEl.style.display = 'block';
+        }
+      } catch(e) {
+        errEl.textContent = 'Error de conexión.'; errEl.style.display = 'block';
+      }
+    }
     function closeTrialWelcome() {
       document.getElementById('trial-welcome-modal').style.display = 'none';
     }
