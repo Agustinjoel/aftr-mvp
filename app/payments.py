@@ -447,9 +447,43 @@ async def mercadopago_webhook(request: Request):
         return JSONResponse({"ok": False}, status_code=400)
 
     topic = data.get("type") or data.get("topic") or ""
-    resource_id = (data.get("data") or {}).get("id") or data.get("id") or ""
+    resource_id = str((data.get("data") or {}).get("id") or data.get("id") or "").strip()
 
-    logger.info("MP webhook: type=%s id=%s", topic, resource_id)
+    logger.info("MP webhook: type=%s id=%s body=%s", topic, resource_id, str(data)[:300])
+
+    # Pago individual de suscripción → buscar el preapproval asociado
+    if topic == "payment":
+        try:
+            r = http_requests.get(
+                f"{_MP_API}/v1/payments/{resource_id}",
+                headers=_mp_headers(),
+                timeout=10,
+            )
+            if r.status_code == 200:
+                payment = r.json()
+                preapproval_id = str(payment.get("subscription_id") or payment.get("preapproval_id") or "").strip()
+                status = (payment.get("status") or "").lower()
+                ext_ref = str(payment.get("external_reference") or "").strip()
+                logger.info("MP payment: status=%s preapproval=%s ext_ref=%s", status, preapproval_id, ext_ref)
+                if status == "approved" and ext_ref:
+                    try:
+                        uid_int = int(ext_ref)
+                        exp_iso = (datetime.now(timezone.utc) + timedelta(days=31)).isoformat()
+                        _apply_premium_to_user(uid_int, exp_iso, subscription_id=preapproval_id or resource_id)
+                        logger.info("MP payment approved: premium applied uid=%s", uid_int)
+                        try:
+                            user = get_user_by_id(uid_int) or {}
+                            email_addr = user.get("email") or ""
+                            username = user.get("username") or email_addr.split("@")[0]
+                            if email_addr:
+                                send_premium_welcome_email(email_addr, username)
+                        except Exception:
+                            pass
+                    except (ValueError, TypeError):
+                        logger.warning("MP payment: invalid ext_ref=%s", ext_ref)
+        except Exception as e:
+            logger.warning("MP payment fetch error: %s", e)
+        return JSONResponse({"ok": True})
 
     if topic not in ("subscription_preapproval", "preapproval"):
         return JSONResponse({"ok": True})
@@ -486,7 +520,6 @@ async def mercadopago_webhook(request: Request):
 
     if status == "authorized":
         # Calcular expiración: 1 mes desde ahora
-        from datetime import datetime, timezone, timedelta
         exp_iso = (datetime.now(timezone.utc) + timedelta(days=31)).isoformat()
         _apply_premium_to_user(uid_int, exp_iso, subscription_id=resource_id)
         logger.info("MP authorized: premium applied uid=%s sub=%s", uid_int, resource_id)
