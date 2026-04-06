@@ -3398,29 +3398,74 @@ canvas{
 .account-streak-banner-text{
   font-size: 1rem;
 }
+/* ── Racha prominente ── */
 .home-streak-banner{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 auto 20px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin: 0 auto 24px;
   max-width: 900px;
-  padding: 14px 20px;
-  border-radius: 12px;
+  padding: 18px 22px;
+  border-radius: 16px;
   border: 1px solid transparent;
-  font-size: 1rem;
-  font-weight: 600;
 }
 .home-streak-banner--win{
-  background: linear-gradient(135deg, rgba(34,197,94,.15) 0%, rgba(16,185,129,.08) 100%);
-  border-color: rgba(34,197,94,.35);
-  color: #4ade80;
+  background: linear-gradient(135deg, rgba(34,197,94,.18) 0%, rgba(16,185,129,.08) 100%);
+  border-color: rgba(34,197,94,.4);
 }
 .home-streak-banner--loss{
-  background: linear-gradient(135deg, rgba(239,68,68,.12) 0%, rgba(220,38,38,.06) 100%);
-  border-color: rgba(239,68,68,.30);
-  color: #f87171;
+  background: linear-gradient(135deg, rgba(239,68,68,.14) 0%, rgba(220,38,38,.06) 100%);
+  border-color: rgba(239,68,68,.32);
 }
-.home-streak-icon{ font-size: 1.4rem; line-height: 1; }
+.streak-fires{ font-size: 1.8rem; line-height: 1; flex-shrink: 0; }
+.streak-body{ flex: 1 1 180px; }
+.streak-headline{
+  font-size: 1.15rem; font-weight: 800; color: #4ade80; line-height: 1.2;
+}
+.home-streak-banner--loss .streak-headline{ color: #f87171; }
+.streak-num{ font-size: 2rem; font-weight: 900; margin-right: 4px; }
+.streak-sub{ font-size: 0.82rem; opacity: .7; margin-top: 3px; }
+.streak-share-btn{
+  background: rgba(34,197,94,.2); border-color: rgba(34,197,94,.4);
+  color: #4ade80; font-weight: 700; font-size: 0.82rem;
+  padding: 7px 14px; white-space: nowrap; flex-shrink: 0;
+}
+.streak-share-btn:hover{ background: rgba(34,197,94,.32); }
+
+/* ── Share card modal ── */
+.modal--share{ width: min(480px, 100%); }
+.share-card-preview{
+  background: linear-gradient(145deg, #0f172a 0%, #1a2540 100%);
+  border: 1px solid rgba(120,170,255,.25);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 12px 0 16px;
+}
+.sc-brand{
+  display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.sc-logo{ width: 28px; height: 28px; border-radius: 6px; }
+.sc-brand-name{ font-weight: 900; font-size: 1rem; }
+.sc-brand-tag{ font-size: 0.72rem; opacity: .5; margin-left: 4px; }
+.sc-league{ font-size: 0.72rem; text-transform: uppercase; letter-spacing: .08em; opacity: .5; margin-bottom: 4px; }
+.sc-match{ font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+.sc-market{ font-size: 0.88rem; opacity: .75; margin-bottom: 14px; }
+.sc-stats{ display: flex; gap: 16px; margin-bottom: 14px; }
+.sc-stat{ display: flex; flex-direction: column; gap: 2px; }
+.sc-stat-label{ font-size: 0.66rem; text-transform: uppercase; letter-spacing: .06em; opacity: .5; }
+.sc-stat-val{ font-size: 1.1rem; font-weight: 800; }
+.sc-val-blue{ color: rgba(120,170,255,1); }
+.sc-val-green{ color: #4ade80; }
+.sc-footer{ font-size: 0.7rem; opacity: .35; text-align: right; }
+.share-modal-actions{ display: flex; gap: 8px; flex-wrap: wrap; }
+.share-btn-wa{ background: #25d366; color: #fff; border: none; font-weight: 700; }
+.share-btn-wa:hover{ background: #1fba57; }
+.share-btn-copy{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.15); }
+.share-btn-download{ background: rgba(120,170,255,.15); border-color: rgba(120,170,255,.3); color: rgba(120,170,255,1); }
+
+/* Streak share card variant */
+.share-card-streak{ text-align: center; padding: 28px 20px; }
+.streak-card-fires{ font-size: 2.2rem; margin-bottom: 8px; }
+.streak-card-num{ font-size: 2.4rem; font-weight: 900; color: #4ade80; line-height: 1; }
+.streak-card-label{ font-size: 0.88rem; opacity: .7; margin-top: 4px; margin-bottom: 16px; }
 
 /* ── Account page rediseño ───────────────────────────────── */
 .ap-stats-row{

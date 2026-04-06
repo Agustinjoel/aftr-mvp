@@ -241,19 +241,28 @@ def home_page(request: Request) -> str:
         except Exception:
             pass
     if streak_count >= 2 and streak_kind == "WIN":
-        streak_banner_html = (
-            f'<div class="home-streak-banner home-streak-banner--win">'
-            f'<span class="home-streak-icon">🔥</span>'
-            f'<span>{streak_count} victorias seguidas — seguís en racha</span>'
-            f'</div>'
-        )
+        _fires = "🔥" * min(streak_count, 5)
+        _streak_sub = ("¡Estás en racha!" if streak_count < 5
+                       else "¡Racha élite!" if streak_count < 10
+                       else "¡Histórico! 🏆")
+        streak_banner_html = f"""
+        <div class="home-streak-banner home-streak-banner--win" role="status">
+          <div class="streak-fires">{_fires}</div>
+          <div class="streak-body">
+            <div class="streak-headline"><span class="streak-num">{streak_count}</span> en racha</div>
+            <div class="streak-sub">{_streak_sub} {streak_count} picks ganadores seguidos con AFTR.</div>
+          </div>
+          <button class="streak-share-btn pill" onclick="openStreakShare({streak_count})">Compartir racha →</button>
+        </div>"""
     elif streak_count >= 2 and streak_kind == "LOSS":
-        streak_banner_html = (
-            f'<div class="home-streak-banner home-streak-banner--loss">'
-            f'<span class="home-streak-icon">📉</span>'
-            f'<span>{streak_count} derrotas seguidas — el modelo sigue analizando</span>'
-            f'</div>'
-        )
+        streak_banner_html = f"""
+        <div class="home-streak-banner home-streak-banner--loss" role="status">
+          <div class="streak-fires">📉</div>
+          <div class="streak-body">
+            <div class="streak-headline"><span class="streak-num">{streak_count}</span> seguidas</div>
+            <div class="streak-sub">El modelo sigue analizando. Las rachas se rompen.</div>
+          </div>
+        </div>"""
     else:
         streak_banner_html = ""
 
@@ -689,6 +698,12 @@ def home_page(request: Request) -> str:
               data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"
               data-home-team="{home}" data-away-team="{away}"
               style="padding:6px 12px; font-size:0.85rem;">📈 Seguir pick</button>
+            <button type="button" class="btn-share-pick pill"
+              data-home="{home}" data-away="{away}" data-market="{market_attr}"
+              data-score="{score}" data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"
+              data-league="{html_lib.escape(league_code)}"
+              onclick="openShareCard(this)"
+              style="padding:6px 10px; font-size:0.85rem; background:transparent; border-color:rgba(255,255,255,.15); color:rgba(255,255,255,.5);">↗ Compartir</button>
           </div>
         </div>""")
 
@@ -950,7 +965,7 @@ def home_page(request: Request) -> str:
       <meta name="twitter:title"       content="AFTR — Picks con ventaja estadística">
       <meta name="twitter:description" content="Apostá con ventaja real. IA analiza cada partido y te dice cuándo el mercado está equivocado.">
       <meta name="twitter:image"       content="https://aftr-mvp-2.onrender.com/static/logo_aftr.png">
-      <link rel="stylesheet" href="/static/style.css?v=35">
+      <link rel="stylesheet" href="/static/style.css?v=36">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.json">
       <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -1528,6 +1543,67 @@ def home_page(request: Request) -> str:
         <p class="aftr-footer-copy">© 2026 AFTR · Herramienta de análisis. Apostá con responsabilidad.</p>
       </div>
     </footer>
+    <!-- Share card modal -->
+    <div id="share-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)closeShareModal()">
+      <div class="modal modal--share">
+        <div class="modal-head">
+          <div class="modal-title">Compartir pick</div>
+          <button class="modal-x" onclick="closeShareModal()">✕</button>
+        </div>
+        <div class="modal-body" style="padding:0 16px 20px;">
+          <!-- Tarjeta que se comparte -->
+          <div id="share-card-preview" class="share-card-preview">
+            <div class="sc-brand">
+              <img src="/static/logo_aftr.png" class="sc-logo" alt="AFTR"/>
+              <span class="sc-brand-name">AFTR</span>
+              <span class="sc-brand-tag">Picks con ventaja estadística</span>
+            </div>
+            <div id="sc-league" class="sc-league"></div>
+            <div id="sc-match" class="sc-match"></div>
+            <div id="sc-market" class="sc-market"></div>
+            <div class="sc-stats">
+              <div class="sc-stat"><span class="sc-stat-label">AFTR Score</span><strong id="sc-score" class="sc-stat-val sc-val-blue"></strong></div>
+              <div class="sc-stat"><span class="sc-stat-label">Tier</span><strong id="sc-tier" class="sc-stat-val"></strong></div>
+              <div class="sc-stat"><span class="sc-stat-label">Edge</span><strong id="sc-edge" class="sc-stat-val sc-val-green"></strong></div>
+            </div>
+            <div class="sc-footer">aftrapp.com</div>
+          </div>
+          <div class="share-modal-actions">
+            <button class="pill share-btn-wa" onclick="shareToWhatsApp()">📲 WhatsApp</button>
+            <button class="pill share-btn-copy" onclick="shareCopyLink()">🔗 Copiar link</button>
+            <button class="pill share-btn-download" onclick="shareDownload()">⬇ Guardar imagen</button>
+          </div>
+          <p id="share-copy-confirm" class="muted" style="font-size:.78rem;text-align:center;margin-top:8px;display:none;">¡Link copiado!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Streak share modal -->
+    <div id="streak-share-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)closeStreakShare()">
+      <div class="modal modal--share">
+        <div class="modal-head">
+          <div class="modal-title">Compartir racha</div>
+          <button class="modal-x" onclick="closeStreakShare()">✕</button>
+        </div>
+        <div class="modal-body" style="padding:0 16px 20px;">
+          <div id="streak-card-preview" class="share-card-preview share-card-streak">
+            <div class="sc-brand">
+              <img src="/static/logo_aftr.png" class="sc-logo" alt="AFTR"/>
+              <span class="sc-brand-name">AFTR</span>
+            </div>
+            <div class="streak-card-fires" id="sc-streak-fires"></div>
+            <div class="streak-card-num" id="sc-streak-num"></div>
+            <div class="streak-card-label">picks ganadores seguidos</div>
+            <div class="sc-footer">aftrapp.com — Picks con ventaja estadística</div>
+          </div>
+          <div class="share-modal-actions">
+            <button class="pill share-btn-wa" onclick="shareStreakWhatsApp()">📲 WhatsApp</button>
+            <button class="pill share-btn-copy" onclick="shareStreakCopy()">🔗 Copiar link</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
     // AFTR Score tooltip: tap to toggle on mobile
     (function(){
@@ -1537,6 +1613,91 @@ def home_page(request: Request) -> str:
         document.querySelectorAll('.aftr-score-wrap.tip-open').forEach(function(el){ el.classList.remove('tip-open'); });
       });
     })();
+
+    // ── Share card ────────────────────────────────────────────────
+    var _shareData = {};
+    window.openShareCard = function(btn) {
+      _shareData = {
+        home:   btn.dataset.home   || '',
+        away:   btn.dataset.away   || '',
+        market: btn.dataset.market || '',
+        score:  btn.dataset.score  || '',
+        tier:   btn.dataset.tier   || '',
+        edge:   btn.dataset.edge   || '',
+        league: btn.dataset.league || '',
+      };
+      document.getElementById('sc-league').textContent  = _shareData.league;
+      document.getElementById('sc-match').textContent   = _shareData.home + ' vs ' + _shareData.away;
+      document.getElementById('sc-market').textContent  = _shareData.market;
+      document.getElementById('sc-score').textContent   = _shareData.score;
+      document.getElementById('sc-tier').textContent    = _shareData.tier.toUpperCase();
+      var edgeNum = parseFloat(_shareData.edge);
+      document.getElementById('sc-edge').textContent    = isNaN(edgeNum) ? '—' : (edgeNum*100).toFixed(1)+'%';
+      var m = document.getElementById('share-modal');
+      if(m){ m.style.display='flex'; document.body.style.overflow='hidden'; }
+    };
+    window.closeShareModal = function(){
+      var m = document.getElementById('share-modal');
+      if(m){ m.style.display='none'; document.body.style.overflow=''; }
+    };
+    window.shareToWhatsApp = function(){
+      var text = '⚽ ' + _shareData.home + ' vs ' + _shareData.away
+        + '\n🎯 Mercado: ' + _shareData.market
+        + '\n📊 AFTR Score: ' + _shareData.score + '/100 · ' + (_shareData.tier||'').toUpperCase()
+        + '\n\naftrapp.com';
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    };
+    window.shareCopyLink = function(){
+      var text = '⚽ ' + _shareData.home + ' vs ' + _shareData.away
+        + ' · ' + _shareData.market
+        + ' · AFTR Score ' + _shareData.score + '/100'
+        + ' — aftrapp.com';
+      navigator.clipboard.writeText(text).then(function(){
+        var el = document.getElementById('share-copy-confirm');
+        if(el){ el.style.display='block'; setTimeout(function(){ el.style.display='none'; }, 2000); }
+      }).catch(function(){});
+    };
+    window.shareDownload = function(){
+      var card = document.getElementById('share-card-preview');
+      if(!card) return;
+      if(typeof navigator.share !== 'undefined'){
+        // Use Web Share API on mobile
+        var text = '⚽ ' + _shareData.home + ' vs ' + _shareData.away
+          + '\n🎯 ' + _shareData.market
+          + '\n📊 AFTR Score: ' + _shareData.score + '/100'
+          + '\naftrapp.com';
+        navigator.share({ title: 'Pick AFTR', text: text, url: 'https://aftrapp.com' }).catch(function(){});
+      } else {
+        alert('Tomá captura de pantalla de la tarjeta para compartirla.');
+      }
+    };
+
+    // ── Streak share ──────────────────────────────────────────────
+    var _streakCount = 0;
+    window.openStreakShare = function(n){
+      _streakCount = n;
+      var fires = '';
+      for(var i=0;i<Math.min(n,5);i++) fires += '🔥';
+      document.getElementById('sc-streak-fires').textContent = fires;
+      document.getElementById('sc-streak-num').textContent   = n + ' en racha';
+      var m = document.getElementById('streak-share-modal');
+      if(m){ m.style.display='flex'; document.body.style.overflow='hidden'; }
+    };
+    window.closeStreakShare = function(){
+      var m = document.getElementById('streak-share-modal');
+      if(m){ m.style.display='none'; document.body.style.overflow=''; }
+    };
+    window.shareStreakWhatsApp = function(){
+      var fires = '';
+      for(var i=0;i<Math.min(_streakCount,5);i++) fires += '🔥';
+      var text = fires + ' ' + _streakCount + ' picks ganadores seguidos con AFTR'
+        + '\n\naftrapp.com — Picks con ventaja estadística';
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    };
+    window.shareStreakCopy = function(){
+      var fires = '🔥'.repeat(Math.min(_streakCount,5));
+      navigator.clipboard.writeText(fires + ' ' + _streakCount + ' en racha con AFTR — aftrapp.com').catch(function(){});
+    };
 
     // PWA install banner
     (function(){
