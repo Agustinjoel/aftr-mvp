@@ -201,6 +201,7 @@ def home_page(request: Request) -> str:
     login_modal_style = "display:flex" if auth_param == "login" else "display:none"
     login_err_html = '<p style="color:#ef4444;font-size:13px;margin:8px 0 0;">Email o contraseña incorrectos.</p>' if msg_param == "login_fail" else ""
     show_premium_welcome = "true" if (msg_param == "premium_activated" and user and is_premium_active(user)) else "false"
+    show_trial_welcome = "true" if (msg_param == "cuenta_creada" and user) else "false"
     auth_html = ""
     if user:
         display_name = html_lib.escape((user.get("username") or user.get("email") or ""))
@@ -966,7 +967,7 @@ def home_page(request: Request) -> str:
       <meta name="twitter:title"       content="AFTR — Picks con ventaja estadística">
       <meta name="twitter:description" content="Apostá con ventaja real. IA analiza cada partido y te dice cuándo el mercado está equivocado.">
       <meta name="twitter:image"       content="https://aftrapp.online/static/logo_aftr.png">
-      <link rel="stylesheet" href="/static/style.css?v=37">
+      <link rel="stylesheet" href="/static/style.css?v=38">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.json">
       <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -1761,6 +1762,33 @@ def home_page(request: Request) -> str:
     <script src="/static/aftr-ui.js?v=1" defer></script>
     <script src="/static/aftr-share.js?v=1" defer></script>
     <script src="/static/aftr-onboarding.js?v=1" defer></script>
+    <!-- Trial Welcome Modal -->
+    <div id="trial-welcome-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeTrialWelcome()">
+      <div class="trial-welcome-card">
+        <div class="trial-welcome-icon">🎉</div>
+        <h2 class="trial-welcome-title">¡Bienvenido a AFTR!</h2>
+        <p class="trial-welcome-sub">Tenés <strong>7 días de Premium gratis</strong> para explorar todo.</p>
+        <div class="trial-welcome-perks">
+          <div class="twp-item">📊 Todos los picks del día — sin límite</div>
+          <div class="twp-item">🎯 Combos del día curados por IA</div>
+          <div class="twp-item">📈 Dashboard de rendimiento</div>
+          <div class="twp-item">⚽ Picks de tu equipo favorito</div>
+        </div>
+        <button class="trial-welcome-btn" onclick="closeTrialWelcome()">Empezar a explorar</button>
+        <p class="trial-welcome-note">Sin tarjeta requerida · Se notifica antes de que venza</p>
+      </div>
+    </div>
+    <script>
+    (function() {{
+      if (!{show_trial_welcome}) return;
+      history.replaceState({{}},'','/');
+      document.getElementById('trial-welcome-modal').style.display = 'flex';
+    }})();
+    function closeTrialWelcome() {{
+      document.getElementById('trial-welcome-modal').style.display = 'none';
+    }}
+    </script>
+
     <!-- Premium Welcome Celebration -->
     <div id="premium-welcome-overlay" class="prem-welcome-overlay" style="display:none" aria-modal="true" role="dialog">
       <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
