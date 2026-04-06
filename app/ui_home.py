@@ -1016,7 +1016,13 @@ def home_page(request: Request) -> str:
                   <li class="plan-item plan-item--yes">Picks de alto AFTR Score</li>
                   <li class="plan-item plan-item--yes">Edge y análisis completo</li>
                 </ul>
-                {"<div class=\"premium-badge\">⭐ Premium activo</div>" if user_premium else '<div class="checkout-btns"><button class="pill modal-cta modal-cta--mp" onclick="activatePremium(\'mp\')">Pagar con Mercado Pago</button></div>'}
+                {
+                    "<div class=\"premium-badge\">⭐ Premium activo</div>"
+                    if (user_premium and not user_on_trial) else
+                    ('<div style="font-size:.8rem;color:#FFD700;margin:0 0 8px;">Trial activo — activá para no perder acceso.</div>'
+                     if user_on_trial else '') +
+                    '<div class="checkout-btns"><button class="pill modal-cta modal-cta--mp" onclick="activatePremium(\'mp\')">Pagar con Mercado Pago</button></div>'
+                }
               </div>
             </div>
           </div>
@@ -1112,7 +1118,7 @@ def home_page(request: Request) -> str:
           </div>
           <div class="hero-buttons">
             <a href="#top-picks" class="btn-secondary">Ver picks de hoy</a>
-            {"<div class=\"premium-badge\">⭐ Premium activo</div>" if user_premium else '<button type="button" class="btn-primary" onclick="openPremium();">Obtener Premium</button>'}
+            {"<div class=\"premium-badge\">⭐ Premium activo</div>" if (user_premium and not user_on_trial) else '<button type="button" class="btn-primary" onclick="openPremium();">Obtener Premium</button>'}
           </div>
         </div>
         <div class="hero-art">
