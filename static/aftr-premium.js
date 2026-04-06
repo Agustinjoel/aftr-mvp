@@ -73,10 +73,17 @@
         if (!data) return;
         var role = (data.role || '').toLowerCase();
         var status = (data.subscription_status || '').toLowerCase();
-        var isPremium = role === 'premium_user' && (status === 'active' || status === 'trial');
-        if (isPremium) {
+        var isActive = role === 'premium_user' && status === 'active';
+        var isOnTrial = role === 'premium_user' && status === 'trial';
+        if (isActive) {
           var cta = document.getElementById('premium-modal-cta');
           if (cta) cta.innerHTML = '<div class="premium-badge">&#11088; Premium activo</div>';
+        } else if (isOnTrial) {
+          var cta = document.getElementById('premium-modal-cta');
+          if (cta) cta.innerHTML = [
+            '<p style="font-size:.8rem;color:#FFD700;margin:0 0 10px;">Tenés un trial activo. Activá ahora para no perder acceso.</p>',
+            '<button class="pill modal-cta modal-cta--mp" onclick="activatePremium(\'mp\')">Activar Premium con Mercado Pago</button>'
+          ].join('');
         }
       })
       .catch(function () {});
