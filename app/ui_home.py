@@ -898,7 +898,7 @@ def home_page(request: Request) -> str:
       <meta name="twitter:title"       content="AFTR — Picks con ventaja estadística">
       <meta name="twitter:description" content="Apostá con ventaja real. IA analiza cada partido y te dice cuándo el mercado está equivocado.">
       <meta name="twitter:image"       content="https://aftr-mvp-2.onrender.com/static/logo_aftr.png">
-      <link rel="stylesheet" href="/static/style.css?v=32">
+      <link rel="stylesheet" href="/static/style.css?v=33">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.json">
       <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -910,31 +910,61 @@ def home_page(request: Request) -> str:
     <body>
     """ + AUTH_BOOTSTRAP_SCRIPT + f"""
       <div id="premium-modal" class="modal-backdrop" style="display:none;">
-        <div class="modal">
+        <div class="modal modal--wide">
           <div class="modal-head">
-            <div class="modal-title">⭐ AFTR Premium</div>
+            <div class="modal-title">AFTR — Planes</div>
             <button class="modal-x" onclick="closePremium()">✕</button>
           </div>
           <div class="modal-body">
-            <p class="modal-subtitle">Desbloqueá el motor de apuestas con IA</p>
-            <ul class="modal-list">
-              <li>Todos los picks del día</li>
-              <li>Picks con alto AFTR Score</li>
-              <li>Apuestas de valor con ventaja positiva</li>
-              <li>Picks de todas las ligas</li>
-            </ul>
-            <p style="margin:14px 0;"><span class="price-main">$9.99</span><span class="price-sub">/ mes USD</span></p>
-            {"<div class=\"premium-badge\">⭐ Premium activo</div>" if user_premium else '<div class="checkout-btns"><button class="pill modal-cta modal-cta--mp" onclick="activatePremium(\'mp\')">Pagar con Mercado Pago</button><button class="pill modal-cta modal-cta--ls" onclick="activatePremium(\'ls\')">Pagar con tarjeta (USD)</button></div>'}
+            <div class="plan-compare">
+              <div class="plan-col plan-col--free">
+                <div class="plan-col-name">Gratis</div>
+                <div class="plan-col-price-line"><span class="plan-price-num">$0</span></div>
+                <ul class="plan-col-list">
+                  <li class="plan-item plan-item--yes">Picks diarios con AFTR Score</li>
+                  <li class="plan-item plan-item--yes">Notificaciones antes del partido</li>
+                  <li class="plan-item plan-item--yes">Tracker personal de apuestas</li>
+                  <li class="plan-item plan-item--yes">Favoritos e historial propio</li>
+                  <li class="plan-item plan-item--no">Todos los picks del día</li>
+                  <li class="plan-item plan-item--no">Ligas adicionales</li>
+                  <li class="plan-item plan-item--no">Combos inteligentes de valor</li>
+                </ul>
+                <a href="/?auth=register" class="plan-col-btn plan-col-btn--free" onclick="closePremium();">Crear cuenta</a>
+              </div>
+              <div class="plan-col plan-col--premium">
+                <div class="plan-col-badge">Recomendado</div>
+                <div class="plan-col-name">⭐ Premium</div>
+                <div class="plan-col-price-line"><span class="plan-price-num">$9.99</span><span class="plan-price-sub">/mes USD</span></div>
+                <ul class="plan-col-list">
+                  <li class="plan-item plan-item--yes">Todo lo del plan gratis</li>
+                  <li class="plan-item plan-item--yes">Todos los picks del día</li>
+                  <li class="plan-item plan-item--yes">Todas las ligas disponibles</li>
+                  <li class="plan-item plan-item--yes">Combos inteligentes de valor</li>
+                  <li class="plan-item plan-item--yes">Picks de alto AFTR Score</li>
+                  <li class="plan-item plan-item--yes">Edge y análisis completo</li>
+                </ul>
+                {"<div class=\"premium-badge\">⭐ Premium activo</div>" if user_premium else '<div class="checkout-btns"><button class="pill modal-cta modal-cta--mp" onclick="activatePremium(\'mp\')">Pagar con Mercado Pago</button><button class="pill modal-cta modal-cta--ls" onclick="activatePremium(\'ls\')">Pagar con tarjeta (USD)</button></div>'}
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <div id="signup-modal" class="modal-backdrop" style="{signup_modal_style}">
         <div class="modal">
           <div class="modal-head">
-            <div class="modal-title">Crear cuenta</div>
+            <div class="modal-title">Crear cuenta gratis</div>
             <button class="modal-x" onclick="closeSignupModal()">✕</button>
           </div>
           <div class="modal-body">
+            <div class="signup-free-perks">
+              <p class="signup-free-title">Tu cuenta gratis incluye:</p>
+              <ul class="signup-free-list">
+                <li>Picks diarios con AFTR Score</li>
+                <li>Notificaciones antes de cada partido</li>
+                <li>Historial personal y favoritos</li>
+                <li>AFTR Tracker para registrar tus apuestas</li>
+              </ul>
+            </div>
             <div id="signup-error" class="modal-line" style="color:#c00; display:none;"></div>
             <div class="modal-line">
               <input type="email" id="signup-email" class="email-input" placeholder="Email" required>
@@ -949,6 +979,7 @@ def home_page(request: Request) -> str:
               <input type="password" id="signup-confirm" class="email-input" placeholder="Confirmar contraseña" required autocomplete="new-password">
             </div>
             <button class="pill modal-cta" onclick="registerSubmit()" style="width:100%;">Crear cuenta</button>
+            <p class="signup-footer-note muted">¿Ya tenés cuenta? <a href="/?auth=login" class="modal-link">Entrá acá</a></p>
           </div>
         </div>
       </div>

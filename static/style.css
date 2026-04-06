@@ -3529,6 +3529,70 @@ canvas{
 .modal-cta--ls{ background:transparent; border:1px solid rgba(255,255,255,.2); color:#9ca3af; font-size:0.85rem; }
 .modal-cta--ls:hover{ border-color:rgba(255,255,255,.4); color:#e5e7eb; }
 
+/* ── Plan comparison modal ── */
+.modal--wide{ width: min(640px, 100%); }
+.plan-compare{
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.plan-col{
+  flex: 1 1 0; border-radius: 12px; padding: 16px 14px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.plan-col--free{
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.plan-col--premium{
+  background: rgba(56,189,248,0.07);
+  border: 1px solid rgba(56,189,248,0.35);
+  position: relative;
+}
+.plan-col-badge{
+  position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+  background: rgba(56,189,248,0.9); color: #0d1117;
+  font-size: 0.7rem; font-weight: 700; padding: 2px 10px; border-radius: 20px;
+  white-space: nowrap; letter-spacing: .04em;
+}
+.plan-col-name{ font-size: 0.95rem; font-weight: 700; margin-top: 6px; }
+.plan-col-price-line{ margin: 2px 0 6px; }
+.plan-price-num{ font-size: 1.5rem; font-weight: 800; }
+.plan-price-sub{ font-size: 0.78rem; opacity: .6; margin-left: 4px; }
+.plan-col-list{ list-style: none; padding: 0; margin: 0 0 10px; display: flex; flex-direction: column; gap: 5px; }
+.plan-item{ font-size: 0.82rem; padding-left: 18px; position: relative; opacity: .88; line-height: 1.4; }
+.plan-item--yes::before{ content: "✓"; position: absolute; left: 0; color: #4ade80; font-weight: 700; }
+.plan-item--no::before{ content: "✕"; position: absolute; left: 0; color: rgba(255,255,255,0.25); }
+.plan-item--no{ opacity: .45; }
+.plan-col-btn{
+  display: block; text-align: center; padding: 9px 12px; border-radius: 8px;
+  font-size: 0.85rem; font-weight: 600; text-decoration: none; margin-top: auto;
+}
+.plan-col-btn--free{
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.plan-col-btn--free:hover{ background: rgba(255,255,255,0.13); }
+.checkout-btns{ display: flex; flex-direction: column; gap: 8px; }
+@media(max-width:520px){
+  .plan-compare{ flex-direction: column; }
+  .plan-col--premium{ margin-top: 14px; }
+}
+
+/* ── Signup modal free tier perks ── */
+.signup-free-perks{
+  background: rgba(56,189,248,0.07);
+  border: 1px solid rgba(56,189,248,0.20);
+  border-radius: 10px;
+  padding: 11px 14px;
+  margin-bottom: 14px;
+}
+.signup-free-title{ font-size: 0.80rem; font-weight: 600; margin: 0 0 6px; opacity: .85; text-transform: uppercase; letter-spacing: .05em; }
+.signup-free-list{ list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.signup-free-list li{ font-size: 0.83rem; padding-left: 16px; position: relative; opacity: .85; }
+.signup-free-list li::before{ content: "✓"; position: absolute; left: 0; color: #4ade80; font-weight: 700; }
+.signup-footer-note{ font-size: 0.80rem; text-align: center; margin-top: 10px; }
+.modal-link{ color: rgba(120,170,255,0.9); text-decoration: none; }
+.modal-link:hover{ text-decoration: underline; }
+
 /* ═══════════════════════════════════════════════════════
    TRACKER
    ═══════════════════════════════════════════════════════ */
