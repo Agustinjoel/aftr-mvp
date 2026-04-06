@@ -201,6 +201,74 @@ def notify_tracker_bets() -> None:
             logger.info("push tracker leg=%s user=%s", leg_id, uid)
 
 
+def notify_trial_expiring() -> None:
+    """
+    Envía push a usuarios cuyo trial expira en las próximas 48 horas.
+    Evita duplicados: solo notifica una vez por usuario por ejecución del proceso.
+    """
+    from app.db import get_conn, put_conn
+    now = datetime.now(timezone.utc)
+    window_end = now + timedelta(hours=48)
+
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """SELECT id, username, email FROM users
+               WHERE subscription_status = 'trial'
+                 AND subscription_end IS NOT NULL
+                 AND subscription_end > %s
+                 AND subscription_end <= %s""",
+            (now, window_end),
+        )
+        users = list(cur.fetchall())
+    finally:
+        put_conn(conn)
+
+    for row in users:
+        uid = row["id"]
+        cache_key = f"trial_expiring:{uid}"
+        if cache_key in _notified_cache:
+            continue
+
+        sub_end_raw = None
+        conn2 = get_conn()
+        try:
+            cur2 = conn2.cursor()
+            cur2.execute("SELECT subscription_end FROM users WHERE id = %s", (uid,))
+            r = cur2.fetchone()
+            sub_end_raw = r["subscription_end"] if r else None
+        finally:
+            put_conn(conn2)
+
+        if not sub_end_raw:
+            continue
+        try:
+            end_dt = sub_end_raw if hasattr(sub_end_raw, "tzinfo") else datetime.fromisoformat(str(sub_end_raw).replace("Z", "+00:00"))
+            if end_dt.tzinfo is None:
+                end_dt = end_dt.replace(tzinfo=timezone.utc)
+            hours_left = int((end_dt - now).total_seconds() / 3600)
+        except Exception:
+            continue
+
+        if hours_left <= 24:
+            body = "Tu prueba Premium vence hoy. Activá tu plan para no perder los picks."
+        else:
+            body = f"Tu prueba Premium vence en {hours_left // 24} día{'s' if hours_left // 24 != 1 else ''}. Activá tu plan."
+
+        payload = {
+            "title": "⭐ Tu prueba AFTR Premium está por vencer",
+            "body": body,
+            "tag": "trial-expiring",
+            "url": "/?auth=premium",
+        }
+
+        sent = send_to_user(uid, payload)
+        if sent > 0:
+            _notified_cache.add(cache_key)
+            logger.info("push trial_expiring sent uid=%s hours_left=%s", uid, hours_left)
+
+
 def load_user_follows_index() -> dict[str, list[int]]:
     """
     Construye {pick_id: [user_id, ...]} desde la tabla user_picks (seguidas).

@@ -1008,25 +1008,34 @@ def reset_password_form_page(request: Request, token: str = Query("")):
 @router.get("/terminos", response_class=HTMLResponse)
 def terminos_page(request: Request):
     body = """
-    <div class="page" style="max-width:720px;margin:40px auto;padding:24px 20px;">
+    <div class="page" style="max-width:720px;margin:40px auto;padding:24px 20px 64px;">
       <a href="/" style="color:rgba(180,220,255,.8);font-size:.85rem;">← Volver al inicio</a>
-      <h1 style="margin:24px 0 8px;font-size:1.6rem;">Términos de Uso</h1>
-      <p class="muted" style="margin:0 0 28px;font-size:.85rem;">Última actualización: Abril 2026</p>
+      <h1 style="margin:24px 0 4px;font-size:1.6rem;">Términos de Uso</h1>
+      <p class="muted" style="margin:0 0 32px;font-size:.82rem;">Última actualización: Abril 2026 · AFTR</p>
 
-      <h2 style="font-size:1.1rem;margin:24px 0 8px;">1. Descripción del servicio</h2>
-      <p class="muted">AFTR es una herramienta de análisis estadístico deportivo. Las predicciones y picks publicados son el resultado de modelos cuantitativos y no constituyen asesoramiento financiero ni garantía de resultados.</p>
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">1. Descripción del servicio</h2>
+      <p class="muted">AFTR es una plataforma de análisis estadístico deportivo. Los picks y predicciones son el resultado de modelos cuantitativos (distribuciones de Poisson, valor esperado, edge vs cuota de mercado) y <strong>no constituyen asesoramiento financiero ni garantía de resultados</strong>. AFTR no es una casa de apuestas ni opera como tal.</p>
 
-      <h2 style="font-size:1.1rem;margin:24px 0 8px;">2. Uso responsable</h2>
-      <p class="muted">El usuario es responsable de sus propias decisiones de apuesta. AFTR no se hace responsable por pérdidas económicas derivadas del uso del servicio. Las apuestas deportivas son actividades de riesgo — apostá solo lo que podés permitirte perder.</p>
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">2. Uso responsable</h2>
+      <p class="muted">El usuario es el único responsable de sus decisiones de apuesta. AFTR no se hace responsable por pérdidas económicas derivadas del uso del servicio. Las apuestas deportivas implican riesgo económico real — apostá solo lo que podés permitirte perder. Si considerás que tenés un problema con el juego, buscá ayuda profesional.</p>
 
-      <h2 style="font-size:1.1rem;margin:24px 0 8px;">3. Suscripción Premium</h2>
-      <p class="muted">El plan Premium es una suscripción mensual de renovación automática procesada por Lemon Squeezy. Podés cancelarla en cualquier momento desde tu cuenta. No ofrecemos reembolsos por períodos ya transcurridos.</p>
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">3. Cuentas y acceso</h2>
+      <p class="muted">Para usar funcionalidades personalizadas es necesario crear una cuenta con email y contraseña. Sos responsable de mantener la confidencialidad de tus credenciales. Nos reservamos el derecho de suspender cuentas que violen estos términos.</p>
 
-      <h2 style="font-size:1.1rem;margin:24px 0 8px;">4. Propiedad intelectual</h2>
-      <p class="muted">Todo el contenido, marca y código de AFTR son propiedad de sus creadores. Está prohibida la reproducción parcial o total sin autorización.</p>
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">4. Prueba gratuita y plan Premium</h2>
+      <p class="muted">Los nuevos usuarios reciben <strong>7 días de acceso Premium gratuito</strong> al registrarse. Al vencer la prueba, la cuenta pasa automáticamente al plan gratuito con acceso limitado. El plan Premium es una suscripción mensual de renovación automática procesada por <strong>Mercado Pago</strong>. Podés cancelarla en cualquier momento desde tu cuenta en Mercado Pago. No ofrecemos reembolsos por períodos ya transcurridos salvo lo que exija la ley aplicable.</p>
 
-      <h2 style="font-size:1.1rem;margin:24px 0 8px;">5. Contacto</h2>
-      <p class="muted">Consultas: <a href="mailto:aftrapp@outlook.com">aftrapp@outlook.com</a></p>
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">5. Contenido y propiedad intelectual</h2>
+      <p class="muted">Todo el contenido, marca, código y modelos de AFTR son propiedad de sus creadores. Está prohibida la reproducción, distribución o uso comercial sin autorización expresa. No podés hacer scraping de los picks ni redistribuirlos.</p>
+
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">6. Modificaciones del servicio</h2>
+      <p class="muted">Nos reservamos el derecho de modificar, suspender o discontinuar el servicio o sus precios con aviso previo razonable. Los cambios en precios no afectan suscripciones activas hasta su próximo ciclo de renovación.</p>
+
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">7. Limitación de responsabilidad</h2>
+      <p class="muted">En la máxima medida permitida por la ley, AFTR no será responsable por daños indirectos, incidentales o consecuentes derivados del uso o la imposibilidad de uso del servicio.</p>
+
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">8. Contacto</h2>
+      <p class="muted">Consultas y reclamos: <a href="mailto:aftrapp@outlook.com" style="color:rgba(180,220,255,.8);">aftrapp@outlook.com</a></p>
     </div>
     """
     return _simple_page("Términos de Uso — AFTR", body)
@@ -1035,25 +1044,44 @@ def terminos_page(request: Request):
 @router.get("/privacidad", response_class=HTMLResponse)
 def privacidad_page(request: Request):
     body = """
-    <div class="page" style="max-width:720px;margin:40px auto;padding:24px 20px;">
+    <div class="page" style="max-width:720px;margin:40px auto;padding:24px 20px 64px;">
       <a href="/" style="color:rgba(180,220,255,.8);font-size:.85rem;">← Volver al inicio</a>
-      <h1 style="margin:24px 0 8px;font-size:1.6rem;">Política de Privacidad</h1>
-      <p class="muted" style="margin:0 0 28px;font-size:.85rem;">Última actualización: Abril 2026</p>
+      <h1 style="margin:24px 0 4px;font-size:1.6rem;">Política de Privacidad</h1>
+      <p class="muted" style="margin:0 0 32px;font-size:.82rem;">Última actualización: Abril 2026 · AFTR</p>
 
-      <h2 style="font-size:1.1rem;margin:24px 0 8px;">Datos que recopilamos</h2>
-      <p class="muted">Recopilamos el email y nombre de usuario al registrarse, picks que el usuario guarda/sigue, y datos de suscripción (procesados por Lemon Squeezy). No almacenamos datos de tarjetas de crédito.</p>
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">1. Responsable del tratamiento</h2>
+      <p class="muted">AFTR es el responsable del tratamiento de tus datos personales. Contacto: <a href="mailto:aftrapp@outlook.com" style="color:rgba(180,220,255,.8);">aftrapp@outlook.com</a></p>
 
-      <h2 style="font-size:1.1rem;margin:24px 0 8px;">Uso de los datos</h2>
-      <p class="muted">Usamos tus datos para: operar el servicio, enviar emails transaccionales (bienvenida, confirmación de picks), y procesar pagos. No vendemos ni compartimos datos con terceros con fines publicitarios.</p>
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">2. Datos que recopilamos</h2>
+      <p class="muted">Recopilamos únicamente los datos necesarios para operar el servicio:</p>
+      <ul class="muted" style="padding-left:20px;line-height:1.8;">
+        <li><strong>Cuenta:</strong> email y nombre de usuario al registrarse</li>
+        <li><strong>Actividad:</strong> picks guardados, seguidos e historial personal</li>
+        <li><strong>Pagos:</strong> gestionados íntegramente por Mercado Pago — AFTR no almacena datos de tarjetas ni información bancaria</li>
+        <li><strong>Notificaciones push:</strong> endpoint de suscripción del navegador (si das permiso)</li>
+        <li><strong>Técnicos:</strong> IP de acceso (para rate limiting y seguridad), logs de errores</li>
+      </ul>
 
-      <h2 style="font-size:1.1rem;margin:24px 0 8px;">Cookies</h2>
-      <p class="muted">Usamos una única cookie de sesión (<code>aftr_session</code>) necesaria para mantener tu sesión iniciada. No usamos cookies de rastreo ni publicidad.</p>
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">3. Uso de los datos</h2>
+      <p class="muted">Usamos tus datos exclusivamente para: operar y personalizar el servicio, enviar notificaciones que vos activás (push, email transaccional), procesar pagos y prevenir fraude. <strong>No vendemos ni compartimos datos personales con terceros con fines publicitarios.</strong></p>
 
-      <h2 style="font-size:1.1rem;margin:24px 0 8px;">Tus derechos</h2>
-      <p class="muted">Podés solicitar la eliminación de tu cuenta y datos en cualquier momento escribiendo a <a href="mailto:aftrapp@outlook.com">aftrapp@outlook.com</a>.</p>
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">4. Cookies</h2>
+      <p class="muted">Usamos una única cookie de sesión (<code>aftr_session</code>), necesaria para mantener tu sesión iniciada. Es una cookie HttpOnly y no puede ser leída por JavaScript de terceros. No usamos cookies de rastreo, analytics de terceros ni publicidad comportamental.</p>
 
-      <h2 style="font-size:1.1rem;margin:24px 0 8px;">Contacto</h2>
-      <p class="muted"><a href="mailto:aftrapp@outlook.com">aftrapp@outlook.com</a></p>
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">5. Retención de datos</h2>
+      <p class="muted">Conservamos tus datos mientras tu cuenta esté activa. Si eliminás tu cuenta, borramos tus datos personales en un plazo de 30 días, excepto los que debamos conservar por obligaciones legales.</p>
+
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">6. Tus derechos</h2>
+      <p class="muted">Tenés derecho a acceder, rectificar, eliminar y portar tus datos. Para ejercerlos o para solicitar la eliminación de tu cuenta, escribí a <a href="mailto:aftrapp@outlook.com" style="color:rgba(180,220,255,.8);">aftrapp@outlook.com</a>. Respondemos en un plazo de 15 días hábiles.</p>
+
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">7. Seguridad</h2>
+      <p class="muted">Aplicamos medidas técnicas de seguridad razonables: contraseñas almacenadas con bcrypt, sesiones por cookie HttpOnly, comunicaciones sobre HTTPS, y monitoreo de accesos. Ningún sistema es 100% seguro — en caso de brecha que afecte tus datos, te notificaremos sin demora indebida.</p>
+
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">8. Cambios a esta política</h2>
+      <p class="muted">Podemos actualizar esta política. Los cambios significativos se comunicarán por email o mediante aviso en la plataforma.</p>
+
+      <h2 style="font-size:1.05rem;margin:28px 0 8px;">9. Contacto</h2>
+      <p class="muted"><a href="mailto:aftrapp@outlook.com" style="color:rgba(180,220,255,.8);">aftrapp@outlook.com</a></p>
     </div>
     """
     return _simple_page("Privacidad — AFTR", body)

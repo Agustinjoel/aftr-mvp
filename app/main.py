@@ -64,6 +64,9 @@ app = FastAPI(
     description="API y dashboard de picks deportivos",
     version="1.0.0",
     lifespan=lifespan,
+    docs_url=None,      # disable /docs in production
+    redoc_url=None,     # disable /redoc in production
+    openapi_url=None,   # disable /openapi.json
 )
 
 # Absolute path so uvicorn works when CWD is not the project root (e.g. some PaaS layouts).
@@ -82,6 +85,21 @@ app.include_router(tracker_router, prefix="/tracker", tags=["tracker"])
 app.include_router(pay_router)
 
 
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Add security headers to every response."""
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        # Remove server fingerprint
+        response.headers.pop("server", None)
+        return response
+
+
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Log every incoming request method + path."""
     async def dispatch(self, request, call_next):
@@ -98,6 +116,7 @@ class ClearInvalidSessionMiddleware(BaseHTTPMiddleware):
         return response
 
 
+app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(ClearInvalidSessionMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
 
