@@ -1148,6 +1148,22 @@ def home_page(request: Request) -> str:
       </div>
       </section>
 
+      {f'''<section class="home-section bankroll-home-section">
+        <div class="bkh-header">
+          <h2 class="home-h2" style="margin:0;">💰 Tu Bankroll Virtual</h2>
+          <a href="/account#bankroll" class="bkh-config-link muted">Configurar →</a>
+        </div>
+        <div id="bankroll-display"><p class="muted" style="padding:16px 0;">Cargando…</p></div>
+        <form id="bankroll-form" style="display:none">
+          <div class="bankroll-form-row">
+            <label>Capital inicial<input type="number" id="br-initial" class="bankroll-input" min="1" step="any" placeholder="10000"></label>
+            <label>Por unidad<input type="number" id="br-stake" class="bankroll-input" min="1" step="any" placeholder="1000"></label>
+            <label>Moneda<select id="br-currency" class="bankroll-input"><option value="ARS">ARS</option><option value="USD">USD</option></select></label>
+          </div>
+          <button type="submit" class="pill bankroll-save-btn">Guardar</button>
+        </form>
+      </section>''' if user_premium else ''}
+
       <section class="home-section">
       <h2 class="home-h2">Combos de Hoy</h2>
       <div class="combos-car" data-combos-carousel>
@@ -1843,6 +1859,7 @@ def home_page(request: Request) -> str:
     <script src="/static/aftr-ui.js?v=1" defer></script>
     <script src="/static/aftr-share.js?v=1" defer></script>
     <script src="/static/aftr-onboarding.js?v=1" defer></script>
+    <script src="/static/aftr-bankroll.js" defer></script>
     <script>
     function closeTrialWelcome() {
       document.getElementById('trial-welcome-modal').style.display = 'none';
