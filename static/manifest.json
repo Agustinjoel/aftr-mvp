@@ -1,0 +1,37 @@
+{
+  "name": "AFTR — Picks Deportivas",
+  "short_name": "AFTR",
+  "description": "Picks deportivas con valor real. Seguí tus apuestas, racha y bankroll.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "lang": "es",
+  "icons": [
+    { "src": "/static/icon-72x72.png",   "sizes": "72x72",   "type": "image/png" },
+    { "src": "/static/icon-96x96.png",   "sizes": "96x96",   "type": "image/png" },
+    { "src": "/static/icon-128x128.png", "sizes": "128x128", "type": "image/png" },
+    { "src": "/static/icon-144x144.png", "sizes": "144x144", "type": "image/png" },
+    { "src": "/static/icon-152x152.png", "sizes": "152x152", "type": "image/png" },
+    { "src": "/static/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/static/icon-384x384.png", "sizes": "384x384", "type": "image/png" },
+    { "src": "/static/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tracker",
+      "short_name": "Tracker",
+      "description": "Seguir mis apuestas",
+      "url": "/tracker",
+      "icons": [{ "src": "/static/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Mi cuenta",
+      "short_name": "Cuenta",
+      "description": "Ver mi cuenta",
+      "url": "/account",
+      "icons": [{ "src": "/static/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ]
+}

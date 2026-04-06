@@ -892,10 +892,14 @@ def home_page(request: Request) -> str:
       <meta name="twitter:title"       content="AFTR — Picks con ventaja estadística">
       <meta name="twitter:description" content="Apostá con ventaja real. IA analiza cada partido y te dice cuándo el mercado está equivocado.">
       <meta name="twitter:image"       content="https://aftr-mvp-2.onrender.com/static/logo_aftr.png">
-      <link rel="stylesheet" href="/static/style.css?v=30">
+      <link rel="stylesheet" href="/static/style.css?v=31">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
-      <link rel="manifest" href="/static/manifest.webmanifest">
-      <meta name="theme-color" content="#0b0f14">
+      <link rel="manifest" href="/static/manifest.json">
+      <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+      <meta name="theme-color" content="#0d1117">
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+      <meta name="apple-mobile-web-app-title" content="AFTR">
     </head>
     <body>
     """ + AUTH_BOOTSTRAP_SCRIPT + f"""
