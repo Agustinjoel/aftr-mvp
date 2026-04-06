@@ -915,7 +915,7 @@ def _simple_page(title: str, body: str) -> str:
   <meta charset="utf-8"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=31">
+  <link rel="stylesheet" href="/static/style.css?v=35">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
   <link rel="manifest" href="/static/manifest.json">
   <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -927,6 +927,7 @@ def _simple_page(title: str, body: str) -> str:
 <body>
   {body}
   """ + AUTH_BOOTSTRAP_SCRIPT + """
+  <script src="/static/aftr-premium.js?v=1" defer></script>
 </body>
 </html>"""
 

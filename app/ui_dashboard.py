@@ -305,7 +305,7 @@ def dashboard(request: Request, league: str):
       <meta charset="utf-8"/>
       <title>AFTR Pick</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-      <link rel="stylesheet" href="/static/style.css?v=31">
+      <link rel="stylesheet" href="/static/style.css?v=35">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.json">
       <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -328,36 +328,7 @@ def dashboard(request: Request, league: str):
     """ + AUTH_BOOTSTRAP_SCRIPT + f"""
 
       <!-- Premium Modal (afuera de .page) -->
-      <div id="premium-modal" class="modal-backdrop" style="display:none;">
-        <div class="modal">
-          <div class="modal-head">
-            <div class="modal-title">⭐ AFTR Premium</div>
-            <button class="modal-x" onclick="closePremium()">✕</button>
-          </div>
-
-          <div class="modal-body">
-            <p class="modal-subtitle">Desbloqueá el motor de apuestas con IA</p>
-            <div class="modal-section">Qué incluye</div>
-            <ul class="modal-list">
-              <li>Todos los picks del día</li>
-              <li>Picks con alto AFTR Score</li>
-              <li>Apuestas de valor con ventaja positiva</li>
-              <li>Picks de todas las ligas</li>
-              <li>Análisis avanzado de partidos</li>
-              <li>Combinadas de valor inteligentes</li>
-              <li>Acceso anticipado a picks</li>
-            </ul>
-
-            <div class="modal-price">
-              <span class="price-main">$9.99</span>
-              <span class="price-sub">/ mes</span>
-            </div>
-            <p class="modal-cancel">Cancelá cuando quieras</p>
-
-            """ + ('<div class="premium-badge">⭐ Premium activo</div>' if user_premium else '<button class="pill modal-cta" onclick="activatePremium(\'PREMIUM\')">Activar Premium</button>') + """
-          </div>
-        </div>
-      </div>
+      <!-- premium modal injected by aftr-premium.js -->
 
       <!-- ✅ CONTENIDO CENTRADO -->
       <div class="page">
@@ -966,49 +937,7 @@ def dashboard(request: Request, league: str):
          </div> <!-- /section settled -->
 
             <script>
-              function openPremium(){
-                var m = document.getElementById('premium-modal');
-                if (m) m.style.display = 'flex';
-                document.documentElement.style.overflow = 'hidden';
-                document.body.style.overflow = 'hidden';
-              }
-
-              function closePremium(){
-                var m = document.getElementById('premium-modal');
-                if (m) m.style.display = 'none';
-                document.documentElement.style.overflow = '';
-                document.body.style.overflow = '';
-              }
-
-              function activatePremium(plan){
-                var url = (window.location.origin || (window.location.protocol + '//' + window.location.host)) + '/billing/create-checkout-session';
-                fetch(url, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  credentials: 'include',
-                  body: JSON.stringify({})
-                })
-                .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
-                .then(function(result){
-                  if (result.ok && result.data && result.data.url) {
-                    window.location.href = result.data.url;
-                  } else if (result.data && result.data.error === 'need_login') {
-                    closePremium();
-                    openLoginModal();
-                  } else {
-                    alert('No se pudo iniciar el checkout: ' + ((result.data && result.data.error) || 'error desconocido'));
-                  }
-                })
-                .catch(function(){
-                  alert('Error de conexión con el servidor de pagos.');
-                });
-              }
-
-              document.addEventListener('click', function(e){
-                var m = document.getElementById('premium-modal');
-                if (!m || m.style.display !== 'flex') return;
-                if (e.target === m) closePremium();
-              });
+              // openPremium / closePremium / activatePremium provided by aftr-premium.js
 
 
               (function pickActions(){
@@ -1429,6 +1358,7 @@ def dashboard(request: Request, league: str):
     </script>
 
     </div> <!-- /page -->
+    <script src="/static/aftr-premium.js?v=1" defer></script>
     <script src="/static/aftr-ui.js?v=1" defer></script>
     <div id="match-drawer" class="match-drawer" aria-hidden="true" role="dialog" aria-modal="true">
       <div class="match-drawer-overlay"></div>

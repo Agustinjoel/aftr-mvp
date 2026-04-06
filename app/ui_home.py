@@ -1231,22 +1231,7 @@ def home_page(request: Request) -> str:
     # JavaScript for home page: must be in plain string (no f-string) to avoid { } interpreted as format placeholders
     page_html += """
       <script>
-        function openPremium(){ var m = document.getElementById("premium-modal"); if(m) m.style.display = "flex"; document.body.style.overflow = "hidden"; }
-        function closePremium(){ var m = document.getElementById("premium-modal"); if(m) m.style.display = "none"; document.body.style.overflow = ""; }
-        function activatePremium(provider){
-          var base = window.location.origin || (window.location.protocol + "//" + window.location.host);
-          var url = provider === "mp"
-            ? base + "/billing/mp-checkout"
-            : base + "/billing/create-checkout-session";
-          fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: "{}" })
-            .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
-            .then(function(result){
-              if (result.ok && result.data && result.data.url) { window.location.href = result.data.url; }
-              else if (result.data && result.data.error === "need_login") { closePremium(); window.location.href = "/?auth=login"; }
-              else { alert("No se pudo iniciar el checkout: " + ((result.data && result.data.error) || "error desconocido")); }
-            })
-            .catch(function(){ alert("Error de conexión."); });
-        }
+        // openPremium / closePremium / activatePremium provided by aftr-premium.js
         window.registerSubmit = async function(){
           var email = document.getElementById("signup-email");
           var username = document.getElementById("signup-username");
@@ -1610,6 +1595,7 @@ def home_page(request: Request) -> str:
       }
     })();
     </script>
+    <script src="/static/aftr-premium.js?v=1"></script>
     <script src="/static/aftr-ui.js?v=1" defer></script>
     <script src="/static/aftr-share.js?v=1" defer></script>
     <script src="/static/aftr-onboarding.js?v=1" defer></script>
