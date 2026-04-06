@@ -88,6 +88,37 @@ def _apply_results_by_match_id(
         result, _reason = evaluate_market(market, hg, ag)
         p["result"] = result
 
+    # Second pass: fix stale PUSH picks whose market was set after evaluation
+    _reevaluate_stale_push(picks)
+
+    return picks
+
+
+def _reevaluate_stale_push(picks: list[dict]) -> list[dict]:
+    """
+    Re-evalúa picks que tienen score final cargado pero result=='PUSH' y market conocido.
+    Ocurre cuando best_market se pobló después de que el partido salió de la ventana
+    de finished_by_id, dejando el resultado incorrecto.
+    """
+    for p in picks or []:
+        if not isinstance(p, dict):
+            continue
+        if p.get("result") != "PUSH":
+            continue
+        market = (p.get("best_market") or "").strip()
+        if not market:
+            continue
+        hg = p.get("score_home")
+        ag = p.get("score_away")
+        if hg is None or ag is None:
+            continue
+        try:
+            result, _reason = evaluate_market(market, int(hg), int(ag))
+        except Exception:
+            continue
+        # Only override if we get a definitive answer (not another PUSH)
+        if result != "PUSH":
+            p["result"] = result
     return picks
 
 
