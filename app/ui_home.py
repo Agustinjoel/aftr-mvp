@@ -943,7 +943,7 @@ def home_page(request: Request) -> str:
                   <li class="plan-item plan-item--yes">Picks de alto AFTR Score</li>
                   <li class="plan-item plan-item--yes">Edge y análisis completo</li>
                 </ul>
-                {"<div class=\"premium-badge\">⭐ Premium activo</div>" if user_premium else '<div class="checkout-btns"><button class="pill modal-cta modal-cta--mp" onclick="activatePremium(\'mp\')">Pagar con Mercado Pago</button><button class="pill modal-cta modal-cta--ls" onclick="activatePremium(\'ls\')">Pagar con tarjeta (USD)</button></div>'}
+                {"<div class=\"premium-badge\">⭐ Premium activo</div>" if user_premium else '<div class="checkout-btns"><button class="pill modal-cta modal-cta--mp" onclick="activatePremium(\'mp\')">Pagar con Mercado Pago</button></div>'}
               </div>
             </div>
           </div>
