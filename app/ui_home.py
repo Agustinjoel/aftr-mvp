@@ -200,10 +200,12 @@ def home_page(request: Request) -> str:
     signup_modal_style = "display:flex" if auth_param == "register" else "display:none"
     login_modal_style = "display:flex" if auth_param == "login" else "display:none"
     login_err_html = '<p style="color:#ef4444;font-size:13px;margin:8px 0 0;">Email o contraseña incorrectos.</p>' if msg_param == "login_fail" else ""
-    show_premium_welcome = msg_param == "premium_activated" and user and is_premium_active(user)
-    show_trial_welcome   = msg_param == "cuenta_creada" and bool(user)
-    trial_modal_style    = "display:flex" if show_trial_welcome else "display:none"
-    premium_modal_style  = "display:flex" if show_premium_welcome else "display:none"
+    _show_premium = msg_param == "premium_activated" and user and is_premium_active(user)
+    _show_trial   = msg_param == "cuenta_creada" and bool(user)
+    trial_modal_style   = "display:flex" if _show_trial   else "display:none"
+    premium_modal_style = "display:flex" if _show_premium else "display:none"
+    show_premium_welcome = "true" if _show_premium else "false"
+    show_trial_welcome   = "true" if _show_trial   else "false"
     auth_html = ""
     if user:
         display_name = html_lib.escape((user.get("username") or user.get("email") or ""))
