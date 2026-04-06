@@ -139,6 +139,7 @@ from app.ui_account import (                                     # noqa: F401
     _account_created_display,
     account_page,
 )
+from app.ui_tracker import tracker_page                          # noqa: F401
 
 router = APIRouter()
 logger = logging.getLogger("aftr.ui")
@@ -147,6 +148,7 @@ HOME_VISIBLE_SNAPSHOT_FILE = "home_visible_picks_snapshot.json"
 
 # Registrar rutas de módulos extraídos en el router principal
 router.get("/account", response_class=HTMLResponse)(account_page)
+router.get("/tracker", response_class=HTMLResponse)(tracker_page)
 
 
 # AUTH_BOOTSTRAP_JS, AUTH_BOOTSTRAP_SCRIPT, _serializer, _get_user_id,

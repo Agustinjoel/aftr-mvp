@@ -162,6 +162,39 @@ def init_db() -> None:
         """)
 
         # Indexes (IF NOT EXISTS is safe to re-run)
+        # Tracker tables
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_bets (
+            id               SERIAL PRIMARY KEY,
+            user_id          INTEGER NOT NULL REFERENCES users(id),
+            bet_type         TEXT NOT NULL DEFAULT 'simple',
+            stake            NUMERIC(12,2) NOT NULL,
+            total_odds       NUMERIC(8,3),
+            potential_payout NUMERIC(12,2),
+            status           TEXT NOT NULL DEFAULT 'PENDING',
+            note             TEXT,
+            created_at       TIMESTAMPTZ DEFAULT NOW(),
+            settled_at       TIMESTAMPTZ
+        )
+        """)
+
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS bet_legs (
+            id           SERIAL PRIMARY KEY,
+            bet_id       INTEGER NOT NULL REFERENCES user_bets(id) ON DELETE CASCADE,
+            home_team    TEXT NOT NULL,
+            away_team    TEXT NOT NULL,
+            market       TEXT NOT NULL,
+            odds         NUMERIC(8,3) NOT NULL,
+            status       TEXT NOT NULL DEFAULT 'PENDING',
+            sort_order   INTEGER DEFAULT 0,
+            resolved_at  TIMESTAMPTZ
+        )
+        """)
+
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_user_bets_user_id ON user_bets(user_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_bet_legs_bet_id ON bet_legs(bet_id)")
+
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_picks_user_id ON user_picks(user_id)")
         cur.execute(

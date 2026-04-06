@@ -11,6 +11,7 @@ from app.routes.matches import router as matches_router
 from app.routes.picks import router as picks_router
 from app.routes.match_detail import router as match_detail_router
 from app.routes.user import router as user_router
+from app.routes.tracker import router as tracker_router
 from app.ui import router as ui_router
 from app.routes.live import router as live_router
 from config.settings import settings
@@ -77,6 +78,7 @@ app.include_router(matches_router, prefix="/api", tags=["matches"])
 app.include_router(picks_router, prefix="/api", tags=["picks"])
 app.include_router(match_detail_router, prefix="/api", tags=["match-detail"])
 app.include_router(user_router, prefix="/user", tags=["user"])
+app.include_router(tracker_router, prefix="/tracker", tags=["tracker"])
 app.include_router(pay_router)
 
 

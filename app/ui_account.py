@@ -248,6 +248,7 @@ def account_page(request: Request):
       </div>
 
       <div class="account-actions">
+        <a href="/tracker" class="pill account-action-pill">📊 Tracker</a>
         <a href="#mi-equipo" class="pill account-action-pill">Mi equipo</a>
         <a href="#seguidas" class="pill account-action-pill">Seguidas</a>
         <a href="#favoritos" class="pill account-action-pill">Favoritos</a>
