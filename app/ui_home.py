@@ -1415,6 +1415,7 @@ def home_page(request: Request) -> str:
           <span class="aftr-footer-tagline">Picks con ventaja estadística</span>
         </div>
         <nav class="aftr-footer-links">
+          <a href="/rendimiento">Rendimiento</a>
           <a href="/terminos">Términos de uso</a>
           <a href="/privacidad">Privacidad</a>
           <a href="mailto:aftrapp@outlook.com">Contacto</a>

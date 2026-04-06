@@ -345,8 +345,7 @@ def build_rendimiento_page(request: Request) -> str:
 
     pending_note = (
         f'<p class="muted" style="font-size:0.82rem;margin-top:4px;">'
-        f'{pending} pick{"s" if pending != 1 else ""} pendiente{"s" if pending != 1 else ""} '
-        f'de resolución · {total_in_db} en total en la DB.</p>'
+        f'{settled} picks resueltos · {pending} pendientes de resultado.</p>'
     )
 
     # ── draw chart JS (same as dashboard) ───
@@ -468,10 +467,25 @@ def build_rendimiento_page(request: Request) -> str:
 
     body = f"""
 <div class="rendimiento-page">
+
+  <!-- CTA banner — only visible to visitors not logged in -->
+  <div id="rend-cta-banner" class="rend-cta-banner" style="display:none;">
+    <div class="rend-cta-inner">
+      <div class="rend-cta-copy">
+        <strong>Seguí los picks en tiempo real.</strong>
+        <span class="muted"> Recibís notificaciones antes de cada partido y ves la probabilidad real vs la cuota del bookie.</span>
+      </div>
+      <div class="rend-cta-actions">
+        <a href="/?auth=register" class="rend-cta-btn-primary">Crear cuenta gratis →</a>
+        <a href="/?auth=login" class="rend-cta-btn-secondary">Ya tengo cuenta</a>
+      </div>
+    </div>
+  </div>
+
   <div class="rendimiento-header">
     <a href="/" class="back-link">← Inicio</a>
     <h1 class="rendimiento-title">Rendimiento histórico</h1>
-    <p class="rendimiento-sub muted">Todas las picks resueltas desde el inicio de AFTR.</p>
+    <p class="rendimiento-sub muted">Picks resueltos desde el inicio de AFTR — matemáticas, sin humo.</p>
     {pending_note}
   </div>
 
@@ -621,10 +635,50 @@ def build_rendimiento_page(request: Request) -> str:
       }}
       .pick-history-market {{ display: none; }}
     }}
+
+    /* ── Conversion CTA banner ── */
+    .rend-cta-banner {{
+      background: linear-gradient(135deg, rgba(120,170,255,0.12) 0%, rgba(80,120,220,0.08) 100%);
+      border: 1px solid rgba(120,170,255,0.25);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 28px;
+    }}
+    .rend-cta-inner {{
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }}
+    .rend-cta-copy {{ flex: 1 1 260px; font-size: 0.93rem; line-height: 1.5; }}
+    .rend-cta-actions {{ display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }}
+    .rend-cta-btn-primary {{
+      background: rgba(120,170,255,0.9); color: #0d1117;
+      padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem;
+      text-decoration: none; white-space: nowrap;
+    }}
+    .rend-cta-btn-primary:hover {{ background: rgba(140,185,255,1); }}
+    .rend-cta-btn-secondary {{
+      color: rgba(255,255,255,0.65); font-size: 0.84rem; text-decoration: none;
+      padding: 9px 4px;
+    }}
+    .rend-cta-btn-secondary:hover {{ color: rgba(255,255,255,0.9); }}
   </style>
 </head>
 <body>
 {body}
 {AUTH_BOOTSTRAP_SCRIPT}
+<script>
+(function(){{
+  // Show CTA banner only to visitors who are not logged in
+  function checkAuth(){{
+    fetch('/user/me', {{credentials:'include'}})
+      .then(function(r){{ if(!r.ok) showBanner(); }})
+      .catch(showBanner);
+  }}
+  function showBanner(){{
+    var el = document.getElementById('rend-cta-banner');
+    if(el) el.style.display = 'block';
+  }}
+  checkAuth();
+}})();
+</script>
 </body>
 </html>"""
