@@ -2018,6 +2018,69 @@ body{
   color: var(--blue);
   font-weight: 800;
   text-shadow: 0 0 24px rgba(56,189,248,0.55), 0 0 8px rgba(56,189,248,0.3);
+  cursor: pointer;
+  position: relative;
+}
+/* AFTR Score tooltip */
+.aftr-score-wrap{
+  position: relative;
+  display: inline-block;
+}
+.aftr-score-tip{
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a2332;
+  border: 1px solid rgba(56,189,248,0.35);
+  border-radius: 10px;
+  padding: 10px 13px;
+  width: 230px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.88);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  white-space: normal;
+  text-align: left;
+  font-weight: 400;
+  text-shadow: none;
+}
+.aftr-score-tip::after{
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(56,189,248,0.35);
+}
+.aftr-score-wrap:hover .aftr-score-tip,
+.aftr-score-wrap.tip-open .aftr-score-tip{
+  opacity: 1;
+}
+.aftr-score-info-icon{
+  font-size: 0.68rem;
+  opacity: .6;
+  margin-left: 2px;
+  vertical-align: super;
+  font-weight: 400;
+  text-shadow: none;
+}
+
+/* "Seguir" button is the primary CTA on home pick cards */
+.home-pick-card .btn-follow-pick{
+  background: rgba(56,189,248,0.18);
+  border-color: rgba(56,189,248,0.45);
+  color: rgba(56,189,248,1);
+  font-weight: 700;
+}
+.home-pick-card .btn-follow-pick:hover{
+  background: rgba(56,189,248,0.30);
+  border-color: rgba(56,189,248,0.70);
 }
 .home-pick-edge-pos{
   color: var(--green);

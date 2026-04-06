@@ -618,7 +618,10 @@ def home_page(request: Request) -> str:
           </div>
           <div class="home-pick-market">{market}</div>
           <div class="home-pick-meta">
-            <span class="home-pick-score">AFTR {score}</span>
+            <span class="aftr-score-wrap">
+              <span class="home-pick-score">AFTR {score}<span class="aftr-score-info-icon">ⓘ</span></span>
+              <span class="aftr-score-tip">Probabilidad real del modelo vs la cuota del bookie. 0–100: a mayor score, más ventaja estadística detectada.</span>
+            </span>
             <span class="aftr-tier" style="color: {tier_color};">{html_lib.escape(tier.upper())}</span>
             <span class="home-pick-edge{edge_class}">Ventaja {edge_str}</span>
             <span>Conf {html_lib.escape(conf_str)}</span>
@@ -696,7 +699,10 @@ def home_page(request: Request) -> str:
             </div>
             <div class="home-pod-market">{_fp_market}</div>
             <div class="home-pod-badges">
-              <span class="home-pod-score">AFTR {_fp_score}</span>
+              <span class="aftr-score-wrap">
+                <span class="home-pod-score">AFTR {_fp_score}<span class="aftr-score-info-icon">ⓘ</span></span>
+                <span class="aftr-score-tip">Probabilidad real del modelo vs la cuota del bookie. 0–100: a mayor score, más ventaja estadística detectada.</span>
+              </span>
               <span class="home-pod-tier" style="color:{_fp_tier_color};">{html_lib.escape(_fp_tier.upper())}</span>
               <span class="home-pod-edge">Edge {_fp_edge_str}</span>
             </div>
@@ -892,7 +898,7 @@ def home_page(request: Request) -> str:
       <meta name="twitter:title"       content="AFTR — Picks con ventaja estadística">
       <meta name="twitter:description" content="Apostá con ventaja real. IA analiza cada partido y te dice cuándo el mercado está equivocado.">
       <meta name="twitter:image"       content="https://aftr-mvp-2.onrender.com/static/logo_aftr.png">
-      <link rel="stylesheet" href="/static/style.css?v=31">
+      <link rel="stylesheet" href="/static/style.css?v=32">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.json">
       <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -1423,6 +1429,16 @@ def home_page(request: Request) -> str:
         <p class="aftr-footer-copy">© 2026 AFTR · Herramienta de análisis. Apostá con responsabilidad.</p>
       </div>
     </footer>
+    <script>
+    // AFTR Score tooltip: tap to toggle on mobile
+    (function(){
+      document.addEventListener('click', function(e){
+        var wrap = e.target.closest('.aftr-score-wrap');
+        if(wrap){ wrap.classList.toggle('tip-open'); e.stopPropagation(); return; }
+        document.querySelectorAll('.aftr-score-wrap.tip-open').forEach(function(el){ el.classList.remove('tip-open'); });
+      });
+    })();
+    </script>
     <script src="/static/aftr-ui.js?v=1" defer></script>
     <script src="/static/aftr-share.js?v=1" defer></script>
     <script src="/static/aftr-onboarding.js?v=1" defer></script>
