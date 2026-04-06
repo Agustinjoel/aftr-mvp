@@ -358,6 +358,154 @@ def _apply_premium_to_user(
         put_conn(conn)
 
 
+# ─────────────────────────────────────────────
+# Mercado Pago — checkout y webhook
+# ─────────────────────────────────────────────
+
+_MP_API = "https://api.mercadopago.com"
+
+
+def _mp_headers() -> dict:
+    return {
+        "Authorization": f"Bearer {settings.mp_access_token}",
+        "Content-Type": "application/json",
+    }
+
+
+@router.post("/billing/mp-checkout")
+def mp_checkout(request: Request):
+    uid = get_user_id(request)
+    if not uid:
+        return JSONResponse({"ok": False, "error": "need_login"}, status_code=401)
+
+    if not settings.mp_access_token:
+        return JSONResponse({"ok": False, "error": "mp_not_configured"}, status_code=500)
+
+    user = get_user_by_id(uid) or {}
+    email = user.get("email") or ""
+    base_url = (getattr(settings, "app_base_url", None) or "").strip().rstrip("/") \
+               or str(request.base_url).rstrip("/")
+
+    try:
+        amount = float(settings.mp_subscription_amount)
+    except Exception:
+        amount = 4999.0
+
+    # Si hay un plan pre-creado, usarlo; si no, crear la suscripción directamente
+    plan_id = (settings.mp_plan_id or "").strip()
+
+    if plan_id:
+        # Crear suscripción usando plan existente
+        payload = {
+            "preapproval_plan_id": plan_id,
+            "payer_email": email,
+            "external_reference": str(uid),
+            "back_url": f"{base_url}/?msg=premium_activated",
+        }
+    else:
+        # Crear suscripción inline (sin plan previo)
+        payload = {
+            "reason": "AFTR Premium — Análisis deportivo mensual",
+            "payer_email": email,
+            "external_reference": str(uid),
+            "auto_recurring": {
+                "frequency": 1,
+                "frequency_type": "months",
+                "transaction_amount": amount,
+                "currency_id": "ARS",
+            },
+            "back_url": f"{base_url}/?msg=premium_activated",
+            "status": "pending",
+        }
+
+    try:
+        r = http_requests.post(
+            f"{_MP_API}/preapproval",
+            headers=_mp_headers(),
+            json=payload,
+            timeout=10,
+        )
+        if r.status_code not in (200, 201):
+            logger.error("MP checkout failed: %s — %s", r.status_code, r.text[:300])
+            return JSONResponse({"ok": False, "error": "checkout_failed"}, status_code=500)
+        data = r.json()
+        init_point = data.get("init_point") or data.get("sandbox_init_point")
+        if not init_point:
+            return JSONResponse({"ok": False, "error": "no_init_point"}, status_code=500)
+        logger.info("MP checkout created uid=%s", uid)
+        return JSONResponse({"ok": True, "url": init_point})
+    except Exception as e:
+        logger.exception("mp-checkout failed: %s", e)
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+
+
+@router.post("/webhooks/mercadopago", include_in_schema=False)
+async def mercadopago_webhook(request: Request):
+    try:
+        data = await request.json()
+    except Exception:
+        return JSONResponse({"ok": False}, status_code=400)
+
+    topic = data.get("type") or data.get("topic") or ""
+    resource_id = (data.get("data") or {}).get("id") or data.get("id") or ""
+
+    logger.info("MP webhook: type=%s id=%s", topic, resource_id)
+
+    if topic not in ("subscription_preapproval", "preapproval"):
+        return JSONResponse({"ok": True})
+
+    if not resource_id:
+        return JSONResponse({"ok": True})
+
+    # Fetch the preapproval to get status and external_reference
+    try:
+        r = http_requests.get(
+            f"{_MP_API}/preapproval/{resource_id}",
+            headers=_mp_headers(),
+            timeout=10,
+        )
+        if r.status_code != 200:
+            logger.warning("MP: could not fetch preapproval %s: %s", resource_id, r.status_code)
+            return JSONResponse({"ok": True})
+        sub = r.json()
+    except Exception as e:
+        logger.warning("MP: fetch preapproval error: %s", e)
+        return JSONResponse({"ok": True})
+
+    status = (sub.get("status") or "").lower()
+    external_ref = str(sub.get("external_reference") or "").strip()
+    uid_int: int | None = None
+    try:
+        uid_int = int(external_ref) if external_ref else None
+    except ValueError:
+        pass
+
+    if uid_int is None:
+        logger.warning("MP webhook: no user_id in external_reference sub=%s", resource_id)
+        return JSONResponse({"ok": True})
+
+    if status == "authorized":
+        # Calcular expiración: 1 mes desde ahora
+        from datetime import datetime, timezone, timedelta
+        exp_iso = (datetime.now(timezone.utc) + timedelta(days=31)).isoformat()
+        _apply_premium_to_user(uid_int, exp_iso, subscription_id=resource_id)
+        logger.info("MP authorized: premium applied uid=%s sub=%s", uid_int, resource_id)
+        try:
+            user = get_user_by_id(uid_int) or {}
+            email = user.get("email") or ""
+            username = user.get("username") or email.split("@")[0]
+            if email:
+                send_premium_welcome_email(email, username)
+        except Exception:
+            logger.warning("MP: no se pudo enviar email premium uid=%s", uid_int, exc_info=True)
+
+    elif status in ("cancelled", "paused", "pending"):
+        _revoke_premium_for_user(uid_int)
+        logger.info("MP %s: premium revoked uid=%s", status, uid_int)
+
+    return JSONResponse({"ok": True})
+
+
 def _revoke_premium_for_user(uid_int: int) -> None:
     """Revoca el plan premium del usuario."""
     now_iso = datetime.now(timezone.utc).isoformat()

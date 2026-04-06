@@ -115,6 +115,12 @@ STRIPE_PUBLISHABLE_KEY: str = (os.getenv("STRIPE_PUBLISHABLE_KEY") or "").strip(
 STRIPE_PRICE_ID: str = (os.getenv("STRIPE_PRICE_ID") or "").strip()
 STRIPE_WEBHOOK_SECRET: str = (os.getenv("STRIPE_WEBHOOK_SECRET") or "").strip()
 
+# Mercado Pago (pagos Argentina)
+MP_ACCESS_TOKEN: str       = (os.getenv("MP_ACCESS_TOKEN")       or "").strip()
+MP_PLAN_ID: str            = (os.getenv("MP_PLAN_ID")            or "").strip()
+MP_SUBSCRIPTION_AMOUNT: str = (os.getenv("MP_SUBSCRIPTION_AMOUNT") or "4999").strip()
+MP_WEBHOOK_SECRET: str     = (os.getenv("MP_WEBHOOK_SECRET")     or "").strip()
+
 # Lemon Squeezy (pagos globales)
 LEMONSQUEEZY_API_KEY: str = (os.getenv("LEMONSQUEEZY_API_KEY") or "").strip()
 LEMONSQUEEZY_STORE_ID: str = (os.getenv("LEMONSQUEEZY_STORE_ID") or "").strip()
@@ -358,6 +364,11 @@ class Settings:
         self.stripe_price_id = STRIPE_PRICE_ID
         self.stripe_webhook_secret = STRIPE_WEBHOOK_SECRET
 
+        # Mercado Pago
+        self.mp_access_token       = MP_ACCESS_TOKEN
+        self.mp_plan_id            = MP_PLAN_ID
+        self.mp_subscription_amount = MP_SUBSCRIPTION_AMOUNT
+        self.mp_webhook_secret     = MP_WEBHOOK_SECRET
         # Lemon Squeezy
         self.lemonsqueezy_api_key = LEMONSQUEEZY_API_KEY
         self.lemonsqueezy_store_id = LEMONSQUEEZY_STORE_ID

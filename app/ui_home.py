@@ -917,8 +917,8 @@ def home_page(request: Request) -> str:
               <li>Apuestas de valor con ventaja positiva</li>
               <li>Picks de todas las ligas</li>
             </ul>
-            <p style="margin:14px 0;"><span class="price-main">$9.99</span><span class="price-sub">/ mes</span></p>
-            {"<div class=\"premium-badge\">⭐ Premium activo</div>" if user_premium else '<button class="pill modal-cta" onclick="activatePremium(\'PREMIUM\')">Activar Premium</button>'}
+            <p style="margin:14px 0;"><span class="price-main">$9.99</span><span class="price-sub">/ mes USD</span></p>
+            {"<div class=\"premium-badge\">⭐ Premium activo</div>" if user_premium else '<div class="checkout-btns"><button class="pill modal-cta modal-cta--mp" onclick="activatePremium(\'mp\')">Pagar con Mercado Pago</button><button class="pill modal-cta modal-cta--ls" onclick="activatePremium(\'ls\')">Pagar con tarjeta (USD)</button></div>'}
           </div>
         </div>
       </div>
@@ -1133,8 +1133,11 @@ def home_page(request: Request) -> str:
       <script>
         function openPremium(){ var m = document.getElementById("premium-modal"); if(m) m.style.display = "flex"; document.body.style.overflow = "hidden"; }
         function closePremium(){ var m = document.getElementById("premium-modal"); if(m) m.style.display = "none"; document.body.style.overflow = ""; }
-        function activatePremium(plan){
-          var url = (window.location.origin || (window.location.protocol + "//" + window.location.host)) + "/billing/create-checkout-session";
+        function activatePremium(provider){
+          var base = window.location.origin || (window.location.protocol + "//" + window.location.host);
+          var url = provider === "mp"
+            ? base + "/billing/mp-checkout"
+            : base + "/billing/create-checkout-session";
           fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: "{}" })
             .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
             .then(function(result){

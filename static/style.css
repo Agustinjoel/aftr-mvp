@@ -3459,6 +3459,13 @@ canvas{
   letter-spacing: .03em;
 }
 
+/* Checkout buttons */
+.checkout-btns{ display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+.modal-cta--mp{ background:#009ee3; color:#fff; border:none; font-weight:600; }
+.modal-cta--mp:hover{ background:#0088cc; }
+.modal-cta--ls{ background:transparent; border:1px solid rgba(255,255,255,.2); color:#9ca3af; font-size:0.85rem; }
+.modal-cta--ls:hover{ border-color:rgba(255,255,255,.4); color:#e5e7eb; }
+
 /* ═══════════════════════════════════════════════════════
    TRACKER
    ═══════════════════════════════════════════════════════ */
