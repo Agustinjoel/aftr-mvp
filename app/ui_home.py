@@ -200,6 +200,7 @@ def home_page(request: Request) -> str:
     signup_modal_style = "display:flex" if auth_param == "register" else "display:none"
     login_modal_style = "display:flex" if auth_param == "login" else "display:none"
     login_err_html = '<p style="color:#ef4444;font-size:13px;margin:8px 0 0;">Email o contraseña incorrectos.</p>' if msg_param == "login_fail" else ""
+    show_premium_welcome = "true" if (msg_param == "premium_activated" and user and is_premium_active(user)) else "false"
     auth_html = ""
     if user:
         display_name = html_lib.escape((user.get("username") or user.get("email") or ""))
@@ -965,7 +966,7 @@ def home_page(request: Request) -> str:
       <meta name="twitter:title"       content="AFTR — Picks con ventaja estadística">
       <meta name="twitter:description" content="Apostá con ventaja real. IA analiza cada partido y te dice cuándo el mercado está equivocado.">
       <meta name="twitter:image"       content="https://aftrapp.online/static/logo_aftr.png">
-      <link rel="stylesheet" href="/static/style.css?v=36">
+      <link rel="stylesheet" href="/static/style.css?v=37">
       <link rel="icon" type="image/png" href="/static/logo_aftr.png">
       <link rel="manifest" href="/static/manifest.json">
       <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -1760,6 +1761,162 @@ def home_page(request: Request) -> str:
     <script src="/static/aftr-ui.js?v=1" defer></script>
     <script src="/static/aftr-share.js?v=1" defer></script>
     <script src="/static/aftr-onboarding.js?v=1" defer></script>
+    <!-- Premium Welcome Celebration -->
+    <div id="premium-welcome-overlay" class="prem-welcome-overlay" style="display:none" aria-modal="true" role="dialog">
+      <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+      <div class="prem-welcome-card">
+        <div class="prem-welcome-crown">👑</div>
+        <h2 class="prem-welcome-title">¡Sos Premium!</h2>
+        <p class="prem-welcome-sub">Acceso completo a todos los picks, combos y análisis avanzado.</p>
+        <button class="prem-welcome-btn" onclick="showOnboardingModal()">Ver qué desbloqueaste &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Onboarding Checklist -->
+    <div id="onboarding-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeOnboardingModal()">
+      <div class="onboarding-card">
+        <button class="modal-close" onclick="closeOnboardingModal()" aria-label="Cerrar">&#10005;</button>
+        <div class="onboarding-header">
+          <span class="onboarding-crown">👑</span>
+          <h3>Lo que desbloqueaste</h3>
+          <p>Tap en cada feature para usarla ahora</p>
+        </div>
+        <div class="onboarding-list">
+          <button class="onboarding-item" onclick="onboardGo('picks')">
+            <span class="onboarding-item-icon">📊</span>
+            <span class="onboarding-item-text">
+              <strong>Todos los picks del día</strong>
+              <span>Sin límite — todas las ligas</span>
+            </span>
+            <span class="onboarding-arrow">→</span>
+          </button>
+          <button class="onboarding-item" onclick="onboardGo('follow')">
+            <span class="onboarding-item-icon">↗</span>
+            <span class="onboarding-item-text">
+              <strong>Seguir picks</strong>
+              <span>Guardá y rastreá tu historial</span>
+            </span>
+            <span class="onboarding-arrow">→</span>
+          </button>
+          <button class="onboarding-item" onclick="onboardGo('rendimiento')">
+            <span class="onboarding-item-icon">📈</span>
+            <span class="onboarding-item-text">
+              <strong>Dashboard de rendimiento</strong>
+              <span>Estadísticas de tus picks</span>
+            </span>
+            <span class="onboarding-arrow">→</span>
+          </button>
+          <button class="onboarding-item" onclick="onboardGo('combos')">
+            <span class="onboarding-item-icon">🎯</span>
+            <span class="onboarding-item-text">
+              <strong>Combo del día</strong>
+              <span>Parlay curado de alto valor</span>
+            </span>
+            <span class="onboarding-arrow">→</span>
+          </button>
+          <button class="onboarding-item" onclick="onboardGo('team')">
+            <span class="onboarding-item-icon">⚽</span>
+            <span class="onboarding-item-text">
+              <strong>Tu equipo favorito</strong>
+              <span>Recibí picks de tu equipo</span>
+            </span>
+            <span class="onboarding-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    (function() {{
+      var SHOW = {show_premium_welcome};
+      if (!SHOW) return;
+      history.replaceState({{}},'','/');
+      var overlay = document.getElementById('premium-welcome-overlay');
+      overlay.style.display = 'flex';
+      startConfetti();
+      setTimeout(showOnboardingModal, 3800);
+    }})();
+
+    function startConfetti() {{
+      var canvas = document.getElementById('confetti-canvas');
+      var ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      var pieces = [];
+      var colors = ['#FFD700','#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98FB98'];
+      for (var i = 0; i < 160; i++) {{
+        pieces.push({{
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          r: Math.random() * 8 + 4,
+          d: Math.random() * 160 + 40,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.floor(Math.random() * 10) - 10,
+          tiltAngle: 0,
+          tiltAngleInc: (Math.random() * 0.07) + 0.05,
+        }});
+      }}
+      var angle = 0, tick = 0;
+      function draw() {{
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        angle += 0.01;
+        tick++;
+        for (var i = 0; i < pieces.length; i++) {{
+          var p = pieces[i];
+          p.tiltAngle += p.tiltAngleInc;
+          p.y += (Math.cos(angle + p.d) + 2.5);
+          p.x += Math.sin(angle) * 1.5;
+          p.tilt = Math.sin(p.tiltAngle) * 12;
+          ctx.beginPath();
+          ctx.lineWidth = p.r / 2;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+          ctx.stroke();
+        }}
+        if (tick < 220) requestAnimationFrame(draw);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }}
+      draw();
+    }}
+
+    function showOnboardingModal() {{
+      var overlay = document.getElementById('premium-welcome-overlay');
+      var modal = document.getElementById('onboarding-modal');
+      overlay.style.display = 'none';
+      modal.style.display = 'flex';
+    }}
+
+    function closeOnboardingModal() {{
+      document.getElementById('onboarding-modal').style.display = 'none';
+    }}
+
+    function onboardGo(target) {{
+      closeOnboardingModal();
+      if (target === 'rendimiento') {{ window.location.href = '/rendimiento'; return; }}
+      if (target === 'team') {{ window.location.href = '/account'; return; }}
+      if (target === 'picks') {{
+        var el = document.querySelector('.home-picks-section, .picks-section, [data-section="picks"]');
+        if (el) el.scrollIntoView({{behavior:'smooth',block:'start'}});
+        return;
+      }}
+      if (target === 'combos') {{
+        var el = document.querySelector('.combos-section, .combo-box, .combo-of-day');
+        if (el) el.scrollIntoView({{behavior:'smooth',block:'start'}});
+        return;
+      }}
+      if (target === 'follow') {{
+        var btn = document.querySelector('.btn-follow-pick');
+        if (btn) {{
+          btn.scrollIntoView({{behavior:'smooth',block:'center'}});
+          btn.classList.add('onboard-pulse');
+          setTimeout(function(){{ btn.classList.remove('onboard-pulse'); }}, 2000);
+        }}
+        return;
+      }}
+    }}
+    </script>
+
     <!-- Match detail drawer -->
     <div id="match-drawer" class="match-drawer" aria-hidden="true" role="dialog" aria-modal="true">
       <div class="match-drawer-overlay"></div>
