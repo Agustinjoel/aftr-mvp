@@ -200,8 +200,10 @@ def home_page(request: Request) -> str:
     signup_modal_style = "display:flex" if auth_param == "register" else "display:none"
     login_modal_style = "display:flex" if auth_param == "login" else "display:none"
     login_err_html = '<p style="color:#ef4444;font-size:13px;margin:8px 0 0;">Email o contraseña incorrectos.</p>' if msg_param == "login_fail" else ""
-    show_premium_welcome = "true" if (msg_param == "premium_activated" and user and is_premium_active(user)) else "false"
-    show_trial_welcome = "true" if (msg_param == "cuenta_creada" and user) else "false"
+    show_premium_welcome = msg_param == "premium_activated" and user and is_premium_active(user)
+    show_trial_welcome   = msg_param == "cuenta_creada" and bool(user)
+    trial_modal_style    = "display:flex" if show_trial_welcome else "display:none"
+    premium_modal_style  = "display:flex" if show_premium_welcome else "display:none"
     auth_html = ""
     if user:
         display_name = html_lib.escape((user.get("username") or user.get("email") or ""))
@@ -1763,7 +1765,7 @@ def home_page(request: Request) -> str:
     <script src="/static/aftr-share.js?v=1" defer></script>
     <script src="/static/aftr-onboarding.js?v=1" defer></script>
     <!-- Trial Welcome Modal -->
-    <div id="trial-welcome-modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeTrialWelcome()">
+    <div id="trial-welcome-modal" class="modal-backdrop" style="{trial_modal_style}" onclick="if(event.target===this)closeTrialWelcome()">
       <div class="trial-welcome-card">
         <div class="trial-welcome-icon">🎉</div>
         <h2 class="trial-welcome-title">¡Bienvenido a AFTR!</h2>
@@ -1779,18 +1781,14 @@ def home_page(request: Request) -> str:
       </div>
     </div>
     <script>
-    (function() {{
-      if (!{show_trial_welcome}) return;
-      history.replaceState({{}},'','/');
-      document.getElementById('trial-welcome-modal').style.display = 'flex';
-    }})();
+    if ({show_trial_welcome}) history.replaceState({{}},'','/');
     function closeTrialWelcome() {{
       document.getElementById('trial-welcome-modal').style.display = 'none';
     }}
     </script>
 
     <!-- Premium Welcome Celebration -->
-    <div id="premium-welcome-overlay" class="prem-welcome-overlay" style="display:none" aria-modal="true" role="dialog">
+    <div id="premium-welcome-overlay" class="prem-welcome-overlay" style="{premium_modal_style}" aria-modal="true" role="dialog">
       <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
       <div class="prem-welcome-card">
         <div class="prem-welcome-crown">👑</div>
@@ -1856,11 +1854,8 @@ def home_page(request: Request) -> str:
 
     <script>
     (function() {{
-      var SHOW = {show_premium_welcome};
-      if (!SHOW) return;
+      if (!{show_premium_welcome}) return;
       history.replaceState({{}},'','/');
-      var overlay = document.getElementById('premium-welcome-overlay');
-      overlay.style.display = 'flex';
       startConfetti();
       setTimeout(showOnboardingModal, 3800);
     }})();
