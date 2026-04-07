@@ -890,7 +890,7 @@ def home_page(request: Request) -> str:
         ]
         if team_picks:
             team_cards = "".join(
-                _render_pick_card(p, user_premium, uid)
+                _render_pick_card(p)
                 for p in team_picks[:3]
             )
             fav_crest_url = html_lib.escape(user.get("favorite_team_crest") or "")

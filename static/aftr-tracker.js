@@ -452,7 +452,8 @@
   };
 
   function resolveMarketKey(raw) {
-    return MARKET_KEY_MAP[(raw || '').toLowerCase().trim()] || 'over_1.5';
+    var normalized = (raw || '').toLowerCase().trim();
+    return MARKET_KEY_MAP[normalized] || normalized || 'over_1.5';
   }
 
   function utcIsoToLocalDatetimeInput(utcIso) {

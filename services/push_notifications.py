@@ -12,6 +12,16 @@ logger = logging.getLogger("aftr.push")
 
 NOTIFY_BEFORE_MIN = 60  # notificar 60 min antes del kick-off
 _notified_cache: set[str] = set()  # evitar duplicados en memoria (pick_id+uid)
+_NOTIFIED_CACHE_MAX = 5000  # cap para evitar memory leak en workers de larga duración
+
+
+def _cache_add(key: str) -> None:
+    if len(_notified_cache) >= _NOTIFIED_CACHE_MAX:
+        # Eliminar la mitad más vieja (set no tiene orden, así que simplemente vaciamos la mitad)
+        to_remove = list(_notified_cache)[:_NOTIFIED_CACHE_MAX // 2]
+        for k in to_remove:
+            _notified_cache.discard(k)
+    _notified_cache.add(key)
 
 
 def _get_vapid_claims() -> dict:
@@ -140,7 +150,7 @@ def notify_upcoming_picks(picks: list[dict], user_follows: dict[str, list[int]])
                 continue
             sent = send_to_user(uid, payload)
             if sent > 0:
-                _notified_cache.add(cache_key)
+                _cache_add(cache_key)
                 logger.info("push sent pick=%s user=%s", pick_id, uid)
 
 
@@ -197,7 +207,7 @@ def notify_tracker_bets() -> None:
 
         sent = send_to_user(uid, payload)
         if sent > 0:
-            _notified_cache.add(cache_key)
+            _cache_add(cache_key)
             logger.info("push tracker leg=%s user=%s", leg_id, uid)
 
 
@@ -244,7 +254,10 @@ def notify_trial_expiring() -> None:
         if not sub_end_raw:
             continue
         try:
-            end_dt = sub_end_raw if hasattr(sub_end_raw, "tzinfo") else datetime.fromisoformat(str(sub_end_raw).replace("Z", "+00:00"))
+            if hasattr(sub_end_raw, "year"):
+                end_dt = sub_end_raw
+            else:
+                end_dt = datetime.fromisoformat(str(sub_end_raw).replace("Z", "+00:00"))
             if end_dt.tzinfo is None:
                 end_dt = end_dt.replace(tzinfo=timezone.utc)
             hours_left = int((end_dt - now).total_seconds() / 3600)
@@ -265,7 +278,7 @@ def notify_trial_expiring() -> None:
 
         sent = send_to_user(uid, payload)
         if sent > 0:
-            _notified_cache.add(cache_key)
+            _cache_add(cache_key)
             logger.info("push trial_expiring sent uid=%s hours_left=%s", uid, hours_left)
 
 
