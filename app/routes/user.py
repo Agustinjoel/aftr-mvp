@@ -249,7 +249,11 @@ def _settle_from_pick_and_match(
     if r == "PENDING":
         r = _norm_result(p.get("status"))
     hs, aa = _extract_score(p)
-    if r in ("WIN", "LOSS", "PUSH"):
+
+    # Si el resultado ya está seteado Y el score también está disponible, confiar en él.
+    # Si el resultado está seteado pero sin score, intentar obtener el score real de matches_idx
+    # antes de retornar — evita devolver (WIN, None, None) con datos incompletos del cache.
+    if r in ("WIN", "LOSS", "PUSH") and hs is not None and aa is not None:
         return r, hs, aa
 
     mid = _safe_int(p.get("match_id") or p.get("id"))
@@ -262,6 +266,10 @@ def _settle_from_pick_and_match(
             if hs2 is not None and aa2 is not None:
                 ev = _evaluate_market_for_league(league, mkt, hs2, aa2)
                 return ev, hs2, aa2
+
+    # Si teníamos resultado pero no pudimos conseguir score, igual retornarlo
+    if r in ("WIN", "LOSS", "PUSH"):
+        return r, hs, aa
 
     # Fallback by team pair when match_id doesn't resolve.
     home_key = _team_norm_key(p.get("home_team") or p.get("home"))

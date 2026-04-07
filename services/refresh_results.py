@@ -187,6 +187,15 @@ def _save_history(league_code: str, picks: list[dict]) -> None:
     """Guarda historial eterno de picks por liga (merge acumulativo)."""
     hist_file = f"picks_history_{league_code}.json"
     history = _read_json_list(hist_file)
+    # Sanity: si un pick tiene result WIN/LOSS/PUSH pero sin score, resetear a PENDING
+    # para que el próximo ciclo lo re-evalúe correctamente con el score real.
+    for p in picks or []:
+        if not isinstance(p, dict):
+            continue
+        r = (p.get("result") or "").strip().upper()
+        if r in ("WIN", "LOSS", "PUSH"):
+            if p.get("score_home") is None or p.get("score_away") is None:
+                p["result"] = "PENDING"
     merged = _merge_by_match_id(history, picks)
     write_json(hist_file, merged)
 
