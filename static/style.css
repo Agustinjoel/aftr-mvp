@@ -7459,3 +7459,48 @@ input[type="datetime-local"].tracker-input{ color-scheme:dark; }
 @media (max-width: 480px) {
   .bankroll-display-inner { grid-template-columns: 1fr; }
 }
+
+/* ══════════════════════════════════════════════
+   MOBILE — Pick cards compactas (≤480px)
+══════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* Card padding reducido */
+  .aftr-pick-card.card { padding: 12px; }
+
+  /* Equipos: crests más chicos, nombres más ajustados */
+  .aftr-teams { gap: 6px; }
+  .aftr-team .crest { width: 20px; height: 20px; }
+  .aftr-teams .team-name { font-size: 12px; }
+  .aftr-vs { font-size: 11px; padding: 0 4px; }
+
+  /* Mercado + cuota */
+  .aftr-mainpick { padding: 8px 10px; margin-top: 6px; }
+  .pick-main-highlight .aftr-market { font-size: 15px; }
+  .aftr-prob-odds { margin-top: 4px; }
+
+  /* AFTR Score block: gauge más chico */
+  .aftr-score-block { padding: 8px 10px 6px; gap: 8px; }
+  .aftr-gauge-svg { width: 44px; height: 44px; }
+  .aftr-gauge-num { font-size: 12px; }
+  .aftr-badge { font-size: 10px; padding: 2px 6px; }
+
+  /* Botones de acción */
+  .pick-action-btn { padding: 8px 10px; font-size: 12px; }
+  .btn-add-tracker  { padding: 8px 10px; font-size: 12px; }
+
+  /* Top meta */
+  .aftr-topmeta { font-size: 11px; }
+  .aftr-meta-tier-pill { font-size: 10px; padding: 2px 6px; }
+
+  /* Home picks grid: 1 columna sin gap excesivo */
+  .home-picks-grid { gap: 10px; }
+
+  /* Streak card más compacto */
+  .streak-card { padding: 10px 14px; }
+  .streak-card-num { font-size: 2rem; }
+
+  /* Historial público: más compacto */
+  .pub-hist-row { padding: 7px 10px; font-size: 12px; }
+  .pub-hist-badge { font-size: 10px; padding: 2px 6px; min-width: 36px; }
+}
