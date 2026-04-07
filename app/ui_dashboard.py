@@ -1378,34 +1378,6 @@ def dashboard(request: Request, league: str):
     </div> <!-- /page -->
     <script src="/static/aftr-premium.js?v=1" defer></script>
     <script src="/static/aftr-ui.js?v=1" defer></script>
-    <script>
-    window.addPickToTracker = function(btn) {
-      var home    = btn.getAttribute('data-home') || '';
-      var away    = btn.getAttribute('data-away') || '';
-      var market  = btn.getAttribute('data-market') || '';
-      var utcDate = btn.getAttribute('data-utcdate') || '';
-      var newPick = { home: home, away: away, market: market, utcDate: utcDate };
-      // Acumular picks para combinada: si ya hay picks en storage, agregar al array
-      try {
-        var existing = [];
-        var raw = localStorage.getItem('aftr_tracker_prefill');
-        if (raw) {
-          var parsed = JSON.parse(raw);
-          existing = Array.isArray(parsed) ? parsed : [parsed];
-        }
-        existing.push(newPick);
-        localStorage.setItem('aftr_tracker_prefill', JSON.stringify(existing));
-      } catch(e) {
-        try { localStorage.setItem('aftr_tracker_prefill', JSON.stringify([newPick])); } catch(e2) {}
-      }
-      // Si ya estamos en /tracker, prefill directo; si no, navegar
-      if (window.location.pathname === '/tracker') {
-        if (typeof checkPrefill === 'function') checkPrefill();
-      } else {
-        window.location.href = '/tracker';
-      }
-    };
-    </script>
     <div id="match-drawer" class="match-drawer" aria-hidden="true" role="dialog" aria-modal="true">
       <div class="match-drawer-overlay"></div>
       <div class="match-drawer-panel">

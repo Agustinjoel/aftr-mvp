@@ -459,3 +459,32 @@
     bootDrawer();
   }
 })();
+
+// ── addPickToTracker — global, cargado en todas las páginas via aftr-ui.js ──
+window.addPickToTracker = function (btn) {
+  var home    = btn.getAttribute('data-home') || '';
+  var away    = btn.getAttribute('data-away') || '';
+  var market  = btn.getAttribute('data-market') || '';
+  var utcDate = btn.getAttribute('data-utcdate') || '';
+  var newPick = { home: home, away: away, market: market, utcDate: utcDate };
+
+  // Acumular picks para combinadas
+  var existing = [];
+  try {
+    var raw = localStorage.getItem('aftr_tracker_prefill');
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      existing = Array.isArray(parsed) ? parsed : [parsed];
+    }
+  } catch (e) { existing = []; }
+  existing.push(newPick);
+  try { localStorage.setItem('aftr_tracker_prefill', JSON.stringify(existing)); } catch (e) {}
+
+  if (window.location.pathname === '/tracker') {
+    // Ya estamos en el tracker — _aftrCheckPrefill expuesto por aftr-tracker.js
+    if (typeof window._aftrCheckPrefill === 'function') window._aftrCheckPrefill();
+  } else {
+    window.location.href = '/tracker';
+  }
+};
+

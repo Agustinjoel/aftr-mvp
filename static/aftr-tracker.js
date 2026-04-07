@@ -482,7 +482,6 @@
   function checkPrefill() {
     var raw = localStorage.getItem('aftr_tracker_prefill');
     if (!raw) return;
-    localStorage.removeItem('aftr_tracker_prefill');
     try {
       var data = JSON.parse(raw);
       // Puede ser un solo pick {home,away,market,utcDate}
@@ -499,13 +498,20 @@
       });
       el('tracker-modal').style.display = '';
       el('tracker-overlay').style.display = '';
-    } catch (e) {}
+      // Borrar solo después de rellenar exitosamente
+      localStorage.removeItem('aftr_tracker_prefill');
+    } catch (e) {
+      localStorage.removeItem('aftr_tracker_prefill');
+    }
   }
 
   // ── Init ──────────────────────────────────────────────────────────────────
   resetForm();
   loadBets();
   checkPrefill();
+
+  // Exponer checkPrefill para que addPickToTracker lo llame desde cualquier página
+  window._aftrCheckPrefill = checkPrefill;
 
 })();
 
@@ -515,6 +521,24 @@ window.addPickToTracker = function (btn) {
   var away    = btn.getAttribute('data-away') || '';
   var market  = btn.getAttribute('data-market') || '';
   var utcDate = btn.getAttribute('data-utcdate') || '';
-  localStorage.setItem('aftr_tracker_prefill', JSON.stringify({ home: home, away: away, market: market, utcDate: utcDate }));
-  window.location.href = '/tracker';
+  var newPick = { home: home, away: away, market: market, utcDate: utcDate };
+
+  // Acumular picks en lugar de pisar — para combinadas
+  var existing = [];
+  var raw = localStorage.getItem('aftr_tracker_prefill');
+  if (raw) {
+    try {
+      var parsed = JSON.parse(raw);
+      existing = Array.isArray(parsed) ? parsed : [parsed];
+    } catch (e) { existing = []; }
+  }
+  existing.push(newPick);
+  localStorage.setItem('aftr_tracker_prefill', JSON.stringify(existing));
+
+  if (window.location.pathname === '/tracker') {
+    // Ya estamos en el tracker — rellenar el form directamente
+    if (typeof window._aftrCheckPrefill === 'function') window._aftrCheckPrefill();
+  } else {
+    window.location.href = '/tracker';
+  }
 };
