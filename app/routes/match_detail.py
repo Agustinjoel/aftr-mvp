@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import html as html_lib
 import logging
+import traceback
 
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
@@ -316,5 +317,10 @@ def match_detail(league: str, match_id: int) -> HTMLResponse:
         None,
     )
 
-    html = _render_match_detail(match, pick, standings, league)
+    try:
+        html = _render_match_detail(match, pick, standings, league)
+    except Exception:
+        tb = traceback.format_exc()
+        logger.error("match_detail render error league=%s match_id=%s:\n%s", league, match_id, tb)
+        html = f'<p class="muted" style="padding:20px">Error al cargar datos del partido.</p><pre style="font-size:11px;color:#f87171;padding:12px;overflow:auto">{html_lib.escape(tb)}</pre>'
     return HTMLResponse(html)
