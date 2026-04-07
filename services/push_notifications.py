@@ -281,6 +281,18 @@ def notify_trial_expiring() -> None:
             _cache_add(cache_key)
             logger.info("push trial_expiring sent uid=%s hours_left=%s", uid, hours_left)
 
+        # Email de expiración (independiente del push, cache key propia)
+        email_addr = (row.get("email") or "").strip()
+        uname = (row.get("username") or email_addr.split("@")[0] or "").strip()
+        email_cache_key = f"trial_expiring_email:{uid}"
+        if email_addr and email_cache_key not in _notified_cache:
+            from app.email_utils import send_trial_expiring_email
+            days_left = max(1, hours_left // 24) if hours_left > 0 else 0
+            ok = send_trial_expiring_email(email_addr, uname, days_left)
+            if ok:
+                _cache_add(email_cache_key)
+                logger.info("email trial_expiring sent uid=%s days_left=%s", uid, days_left)
+
 
 def load_user_follows_index() -> dict[str, list[int]]:
     """

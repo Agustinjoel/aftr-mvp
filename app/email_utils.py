@@ -292,6 +292,65 @@ def send_pick_follow_email(to_email: str, username: str, home: str, away: str, m
     return send_email(to_email, f"Pick guardado: {match_text} · {market}", _email_wrapper(content))
 
 
+def send_trial_expiring_email(to_email: str, username: str, days_left: int) -> bool:
+    """Email cuando el trial expira en 1 o 2 días."""
+    if days_left <= 1:
+        urgency_line = "Tu prueba <strong style='color:#f87171;'>vence hoy</strong>."
+        cta_color    = "#f87171"
+    else:
+        urgency_line = f"Tu prueba <strong style='color:#fbbf24;'>vence en {days_left} días</strong>."
+        cta_color    = "#4ade80"
+
+    content = f"""
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="display:inline-block;background:rgba(251,191,36,.12);border-radius:50%;width:60px;height:60px;line-height:60px;font-size:28px;">⏳</div>
+      </div>
+
+      <h2 style="margin:0 0 8px;color:#ffffff;font-size:20px;text-align:center;">
+        {urgency_line}
+      </h2>
+      <p style="margin:0 0 24px;color:#9ca3af;font-size:15px;line-height:1.6;text-align:center;">
+        Hola {username}, aprovechaste el análisis de AFTR estos días.<br>
+        Para seguir viendo picks con edge real, activá tu plan.
+      </p>
+
+      <table width="100%" style="background:#1f2937;border-radius:12px;padding:20px;margin-bottom:24px;">
+        <tr><td>
+          <p style="margin:0 0 12px;color:#ffffff;font-size:14px;font-weight:600;letter-spacing:.3px;">QUÉ PERDÉS AL EXPIRAR</p>
+          <table width="100%">
+            <tr><td style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+              <span style="color:#f87171;">✗</span>
+              <span style="color:#d1d5db;font-size:14px;margin-left:8px;">Picks de todas las ligas (Premier, LaLiga, Serie A…)</span>
+            </td></tr>
+            <tr><td style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+              <span style="color:#f87171;">✗</span>
+              <span style="color:#d1d5db;font-size:14px;margin-left:8px;">AFTR Score completo + edge por pick</span>
+            </td></tr>
+            <tr><td style="padding:5px 0;">
+              <span style="color:#f87171;">✗</span>
+              <span style="color:#d1d5db;font-size:14px;margin-left:8px;">Picks ELITE y STRONG sin restricciones</span>
+            </td></tr>
+          </table>
+        </td></tr>
+      </table>
+
+      <a href="{APP_URL}/?open=premium"
+         style="display:block;background:{cta_color};color:#000;text-align:center;padding:14px 24px;border-radius:10px;font-weight:700;font-size:15px;text-decoration:none;margin-bottom:16px;">
+        Activar Premium ahora →
+      </a>
+
+      <p style="margin:0;color:#6b7280;font-size:12px;text-align:center;line-height:1.6;">
+        Si no querés continuar, no hay nada que hacer — tu cuenta pasa a free automáticamente.
+      </p>
+    """
+    subject = (
+        f"⚠️ Tu prueba AFTR vence hoy — activá tu plan"
+        if days_left <= 1
+        else f"⏳ Te quedan {days_left} días de AFTR Premium"
+    )
+    return send_email(to_email, subject, _email_wrapper(content))
+
+
 def send_reset_email(to_email: str, reset_link: str) -> bool:
     """Email de recuperación de contraseña."""
     content = f"""
