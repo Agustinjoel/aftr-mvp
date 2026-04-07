@@ -398,6 +398,38 @@ def home_page(request: Request) -> str:
     home_day_pos = perf_day > 0
     home_day_neg = perf_day < 0
 
+    # ── Historial público (últimos 10 resultados resueltos) ───────────────────
+    _pub_picks = settled_sorted[:10]
+    _pub_rows = []
+    for _pp in _pub_picks:
+        _r = _result_norm(_pp)
+        if not _r or _r == "PENDING":
+            continue
+        _mkt  = html_lib.escape(str(_pp.get("best_market") or _pp.get("market") or "—"))
+        _home = html_lib.escape(str(_pp.get("home") or ""))
+        _away = html_lib.escape(str(_pp.get("away") or ""))
+        _match = f"{_home} vs {_away}" if (_home and _away) else ""
+        _date  = html_lib.escape(str(_pp.get("utcDate") or "")[:10])
+        _rcls  = {"WIN": "pub-hist-win", "LOSS": "pub-hist-loss", "PUSH": "pub-hist-push"}.get(_r, "pub-hist-push")
+        _rlbl  = {"WIN": "WIN", "LOSS": "LOSS", "PUSH": "PUSH"}.get(_r, _r)
+        _pub_rows.append(
+            f'<div class="pub-hist-row">'
+            f'<span class="pub-hist-badge {_rcls}">{_rlbl}</span>'
+            f'<span class="pub-hist-mkt">{_mkt}</span>'
+            f'<span class="pub-hist-match muted">{_match}</span>'
+            f'<span class="pub-hist-date muted">{_date}</span>'
+            f'</div>'
+        )
+    if _pub_rows:
+        public_history_html = (
+            f'<section class="home-section home-public-history">'
+            f'<h2 class="home-h2">Últimos Resultados</h2>'
+            f'<div class="pub-hist-list">{"".join(_pub_rows)}</div>'
+            f'</section>'
+        )
+    else:
+        public_history_html = ""
+
     # Mejores Picks del Día: best by _pick_score (limited to 4 in card build below)
 
     # 3 premium combo cards with explicit roles: Día / 72h / Value
@@ -1176,6 +1208,8 @@ def home_page(request: Request) -> str:
           </div>
         </div>
       </section>
+
+      {public_history_html}
 
       <section class="home-section" id="top-picks">
       <h2 class="home-h2">{'Mejores Picks del Día' if user_premium else f'Picks de Hoy <span class="picks-free-counter">({len(picks_to_render)} de {total_picks_today})</span>'}</h2>

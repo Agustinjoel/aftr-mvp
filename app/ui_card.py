@@ -20,6 +20,36 @@ logger = logging.getLogger("aftr.ui.card")
 # Flag de debug: solo loguea la primera card finalizada por sesión
 _finished_card_debug_logged = False
 
+# ── Tooltips de mercado ────────────────────────────────────────────────────────
+_MARKET_TIPS: dict[str, str] = {
+    "1":        "Gana el local",
+    "X":        "Empate",
+    "2":        "Gana el visitante",
+    "1X":       "Local gana o empate",
+    "X2":       "Empate o visitante gana",
+    "12":       "Cualquiera gana, sin empate",
+    "Over 0.5": "Al menos 1 gol en el partido",
+    "Over 1.5": "Más de 1 gol en el partido",
+    "Over 2.5": "Más de 2 goles en el partido",
+    "Over 3.5": "Más de 3 goles en el partido",
+    "Under 1.5": "Menos de 2 goles en el partido",
+    "Under 2.5": "Menos de 3 goles en el partido",
+    "Under 3.5": "Menos de 4 goles en el partido",
+    "BTTS":     "Ambos equipos anotan",
+    "BTTS No":  "Al menos uno no anota",
+    "DNB 1":    "Local gana (devuelve si empata)",
+    "DNB 2":    "Visitante gana (devuelve si empata)",
+}
+
+def _market_html(market: str) -> str:
+    """Market con tooltip si el mercado es conocido."""
+    m = str(market or "—")
+    tip = _MARKET_TIPS.get(m)
+    esc = html_lib.escape(m)
+    if tip:
+        return f'<span class="mkt-tip" tabindex="0" data-tip="{html_lib.escape(tip)}">{esc}</span>'
+    return esc
+
 TEAM_LOGO_FALLBACK_PATH = "/static/teams/default.svg"
 
 
@@ -535,7 +565,7 @@ def _render_pick_card(
         pick_actions_html = (
             f'<div class="pick-finished-status pick-main-highlight">'
             f'<div class="pick-finished-top">'
-            f'<div class="pick-finished-market">{html_lib.escape(str(best_market))}</div>'
+            f'<div class="pick-finished-market">{_market_html(str(best_market))}</div>'
             f'{prob_line}'
             f'</div>'
             f'<div class="pick-finished-badge-row">'
@@ -578,7 +608,7 @@ def _render_pick_card(
     if not is_finished:
         mainpick_html = (
             f'<div class="aftr-mainpick pick-main-highlight">'
-            f'<div class="aftr-market">{html_lib.escape(str(best_market))}</div>'
+            f'<div class="aftr-market">{_market_html(str(best_market))}</div>'
             f'{prob_odds_html}'
             f'</div>'
         )
