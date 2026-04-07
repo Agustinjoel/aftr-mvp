@@ -170,24 +170,25 @@ def _render_tab_tabla(standings: list[dict], home_id: int | None, away_id: int |
 
     rows = ""
     for s in standings:
-        pos     = s.get("position", "—")
+        pos     = s.get("position") or "—"
         tid     = s.get("team_id")
         name    = html_lib.escape(str(s.get("team_name") or "—"))
         crest   = s.get("team_crest")
-        pts     = s.get("points", 0)
-        played  = s.get("played", 0)
-        gd      = s.get("gd", 0)
-        won     = s.get("won", 0)
-        draw    = s.get("draw", 0)
-        lost    = s.get("lost", 0)
-        gf      = s.get("gf", 0)
-        ga      = s.get("ga", 0)
+        pts     = s.get("points") or 0
+        played  = s.get("played") or 0
+        gd      = s.get("gd") or 0
+        won     = s.get("won") or 0
+        draw    = s.get("draw") or 0
+        lost    = s.get("lost") or 0
+        gf      = s.get("gf") or 0
+        ga      = s.get("ga") or 0
 
         is_home_team = tid is not None and tid == home_id
         is_away_team = tid is not None and tid == away_id
         highlight = " md-table-row--home" if is_home_team else (" md-table-row--away" if is_away_team else "")
 
-        gd_str  = f"+{gd}" if gd > 0 else str(gd)
+        gd_int  = int(gd) if gd else 0
+        gd_str  = f"+{gd_int}" if gd_int > 0 else str(gd_int)
         rows += (
             f'<tr class="md-table-row{highlight}">'
             f'<td class="md-td-pos">{pos}</td>'
