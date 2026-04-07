@@ -81,6 +81,9 @@ VAPID_EMAIL: str       = (os.getenv("VAPID_EMAIL")       or "mailto:aftrapp@outl
 # API Football-Data.org
 FOOTBALL_DATA_API_KEY: str = (os.getenv("FOOTBALL_DATA_API_KEY") or "").strip()
 
+# API-Football (RapidAPI) — live events: goals, red cards, final scores
+API_FOOTBALL_KEY: str = (os.getenv("API_FOOTBALL_KEY") or "").strip()
+
 # API-Sports (Basketball, etc.)
 API_SPORTS_KEY: str = (os.getenv("API_SPORTS_KEY") or os.getenv("APISPORTS_KEY") or "").strip()
 # Optional override for NBA season (YYYY-YYYY). If set, no automatic fallback to previous season.

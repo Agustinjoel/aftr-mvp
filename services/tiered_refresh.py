@@ -259,6 +259,15 @@ def run_live_refresh_job() -> JobOutcome:
 
         _save_state_patch({"last_live_ts": time.time()})
 
+        # Live events: goles y resultados en tiempo real via API-Football
+        try:
+            from services.live_events import process_live_events
+            n_live = process_live_events()
+            if n_live:
+                logger.info("live_events sent %d push notifications", n_live)
+        except Exception as _live_err:
+            logger.warning("live_events error (non-fatal): %s", _live_err)
+
         # Push notifications: avisar a usuarios que siguen picks próximas
         try:
             from services.push_notifications import notify_upcoming_picks, load_user_follows_index, notify_tracker_bets, notify_trial_expiring
