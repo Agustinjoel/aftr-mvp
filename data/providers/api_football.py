@@ -1,5 +1,6 @@
 """
 API-Football (RapidAPI) provider — live fixtures y eventos en tiempo real.
+API by Api-Sports: api-football-v3.p.rapidapi.com
 Requiere env var API_FOOTBALL_KEY (X-RapidAPI-Key).
 Si la key no está configurada, todas las funciones retornan vacío sin error.
 """
@@ -19,10 +20,7 @@ HEADERS_TEMPLATE = {
     "X-RapidAPI-Host": "api-football-v3.p.rapidapi.com",
 }
 
-# Timeout por request
 _HTTP_TIMEOUT = 10
-
-# Rate-limit mínimo entre llamadas (segundos) para no abusar del plan
 _MIN_CALL_INTERVAL = 5.0
 _last_call_ts: float = 0.0
 
@@ -71,13 +69,4 @@ def fetch_live_fixtures() -> list[dict]:
     Cada item incluye fixture.id, fixture.status.short, teams, goals.
     """
     items = _get("/fixtures", {"live": "all"})
-    return [i for i in items if isinstance(i, dict)]
-
-
-def fetch_fixtures_by_date(date_str: str) -> list[dict]:
-    """
-    Retorna partidos de una fecha (YYYY-MM-DD).
-    Útil para buscar fixture_id de un partido conocido por equipo+fecha.
-    """
-    items = _get("/fixtures", {"date": date_str})
     return [i for i in items if isinstance(i, dict)]

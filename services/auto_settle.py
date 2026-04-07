@@ -222,6 +222,7 @@ def auto_settle_tracker_legs() -> int:
         return 0
 
     settled = 0
+    _push_queue: list[dict] = []
     conn = get_conn()
     try:
         cur = conn.cursor()
@@ -287,12 +288,66 @@ def auto_settle_tracker_legs() -> int:
                 matched["home_goals"], matched["away_goals"],
             )
 
+            # Push cuando la apuesta entera queda resuelta (WON o LOST)
+            if new_bet_status in ("WON", "LOST"):
+                _push_queue.append({
+                    "user_id": leg["bet_id"],  # se resuelve abajo con user_id real
+                    "_bet_id": bet_id,
+                    "new_bet_status": new_bet_status,
+                    "home": leg_home,
+                    "away": leg_away,
+                    "score_h": matched["home_goals"],
+                    "score_a": matched["away_goals"],
+                    "payout": new_payout,
+                    "stake": float(stake_row["stake"]),
+                })
+
+        # Obtener user_id para cada bet en la cola de push
+        for item in _push_queue:
+            cur.execute("SELECT user_id, bet_type FROM user_bets WHERE id = %s", (item["_bet_id"],))
+            row = cur.fetchone()
+            if row:
+                item["user_id"] = row["user_id"]
+                item["bet_type"] = row.get("bet_type", "simple")
+
         conn.commit()
     except Exception as e:
         conn.rollback()
         logger.exception("auto_settle error: %s", e)
+        _push_queue.clear()
     finally:
         put_conn(conn)
+
+    # Enviar pushes fuera del bloque de DB
+    for item in _push_queue:
+        try:
+            from services.push_notifications import send_to_user
+            uid = item.get("user_id")
+            if not uid:
+                continue
+            status = item["new_bet_status"]
+            emoji = "✅" if status == "WON" else "❌"
+            bet_type = item.get("bet_type", "simple")
+            score_str = f"{item['score_h']}–{item['score_a']}"
+            if bet_type == "combinada":
+                body = (
+                    f"Combinada {emoji} | {item['home']} {score_str} {item['away']}"
+                    + (f" | Ganás ${item['payout']:.2f}" if status == "WON" else "")
+                )
+            else:
+                body = (
+                    f"{item['home']} {score_str} {item['away']}"
+                    + (f" | Ganás ${item['payout']:.2f}" if status == "WON" else "")
+                )
+            payload = {
+                "title": f"{emoji} Apuesta {'ganada' if status == 'WON' else 'perdida'}",
+                "body": body,
+                "tag": f"settle-{item['_bet_id']}",
+                "url": "/tracker",
+            }
+            send_to_user(uid, payload)
+        except Exception as _push_err:
+            logger.warning("auto_settle push error: %s", _push_err)
 
     if settled:
         logger.info("auto_settle finished: %d legs resolved", settled)
