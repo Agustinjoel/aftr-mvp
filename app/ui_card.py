@@ -452,18 +452,12 @@ def _render_pick_card(
             odds_line_html += f' <span class="pick-bookmaker">{html_lib.escape(bookmaker_title)}</span>'
         odds_line_html += "</div>"
 
-    # Compact prob•odds line
+    # Solo cuota (sin probabilidad)
     oc = _pick_odds_display_value(p)
-    if oc != "—":
-        prob_odds_html = (
-            f'<div class="aftr-prob-odds">'
-            f'<span class="aftr-prob">{best_prob_pct}%</span>'
-            f'<span class="aftr-dot">•</span>'
-            f'<span class="aftr-odds">{html_lib.escape(oc)}</span>'
-            f'</div>'
-        )
-    else:
-        prob_odds_html = f'<div class="aftr-prob-odds"><span class="aftr-prob">{best_prob_pct}%</span></div>'
+    prob_odds_html = (
+        f'<div class="aftr-prob-odds"><span class="aftr-odds">@{html_lib.escape(oc)}</span></div>'
+        if oc != "—" else ""
+    )
 
     # ── AFTR Score block ───────────────────────────────────
     aftr_score_raw = p.get("aftr_score")
@@ -486,10 +480,6 @@ def _render_pick_card(
         except (TypeError, ValueError):
             pass
 
-    conf_val = p.get("confidence_level") or p.get("confidence")
-    conf_level = str(conf_val).strip().upper() if conf_val is not None else ""
-    conf_badge_text = f"{conf_level} CONF" if conf_level else "CONF EN PROCESO"
-
     aftr_badges = [
         f'<span class="aftr-badge aftr-badge-tier" style="border-color:{tier_color};color:{tier_color};">'
         f'{html_lib.escape(tier_label)}</span>',
@@ -498,9 +488,6 @@ def _render_pick_card(
         aftr_badges.append(
             f'<span class="aftr-badge aftr-badge-edge">{html_lib.escape(edge_badge)} EDGE</span>'
         )
-    aftr_badges.append(
-        f'<span class="aftr-badge aftr-badge-conf">{html_lib.escape(conf_badge_text)}</span>'
-    )
     # ── SVG circular gauge (r=28, C=175.93) ───────────────
     _GAUGE_C = 175.93
     _gauge_pct    = max(0, min(100, aftr_score_val)) / 100
