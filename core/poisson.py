@@ -213,8 +213,8 @@ def market_priority(market_name: str) -> int:
 
 def select_best_candidate(
     candidates: list[dict[str, Any]],
-    similar_threshold: float = 0.03,
-    draw_edge_threshold: float = 0.04,
+    similar_threshold: float = 0.12,
+    draw_edge_threshold: float = 0.06,
 ) -> dict[str, Any] | None:
     """
     Elige el mejor candidato para best_market.
