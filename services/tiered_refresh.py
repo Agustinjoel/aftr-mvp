@@ -268,11 +268,9 @@ def run_live_refresh_job() -> JobOutcome:
         except Exception as _live_err:
             logger.warning("live_events error (non-fatal): %s", _live_err)
 
-        # Push notifications: avisar a usuarios que siguen picks próximas
+        # Push notifications: notify_upcoming_picks (solo en live job — datos de picks en tiempo real)
         try:
-            from services.push_notifications import notify_upcoming_picks, load_user_follows_index, notify_tracker_bets, notify_trial_expiring
-            notify_tracker_bets()
-            notify_trial_expiring()
+            from services.push_notifications import notify_upcoming_picks, load_user_follows_index
             from config.settings import settings as _s
             from data.cache import read_json_with_fallback
             follows_index = load_user_follows_index()
@@ -400,6 +398,15 @@ def run_results_refresh_job() -> JobOutcome:
                 logger.info("auto_settle resolved %d tracker legs", n_settled)
         except Exception as _settle_err:
             logger.warning("auto_settle error (non-fatal): %s", _settle_err)
+
+        # Push notifications: se llaman aquí (results job, corre siempre cada ~10min)
+        # y NO en el live job que se saltea cuando no hay partidos en vivo.
+        try:
+            from services.push_notifications import notify_tracker_bets, notify_trial_expiring
+            notify_tracker_bets()
+            notify_trial_expiring()
+        except Exception as _push_err:
+            logger.warning("push_notifications error (non-fatal): %s", _push_err)
 
         logger.info(
             "AUTO REFRESH RESULTS SUCCESS | leagues=%d http=%d matches_updated=%d | %s",
