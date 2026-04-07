@@ -543,7 +543,7 @@ def _build_home_premium_combos(
     combos = _assemble(_valid_strict)
     filled = sum(1 for c in combos if len(c.get("legs") or []) >= 3)
 
-    if filled == 0 and upcoming:
+    if filled < 3 and upcoming:
         n_strict  = sum(1 for p in upcoming if _valid_strict(p))
         n_relaxed = sum(1 for p in upcoming if _valid_relaxed(p))
         no_key    = sum(1 for p in upcoming if _combo_match_key_for_home(p) is None)
@@ -558,9 +558,17 @@ def _build_home_premium_combos(
 
         if n_relaxed >= 3:
             combos_r = _assemble(_valid_relaxed)
-            if sum(1 for c in combos_r if len(c.get("legs") or []) >= 3) > 0:
+            filled_r = sum(1 for c in combos_r if len(c.get("legs") or []) >= 3)
+            if filled_r > 0:
                 logger.warning("premium_combos[%s]: usando thresholds RELAJADOS (AFTR≥62, CONF≥5)", ctx or "—")
-                return combos_r
+                # Merge: keep strict combos where they have legs, fill empty slots with relaxed
+                merged = []
+                for cs, cr in zip(combos, combos_r):
+                    if len(cs.get("legs") or []) >= 3:
+                        merged.append(cs)
+                    else:
+                        merged.append(cr)
+                return merged
 
     return combos
 

@@ -1124,8 +1124,8 @@ def home_page(request: Request) -> str:
 
       <section class="home-hero hero">
         <div class="hero-copy">
-          <h1>Apostá con ventaja real, no con fe</h1>
-          <p>Picks de valor con IA — analizamos cada partido y te decimos cuándo el mercado está equivocado.</p>
+          <h1>El análisis que le gana al mercado</h1>
+          <p>IA detecta cuándo las cuotas están mal — picks con edge positivo, respaldados por datos.</p>
           <div class="hero-stats home-hero-kpis">
             <div class="home-hero-kpi"><span>ROI HISTÓRICO</span><strong>{roi_str}</strong></div>
             <div class="home-hero-kpi"><span>GANANCIA NETA HIST.</span><strong>{net:+.1f}u</strong></div>

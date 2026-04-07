@@ -268,15 +268,33 @@ def dashboard(request: Request, league: str):
     league_arrow_up_style = "display:inline" if league_arrow_up else "display:none"
     league_arrow_down_style = "display:inline" if league_arrow_down else "display:none"
 
-    # Premium combos UI (same component as homepage)
-    # - match_by_key keyed by (league, match_id); _league forced above on all picks
-
+    # Premium combos UI — usa picks de TODAS las ligas para tener suficiente inventario
     match_by_key = {}
     for mid_i, m in match_by_id.items():
         match_by_key[(league, mid_i)] = m
 
+    # Cargar picks de otras ligas para enriquecer los combos
+    all_upcoming_for_combos = list(upcoming_picks)
+    for other_code in settings.league_codes():
+        if other_code == league:
+            continue
+        other_picks_raw = read_json_with_fallback(f"daily_picks_{other_code}.json") or []
+        other_matches_raw = read_json_with_fallback(f"daily_matches_{other_code}.json") or []
+        for p in other_picks_raw:
+            if isinstance(p, dict):
+                p["_league"] = other_code
+                all_upcoming_for_combos.append(p)
+        for m in other_matches_raw:
+            if isinstance(m, dict):
+                mid_i = _safe_int(m.get("match_id") or m.get("id"))
+                if mid_i is not None:
+                    match_by_key[(other_code, mid_i)] = m
+
+    # Filtrar solo upcoming (no finished)
+    all_upcoming_for_combos = [p for p in all_upcoming_for_combos if not isMatchFinished(p)]
+
     premium_combos = _build_home_premium_combos(
-        upcoming_picks,
+        all_upcoming_for_combos,
         match_by_key,
         log_context=f"league={league}",
     )
@@ -1366,8 +1384,26 @@ def dashboard(request: Request, league: str):
       var away    = btn.getAttribute('data-away') || '';
       var market  = btn.getAttribute('data-market') || '';
       var utcDate = btn.getAttribute('data-utcdate') || '';
-      try { localStorage.setItem('aftr_tracker_prefill', JSON.stringify({ home: home, away: away, market: market, utcDate: utcDate })); } catch(e) {}
-      window.location.href = '/tracker';
+      var newPick = { home: home, away: away, market: market, utcDate: utcDate };
+      // Acumular picks para combinada: si ya hay picks en storage, agregar al array
+      try {
+        var existing = [];
+        var raw = localStorage.getItem('aftr_tracker_prefill');
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          existing = Array.isArray(parsed) ? parsed : [parsed];
+        }
+        existing.push(newPick);
+        localStorage.setItem('aftr_tracker_prefill', JSON.stringify(existing));
+      } catch(e) {
+        try { localStorage.setItem('aftr_tracker_prefill', JSON.stringify([newPick])); } catch(e2) {}
+      }
+      // Si ya estamos en /tracker, prefill directo; si no, navegar
+      if (window.location.pathname === '/tracker') {
+        if (typeof checkPrefill === 'function') checkPrefill();
+      } else {
+        window.location.href = '/tracker';
+      }
     };
     </script>
     <div id="match-drawer" class="match-drawer" aria-hidden="true" role="dialog" aria-modal="true">

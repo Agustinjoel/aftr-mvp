@@ -485,8 +485,18 @@
     localStorage.removeItem('aftr_tracker_prefill');
     try {
       var data = JSON.parse(raw);
+      // Puede ser un solo pick {home,away,market,utcDate}
+      // o un array de picks para una combinada
+      var picks = Array.isArray(data) ? data : [data];
       resetForm();
-      prefillLeg(0, data.home, data.away, resolveMarketKey(data.market), utcIsoToLocalDatetimeInput(data.utcDate));
+      // Setear tipo combinada si hay más de una pata
+      if (picks.length > 1) {
+        var combBtn = document.querySelector('[data-bet-type="combinada"]');
+        if (combBtn) combBtn.click();
+      }
+      picks.forEach(function(pick, idx) {
+        prefillLeg(idx, pick.home, pick.away, resolveMarketKey(pick.market), utcIsoToLocalDatetimeInput(pick.utcDate));
+      });
       el('tracker-modal').style.display = '';
       el('tracker-overlay').style.display = '';
     } catch (e) {}
