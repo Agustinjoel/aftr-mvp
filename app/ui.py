@@ -242,8 +242,13 @@ def ui_same(request: Request, league: str = Query(settings.default_league)):
 
 @router.get("/", response_class=HTMLResponse)
 def index_or_league(request: Request, league: str | None = Query(None)):
-    """Show global home when no league query; otherwise show league dashboard."""
+    """Landing para visitantes; home para usuarios logueados."""
+    from app.auth import get_user_id
+    from app.ui_landing import landing_page
     if league is None or (isinstance(league, str) and league.strip() == ""):
+        uid = get_user_id(request)
+        if not uid:
+            return landing_page(request)
         return home_page(request)
     return dashboard(request, league.strip())
 
