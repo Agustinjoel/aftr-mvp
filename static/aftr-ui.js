@@ -460,6 +460,77 @@
   }
 })();
 
+// ── Tracker bar — barra flotante de picks en cola ─────────────────────────
+(function () {
+  var BAR_ID  = 'aftr-tracker-bar';
+  var KEY     = 'aftr_tracker_prefill';
+
+  function getPicks() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return [];
+      var d = JSON.parse(raw);
+      return Array.isArray(d) ? d : [d];
+    } catch (e) { return []; }
+  }
+
+  function savePicks(arr) {
+    try {
+      if (arr.length) localStorage.setItem(KEY, JSON.stringify(arr));
+      else localStorage.removeItem(KEY);
+    } catch (e) {}
+  }
+
+  function getOrCreateBar() {
+    var bar = document.getElementById(BAR_ID);
+    if (bar) return bar;
+    bar = document.createElement('div');
+    bar.id = BAR_ID;
+    bar.className = 'tracker-bar';
+    bar.innerHTML =
+      '<span class="tracker-bar-text"></span>' +
+      '<a href="/tracker" class="tracker-bar-btn pill">Armar combinada →</a>' +
+      '<button class="tracker-bar-clear" title="Limpiar" aria-label="Limpiar picks">✕</button>';
+    bar.querySelector('.tracker-bar-clear').addEventListener('click', function (e) {
+      e.preventDefault();
+      savePicks([]);
+      updateBar();
+    });
+    document.body.appendChild(bar);
+    return bar;
+  }
+
+  function updateBar() {
+    var picks = getPicks();
+    var bar = document.getElementById(BAR_ID);
+    if (!picks.length) {
+      if (bar) bar.style.display = 'none';
+      return;
+    }
+    bar = getOrCreateBar();
+    var label = picks.length === 1
+      ? '1 pick en cola'
+      : picks.length + ' picks en cola';
+    bar.querySelector('.tracker-bar-text').textContent = label;
+    var goBtn = bar.querySelector('.tracker-bar-btn');
+    goBtn.textContent = picks.length === 1 ? 'Ir al Tracker →' : 'Armar combinada →';
+    bar.style.display = 'flex';
+  }
+
+  // Escuchar cambios de storage (por si se limpian en otra pestaña)
+  window.addEventListener('storage', function (e) {
+    if (e.key === KEY) updateBar();
+  });
+
+  // Inicializar al cargar la página (excepto en /tracker donde el form ya se llena)
+  if (window.location.pathname !== '/tracker') {
+    updateBar();
+  }
+
+  // Exponer para que addPickToTracker lo llame
+  window._aftrUpdateTrackerBar = updateBar;
+})();
+
 // ── addPickToTracker — global, cargado en todas las páginas via aftr-ui.js ──
 window.addPickToTracker = function (btn) {
   var home    = btn.getAttribute('data-home') || '';
@@ -468,7 +539,7 @@ window.addPickToTracker = function (btn) {
   var utcDate = btn.getAttribute('data-utcdate') || '';
   var newPick = { home: home, away: away, market: market, utcDate: utcDate };
 
-  // Acumular picks para combinadas
+  // Acumular en array — sin redirigir
   var existing = [];
   try {
     var raw = localStorage.getItem('aftr_tracker_prefill');
@@ -480,11 +551,16 @@ window.addPickToTracker = function (btn) {
   existing.push(newPick);
   try { localStorage.setItem('aftr_tracker_prefill', JSON.stringify(existing)); } catch (e) {}
 
+  // Feedback visual en el botón
+  btn.textContent = '✓ Agregado';
+  btn.disabled = true;
+
+  // Mostrar/actualizar la barra flotante
+  if (typeof window._aftrUpdateTrackerBar === 'function') window._aftrUpdateTrackerBar();
+
+  // Si ya estamos en /tracker, prefill directo
   if (window.location.pathname === '/tracker') {
-    // Ya estamos en el tracker — _aftrCheckPrefill expuesto por aftr-tracker.js
     if (typeof window._aftrCheckPrefill === 'function') window._aftrCheckPrefill();
-  } else {
-    window.location.href = '/tracker';
   }
 };
 
