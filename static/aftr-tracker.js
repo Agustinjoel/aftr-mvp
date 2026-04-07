@@ -484,21 +484,25 @@
     if (!raw) return;
     try {
       var data = JSON.parse(raw);
-      // Puede ser un solo pick {home,away,market,utcDate}
-      // o un array de picks para una combinada
       var picks = Array.isArray(data) ? data : [data];
-      resetForm();
-      // Setear tipo combinada si hay más de una pata
+      if (!picks.length) return;
+
+      resetForm(); // empieza con 1 leg en modo simple
+
       if (picks.length > 1) {
-        var combBtn = document.querySelector('[data-bet-type="combinada"]');
+        // Cambiar a modo combinada — el atributo es data-type, no data-bet-type
+        var combBtn = document.querySelector('[data-type="combinada"]');
         if (combBtn) combBtn.click();
+        // Agregar las legs que faltan (empieza con 1, necesita picks.length)
+        while (legCount < picks.length) addLeg();
       }
+
       picks.forEach(function(pick, idx) {
         prefillLeg(idx, pick.home, pick.away, resolveMarketKey(pick.market), utcIsoToLocalDatetimeInput(pick.utcDate));
       });
+
       el('tracker-modal').style.display = '';
       el('tracker-overlay').style.display = '';
-      // Borrar solo después de rellenar exitosamente
       localStorage.removeItem('aftr_tracker_prefill');
     } catch (e) {
       localStorage.removeItem('aftr_tracker_prefill');
