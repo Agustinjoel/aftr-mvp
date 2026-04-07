@@ -298,3 +298,23 @@ def _load_all_leagues_data(
     )
 
     return all_picks, match_by_key, all_settled, all_upcoming, picks_by_league, matches_by_league
+
+
+_USER_COUNT_BASE = 50  # offset inicial para parecer orgánico desde el día 1
+
+def get_display_user_count() -> str:
+    """Retorna el conteo de usuarios registrados + base fija, como string formateado."""
+    try:
+        from app.db import get_conn, put_conn
+        conn = get_conn()
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT COUNT(*) AS n FROM users")
+            row = cur.fetchone()
+            real = int(row["n"]) if row else 0
+        finally:
+            put_conn(conn)
+        total = real + _USER_COUNT_BASE
+        return f"{total:,}".replace(",", ".")
+    except Exception:
+        return f"{_USER_COUNT_BASE}"

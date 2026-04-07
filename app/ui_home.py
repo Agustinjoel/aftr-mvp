@@ -41,7 +41,7 @@ from app.ui_matches import (
 )
 from app.ui_data import (
     _extract_score_from_match, _extract_score, _pick_id_for_card,
-    _debug_log_live_match_candidates, _load_all_leagues_data,
+    _debug_log_live_match_candidates, _load_all_leagues_data, get_display_user_count,
 )
 from app.ui_team import (
     TEAM_LOGO_FALLBACK_PATH, LEAGUE_LOGO_PATHS, LEAGUE_LOGO_FALLBACK_PATH,
@@ -572,6 +572,7 @@ def home_page(request: Request) -> str:
             logger.warning("home_page: snapshot write failed: %s", e)
 
     active_picks_now = len(live_picks) + len(picks_near_term)
+    user_count_str = get_display_user_count()
     top_picks_source_note = ""
     if top_picks_source == "nearest_upcoming":
         top_picks_source_note = "Mostrando los próximos picks disponibles fuera de la ventana corta."
@@ -1164,6 +1165,7 @@ def home_page(request: Request) -> str:
             <div class="home-hero-kpi"><span>GANANCIA NETA HIST.</span><strong>{net:+.1f}u</strong></div>
             <div class="home-hero-kpi"><span>ACIERTO HISTÓRICO</span><strong>{winrate_str}</strong></div>
             <div class="home-hero-kpi"><span>PICKS ACTIVOS AHORA</span><strong>{active_picks_now}</strong></div>
+            <div class="home-hero-kpi"><span>APOSTADORES</span><strong>{user_count_str}</strong></div>
           </div>
           <div class="hero-buttons">
             <a href="#top-picks" class="btn-secondary">Ver picks de hoy</a>

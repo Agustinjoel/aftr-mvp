@@ -9,7 +9,7 @@ from app.ui_helpers import AUTH_BOOTSTRAP_SCRIPT
 def landing_page(request: Request) -> str:
     """Página de marketing para visitantes no logueados."""
     from app.ui_picks_calc import _result_norm, _unit_delta, _pick_stake_units
-    from app.ui_data import _load_all_leagues_data
+    from app.ui_data import _load_all_leagues_data, get_display_user_count
 
     # ── Stats reales del sistema ───────────────────────────────
     try:
@@ -26,6 +26,8 @@ def landing_page(request: Request) -> str:
         winrate_str = "—"
         roi_str     = "—"
         picks_count = "—"
+
+    user_count_str = get_display_user_count()
 
     html = f"""<!DOCTYPE html>
 <html lang="es">
@@ -198,6 +200,10 @@ def landing_page(request: Request) -> str:
   <div class="ld-stat">
     <div class="ld-stat-val">{picks_count}</div>
     <div class="ld-stat-lbl">Picks analizados</div>
+  </div>
+  <div class="ld-stat">
+    <div class="ld-stat-val">{user_count_str}</div>
+    <div class="ld-stat-lbl">Apostadores</div>
   </div>
 </div>
 
