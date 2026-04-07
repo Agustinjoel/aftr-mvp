@@ -253,16 +253,18 @@ def account_page(request: Request):
         <div id="streak-card-best" class="streak-card-best"></div>
       </div>
 
-      <div class="account-actions">
-        <a href="/tracker" class="pill account-action-pill">📊 Tracker</a>
-        <button id="push-enable-btn" class="pill account-action-pill" style="display:none">🔔 Activar notificaciones</button>
-        <a href="#mi-equipo" class="pill account-action-pill">Mi equipo</a>
-        <a href="#seguidas" class="pill account-action-pill">Seguidas</a>
-        <a href="#favoritos" class="pill account-action-pill">Favoritos</a>
-        <a href="#historial" class="pill account-action-pill">Historial</a>
-        {'<a href="#bankroll" class="pill account-action-pill">Bankroll</a>' if is_premium else ''}
-        <a href="/auth/logout" class="pill account-action-pill">Salir</a>
+      <div class="account-actions account-actions--sm">
+        <a href="/tracker" class="pill account-action-pill account-pill--sm">📊 Tracker</a>
+        <button id="push-enable-btn" class="pill account-action-pill account-pill--sm" style="display:none">🔔 Notif.</button>
+        <a href="#mi-equipo" class="pill account-action-pill account-pill--sm">Mi equipo</a>
+        <a href="#seguidas" class="pill account-action-pill account-pill--sm">Seguidas</a>
+        <a href="#favoritos" class="pill account-action-pill account-pill--sm">Favoritos</a>
+        <a href="#historial" class="pill account-action-pill account-pill--sm">Historial</a>
+        {'<a href="#bankroll" class="pill account-action-pill account-pill--sm">Bankroll</a>' if is_premium else ''}
+        <a href="/auth/logout" class="pill account-action-pill account-pill--sm">Salir</a>
       </div>
+
+      {'<section id="bankroll" class="account-section account-section--bankroll"><h3 class="account-section-title"><span class="account-section-title-accent">Bankroll</span><span class="account-section-badge">Premium</span></h3><div id="bankroll-display"><p class="muted">Cargando…</p></div><form id="bankroll-form" class="bankroll-form" style="display:none"><div class="bankroll-form-row"><label>Capital inicial<input type="number" id="br-initial" class="bankroll-input" min="1" step="any" placeholder="10000"></label><label>Por unidad<input type="number" id="br-stake" class="bankroll-input" min="1" step="any" placeholder="1000"></label><label>Moneda<select id="br-currency" class="bankroll-input"><option value="ARS">ARS</option><option value="USD">USD</option><option value="EUR">EUR</option></select></label></div><button type="submit" class="pill bankroll-save-btn">Guardar</button></form></section>' if is_premium else ''}
 
       <section id="mi-equipo" class="account-section account-section--team">
         <h3 class="account-section-title"><span class="account-section-title-accent">Mi Equipo</span></h3>
@@ -303,7 +305,6 @@ def account_page(request: Request):
         </div>
       </section>
 
-      {'<section id="bankroll" class="account-section account-section--bankroll"><h3 class="account-section-title"><span class="account-section-title-accent">Bankroll</span><span class="account-section-badge">Premium</span></h3><div id="bankroll-display"><p class="muted">Cargando…</p></div><form id="bankroll-form" class="bankroll-form" style="display:none"><div class="bankroll-form-row"><label>Capital inicial<input type="number" id="br-initial" class="bankroll-input" min="1" step="any" placeholder="10000"></label><label>Por unidad<input type="number" id="br-stake" class="bankroll-input" min="1" step="any" placeholder="1000"></label><label>Moneda<select id="br-currency" class="bankroll-input"><option value="ARS">ARS</option><option value="USD">USD</option><option value="EUR">EUR</option></select></label></div><button type="submit" class="pill bankroll-save-btn">Guardar</button></form></section>' if is_premium else ''}
     </div>
     <script>
     (function(){{
@@ -536,6 +537,32 @@ def account_page(request: Request):
           if (stats && stats.ok && stats.stats) updateStatEls(stats.stats);
         }});
       }}
+      function renderCarousel(container, items, cardFn, pageSize) {{
+        pageSize = pageSize || 5;
+        var page = 0;
+        var total = items.length;
+        var totalPages = Math.ceil(total / pageSize);
+        function render() {{
+          var start = page * pageSize;
+          var end = Math.min(start + pageSize, total);
+          var html = "";
+          for (var i = start; i < end; i++) html += cardFn(items[i]);
+          var navHtml = "";
+          if (totalPages > 1) {{
+            navHtml = '<div class="carousel-nav">'
+              + '<button class="carousel-prev pill carousel-btn" ' + (page === 0 ? 'disabled' : '') + '>←</button>'
+              + '<span class="carousel-page muted">' + (page + 1) + ' / ' + totalPages + '</span>'
+              + '<button class="carousel-next pill carousel-btn" ' + (page === totalPages - 1 ? 'disabled' : '') + '>→</button>'
+              + '</div>';
+          }}
+          container.innerHTML = html + navHtml;
+          var prevBtn = container.querySelector('.carousel-prev');
+          var nextBtn = container.querySelector('.carousel-next');
+          if (prevBtn) prevBtn.addEventListener('click', function() {{ if (page > 0) {{ page--; render(); }} }});
+          if (nextBtn) nextBtn.addEventListener('click', function() {{ if (page < totalPages - 1) {{ page++; render(); }} }});
+        }}
+        render();
+      }}
       document.addEventListener("click", function(e) {{
         var btn = e.target.closest && e.target.closest(".btn-remove-fav");
         if (btn) {{
@@ -662,15 +689,14 @@ def account_page(request: Request):
           if (!favList2.length) {{
             favCont.innerHTML = "<p class=\\"muted\\">No tenés favoritos todavía.</p>";
           }} else {{
-            var fHtml = "";
-            favList2.forEach(function(item) {{
+            renderCarousel(favCont, favList2.slice(0, 60), function(item) {{
               var pickId = esc(item.pick_id || "");
               var viewHref = panelHrefForPick(item.pick_id || "");
               var home = item.home_team || item.home || "";
               var away = item.away_team || item.away || "";
               var teams = (home && away) ? (home + " vs " + away) : "";
               var rmBtn = "<button type=\\"button\\" class=\\"ap-remove-btn btn-remove-fav\\" data-pick-id=\\"" + pickId + "\\" title=\\"Quitar\\">✕</button>";
-              fHtml += apCard({{
+              return apCard({{
                 result: "FAV",
                 market: item.market || "—",
                 teams: teams,
@@ -683,7 +709,6 @@ def account_page(request: Request):
                 removeBtn: rmBtn
               }});
             }});
-            favCont.innerHTML = fHtml;
           }}
         }}
 
@@ -721,18 +746,17 @@ def account_page(request: Request):
           }}
         }}
 
-        // ── Historial (resueltos) ──────────────────────────────────
+        // ── Historial (resueltos) — carrusel de 5 ──────────────────
         var histCont = document.getElementById("account-history");
         if (histCont) {{
           var resolved = (histList || []).filter(function(it){{
             var r = (it && it.result) ? String(it.result).toUpperCase() : "PENDING";
             return r !== "PENDING";
-          }});
+          }}).slice(0, 60); // máx 60 picks guardadas
           if (!resolved.length) {{
             histCont.innerHTML = "<p class=\\"muted\\">Sin historial todavía.</p>";
           }} else {{
-            var hHtml = "";
-            resolved.forEach(function(item) {{
+            renderCarousel(histCont, resolved, function(item) {{
               var pickId = esc(item.pick_id || "");
               var viewHref = panelHrefForPick(item.pick_id || "");
               var home = item.home_team || item.home || "";
@@ -740,7 +764,7 @@ def account_page(request: Request):
               var finalScore = item.final_score ? " · " + item.final_score : "";
               var teams = (home && away) ? (home + " vs " + away + finalScore) : "";
               var ufBtn = "<button type=\\"button\\" class=\\"ap-remove-btn btn-unfollow\\" data-pick-id=\\"" + pickId + "\\" title=\\"Eliminar\\">✕</button>";
-              hHtml += apCard({{
+              return apCard({{
                 result: item.result || "PENDING",
                 market: item.market || "—",
                 teams: teams,
@@ -754,7 +778,6 @@ def account_page(request: Request):
                 shareOpts: {{ home: home, away: away, score_home: item.score_home, score_away: item.score_away }}
               }});
             }});
-            histCont.innerHTML = hHtml;
           }}
         }}
       }}).catch(function() {{

@@ -607,8 +607,9 @@ def home_page(request: Request) -> str:
                         break
         picks_to_render = free_picks_display
     else:
-        # Premium: show more picks (up to 10)
-        picks_to_render = sorted(all_picks_pool, key=lambda x: (-(x.get("aftr_score") or 0), -_pick_score(x)))[:10]
+        # Premium: top 4 sorted; el primero es el Pick del Día y se excluye del grid → 3 en grid
+        picks_to_render = sorted(all_picks_pool, key=lambda x: (-(x.get("aftr_score") or 0), -_pick_score(x)))[:4]
+        picks_to_render = picks_to_render[1:] if len(picks_to_render) > 1 else picks_to_render
 
     locked_count = max(0, total_picks_today - len(picks_to_render)) if not user_premium else 0
 
@@ -1190,22 +1191,6 @@ def home_page(request: Request) -> str:
       </div>
       </section>
 
-      {f'''<section class="home-section bankroll-home-section">
-        <div class="bkh-header">
-          <h2 class="home-h2" style="margin:0;">💰 Tu Bankroll Virtual</h2>
-          <a href="/account#bankroll" class="bkh-config-link muted">Configurar →</a>
-        </div>
-        <div id="bankroll-display"><p class="muted" style="padding:16px 0;">Cargando…</p></div>
-        <form id="bankroll-form" style="display:none">
-          <div class="bankroll-form-row">
-            <label>Capital inicial<input type="number" id="br-initial" class="bankroll-input" min="1" step="any" placeholder="10000"></label>
-            <label>Por unidad<input type="number" id="br-stake" class="bankroll-input" min="1" step="any" placeholder="1000"></label>
-            <label>Moneda<select id="br-currency" class="bankroll-input"><option value="ARS">ARS</option><option value="USD">USD</option></select></label>
-          </div>
-          <button type="submit" class="pill bankroll-save-btn">Guardar</button>
-        </form>
-      </section>''' if user_premium else ''}
-
       <section class="home-section">
       <h2 class="home-h2">Combos de Hoy</h2>
       <div class="combos-car" data-combos-carousel>
@@ -1229,44 +1214,9 @@ def home_page(request: Request) -> str:
       </div>
       </section>
 
-      <section class="home-section home-perf-section perf-panel-section">
-      <div class="perf-panel-head perf-panel-head--home">
-        <h2 class="home-h2 perf-panel-title">Rendimiento AFTR (histórico)</h2>
-        <p class="home-perf-intro muted perf-panel-sub">Evolución del ROI y unidades netas (últimos 7 días).</p>
+      <div style="text-align:right;padding:4px 0 16px;">
+        <a href="/rendimiento" class="muted" style="font-size:0.82rem;text-decoration:none;opacity:.6;">Ver rendimiento completo →</a>
       </div>
-      <div class="home-perf-inner">
-        <div class="perf-panel-glass home-perf-chart-wrap card home-spark-wrap">
-          <div class="perf-strip-stats perf-strip-stats--home" role="group" aria-label="Resumen de rendimiento">
-            <div class="perf-stat-tile perf-stat-tile--primary {home_primary_tile_class}">
-              <span class="perf-stat-arrow perf-stat-arrow--up" aria-hidden="true" style="{home_arrow_up_style}">↑</span>
-              <span class="perf-stat-arrow perf-stat-arrow--down" aria-hidden="true" style="{home_arrow_down_style}">↓</span>
-              <span class="perf-stat-value">{roi_str}</span>
-              <span class="perf-stat-label">ROI total</span>
-            </div>
-            <div class="perf-stat-tile{' perf-stat-tile--pos' if home_accum_pos else ''}{' perf-stat-tile--neg' if home_accum_neg else ''}">
-              <span class="perf-stat-value">{perf_accum:+.2f}u</span>
-              <span class="perf-stat-label">Profit acumulado</span>
-            </div>
-            <div class="perf-stat-tile{' perf-stat-tile--pos' if home_day_pos else ''}{' perf-stat-tile--neg' if home_day_neg else ''}">
-              <span class="perf-stat-value">{perf_day:+.2f}u</span>
-              <span class="perf-stat-label">Último día</span>
-            </div>
-          </div>
-          <div class="roi-spark-head perf-chart-head-inner">
-            <div>
-              <div class="roi-spark-title">Curva acumulada</div>
-              <div class="roi-spark-sub muted">Pasá el mouse para ver el detalle por día</div>
-            </div>
-          </div>
-          <div class="roi-spark-canvas perf-chart-canvas-wrap home-spark-canvas-inner">
-            {home_perf_chart_inner}
-          </div>
-          <div style="text-align:right;padding:10px 4px 2px;">
-            <a href="/rendimiento" class="perf-hist-link muted" style="font-size:0.82rem;text-decoration:none;opacity:.7;">Ver rendimiento completo →</a>
-          </div>
-        </div>
-      </div>
-      </section>
 
       <section class="home-section home-bottom-hub-section">
         <div class="home-bottom-hub">

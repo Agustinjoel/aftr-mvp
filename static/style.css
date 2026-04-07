@@ -4121,6 +4121,35 @@ input[type="datetime-local"].tracker-input{ color-scheme:dark; }
   gap: 10px;
   margin-bottom: 28px;
 }
+.account-actions--sm{
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.account-pill--sm{
+  font-size: 11px !important;
+  padding: 5px 10px !important;
+  border-radius: 20px;
+}
+.carousel-nav{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+.carousel-btn{
+  font-size: 13px;
+  padding: 5px 14px;
+  min-width: 40px;
+}
+.carousel-btn:disabled{
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+.carousel-page{
+  font-size: 12px;
+}
 .account-action-pill{
   padding: 10px 18px;
   border-radius: 10px;
