@@ -565,12 +565,12 @@ def _render_pick_card(
             f' data-aftr-score="{aftr_score_val}" data-tier="{html_lib.escape(tier)}"'
             f' data-edge="{edge_attr}" data-home-team="{home_team_attr}" data-away-team="{away_team_attr}">'
             f'📈 Seguir pick</button>'
-            f'<button type="button" class="btn-add-tracker pill pick-action-btn"'
+            f'</div>'
+            f'<button type="button" class="btn-add-tracker pill pick-action-btn pick-action-tracker"'
             f' data-home="{home_team_attr}" data-away="{away_team_attr}"'
             f' data-market="{market_attr}" data-utcdate="{utc_date_attr}"'
             f' onclick="addPickToTracker(this)">'
-            f'📊 Tracker</button>'
-            f'</div>'
+            f'📊 Agregar al Tracker</button>'
             f'</div>'
         )
 

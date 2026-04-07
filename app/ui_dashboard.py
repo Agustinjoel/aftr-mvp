@@ -447,8 +447,8 @@ def dashboard(request: Request, league: str):
           <div class="links">
             <a href="/">Inicio</a>
             <a href="/?league={league}">Panel</a>
-            <a href="/api/matches?league={league}" target="_blank">Matches JSON</a>
-            <a href="/api/picks?league={league}" target="_blank">Picks JSON</a>
+            {f'<a href="/api/matches?league={league}" target="_blank">Matches JSON</a>' if is_admin_user else ''}
+            {f'<a href="/api/picks?league={league}" target="_blank">Picks JSON</a>' if is_admin_user else ''}
             {admin_users_link}
           </div>
         </div>
@@ -1360,6 +1360,16 @@ def dashboard(request: Request, league: str):
     </div> <!-- /page -->
     <script src="/static/aftr-premium.js?v=1" defer></script>
     <script src="/static/aftr-ui.js?v=1" defer></script>
+    <script>
+    window.addPickToTracker = function(btn) {
+      var home    = btn.getAttribute('data-home') || '';
+      var away    = btn.getAttribute('data-away') || '';
+      var market  = btn.getAttribute('data-market') || '';
+      var utcDate = btn.getAttribute('data-utcdate') || '';
+      try { localStorage.setItem('aftr_tracker_prefill', JSON.stringify({ home: home, away: away, market: market, utcDate: utcDate })); } catch(e) {}
+      window.location.href = '/tracker';
+    };
+    </script>
     <div id="match-drawer" class="match-drawer" aria-hidden="true" role="dialog" aria-modal="true">
       <div class="match-drawer-overlay"></div>
       <div class="match-drawer-panel">

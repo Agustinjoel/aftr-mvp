@@ -718,6 +718,7 @@ h2::after{
 }
 .btn-favorite-pick{ background: rgba(255,255,255,.03); }
 .btn-add-tracker{ background: rgba(34,197,94,.1); border-color: rgba(34,197,94,.3); color: rgba(34,197,94,.9); }
+.pick-action-tracker{ width: 100%; text-align: center; }
 .pick-action-btn:disabled{
   opacity: .65;
   cursor: not-allowed;

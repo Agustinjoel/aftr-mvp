@@ -235,7 +235,7 @@ def home_page(request: Request) -> str:
     elif is_premium_active(user) or get_active_plan(uid) == settings.plan_premium:
         plan_badge = '<span class="plan-badge premium">PREMIUM</span>' + auth_html
 
-    user_premium = bool(uid and (is_premium_active(user) or get_active_plan(uid) == settings.plan_premium))
+    user_premium = bool(uid and (is_admin(user, request) or is_premium_active(user) or get_active_plan(uid) == settings.plan_premium))
     trial_days = trial_days_remaining(user) if user else None
     user_on_trial = bool(user and (user.get("subscription_status") or "").strip().lower() == "trial" and user_premium)
 

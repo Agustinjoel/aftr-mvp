@@ -214,11 +214,23 @@ def _format_cache_status(meta: dict) -> str:
     if not last:
         return '<div class="cache-status"><span class="cs-dot cs-dot--stale"></span>Sin datos aún</div>'
     try:
+        from datetime import timezone as _tz
         dt = datetime.fromisoformat(str(last).replace("Z", "+00:00"))
-        formatted = dt.strftime("%d/%m/%Y %H:%M")
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=_tz.utc)
+        age_sec = int((datetime.now(_tz.utc) - dt).total_seconds())
+        if age_sec < 60:
+            rel = "hace menos de 1 min"
+        elif age_sec < 3600:
+            rel = f"hace {age_sec // 60} min"
+        elif age_sec < 86400:
+            rel = f"hace {age_sec // 3600}h"
+        else:
+            rel = f"hace {age_sec // 86400}d"
+        formatted = html_lib.escape(rel)
     except Exception:
-        formatted = str(last)
-    return f'<div class="cache-status"><span class="cs-dot cs-dot--ok"></span>Datos al {html_lib.escape(formatted)}</div>'
+        formatted = str(last)[:16]
+    return f'<div class="cache-status"><span class="cs-dot cs-dot--ok"></span>Actualizado {formatted}</div>'
 
 
 # =========================================================
