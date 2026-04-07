@@ -51,6 +51,8 @@ def _safe_float(x: Any, default: float = 0.0) -> float:
     try:
         return float(x)
     except Exception:
+        if default is None:
+            return None
         return float(default)
 
 
