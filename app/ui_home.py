@@ -1150,6 +1150,32 @@ def home_page(request: Request) -> str:
       {monthly_strip_html}
       {pick_del_dia_html}
 
+      <section class="home-section how-it-works">
+        <h2 class="home-h2">¿Cómo funciona?</h2>
+        <div class="hiw-steps">
+          <div class="hiw-step">
+            <div class="hiw-icon">📊</div>
+            <div class="hiw-num">1</div>
+            <div class="hiw-title">Elegí un pick</div>
+            <div class="hiw-desc">AFTR analiza cada partido y te muestra los picks con mayor ventaja sobre el mercado.</div>
+          </div>
+          <div class="hiw-arrow">→</div>
+          <div class="hiw-step">
+            <div class="hiw-icon">🎯</div>
+            <div class="hiw-num">2</div>
+            <div class="hiw-title">Buscalo en tu bookie</div>
+            <div class="hiw-desc">Ingresá a tu casa de apuestas, buscá el partido y apostá al mercado sugerido.</div>
+          </div>
+          <div class="hiw-arrow">→</div>
+          <div class="hiw-step">
+            <div class="hiw-icon">📈</div>
+            <div class="hiw-num">3</div>
+            <div class="hiw-title">Seguí el resultado</div>
+            <div class="hiw-desc">Guardá la apuesta en el Tracker y recibí una notificación cuando termine el partido.</div>
+          </div>
+        </div>
+      </section>
+
       <section class="home-section" id="top-picks">
       <h2 class="home-h2">{'Mejores Picks del Día' if user_premium else f'Picks de Hoy <span class="picks-free-counter">({len(picks_to_render)} de {total_picks_today})</span>'}</h2>
       {f'<p class="home-empty muted">{html_lib.escape(top_picks_source_note)}</p>' if top_picks_source_note else ''}
