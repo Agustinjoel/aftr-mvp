@@ -1269,11 +1269,34 @@ def push_test(request: Request):
     uid, err = _require_user(request)
     if err:
         return err
-    from services.push_notifications import send_to_user
-    import traceback
+    import traceback, json as _json, base64
+    from config.settings import VAPID_PRIVATE_KEY
+    from app.db import get_conn, put_conn
+    conn = get_conn()
     try:
-        payload = {"title": "AFTR Test", "body": "Si ves esto, las notificaciones funcionan.", "tag": "test", "url": "/"}
-        sent = send_to_user(uid, payload)
-        return JSONResponse({"ok": True, "sent": sent})
-    except Exception as e:
-        return JSONResponse({"ok": False, "error": str(e), "trace": traceback.format_exc()})
+        cur = conn.cursor()
+        cur.execute("SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE user_id=%s", (uid,))
+        subs = list(cur.fetchall())
+    finally:
+        put_conn(conn)
+
+    if not subs:
+        return JSONResponse({"ok": False, "error": "no_subscriptions"})
+
+    results = []
+    for sub in subs:
+        try:
+            from pywebpush import webpush
+            priv_pem = base64.b64decode(VAPID_PRIVATE_KEY + "==")
+            payload = {"title": "AFTR Test", "body": "Si ves esto, las notificaciones funcionan.", "tag": "test", "url": "/"}
+            webpush(
+                subscription_info={"endpoint": sub["endpoint"], "keys": {"p256dh": sub["p256dh"], "auth": sub["auth"]}},
+                data=_json.dumps(payload),
+                vapid_private_key=priv_pem,
+                vapid_claims={"sub": "mailto:aftrapp@outlook.com"},
+            )
+            results.append({"endpoint": sub["endpoint"][:60], "ok": True})
+        except Exception as e:
+            results.append({"endpoint": sub["endpoint"][:60], "ok": False, "error": str(e), "trace": traceback.format_exc()})
+
+    return JSONResponse({"results": results})
