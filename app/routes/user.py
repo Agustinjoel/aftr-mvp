@@ -1270,7 +1270,7 @@ def push_test(request: Request):
     uid, err = _require_user(request)
     if err:
         return err
-    import traceback, json as _json, base64
+    import traceback, json as _json
     from config.settings import VAPID_PRIVATE_KEY
     from app.db import get_conn, put_conn
     conn = get_conn()
@@ -1288,12 +1288,11 @@ def push_test(request: Request):
     for sub in subs:
         try:
             from pywebpush import webpush
-            priv_pem = base64.b64decode(VAPID_PRIVATE_KEY + "==")
             payload = {"title": "AFTR Test", "body": "Si ves esto, las notificaciones funcionan.", "tag": "test", "url": "/"}
             webpush(
                 subscription_info={"endpoint": sub["endpoint"], "keys": {"p256dh": sub["p256dh"], "auth": sub["auth"]}},
                 data=_json.dumps(payload),
-                vapid_private_key=priv_pem,
+                vapid_private_key=VAPID_PRIVATE_KEY,
                 vapid_claims={"sub": "mailto:aftrapp@outlook.com"},
             )
             results.append({"endpoint": sub["endpoint"][:60], "ok": True})

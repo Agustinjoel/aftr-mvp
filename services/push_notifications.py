@@ -36,13 +36,10 @@ def _send_one(endpoint: str, p256dh: str, auth: str, payload: dict) -> bool:
         from config.settings import VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY
         import base64
 
-        # pywebpush espera la private key como PEM bytes
-        priv_pem = base64.b64decode(VAPID_PRIVATE_KEY + "==")
-
         webpush(
             subscription_info={"endpoint": endpoint, "keys": {"p256dh": p256dh, "auth": auth}},
             data=json.dumps(payload),
-            vapid_private_key=priv_pem,
+            vapid_private_key=VAPID_PRIVATE_KEY,
             vapid_claims=_get_vapid_claims(),
         )
         return True
