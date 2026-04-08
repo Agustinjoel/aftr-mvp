@@ -1242,3 +1242,22 @@ def user_bankroll_post(request: Request, payload: dict = Body(...)):
         put_conn(conn)
 
     return JSONResponse({"ok": True})
+
+
+@router.get("/push/debug")
+def push_debug(request: Request):
+    """Debug: muestra suscripciones push del usuario logueado."""
+    uid, err = _require_user(request)
+    if err:
+        return err
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT endpoint, LEFT(p256dh,20) as p256dh_preview, LEFT(auth,10) as auth_preview FROM push_subscriptions WHERE user_id=%s",
+            (uid,),
+        )
+        rows = [dict(r) for r in cur.fetchall()]
+        return JSONResponse({"user_id": uid, "subscriptions": rows, "count": len(rows)})
+    finally:
+        put_conn(conn)
