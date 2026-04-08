@@ -14,29 +14,47 @@ logger = logging.getLogger("aftr.push")
 
 def _vapid_private_key_pem() -> str:
     """
-    Convierte VAPID_PRIVATE_KEY (base64 o base64url, 32 bytes de clave EC raw)
-    a PEM string que pywebpush puede parsear en cualquier versión.
-    Si ya es PEM (empieza con -----) lo devuelve tal cual.
+    Convierte VAPID_PRIVATE_KEY a PEM string que pywebpush puede parsear.
+    Soporta: PEM directo, DER en base64/base64url, escalar raw de 32 bytes.
     """
     from config.settings import VAPID_PRIVATE_KEY
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives.serialization import (
+        Encoding, PrivateFormat, NoEncryption, load_der_private_key,
+    )
+
     key = (VAPID_PRIVATE_KEY or "").strip()
     if not key:
         raise ValueError("VAPID_PRIVATE_KEY no configurada")
     if "-----BEGIN" in key:
-        return key
-    # Normalizar a base64 estándar (base64url usa - y _ en lugar de + y /)
+        return key  # ya es PEM
+
+    # Normalizar a base64 estándar y decodificar
     key_std = key.replace("-", "+").replace("_", "/")
-    # Padding correcto
     pad = (4 - len(key_std) % 4) % 4
     raw = base64.b64decode(key_std + "=" * pad)
-    # Construir clave EC desde los 32 bytes del escalar privado
-    from cryptography.hazmat.primitives.asymmetric.ec import derive_private_key, SECP256R1
-    from cryptography.hazmat.backends import default_backend
-    from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
-    d = int.from_bytes(raw, "big")
-    private_key = derive_private_key(d, SECP256R1(), default_backend())
-    pem = private_key.private_bytes(Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption())
-    return pem.decode("utf-8")
+
+    # Intento 1: DER (formato que genera pywebpush --gen, ~121 bytes)
+    try:
+        private_key = load_der_private_key(raw, password=None, backend=default_backend())
+        pem = private_key.private_bytes(Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption())
+        return pem.decode("utf-8")
+    except Exception:
+        pass
+
+    # Intento 2: escalar raw de 32 bytes (formato web-push Node.js)
+    try:
+        from cryptography.hazmat.primitives.asymmetric.ec import derive_private_key, SECP256R1
+        if len(raw) == 32:
+            d = int.from_bytes(raw, "big")
+            private_key = derive_private_key(d, SECP256R1(), default_backend())
+            pem = private_key.private_bytes(Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption())
+            return pem.decode("utf-8")
+    except Exception:
+        pass
+
+    raise ValueError(f"VAPID_PRIVATE_KEY no reconocida ({len(raw)} bytes). "
+                     "Debe ser PEM, DER en base64 o escalar EC de 32 bytes.")
 
 NOTIFY_BEFORE_MIN = 60  # notificar 60 min antes del kick-off
 _notified_cache: set[str] = set()  # evitar duplicados en memoria (pick_id+uid)
