@@ -4,11 +4,39 @@ Se llama desde el refresh worker cuando una pick empieza en <= NOTIFY_BEFORE_MIN
 """
 from __future__ import annotations
 
+import base64
 import json
 import logging
 from datetime import datetime, timezone, timedelta
 
 logger = logging.getLogger("aftr.push")
+
+
+def _vapid_private_key_pem() -> str:
+    """
+    Convierte VAPID_PRIVATE_KEY (base64 o base64url, 32 bytes de clave EC raw)
+    a PEM string que pywebpush puede parsear en cualquier versión.
+    Si ya es PEM (empieza con -----) lo devuelve tal cual.
+    """
+    from config.settings import VAPID_PRIVATE_KEY
+    key = (VAPID_PRIVATE_KEY or "").strip()
+    if not key:
+        raise ValueError("VAPID_PRIVATE_KEY no configurada")
+    if "-----BEGIN" in key:
+        return key
+    # Normalizar a base64 estándar (base64url usa - y _ en lugar de + y /)
+    key_std = key.replace("-", "+").replace("_", "/")
+    # Padding correcto
+    pad = (4 - len(key_std) % 4) % 4
+    raw = base64.b64decode(key_std + "=" * pad)
+    # Construir clave EC desde los 32 bytes del escalar privado
+    from cryptography.hazmat.primitives.asymmetric.ec import derive_private_key, SECP256R1
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption
+    d = int.from_bytes(raw, "big")
+    private_key = derive_private_key(d, SECP256R1(), default_backend())
+    pem = private_key.private_bytes(Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption())
+    return pem.decode("utf-8")
 
 NOTIFY_BEFORE_MIN = 60  # notificar 60 min antes del kick-off
 _notified_cache: set[str] = set()  # evitar duplicados en memoria (pick_id+uid)
@@ -33,13 +61,10 @@ def _send_one(endpoint: str, p256dh: str, auth: str, payload: dict) -> bool:
     """Envía una notificación a una suscripción. Retorna True si fue exitoso."""
     try:
         from pywebpush import webpush, WebPushException
-        from config.settings import VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY
-        import base64
-
         webpush(
             subscription_info={"endpoint": endpoint, "keys": {"p256dh": p256dh, "auth": auth}},
             data=json.dumps(payload),
-            vapid_private_key=VAPID_PRIVATE_KEY,
+            vapid_private_key=_vapid_private_key_pem(),
             vapid_claims=_get_vapid_claims(),
         )
         return True

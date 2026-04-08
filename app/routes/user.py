@@ -1288,11 +1288,12 @@ def push_test(request: Request):
     for sub in subs:
         try:
             from pywebpush import webpush
+            from services.push_notifications import _vapid_private_key_pem
             payload = {"title": "AFTR Test", "body": "Si ves esto, las notificaciones funcionan.", "tag": "test", "url": "/"}
             webpush(
                 subscription_info={"endpoint": sub["endpoint"], "keys": {"p256dh": sub["p256dh"], "auth": sub["auth"]}},
                 data=_json.dumps(payload),
-                vapid_private_key=VAPID_PRIVATE_KEY,
+                vapid_private_key=_vapid_private_key_pem(),
                 vapid_claims={"sub": "mailto:aftrapp@outlook.com"},
             )
             results.append({"endpoint": sub["endpoint"][:60], "ok": True})
