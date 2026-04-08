@@ -256,6 +256,7 @@ def account_page(request: Request):
       <div class="account-actions account-actions--sm">
         <a href="/tracker" class="pill account-action-pill account-pill--sm">📊 Tracker</a>
         <button id="push-enable-btn" class="pill account-action-pill account-pill--sm" style="display:none">🔔 Notif.</button>
+        <button id="push-reactivate-btn" class="pill account-action-pill account-pill--sm" style="display:none">🔔 Activar notif.</button>
         <a href="#mi-equipo" class="pill account-action-pill account-pill--sm">Mi equipo</a>
         <a href="#seguidas" class="pill account-action-pill account-pill--sm">Seguidas</a>
         <a href="#favoritos" class="pill account-action-pill account-pill--sm">Favoritos</a>

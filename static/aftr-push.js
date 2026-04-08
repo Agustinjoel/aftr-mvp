@@ -22,36 +22,79 @@
     });
   }
 
-  function subscribe(reg) {
+  function subscribe(reg, onSuccess, onError) {
     reg.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
     }).then(function (sub) {
-      sendSubscriptionToServer(sub).catch(function () {});
-    }).catch(function () {});
+      return sendSubscriptionToServer(sub);
+    }).then(function (res) {
+      return res.json();
+    }).then(function (data) {
+      if (data.ok) {
+        if (onSuccess) onSuccess();
+      } else {
+        if (onError) onError('Error servidor: ' + (data.error || 'desconocido'));
+      }
+    }).catch(function (err) {
+      if (onError) onError(err && err.message ? err.message : 'Error desconocido');
+    });
   }
 
   function initPush() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
     navigator.serviceWorker.register('/static/sw.js').then(function (reg) {
-      // Check current permission state
+      var reactivateBtn = document.getElementById('push-reactivate-btn');
+
       if (Notification.permission === 'granted') {
+        // Re-send existing subscription silently on load
         reg.pushManager.getSubscription().then(function (existing) {
-          if (!existing) subscribe(reg);
-          else sendSubscriptionToServer(existing).catch(function () {});
+          if (existing) {
+            sendSubscriptionToServer(existing).catch(function () {});
+          } else {
+            subscribe(reg, null, null);
+          }
         });
+
+        // Show reactivate button so user can force re-register if needed
+        if (reactivateBtn) {
+          reactivateBtn.style.display = '';
+          reactivateBtn.addEventListener('click', function () {
+            reactivateBtn.disabled = true;
+            reactivateBtn.textContent = '⏳ Activando...';
+            // Unsubscribe first to force fresh subscription
+            reg.pushManager.getSubscription().then(function (existing) {
+              var doSubscribe = function () {
+                subscribe(reg, function () {
+                  reactivateBtn.textContent = '✅ Activadas';
+                  setTimeout(function () {
+                    reactivateBtn.style.display = 'none';
+                  }, 3000);
+                }, function (err) {
+                  reactivateBtn.disabled = false;
+                  reactivateBtn.textContent = '❌ Error — reintentar';
+                });
+              };
+              if (existing) {
+                existing.unsubscribe().then(doSubscribe).catch(doSubscribe);
+              } else {
+                doSubscribe();
+              }
+            });
+          });
+        }
         return;
       }
 
-      // Show our own prompt button instead of asking immediately
+      // Show enable button if permission not yet granted
       var btn = document.getElementById('push-enable-btn');
       if (btn) {
         btn.style.display = '';
         btn.addEventListener('click', function () {
           Notification.requestPermission().then(function (perm) {
             btn.style.display = 'none';
-            if (perm === 'granted') subscribe(reg);
+            if (perm === 'granted') subscribe(reg, null, null);
           });
         });
       }
