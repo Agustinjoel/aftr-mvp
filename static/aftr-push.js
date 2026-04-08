@@ -49,7 +49,7 @@
   function initPush() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
-    navigator.serviceWorker.register('/static/sw.js').then(function (reg) {
+    navigator.serviceWorker.register('/sw.js').then(function (reg) {
       var reactivateBtn = document.getElementById('push-reactivate-btn');
 
       if (Notification.permission === 'granted') {
@@ -86,7 +86,9 @@
                   }, 3000);
                 }, function (err) {
                   reactivateBtn.disabled = false;
-                  reactivateBtn.textContent = '❌ Error — reintentar';
+                  var msg = (err && err.message) ? err.message : String(err);
+                  reactivateBtn.textContent = '❌ ' + msg;
+                  console.error('[AFTR push] subscribe error:', err);
                 });
               };
               if (existing) {

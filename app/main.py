@@ -3,7 +3,7 @@ import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
 
 from app.auto_refresh import spawn_auto_refresh_tasks
@@ -72,6 +72,18 @@ app = FastAPI(
 # Absolute path so uvicorn works when CWD is not the project root (e.g. some PaaS layouts).
 static_dir = settings.base_dir / "static"
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+
+@app.get("/sw.js", include_in_schema=False)
+async def service_worker():
+    """Sirve el service worker desde el root para que tenga scope '/'."""
+    sw_path = static_dir / "sw.js"
+    content = sw_path.read_bytes()
+    return Response(
+        content=content,
+        media_type="application/javascript",
+        headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-store"},
+    )
 
 # Auth before UI so /auth/* is not shadowed by ui_router (e.g. legacy duplicate paths).
 app.include_router(auth_router)
