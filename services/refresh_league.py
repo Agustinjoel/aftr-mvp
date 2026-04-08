@@ -184,10 +184,12 @@ def _refresh_league_results_only(
     finished_by_id = _build_finished_lookup_by_id(finished_matches or [])
     finished_matches_norm = [_normalize_match(m) for m in (finished_matches or [])]
     _update_team_names_from_matches(team_names, finished_matches_norm)
-    finished_picks = _build_picks_from_matches(finished_matches_norm, team_names)
 
     merged_matches = _merge_by_match_id(existing_matches, finished_matches_norm)
-    merged_picks = _merge_by_match_id(existing_picks, finished_picks)
+    # Existing picks win over freshly rebuilt ones to preserve original best_market.
+    # finished_picks only fill gaps for matches with no existing pick.
+    finished_picks = _build_picks_from_matches(finished_matches_norm, team_names)
+    merged_picks = _merge_by_match_id(finished_picks, existing_picks)
     picks_all = _apply_results_by_match_id(merged_picks, finished_by_id)
 
     picks_all = _enrich_and_score(league_code, picks_all, merged_matches, fetch_odds=fetch_odds)
@@ -258,9 +260,10 @@ def _refresh_league_full(
     except Exception as e:
         logger.warning("No pude traer FINISHED para %s (sigo sin evaluar): %s", league_code, e)
 
-    # 4) Merge picks
+    # 4) Merge picks: upcoming wins over existing (fresh prediction), but existing/upcoming
+    # win over finished_picks to preserve original best_market pre-partido.
     merged = _merge_by_match_id(existing_picks, upcoming_picks)
-    merged = _merge_by_match_id(merged, finished_picks)
+    merged = _merge_by_match_id(finished_picks, merged)
 
     # 5) Aplicar resultados
     picks_all = _apply_results_by_match_id(merged, finished_by_id)
