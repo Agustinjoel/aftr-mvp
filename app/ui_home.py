@@ -647,18 +647,18 @@ def home_page(request: Request) -> str:
     locked_count = max(0, total_picks_today - len(picks_to_render)) if not user_premium else 0
 
     top_pick_cards = []
-    ad_slot_html = """<div class="aftr-ad-slot">
+    _1XBET_BANNER_URL = "https://reffpa.com/L?tag=d_5458956m_97c_&site=5458956&ad=97"
+    ad_slot_html = f"""<div class="aftr-ad-slot">
       <span class="ad-label">Publicidad</span>
-      <div class="ad-house">
-        <div class="ad-house-inner">
-          <span class="ad-house-icon">⭐</span>
-          <div class="ad-house-copy">
-            <strong>AFTR Premium</strong>
-            <span>Todos los picks · todas las ligas · sin anuncios</span>
+      <a href="{_1XBET_BANNER_URL}" target="_blank" rel="noopener noreferrer" class="ad-bookie-banner">
+        <div class="ad-bookie-inner">
+          <div class="ad-bookie-copy">
+            <strong>1xBet</strong>
+            <span>Apostá este pick en 1xBet →</span>
           </div>
-          <button class="ad-house-btn pill" onclick="openPremium()">Ver planes</button>
+          <span class="ad-bookie-cta">Ir al sitio</span>
         </div>
-      </div>
+      </a>
     </div>"""
     ad_inserted = False
 

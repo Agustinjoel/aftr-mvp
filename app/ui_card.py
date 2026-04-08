@@ -568,6 +568,7 @@ def _render_pick_card(
             f'<button type="button" class="btn-match-detail pick-detail-link"'
             f' data-league="{league_attr}" data-match-id="{mid_attr}">Ver partido →</button>'
         ) if league_attr and mid_attr else ""
+        _1XBET_URL = "https://reffpa.com/L?tag=d_5458956m_97c_&site=5458956&ad=97"
         pick_actions_html = (
             f'<div class="pick-actions-wrap">'
             f'{detail_btn}'
@@ -588,6 +589,9 @@ def _render_pick_card(
             f' data-market="{market_attr}" data-utcdate="{utc_date_attr}"'
             f' onclick="addPickToTracker(this)">'
             f'📊 Agregar al Tracker</button>'
+            f'<a href="{_1XBET_URL}" target="_blank" rel="noopener noreferrer"'
+            f' class="pill pick-action-btn pick-action-bookie">'
+            f'Apostar en 1xBet →</a>'
             f'</div>'
         )
 
