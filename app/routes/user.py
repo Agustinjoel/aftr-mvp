@@ -1263,6 +1263,7 @@ def push_debug(request: Request):
         put_conn(conn)
 
 
+@router.get("/push/test")
 @router.post("/push/test")
 def push_test(request: Request):
     """Envía un push de prueba al usuario logueado y retorna el resultado."""
