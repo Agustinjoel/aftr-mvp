@@ -651,6 +651,9 @@ def push_subscribe(request: Request, payload: dict = Body(...)):
     auth   = (keys.get("auth")   or "").strip()
     if not endpoint or not p256dh or not auth:
         return JSONResponse({"ok": False, "error": "missing_fields"}, status_code=400)
+    # Rechazar endpoints FCM legacy (apagado por Google en jun-2024)
+    if "fcm.googleapis.com/fcm/send/" in endpoint:
+        return JSONResponse({"ok": False, "error": "stale_endpoint"}, status_code=400)
     conn = get_conn()
     try:
         cur = conn.cursor()
@@ -1329,12 +1332,20 @@ def push_diagnose(request: Request):
         report["pywebpush_available"] = False
         report["pywebpush_error"] = str(e)
 
-    # 3. Suscripciones del usuario
+    # 3. Suscripciones del usuario — limpiar endpoints viejos automáticamente
     conn = get_conn()
     try:
         cur = conn.cursor()
         cur.execute("SELECT endpoint, LEFT(p256dh,20) AS p256dh_preview FROM push_subscriptions WHERE user_id=%s", (uid,))
         subs = [dict(r) for r in cur.fetchall()]
+        # Detectar y eliminar endpoints con formato FCM legacy (apagado jun-2024)
+        stale = [s for s in subs if "fcm.googleapis.com/fcm/send/" in (s.get("endpoint") or "")]
+        if stale:
+            for s in stale:
+                cur.execute("DELETE FROM push_subscriptions WHERE user_id=%s AND endpoint=%s", (uid, s["endpoint"]))
+            conn.commit()
+            subs = [s for s in subs if s not in stale]
+            report["stale_endpoints_removed"] = len(stale)
         report["subscriptions_count"] = len(subs)
         report["subscriptions"] = subs
     finally:

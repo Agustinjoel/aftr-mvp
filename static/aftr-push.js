@@ -41,6 +41,11 @@
     });
   }
 
+  function isStaleEndpoint(endpoint) {
+    // Formato viejo de FCM (apagado por Google en junio 2024)
+    return endpoint && endpoint.indexOf('fcm.googleapis.com/fcm/send/') !== -1;
+  }
+
   function initPush() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
@@ -48,8 +53,16 @@
       var reactivateBtn = document.getElementById('push-reactivate-btn');
 
       if (Notification.permission === 'granted') {
-        // Re-send existing subscription silently on load
         reg.pushManager.getSubscription().then(function (existing) {
+          if (existing && isStaleEndpoint(existing.endpoint)) {
+            // Endpoint viejo (FCM legacy apagado) — forzar re-suscripción
+            existing.unsubscribe().then(function () {
+              subscribe(reg, null, null);
+            }).catch(function () {
+              subscribe(reg, null, null);
+            });
+            return;
+          }
           if (existing) {
             sendSubscriptionToServer(existing).catch(function () {});
           } else {
