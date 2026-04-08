@@ -103,11 +103,17 @@
   }
 
   function legActionsHtml(leg, betSettled) {
-    if (betSettled || leg.status !== 'PENDING') return '';
-    return '<div class="leg-actions">' +
-      '<button class="leg-btn leg-btn--won"  data-leg="' + leg.id + '" data-status="WON">✓</button>' +
-      '<button class="leg-btn leg-btn--lost" data-leg="' + leg.id + '" data-status="LOST">✗</button>' +
-      '<button class="leg-btn leg-btn--void" data-leg="' + leg.id + '" data-status="VOID">⊘</button>' +
+    // Siempre mostrar botones de corrección (para corregir liquidaciones automáticas erróneas)
+    if (leg.status === 'PENDING') {
+      return '<div class="leg-actions">' +
+        '<button class="leg-btn leg-btn--won"  data-leg="' + leg.id + '" data-status="WON">✓</button>' +
+        '<button class="leg-btn leg-btn--lost" data-leg="' + leg.id + '" data-status="LOST">✗</button>' +
+        '<button class="leg-btn leg-btn--void" data-leg="' + leg.id + '" data-status="VOID">⊘</button>' +
+        '</div>';
+    }
+    // Leg ya liquidada: mostrar solo botón de corrección discreto
+    return '<div class="leg-actions leg-actions--settled">' +
+      '<button class="leg-btn leg-btn--edit" data-leg="' + leg.id + '" data-status="PENDING" title="Corregir">✎</button>' +
       '</div>';
   }
 

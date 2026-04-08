@@ -3921,6 +3921,9 @@ canvas{
 .leg-btn--void{ background:rgba(107,114,128,.15); color:#9ca3af; }
 .leg-btn--void:hover{ background:rgba(107,114,128,.25); }
 .leg-btn:disabled{ opacity:.4; cursor:not-allowed; }
+.leg-actions--settled{ opacity:.6; }
+.leg-btn--edit{ background:rgba(99,102,241,.12); color:#818cf8; font-size:0.8rem; }
+.leg-btn--edit:hover{ background:rgba(99,102,241,.25); }
 
 /* Footer */
 .bet-card-footer{

@@ -15,6 +15,36 @@ from fastapi.responses import JSONResponse
 from app.auth import get_user_id
 from app.db import get_conn, put_conn
 
+
+def _lookup_kickoff_from_cache(home: str, away: str) -> str | None:
+    """Busca el kickoff UTC en daily_matches_*.json por nombres de equipo."""
+    try:
+        from config.settings import settings
+        from data.cache import read_json
+
+        def _norm(s: str) -> str:
+            return (s or "").lower().strip()
+
+        nh, na = _norm(home), _norm(away)
+        for code in settings.league_codes():
+            data = read_json(f"daily_matches_{code}.json")
+            if not isinstance(data, list):
+                continue
+            for m in data:
+                if not isinstance(m, dict):
+                    continue
+                mh = _norm(m.get("home") or (m.get("homeTeam") or {}).get("name", ""))
+                ma = _norm(m.get("away") or (m.get("awayTeam") or {}).get("name", ""))
+                if not mh or not ma:
+                    continue
+                if (nh in mh or mh in nh) and (na in ma or ma in na):
+                    utc = m.get("utcDate") or ""
+                    if utc:
+                        return str(utc)
+    except Exception:
+        pass
+    return None
+
 router = APIRouter()
 
 VALID_MARKETS = {
@@ -26,7 +56,7 @@ VALID_MARKETS = {
     "dnb_1", "dnb_2",
 }
 
-VALID_LEG_STATUSES = {"WON", "LOST", "VOID", "PUSHED"}
+VALID_LEG_STATUSES = {"WON", "LOST", "VOID", "PUSHED", "PENDING"}
 
 
 def _require_user(request: Request):
@@ -117,6 +147,9 @@ def create_bet(request: Request, payload: dict = Body(...)):
         bet_id = cur.fetchone()["id"]
         for i, leg in enumerate(legs):
             kickoff = leg.get("kickoff_time") or None
+            if not kickoff:
+                # Intentar auto-poblar desde el caché para que auto_settle y notificaciones funcionen
+                kickoff = _lookup_kickoff_from_cache(leg["home_team"], leg["away_team"])
             cur.execute(
                 """INSERT INTO bet_legs
                    (bet_id, home_team, away_team, market, odds, status, sort_order, kickoff_time)

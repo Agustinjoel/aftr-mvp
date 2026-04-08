@@ -129,14 +129,19 @@ def _load_all_finished_matches() -> list[dict]:
             except Exception:
                 continue
 
-            # Score: acepta score.home/away o score.fullTime.home/away
+            # Score: preferir extraTime (acumulativo, cubre partidos con ET),
+            # luego fullTime (90 min), luego score.home/away o raíz del dict.
             score = m.get("score") or {}
-            gh = score.get("home")
-            ga = score.get("away")
-            if gh is None or ga is None:
-                ft = score.get("fullTime") or {}
-                gh = ft.get("home")
-                ga = ft.get("away")
+            et = score.get("extraTime") or {}
+            if et.get("home") is not None and et.get("away") is not None:
+                gh, ga = et.get("home"), et.get("away")
+            else:
+                gh = score.get("home")
+                ga = score.get("away")
+                if gh is None or ga is None:
+                    ft = score.get("fullTime") or {}
+                    gh = ft.get("home")
+                    ga = ft.get("away")
             # También acepta home_goals/away_goals en raíz del dict
             if gh is None:
                 gh = m.get("home_goals")
@@ -206,8 +211,10 @@ def auto_settle_tracker_legs() -> int:
                FROM bet_legs bl
                JOIN user_bets ub ON bl.bet_id = ub.id
                WHERE bl.status = 'PENDING'
-                 AND bl.kickoff_time IS NOT NULL
-                 AND bl.kickoff_time <= %s""",
+                 AND (
+                   (bl.kickoff_time IS NOT NULL AND bl.kickoff_time <= %s)
+                   OR bl.kickoff_time IS NULL
+                 )""",
             (cutoff,),
         )
         pending = list(cur.fetchall())

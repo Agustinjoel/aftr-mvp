@@ -23,7 +23,7 @@ def tracker_page(request: Request) -> HTMLResponse:
   <meta charset="utf-8">
   <title>AFTR Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/static/style.css?v=31">
+  <link rel="stylesheet" href="/static/style.css?v=32">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
   <link rel="manifest" href="/static/manifest.json">
   <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">

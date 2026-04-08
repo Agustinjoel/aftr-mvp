@@ -311,8 +311,14 @@ def get_upcoming_matches(league_code: str, days: int = 3) -> list[dict]:
 
 def _fd_match_to_aftr_row(m: dict, league_code: str) -> dict:
     """Normaliza un match crudo de Football-Data API v4 al shape AFTR (daily_matches)."""
-    ft = ((m.get("score") or {}).get("fullTime")) or {}
-    hg, ag = ft.get("home"), ft.get("away")
+    score_raw = m.get("score") or {}
+    # Usar extraTime si existe (es acumulativo: incluye goles de 90' + ET)
+    et = score_raw.get("extraTime") or {}
+    if et.get("home") is not None and et.get("away") is not None:
+        hg, ag = et.get("home"), et.get("away")
+    else:
+        ft = score_raw.get("fullTime") or {}
+        hg, ag = ft.get("home"), ft.get("away")
     hid = (m.get("homeTeam") or {}).get("id")
     aid = (m.get("awayTeam") or {}).get("id")
     st = (m.get("status") or "").strip().upper() or "IN_PLAY"
@@ -386,9 +392,14 @@ def get_finished_matches(league_code: str, days_back: int = 5) -> list[dict]:
         away = (m.get("awayTeam") or {}).get("name", "")
         utc = m.get("utcDate", "")
 
-        ft = ((m.get("score") or {}).get("fullTime")) or {}
-        hg = ft.get("home")
-        ag = ft.get("away")
+        sc = m.get("score") or {}
+        et = sc.get("extraTime") or {}
+        if et.get("home") is not None and et.get("away") is not None:
+            hg, ag = et.get("home"), et.get("away")
+        else:
+            ft = sc.get("fullTime") or {}
+            hg = ft.get("home")
+            ag = ft.get("away")
 
         hid = (m.get("homeTeam") or {}).get("id")
         aid = (m.get("awayTeam") or {}).get("id")

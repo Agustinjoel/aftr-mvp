@@ -1301,3 +1301,93 @@ def push_test(request: Request):
             results.append({"endpoint": sub["endpoint"][:60], "ok": False, "error": str(e), "trace": traceback.format_exc()})
 
     return JSONResponse({"results": results})
+
+
+@router.get("/push/diagnose")
+def push_diagnose(request: Request):
+    """Diagnóstico completo del sistema de notificaciones."""
+    uid, err = _require_user(request)
+    if err:
+        return err
+
+    import traceback
+    from config.settings import VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY
+    from app.db import get_conn, put_conn
+
+    report: dict = {}
+
+    # 1. VAPID keys
+    report["vapid_private_key_set"] = bool(VAPID_PRIVATE_KEY and len(VAPID_PRIVATE_KEY) > 10)
+    report["vapid_public_key_set"] = bool(VAPID_PUBLIC_KEY and len(VAPID_PUBLIC_KEY) > 10)
+    report["vapid_public_key_preview"] = VAPID_PUBLIC_KEY[:30] + "..." if VAPID_PUBLIC_KEY else None
+
+    # 2. pywebpush importable
+    try:
+        from pywebpush import webpush
+        report["pywebpush_available"] = True
+    except ImportError as e:
+        report["pywebpush_available"] = False
+        report["pywebpush_error"] = str(e)
+
+    # 3. Suscripciones del usuario
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT endpoint, LEFT(p256dh,20) AS p256dh_preview FROM push_subscriptions WHERE user_id=%s", (uid,))
+        subs = [dict(r) for r in cur.fetchall()]
+        report["subscriptions_count"] = len(subs)
+        report["subscriptions"] = subs
+    finally:
+        put_conn(conn)
+
+    # 4. bet_legs pendientes sin kickoff_time
+    conn2 = get_conn()
+    try:
+        cur2 = conn2.cursor()
+        cur2.execute(
+            """SELECT COUNT(*) AS total,
+                      SUM(CASE WHEN kickoff_time IS NULL THEN 1 ELSE 0 END) AS sin_kickoff
+               FROM bet_legs bl JOIN user_bets ub ON bl.bet_id=ub.id
+               WHERE bl.status='PENDING' AND ub.user_id=%s""",
+            (uid,),
+        )
+        row = cur2.fetchone()
+        if row:
+            report["pending_legs_total"] = row["total"]
+            report["pending_legs_sin_kickoff"] = row["sin_kickoff"]
+    finally:
+        put_conn(conn2)
+
+    # 5. API-Football key configurada
+    try:
+        from data.providers.api_football import _api_key
+        report["api_football_key_set"] = bool(_api_key())
+    except Exception:
+        report["api_football_key_set"] = False
+
+    # 6. Estado live_events
+    try:
+        from data.cache import read_json
+        state = read_json("live_events_state.json")
+        report["live_events_state_entries"] = len(state) if isinstance(state, dict) else 0
+    except Exception:
+        report["live_events_state_entries"] = 0
+
+    # 7. Diagnóstico general
+    issues = []
+    if not report["vapid_private_key_set"]:
+        issues.append("VAPID_PRIVATE_KEY no configurada en Render")
+    if not report["vapid_public_key_set"]:
+        issues.append("VAPID_PUBLIC_KEY no configurada (o usar la hardcodeada en aftr-push.js)")
+    if not report.get("pywebpush_available"):
+        issues.append("pywebpush no instalado (agregar a requirements.txt)")
+    if report.get("subscriptions_count", 0) == 0:
+        issues.append("Usuario no tiene suscripción push guardada (habilitar notificaciones en el browser)")
+    if report.get("pending_legs_sin_kickoff", 0):
+        issues.append(f"{report['pending_legs_sin_kickoff']} legs sin kickoff_time (auto-settle y live events no funcionarán para esas legs)")
+    if not report.get("api_football_key_set"):
+        issues.append("API_FOOTBALL_KEY no configurada (notificaciones en vivo usan solo el motor de caché — funciona pero con delay)")
+    report["issues"] = issues
+    report["ok"] = len(issues) == 0
+
+    return JSONResponse(report)
