@@ -695,7 +695,7 @@ def home_page(request: Request) -> str:
         _fc = _follow_counts.get(pick_id_val, 0)
         _social_html = f'<span class="pick-social-proof">&#128101; {_fc} lo siguieron</span>' if _fc > 0 else ""
         # Insert house ad after 2nd pick for free users
-        if not user_premium and _idx == 2 and not ad_inserted:
+        if _idx == 2 and not ad_inserted:
             top_pick_cards.append(ad_slot_html)
             ad_inserted = True
 
