@@ -1984,6 +1984,9 @@ def home_page(request: Request) -> str:
         </div>
       </div>
     </div>
+    <div class="aftr-sticky-banner">
+      <iframe scrolling='no' frameBorder='0' style='width:100%;height:60px;display:block;border:none;' src="https://refbanners.com/I?tag=d_5458956m_99260c_&site=5458956&ad=99260"></iframe>
+    </div>
     </body>
     </html>
     """

@@ -7528,3 +7528,15 @@ input[type="datetime-local"].tracker-input{ color-scheme:dark; }
   .pub-hist-row { padding: 7px 10px; font-size: 12px; }
   .pub-hist-badge { font-size: 10px; padding: 2px 6px; min-width: 36px; }
 }
+
+/* ── Sticky bottom banner (1xBet) ── */
+.aftr-sticky-banner {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 999;
+  background: #0d1117;
+  border-top: 1px solid rgba(255,255,255,.08);
+  height: 60px;
+  overflow: hidden;
+}
+body { padding-bottom: 64px; }

@@ -44,6 +44,9 @@ def _simple_page(title: str, body: str) -> str:
 <body>
   {body}
   """ + AUTH_BOOTSTRAP_SCRIPT + """
+  <div class="aftr-sticky-banner">
+    <iframe scrolling='no' frameBorder='0' style='width:100%;height:60px;display:block;border:none;' src="https://refbanners.com/I?tag=d_5458956m_99260c_&site=5458956&ad=99260"></iframe>
+  </div>
 </body>
 </html>"""
 from app.ui_picks_calc import (
