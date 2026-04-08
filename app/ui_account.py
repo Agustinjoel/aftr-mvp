@@ -45,7 +45,7 @@ def _simple_page(title: str, body: str) -> str:
   {body}
   """ + AUTH_BOOTSTRAP_SCRIPT + """
   <div class="aftr-sticky-banner">
-    <iframe scrolling='no' frameBorder='0' style='width:100%;height:60px;display:block;border:none;' src="https://refbanners.com/I?tag=d_5458956m_99260c_&site=5458956&ad=99260"></iframe>
+    <iframe scrolling='no' frameBorder='0' style='width:100%;height:50px;display:block;border:none;' src="https://refbanners.com/I?tag=d_5458956m_91411c_&site=5458956&ad=91411"></iframe>
   </div>
 </body>
 </html>"""

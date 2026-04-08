@@ -649,7 +649,7 @@ def home_page(request: Request) -> str:
     top_pick_cards = []
     ad_slot_html = """<div class="aftr-ad-slot">
       <span class="ad-label">Publicidad</span>
-      <iframe scrolling='no' frameBorder='0' style='padding:0;margin:0;border:none;width:100%;height:90px;display:block;border-radius:8px;overflow:hidden;' src="https://refbanners.com/I?tag=d_5458956m_99260c_&site=5458956&ad=99260"></iframe>
+      <iframe scrolling='no' frameBorder='0' style='padding:0;margin:0;border:none;width:100%;height:50px;display:block;border-radius:8px;overflow:hidden;' src="https://refbanners.com/I?tag=d_5458956m_91411c_&site=5458956&ad=91411"></iframe>
     </div>"""
     ad_inserted = False
 
@@ -1985,7 +1985,7 @@ def home_page(request: Request) -> str:
       </div>
     </div>
     <div class="aftr-sticky-banner">
-      <iframe scrolling='no' frameBorder='0' style='width:100%;height:60px;display:block;border:none;' src="https://refbanners.com/I?tag=d_5458956m_99260c_&site=5458956&ad=99260"></iframe>
+      <iframe scrolling='no' frameBorder='0' style='width:100%;height:50px;display:block;border:none;' src="https://refbanners.com/I?tag=d_5458956m_91411c_&site=5458956&ad=91411"></iframe>
     </div>
     </body>
     </html>
