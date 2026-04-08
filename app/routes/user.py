@@ -1261,3 +1261,19 @@ def push_debug(request: Request):
         return JSONResponse({"user_id": uid, "subscriptions": rows, "count": len(rows)})
     finally:
         put_conn(conn)
+
+
+@router.post("/push/test")
+def push_test(request: Request):
+    """Envía un push de prueba al usuario logueado y retorna el resultado."""
+    uid, err = _require_user(request)
+    if err:
+        return err
+    from services.push_notifications import send_to_user
+    import traceback
+    try:
+        payload = {"title": "AFTR Test", "body": "Si ves esto, las notificaciones funcionan.", "tag": "test", "url": "/"}
+        sent = send_to_user(uid, payload)
+        return JSONResponse({"ok": True, "sent": sent})
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": str(e), "trace": traceback.format_exc()})
