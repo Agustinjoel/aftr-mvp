@@ -87,10 +87,11 @@ def _send_one(endpoint: str, p256dh: str, auth: str, payload: dict) -> bool:
     """Envía una notificación a una suscripción. Retorna True si fue exitoso."""
     try:
         from pywebpush import webpush, WebPushException
+        from config.settings import VAPID_PRIVATE_KEY
         webpush(
             subscription_info={"endpoint": endpoint, "keys": {"p256dh": p256dh, "auth": auth}},
             data=json.dumps(payload),
-            vapid_private_key=_vapid_private_key_pem(),
+            vapid_private_key=VAPID_PRIVATE_KEY,
             vapid_claims=_get_vapid_claims(),
         )
         return True
