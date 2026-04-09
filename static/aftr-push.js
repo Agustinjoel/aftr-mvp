@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var VAPID_PUBLIC_KEY = 'BFChaN7xYNXVMuUdUvyinJ1O_HLsI5AD7GaMu1syhumy0Sv-pCnQss7W1wy5wnWZJurpSK4M1fOmna3jYAqB99c';
+  var VAPID_PUBLIC_KEY = 'BNUX2vp8zibrk3-ab3TYl0WQEb8yaBi-3_S8GRbUsEhFfOlnsh38Snx0QVyk_Cq8ogv1b3R4yF2yImpuUV1tV8Q';
 
   function urlBase64ToUint8Array(base64String) {
     var padding = '='.repeat((4 - base64String.length % 4) % 4);
