@@ -23,7 +23,7 @@ def _utc_iso() -> str:
 
 
 async def _live_loop() -> None:
-    sec = float(getattr(settings, "live_refresh_seconds", 60) or 60)
+    sec = float(getattr(settings, "live_refresh_seconds", 30) or 30)
     logger.info(
         "AUTO REFRESH: LIVE loop | interval=%.0fs | %s",
         sec,

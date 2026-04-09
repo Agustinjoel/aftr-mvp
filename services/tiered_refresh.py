@@ -213,7 +213,7 @@ def run_live_refresh_job() -> JobOutcome:
             time.sleep(w)
 
         st = _load_state()
-        min_gap = max(10, int(getattr(settings, "live_refresh_min_interval_sec", 30) or 30))
+        min_gap = max(20, int(getattr(settings, "live_refresh_min_interval_sec", 30) or 30))
         if _seconds_since("last_live_ts", st) < min_gap:
             out.skipped = True
             out.skip_reason = "fresh"

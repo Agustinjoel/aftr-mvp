@@ -334,7 +334,7 @@ def process_live_events() -> int:
             fix_status in _STATUS_KICKOFF
             and prev_status not in _STATUS_KICKOFF
             and not state[fix_id]["notified_kickoff"]
-            and int(fix_elapsed or 0) <= 10
+            and int(fix_elapsed or 0) <= 30
         ):
             payload = {
                 "title": f"Arrancó: {match_title}",
@@ -517,6 +517,21 @@ def process_cache_live_events(league_codes: list[str]) -> int:
     state_changed = False
     notifications_sent = 0
 
+    # Fix doble notificación: si API-Football está activa, recoger los partidos que
+    # ya cubrió el motor pago (claves sin prefijo "c_") para no procesarlos aquí.
+    _paid_covered: set[tuple[str, str]] = set()
+    try:
+        from data.providers.api_football import _api_key
+        if _api_key():
+            for _k, _v in state.items():
+                if not _k.startswith("c_") and isinstance(_v, dict):
+                    _h = _normalize(_v.get("home", ""))
+                    _a = _normalize(_v.get("away", ""))
+                    if _h and _a:
+                        _paid_covered.add((_h, _a))
+    except Exception:
+        pass
+
     for code in league_codes:
         curr_list = read_json(f"daily_matches_{code}.json")
         prev_list = read_json(f"daily_matches_{code}.json.prev")
@@ -546,6 +561,11 @@ def process_cache_live_events(league_codes: list[str]) -> int:
 
             if not mid or not home_name or not away_name:
                 continue
+
+            # Saltar si ya fue cubierto por el motor pago en este ciclo
+            if _paid_covered and (_normalize(home_name), _normalize(away_name)) in _paid_covered:
+                continue
+
             if score_h is None or score_a is None:
                 score_h = score_h or 0
                 score_a = score_a or 0
@@ -609,7 +629,7 @@ def process_cache_live_events(league_codes: list[str]) -> int:
             goal_scored = (
                 not first_time_seen
                 and (score_h != prev_h or score_a != prev_a)
-                and prev_h >= 0
+                and (prev_h >= 0 or score_h > 0 or score_a > 0)
             )
 
             # ── KICK-OFF ──────────────────────────────────────────────────────
@@ -651,10 +671,16 @@ def process_cache_live_events(league_codes: list[str]) -> int:
                     logger.info("cache_live HT: mid=%s %s %s users=%d", mid, match_title, score_str, n)
 
             # ── INICIO 2° TIEMPO ──────────────────────────────────────────────
+            # Normal path: IN_PLAY viniendo de PAUSED.
+            # Fallback: si el ciclo con PAUSED se perdió, disparar igual cuando
+            # ya notificamos HT y volvemos a ver IN_PLAY.
             if (
-                cur_status in _FDO_KICKOFF          # IN_PLAY de nuevo
-                and prev_status in _FDO_HALFTIME    # venía de PAUSED
-                and not prev_state.get("notified_2h")
+                not prev_state.get("notified_2h")
+                and cur_status in _FDO_KICKOFF  # IN_PLAY
+                and (
+                    prev_status in _FDO_HALFTIME      # normal: venía de PAUSED
+                    or prev_state.get("notified_ht")  # fallback: HT ya notificado
+                )
             ):
                 payload = {
                     "title": f"2° tiempo: {home_name} {score_str} {away_name}",

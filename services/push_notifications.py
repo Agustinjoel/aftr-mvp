@@ -7,6 +7,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import time
 from datetime import datetime, timezone, timedelta
 
 logger = logging.getLogger("aftr.push")
@@ -65,17 +66,69 @@ def _vapid_private_key_pem() -> str:
                      "Debe ser PEM, DER en base64 o escalar EC de 32 bytes.")
 
 NOTIFY_BEFORE_MIN = 60  # notificar 60 min antes del kick-off
-_notified_cache: set[str] = set()  # evitar duplicados en memoria (pick_id+uid)
-_NOTIFIED_CACHE_MAX = 5000  # cap para evitar memory leak en workers de larga duración
+
+# _notified_cache: {key: timestamp_float} — persistido a disco con TTL 2h
+_notified_cache: dict[str, float] = {}
+_notified_cache_loaded: bool = False
+_NOTIFIED_CACHE_MAX = 5000
+_NOTIFIED_CACHE_TTL_SEC = 2 * 3600  # 2 horas
+_NOTIFIED_CACHE_FILE = "notified_cache.json"
+
+
+def _load_notified_cache() -> None:
+    global _notified_cache, _notified_cache_loaded
+    if _notified_cache_loaded:
+        return
+    try:
+        from data.cache import read_json
+        raw = read_json(_NOTIFIED_CACHE_FILE)
+        if isinstance(raw, dict):
+            now = time.time()
+            _notified_cache = {
+                k: v for k, v in raw.items()
+                if isinstance(v, (int, float)) and (now - float(v)) < _NOTIFIED_CACHE_TTL_SEC
+            }
+        else:
+            _notified_cache = {}
+    except Exception:
+        _notified_cache = {}
+    _notified_cache_loaded = True
+
+
+def _save_notified_cache() -> None:
+    try:
+        from data.cache import write_json
+        write_json(_NOTIFIED_CACHE_FILE, _notified_cache)
+    except Exception as _e:
+        logger.warning("_save_notified_cache error: %s", _e)
+
+
+def _cache_has(key: str) -> bool:
+    _load_notified_cache()
+    ts = _notified_cache.get(key)
+    if ts is None:
+        return False
+    if (time.time() - ts) >= _NOTIFIED_CACHE_TTL_SEC:
+        del _notified_cache[key]
+        return False
+    return True
 
 
 def _cache_add(key: str) -> None:
+    _load_notified_cache()
+    now = time.time()
     if len(_notified_cache) >= _NOTIFIED_CACHE_MAX:
-        # Eliminar la mitad más vieja (set no tiene orden, así que simplemente vaciamos la mitad)
-        to_remove = list(_notified_cache)[:_NOTIFIED_CACHE_MAX // 2]
-        for k in to_remove:
-            _notified_cache.discard(k)
-    _notified_cache.add(key)
+        # Primero limpiar entradas expiradas
+        expired = [k for k, v in _notified_cache.items() if (now - v) >= _NOTIFIED_CACHE_TTL_SEC]
+        for k in expired:
+            del _notified_cache[k]
+        # Si sigue lleno, eliminar la mitad más antigua
+        if len(_notified_cache) >= _NOTIFIED_CACHE_MAX:
+            oldest = sorted(_notified_cache.items(), key=lambda x: x[1])
+            for k, _ in oldest[:_NOTIFIED_CACHE_MAX // 2]:
+                del _notified_cache[k]
+    _notified_cache[key] = now
+    _save_notified_cache()
 
 
 def _get_vapid_claims() -> dict:
@@ -197,7 +250,7 @@ def notify_upcoming_picks(picks: list[dict], user_follows: dict[str, list[int]])
 
         for uid in followers:
             cache_key = f"{pick_id}:{uid}"
-            if cache_key in _notified_cache:
+            if _cache_has(cache_key):
                 continue
             sent = send_to_user(uid, payload)
             if sent > 0:
@@ -240,7 +293,7 @@ def notify_tracker_bets() -> None:
         mins_left = max(1, int((kickoff - now).total_seconds() / 60))
 
         cache_key = f"tracker:{leg_id}:{uid}"
-        if cache_key in _notified_cache:
+        if _cache_has(cache_key):
             continue
 
         home = row["home_team"]
@@ -289,7 +342,7 @@ def notify_trial_expiring() -> None:
     for row in users:
         uid = row["id"]
         cache_key = f"trial_expiring:{uid}"
-        if cache_key in _notified_cache:
+        if _cache_has(cache_key):
             continue
 
         sub_end_raw = None
