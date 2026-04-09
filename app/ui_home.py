@@ -1131,10 +1131,13 @@ def home_page(request: Request) -> str:
             <div class="brand-tag">Picks con ventaja estadística</div>
           </div>
         </div>
-        <a href="/" class="home-header-inicio" aria-current="page">Inicio</a>
+        <nav class="home-header-nav">
+          <a href="/" class="home-header-navlink home-header-navlink--active">Inicio</a>
+          <a href="/tracker" class="home-header-navlink">Tracker</a>
+          {'<a href="/admin" class="home-header-navlink home-header-navlink--admin">Admin</a>' if is_admin_user else ''}
+        </nav>
         <div class="home-header-auth">
           {plan_badge}
-          {'<a href="/admin" class="muted">Admin</a>' if is_admin_user else ''}
         </div>
       </header>
       {cache_status_html}

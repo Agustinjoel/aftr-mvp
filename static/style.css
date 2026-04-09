@@ -1493,13 +1493,13 @@ body{
   margin-bottom: 28px;
 }
 .home-header .brand{ margin-right: 12px; }
-.home-header-inicio{ margin-right: auto; }
 .home-header-nav{
   display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
   justify-content: center;
+  margin-right: auto;
 }
 .home-header-auth{
   display: flex;
@@ -5597,20 +5597,33 @@ input[type="datetime-local"].tracker-input{ color-scheme:dark; }
   margin-left: auto;
   margin-right: auto;
 }
-.home-header-inicio{
+.home-header-navlink{
   font-size: 13px;
-  font-weight: 800;
-  color: rgba(234,242,255,.72);
+  font-weight: 700;
+  color: rgba(234,242,255,.65);
   text-decoration: none;
-  padding: 8px 12px;
+  padding: 7px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.08);
   transition: color .2s ease, border-color .2s ease, background .2s ease;
 }
-.home-header-inicio:hover{
+.home-header-navlink:hover{
   color: rgba(234,242,255,.95);
   border-color: rgba(170,210,255,.28);
-  background: rgba(255,255,255,.04);
+  background: rgba(255,255,255,.05);
+}
+.home-header-navlink--active{
+  color: #fff;
+  border-color: rgba(99,179,255,.35);
+  background: rgba(99,179,255,.08);
+}
+.home-header-navlink--admin{
+  color: rgba(251,191,36,.8);
+  border-color: rgba(251,191,36,.2);
+}
+.home-header-navlink--admin:hover{
+  color: rgba(251,191,36,1);
+  background: rgba(251,191,36,.06);
 }
 /* League dashboard: carousel needs full row width (same effective width as home strip). */
 .top.top-pro.top-pro--with-carousel{
