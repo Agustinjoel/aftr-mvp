@@ -27,6 +27,10 @@ logger = logging.getLogger("aftr.live_events")
 # Archivo de estado: {fixture_id_str: {home, away, score_h, score_a, status, ...notified flags...}}
 _STATE_FILE = "live_events_state.json"
 
+# FIX 3: partidos ya cubiertos por el motor API-Football en el ciclo actual
+# Se puebla en process_live_events() y se consulta en process_cache_live_events()
+_apifootball_covered_teams: set[str] = set()  # "home_norm|away_norm"
+
 # Ventana: solo bets con kickoff en las últimas N horas
 _KICKOFF_WINDOW_H = 4
 
@@ -235,8 +239,12 @@ def process_live_events() -> int:
     y envía pushes a usuarios con tracker bets o picks seguidas en esos partidos.
     Retorna cantidad de notificaciones enviadas.
     """
+    global _apifootball_covered_teams
     from data.providers.api_football import fetch_live_fixtures, _api_key
     from services.push_notifications import send_to_user
+
+    # FIX 3: limpiar cobertura del ciclo anterior
+    _apifootball_covered_teams = set()
 
     if not _api_key():
         return 0
@@ -329,12 +337,18 @@ def process_live_events() -> int:
         score_str = f"{score_h}–{score_a}"
         match_title = f"{home_name} vs {away_name}"
 
+        # FIX 3: registrar este partido como cubierto por API-Football
+        _apifootball_covered_teams.add(
+            f"{_normalize(home_name)}|{_normalize(away_name)}"
+        )
+
         # ── KICK-OFF ──────────────────────────────────────────────────────────
+        # FIX 4: ampliar ventana a 30 min para no perder kickoff en polls tardíos
         if (
             fix_status in _STATUS_KICKOFF
             and prev_status not in _STATUS_KICKOFF
             and not state[fix_id]["notified_kickoff"]
-            and int(fix_elapsed or 0) <= 10
+            and int(fix_elapsed or 0) <= 30
         ):
             payload = {
                 "title": f"Arrancó: {match_title}",
@@ -505,6 +519,10 @@ def process_cache_live_events(league_codes: list[str]) -> int:
     from data.cache import read_json
     from services.push_notifications import send_to_user, load_user_follows_index
     from config.settings import settings as _s
+    from data.providers.api_football import _api_key as _apif_key
+
+    # FIX 3: si API-Football está activa, este motor actúa solo como fallback
+    apif_active = bool(_apif_key())
 
     pending_legs   = _load_pending_legs()
     follows_index  = load_user_follows_index()   # {pick_id: [user_ids]}
@@ -546,6 +564,13 @@ def process_cache_live_events(league_codes: list[str]) -> int:
 
             if not mid or not home_name or not away_name:
                 continue
+
+            # FIX 3: si API-Football ya cubrió este partido, saltearlo
+            if apif_active:
+                team_key = f"{_normalize(home_name)}|{_normalize(away_name)}"
+                if team_key in _apifootball_covered_teams:
+                    continue
+
             if score_h is None or score_a is None:
                 score_h = score_h or 0
                 score_a = score_a or 0
@@ -606,10 +631,12 @@ def process_cache_live_events(league_codes: list[str]) -> int:
             score_str   = f"{score_h}–{score_a}"
             match_title = f"{home_name} vs {away_name}"
             is_final    = cur_status in _FDO_FINAL
+            # FIX 5: detectar gol incluso cuando el score previo era null (prev_h == -1)
+            # siempre que el marcador actual muestre goles
             goal_scored = (
                 not first_time_seen
                 and (score_h != prev_h or score_a != prev_a)
-                and prev_h >= 0
+                and (prev_h >= 0 or score_h > 0 or score_a > 0)
             )
 
             # ── KICK-OFF ──────────────────────────────────────────────────────
@@ -651,10 +678,15 @@ def process_cache_live_events(league_codes: list[str]) -> int:
                     logger.info("cache_live HT: mid=%s %s %s users=%d", mid, match_title, score_str, n)
 
             # ── INICIO 2° TIEMPO ──────────────────────────────────────────────
+            # FIX 2: también disparar si ya se notificó HT pero el PAUSED fue salteado
+            # (el partido volvió a IN_PLAY sin que hayamos visto PAUSED en .prev)
             if (
-                cur_status in _FDO_KICKOFF          # IN_PLAY de nuevo
-                and prev_status in _FDO_HALFTIME    # venía de PAUSED
+                cur_status in _FDO_KICKOFF
                 and not prev_state.get("notified_2h")
+                and (
+                    prev_status in _FDO_HALFTIME          # caso normal: veníamos de PAUSED
+                    or state[state_key].get("notified_ht")  # FIX 2: ya se notificó HT
+                )
             ):
                 payload = {
                     "title": f"2° tiempo: {home_name} {score_str} {away_name}",

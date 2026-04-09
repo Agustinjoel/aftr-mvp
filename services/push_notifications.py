@@ -11,6 +11,34 @@ from datetime import datetime, timezone, timedelta
 
 logger = logging.getLogger("aftr.push")
 
+# FIX 6: caché persistente en disco para sobrevivir reinicios
+_NOTIFIED_CACHE_FILE = "push_notified_cache.json"
+_NOTIFIED_CACHE_TTL_H = 2  # horas de TTL por entrada
+
+
+def _load_notified_cache() -> dict[str, str]:
+    """Carga el caché desde disco, descartando entradas expiradas."""
+    try:
+        from data.cache import read_json
+        raw = read_json(_NOTIFIED_CACHE_FILE)
+        if not isinstance(raw, dict):
+            return {}
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=_NOTIFIED_CACHE_TTL_H)
+        return {
+            k: v for k, v in raw.items()
+            if isinstance(v, str) and datetime.fromisoformat(v) > cutoff
+        }
+    except Exception:
+        return {}
+
+
+def _save_notified_cache(cache: dict[str, str]) -> None:
+    try:
+        from data.cache import write_json
+        write_json(_NOTIFIED_CACHE_FILE, cache)
+    except Exception as e:
+        logger.warning("push: no se pudo guardar notified_cache: %s", e)
+
 
 def _vapid_private_key_pem() -> str:
     """
@@ -65,17 +93,25 @@ def _vapid_private_key_pem() -> str:
                      "Debe ser PEM, DER en base64 o escalar EC de 32 bytes.")
 
 NOTIFY_BEFORE_MIN = 60  # notificar 60 min antes del kick-off
-_notified_cache: set[str] = set()  # evitar duplicados en memoria (pick_id+uid)
 _NOTIFIED_CACHE_MAX = 5000  # cap para evitar memory leak en workers de larga duración
+
+# FIX 6: caché persistente {key: iso_timestamp}; cargado desde disco al startup
+_notified_cache_disk: dict[str, str] = _load_notified_cache()
+# Mantener el set en memoria para lookups O(1) rápidos
+_notified_cache: set[str] = set(_notified_cache_disk.keys())
 
 
 def _cache_add(key: str) -> None:
+    now_iso = datetime.now(timezone.utc).isoformat()
     if len(_notified_cache) >= _NOTIFIED_CACHE_MAX:
-        # Eliminar la mitad más vieja (set no tiene orden, así que simplemente vaciamos la mitad)
-        to_remove = list(_notified_cache)[:_NOTIFIED_CACHE_MAX // 2]
-        for k in to_remove:
+        # Eliminar la mitad más vieja por timestamp
+        sorted_keys = sorted(_notified_cache_disk, key=lambda k: _notified_cache_disk.get(k, ""))
+        for k in sorted_keys[: _NOTIFIED_CACHE_MAX // 2]:
             _notified_cache.discard(k)
+            _notified_cache_disk.pop(k, None)
     _notified_cache.add(key)
+    _notified_cache_disk[key] = now_iso
+    _save_notified_cache(_notified_cache_disk)
 
 
 def _get_vapid_claims() -> dict:
