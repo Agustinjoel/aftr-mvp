@@ -34,7 +34,15 @@ def _vapid_private_key_pem() -> str:
     pad = (4 - len(key_std) % 4) % 4
     raw = base64.b64decode(key_std + "=" * pad)
 
-    # Intento 1: DER (formato que genera pywebpush --gen, ~121 bytes)
+    # Intento 1: los bytes decodificados son en realidad un PEM (base64 del PEM)
+    try:
+        decoded_str = raw.decode("utf-8").strip()
+        if "-----BEGIN" in decoded_str:
+            return decoded_str
+    except Exception:
+        pass
+
+    # Intento 2: DER directo (~121 bytes, formato pywebpush --gen)
     try:
         private_key = load_der_private_key(raw, password=None, backend=default_backend())
         pem = private_key.private_bytes(Encoding.PEM, PrivateFormat.TraditionalOpenSSL, NoEncryption())
@@ -42,7 +50,7 @@ def _vapid_private_key_pem() -> str:
     except Exception:
         pass
 
-    # Intento 2: escalar raw de 32 bytes (formato web-push Node.js)
+    # Intento 3: escalar raw de 32 bytes (formato web-push Node.js)
     try:
         from cryptography.hazmat.primitives.asymmetric.ec import derive_private_key, SECP256R1
         if len(raw) == 32:
