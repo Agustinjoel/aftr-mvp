@@ -183,6 +183,52 @@ def _send_all(send_to_user, user_ids: set[int], payload: dict) -> int:
     return sent
 
 
+def _update_cache_live_minutes(live_fixtures: list[dict]) -> None:
+    """
+    Parcha el caché diario con el minuto actual de cada partido en vivo
+    (API-Football → elapsed). Así la UI puede mostrar '67'' en las live cards.
+    """
+    from data.cache import read_json, write_json
+    from config.settings import settings
+
+    live_by_teams: dict[str, dict] = {}
+    for fix in live_fixtures:
+        teams = fix.get("teams") or {}
+        home_n = _normalize((teams.get("home") or {}).get("name", ""))
+        away_n = _normalize((teams.get("away") or {}).get("name", ""))
+        if not home_n or not away_n:
+            continue
+        fix_info = fix.get("fixture") or {}
+        status_info = fix_info.get("status") or {}
+        live_by_teams[f"{home_n}|{away_n}"] = {
+            "elapsed": status_info.get("elapsed"),
+            "status_short": status_info.get("short", ""),
+        }
+
+    if not live_by_teams:
+        return
+
+    for code in settings.league_codes():
+        fname = f"daily_matches_{code}.json"
+        data = read_json(fname)
+        if not isinstance(data, list):
+            continue
+        changed = False
+        for m in data:
+            if not isinstance(m, dict):
+                continue
+            h = _normalize(m.get("home") or m.get("home_team") or "")
+            a = _normalize(m.get("away") or m.get("away_team") or "")
+            info = live_by_teams.get(f"{h}|{a}")
+            if info:
+                m["elapsed"] = info["elapsed"]
+                if info["status_short"]:
+                    m["status"] = info["status_short"]
+                changed = True
+        if changed:
+            write_json(fname, data)
+
+
 def process_live_events() -> int:
     """
     Busca partidos en vivo via API-Football, detecta eventos de estado y goles,
@@ -198,6 +244,12 @@ def process_live_events() -> int:
     live_fixtures = fetch_live_fixtures()
     if not live_fixtures:
         return 0
+
+    # Actualizar minutos en caché para que la UI los muestre
+    try:
+        _update_cache_live_minutes(live_fixtures)
+    except Exception as _e:
+        logger.warning("update_cache_live_minutes error (non-fatal): %s", _e)
 
     pending_legs    = _load_pending_legs()
     followed_picks  = _load_followed_picks()
