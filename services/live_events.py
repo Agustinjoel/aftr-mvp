@@ -334,7 +334,7 @@ def process_live_events() -> int:
             fix_status in _STATUS_KICKOFF
             and prev_status not in _STATUS_KICKOFF
             and not state[fix_id]["notified_kickoff"]
-            and int(fix_elapsed or 0) <= 10
+            and int(fix_elapsed or 0) <= 30
         ):
             payload = {
                 "title": f"Arrancó: {match_title}",
@@ -606,10 +606,12 @@ def process_cache_live_events(league_codes: list[str]) -> int:
             score_str   = f"{score_h}–{score_a}"
             match_title = f"{home_name} vs {away_name}"
             is_final    = cur_status in _FDO_FINAL
+            # prev_h puede ser -1 si el partido aún no había arrancado (score null).
+            # Aceptamos la transición null→gol cuando el score actual ya tiene algún gol.
             goal_scored = (
                 not first_time_seen
                 and (score_h != prev_h or score_a != prev_a)
-                and prev_h >= 0
+                and (prev_h >= 0 or score_h > 0 or score_a > 0)
             )
 
             # ── KICK-OFF ──────────────────────────────────────────────────────
@@ -651,10 +653,17 @@ def process_cache_live_events(league_codes: list[str]) -> int:
                     logger.info("cache_live HT: mid=%s %s %s users=%d", mid, match_title, score_str, n)
 
             # ── INICIO 2° TIEMPO ──────────────────────────────────────────────
+            # Condición principal: venía de PAUSED (HT detectado en ciclo anterior).
+            # Condición alternativa: si el poll salteó el ciclo de PAUSED, detectamos
+            # 2H cuando estamos IN_PLAY + ya se había notificado el HT + aún no se
+            # notificó el 2H. Esto evita perder la notificación por backoff/lag.
             if (
-                cur_status in _FDO_KICKOFF          # IN_PLAY de nuevo
-                and prev_status in _FDO_HALFTIME    # venía de PAUSED
+                cur_status in _FDO_KICKOFF
                 and not prev_state.get("notified_2h")
+                and (
+                    prev_status in _FDO_HALFTIME                     # camino normal
+                    or prev_state.get("notified_ht")                 # camino fallback
+                )
             ):
                 payload = {
                     "title": f"2° tiempo: {home_name} {score_str} {away_name}",

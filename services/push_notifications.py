@@ -64,18 +64,67 @@ def _vapid_private_key_pem() -> str:
     raise ValueError(f"VAPID_PRIVATE_KEY no reconocida ({len(raw)} bytes). "
                      "Debe ser PEM, DER en base64 o escalar EC de 32 bytes.")
 
+import time
+
 NOTIFY_BEFORE_MIN = 60  # notificar 60 min antes del kick-off
-_notified_cache: set[str] = set()  # evitar duplicados en memoria (pick_id+uid)
 _NOTIFIED_CACHE_MAX = 5000  # cap para evitar memory leak en workers de larga duración
+_NOTIFIED_CACHE_TTL = 7200  # TTL en segundos (2 horas)
+_NOTIFIED_CACHE_FILE = "push_notified_cache.json"
+
+# {key: timestamp_added} — persiste en disco para sobrevivir reinicios
+_notified_cache: dict[str, float] = {}
+
+
+def _cache_load() -> None:
+    """Carga el cache desde disco al startup, descartando entradas vencidas."""
+    global _notified_cache
+    try:
+        from data.cache import read_json
+        raw = read_json(_NOTIFIED_CACHE_FILE)
+        if not isinstance(raw, dict):
+            return
+        now = time.time()
+        _notified_cache = {k: v for k, v in raw.items() if isinstance(v, (int, float)) and now - v < _NOTIFIED_CACHE_TTL}
+    except Exception as _e:
+        logger.debug("push cache load error (non-fatal): %s", _e)
+
+
+def _cache_save() -> None:
+    """Persiste el cache en disco."""
+    try:
+        from data.cache import write_json
+        write_json(_NOTIFIED_CACHE_FILE, _notified_cache)
+    except Exception as _e:
+        logger.debug("push cache save error (non-fatal): %s", _e)
 
 
 def _cache_add(key: str) -> None:
+    now = time.time()
+    # Limpiar entradas vencidas antes de agregar
+    expired = [k for k, ts in _notified_cache.items() if now - ts >= _NOTIFIED_CACHE_TTL]
+    for k in expired:
+        del _notified_cache[k]
+    # Cap de tamaño
     if len(_notified_cache) >= _NOTIFIED_CACHE_MAX:
-        # Eliminar la mitad más vieja (set no tiene orden, así que simplemente vaciamos la mitad)
-        to_remove = list(_notified_cache)[:_NOTIFIED_CACHE_MAX // 2]
-        for k in to_remove:
-            _notified_cache.discard(k)
-    _notified_cache.add(key)
+        oldest = sorted(_notified_cache.items(), key=lambda x: x[1])[:_NOTIFIED_CACHE_MAX // 2]
+        for k, _ in oldest:
+            del _notified_cache[k]
+    _notified_cache[key] = now
+    _cache_save()
+
+
+def _cache_has(key: str) -> bool:
+    ts = _notified_cache.get(key)
+    if ts is None:
+        return False
+    if time.time() - ts >= _NOTIFIED_CACHE_TTL:
+        del _notified_cache[key]
+        return False
+    return True
+
+
+# Cargar cache al importar el módulo
+_cache_load()
 
 
 def _get_vapid_claims() -> dict:
@@ -197,7 +246,7 @@ def notify_upcoming_picks(picks: list[dict], user_follows: dict[str, list[int]])
 
         for uid in followers:
             cache_key = f"{pick_id}:{uid}"
-            if cache_key in _notified_cache:
+            if _cache_has(cache_key):
                 continue
             sent = send_to_user(uid, payload)
             if sent > 0:
@@ -240,7 +289,7 @@ def notify_tracker_bets() -> None:
         mins_left = max(1, int((kickoff - now).total_seconds() / 60))
 
         cache_key = f"tracker:{leg_id}:{uid}"
-        if cache_key in _notified_cache:
+        if _cache_has(cache_key):
             continue
 
         home = row["home_team"]
@@ -289,7 +338,7 @@ def notify_trial_expiring() -> None:
     for row in users:
         uid = row["id"]
         cache_key = f"trial_expiring:{uid}"
-        if cache_key in _notified_cache:
+        if _cache_has(cache_key):
             continue
 
         sub_end_raw = None
@@ -336,7 +385,7 @@ def notify_trial_expiring() -> None:
         email_addr = (row.get("email") or "").strip()
         uname = (row.get("username") or email_addr.split("@")[0] or "").strip()
         email_cache_key = f"trial_expiring_email:{uid}"
-        if email_addr and email_cache_key not in _notified_cache:
+        if email_addr and not _cache_has(email_cache_key):
             from app.email_utils import send_trial_expiring_email
             days_left = max(1, hours_left // 24) if hours_left > 0 else 0
             ok = send_trial_expiring_email(email_addr, uname, days_left)

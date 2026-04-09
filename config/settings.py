@@ -228,9 +228,9 @@ if REFRESH_RUNNING_TTL_SEC < 0:
 
 # --- Auto-refresh multi-tier (LIVE / UPCOMING / RESULTS) ---
 try:
-    LIVE_REFRESH_SECONDS = int((os.getenv("LIVE_REFRESH_SECONDS") or "60").strip())
+    LIVE_REFRESH_SECONDS = int((os.getenv("LIVE_REFRESH_SECONDS") or "30").strip())
 except ValueError:
-    LIVE_REFRESH_SECONDS = 60
+    LIVE_REFRESH_SECONDS = 30
 if LIVE_REFRESH_SECONDS < 15:
     LIVE_REFRESH_SECONDS = 15
 

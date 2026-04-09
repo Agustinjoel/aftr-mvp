@@ -259,30 +259,31 @@ def run_live_refresh_job() -> JobOutcome:
 
         _save_state_patch({"last_live_ts": time.time()})
 
-        # Live events: goles y resultados en tiempo real via API-Football
+        # Live events — API-Football (RapidAPI, pago): más rápido + minuto exacto en goles
+        # Se ejecuta primero; si está activo, el motor de caché se omite para evitar
+        # doble notificación (ambos motores usan IDs distintos y no se deduplicaban).
+        _api_football_active = False
         try:
             from services.live_events import process_live_events
-            n_live = process_live_events()
-            if n_live:
-                logger.info("live_events sent %d push notifications", n_live)
+            from data.providers.api_football import _api_key
+            if _api_key():
+                n_live = process_live_events()
+                _api_football_active = True
+                if n_live:
+                    logger.info("apifootball_live_events sent %d push notifications", n_live)
         except Exception as _live_err:
             logger.warning("live_events error (non-fatal): %s", _live_err)
 
-        # Push notifications: notify_upcoming_picks (solo en live job — datos de picks en tiempo real)
-        try:
-            from services.push_notifications import notify_upcoming_picks, load_user_follows_index
-            from config.settings import settings as _s
-            from data.cache import read_json_with_fallback
-            follows_index = load_user_follows_index()
-            if follows_index:
-                all_picks: list[dict] = []
-                for code in _s.league_codes():
-                    picks = read_json_with_fallback(f"daily_picks_{code}.json")
-                    if isinstance(picks, list):
-                        all_picks.extend(picks)
-                notify_upcoming_picks(all_picks, follows_index)
-        except Exception as _push_err:
-            logger.warning("push_notifications error (non-fatal): %s", _push_err)
+        # Live events — motor de caché (gratis): kickoff/HT/2H/goles/FT
+        # Solo corre como fallback cuando API-Football NO está configurado.
+        if not _api_football_active:
+            try:
+                from services.live_events import process_cache_live_events
+                n_cache = process_cache_live_events(hints)
+                if n_cache:
+                    logger.info("cache_live_events sent %d push notifications", n_cache)
+            except Exception as _cache_err:
+                logger.warning("cache_live_events error (non-fatal): %s", _cache_err)
 
         logger.info(
             "AUTO REFRESH LIVE SUCCESS | http=%d rate_sleep_s=%d matches_updated=%d | %s",
@@ -402,9 +403,20 @@ def run_results_refresh_job() -> JobOutcome:
         # Push notifications: se llaman aquí (results job, corre siempre cada ~10min)
         # y NO en el live job que se saltea cuando no hay partidos en vivo.
         try:
-            from services.push_notifications import notify_tracker_bets, notify_trial_expiring
+            from services.push_notifications import notify_tracker_bets, notify_trial_expiring, notify_upcoming_picks, load_user_follows_index
+            from data.cache import read_json_with_fallback
             notify_tracker_bets()
             notify_trial_expiring()
+            # notify_upcoming_picks: picks que empiezan en <=60min (corre aquí y no en live
+            # job para que funcione aunque no haya partidos en vivo todavía)
+            follows_index = load_user_follows_index()
+            if follows_index:
+                all_picks: list[dict] = []
+                for _code in settings.league_codes():
+                    _picks = read_json_with_fallback(f"daily_picks_{_code}.json")
+                    if isinstance(_picks, list):
+                        all_picks.extend(_picks)
+                notify_upcoming_picks(all_picks, follows_index)
         except Exception as _push_err:
             logger.warning("push_notifications error (non-fatal): %s", _push_err)
 
