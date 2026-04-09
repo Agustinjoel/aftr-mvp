@@ -5,13 +5,15 @@ self.addEventListener('push', function (event) {
 
   var title = data.title || 'AFTR Pick';
   var options = {
-    body:    data.body  || '',
-    icon:    data.icon  || '/static/logo_aftr.png',
-    badge:   '/static/logo_aftr.png',
-    tag:     data.tag   || 'aftr-pick',
-    data:    { url: data.url || '/' },
-    vibrate: [200, 100, 200],
+    body:               data.body  || '',
+    icon:               data.icon  || '/static/logo_aftr.png',
+    badge:              '/static/badge.png',
+    tag:                data.tag   || 'aftr-pick',
+    data:               { url: data.url || '/' },
+    vibrate:            [200, 100, 200],
+    requireInteraction: true,
   };
+  if (data.image) options.image = data.image;
   event.waitUntil(self.registration.showNotification(title, options));
 });
 

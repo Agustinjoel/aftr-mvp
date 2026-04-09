@@ -186,9 +186,11 @@ def notify_upcoming_picks(picks: list[dict], user_follows: dict[str, list[int]])
         market = pick.get("best_market") or ""
         mins_left = int((kickoff - now).total_seconds() / 60)
 
+        icon = pick.get("home_crest") or pick.get("home_logo") or "/static/logo_aftr.png"
         payload = {
             "title": f"{home} vs {away}",
             "body": f"Tu pick empieza en {mins_left} min" + (f" — {market}" if market else ""),
+            "icon": icon,
             "tag": f"pick-{pick_id}",
             "url": "/",
         }
