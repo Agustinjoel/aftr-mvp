@@ -690,6 +690,23 @@ def push_unsubscribe(request: Request, payload: dict = Body(...)):
         put_conn(conn)
 
 
+@router.delete("/push/clear")
+def push_clear(request: Request):
+    """Delete all push subscriptions for the current user (clean slate for re-subscribe)."""
+    uid, err = _require_user(request)
+    if err is not None:
+        return err
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM push_subscriptions WHERE user_id=%s", (uid,))
+        deleted = cur.rowcount
+        conn.commit()
+        return JSONResponse({"ok": True, "deleted": deleted})
+    finally:
+        put_conn(conn)
+
+
 @router.post("/favorite")
 def user_favorite(request: Request, payload: dict = Body(...)):
     """Store a favorite pick_id for the current user. Optional: market, aftr_score, tier, edge, home_team, away_team."""

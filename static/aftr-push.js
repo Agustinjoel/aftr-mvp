@@ -22,6 +22,13 @@
     });
   }
 
+  function clearServerSubscriptions() {
+    return fetch('/user/push/clear', {
+      method: 'DELETE',
+      credentials: 'include',
+    }).catch(function () {});
+  }
+
   function subscribe(reg, onSuccess, onError) {
     reg.pushManager.subscribe({
       userVisibleOnly: true,
@@ -50,9 +57,25 @@
       if (Notification.permission === 'granted') {
         reg.pushManager.getSubscription().then(function (existing) {
           if (existing) {
-            sendSubscriptionToServer(existing).catch(function () {});
+            // Check if this subscription uses the current VAPID key by trying to send it.
+            // If it fails (key mismatch), unsubscribe and re-subscribe.
+            sendSubscriptionToServer(existing).then(function (res) {
+              return res.json();
+            }).then(function (data) {
+              if (!data.ok) {
+                // Server rejected it — refresh subscription
+                existing.unsubscribe().then(function () {
+                  return clearServerSubscriptions();
+                }).then(function () {
+                  subscribe(reg, null, null);
+                });
+              }
+            }).catch(function () {});
           } else {
-            subscribe(reg, null, null);
+            // No local subscription — clear server-side stale ones and re-subscribe
+            clearServerSubscriptions().then(function () {
+              subscribe(reg, null, null);
+            });
           }
         });
 
@@ -62,19 +85,20 @@
           reactivateBtn.addEventListener('click', function () {
             reactivateBtn.disabled = true;
             reactivateBtn.textContent = '⏳ Activando...';
-            // Unsubscribe first to force fresh subscription
             reg.pushManager.getSubscription().then(function (existing) {
               var doSubscribe = function () {
-                subscribe(reg, function () {
-                  reactivateBtn.textContent = '✅ Activadas';
-                  setTimeout(function () {
-                    reactivateBtn.style.display = 'none';
-                  }, 3000);
-                }, function (err) {
-                  reactivateBtn.disabled = false;
-                  var msg = (err && err.message) ? err.message : String(err);
-                  reactivateBtn.textContent = '❌ ' + msg;
-                  console.error('[AFTR push] subscribe error:', err);
+                clearServerSubscriptions().then(function () {
+                  subscribe(reg, function () {
+                    reactivateBtn.textContent = '✅ Activadas';
+                    setTimeout(function () {
+                      reactivateBtn.style.display = 'none';
+                    }, 3000);
+                  }, function (err) {
+                    reactivateBtn.disabled = false;
+                    var msg = (err && err.message) ? err.message : String(err);
+                    reactivateBtn.textContent = '❌ ' + msg;
+                    console.error('[AFTR push] subscribe error:', err);
+                  });
                 });
               };
               if (existing) {
