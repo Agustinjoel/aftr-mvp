@@ -158,31 +158,6 @@ router.get("/tracker", response_class=HTMLResponse)(tracker_page)
 # _profit_by_market, _set_plan_cookie, _clear_plan_cookie → importados de app.ui_helpers / app.ui_picks_calc
 
 
-@router.post("/auth/lead")
-def signup(data: dict = Body(...)):
-    email = (data.get("email") or "").strip().lower()
-    if not email or "@" not in email:
-        return JSONResponse({"ok": False, "error": "email_invalido"}, status_code=400)
-
-    # guarda en leads (sin password)
-    from app.db import get_conn
-    from datetime import datetime, timezone
-
-    conn = get_conn()
-    try:
-        cur = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS leads (email TEXT PRIMARY KEY, created_at TEXT)")
-        cur.execute(
-            "INSERT OR IGNORE INTO leads(email, created_at) VALUES (?, ?)",
-            (email, datetime.now(timezone.utc).isoformat())
-        )
-        conn.commit()
-    finally:
-        conn.close()
-
-    resp = JSONResponse({"ok": True})
-    resp.set_cookie("aftr_user", email, max_age=60*60*24*365, samesite="lax", path="/")
-    return resp
 
 @router.get("/premium/activate", include_in_schema=False)
 def premium_activate(request: Request, plan: str = "PREMIUM"):

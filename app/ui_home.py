@@ -1134,6 +1134,7 @@ def home_page(request: Request) -> str:
             <div class="modal-line" style="margin-top: 12px;">
               <a href="#" onclick="closeLoginModal(); openForgotModal(); return false;" class="muted" style="font-size: 13px;">¿Olvidaste tu contraseña?</a>
             </div>
+            <p class="signup-footer-note muted" style="margin-top:10px;">¿No tenés cuenta? <a href="/?auth=register" class="modal-link">Crear una acá</a></p>
           </div>
         </div>
       </div>
@@ -1178,6 +1179,7 @@ def home_page(request: Request) -> str:
         <span class="trial-banner-copy">Probás <strong>Premium gratis</strong> — te quedan <strong>{trial_days} día{"s" if trial_days != 1 else ""}</strong></span>
         <button class="trial-banner-cta pill" onclick="openPremium()">Activar ahora →</button>
       </div>''' if user_on_trial and trial_days is not None else ''}
+      {'''<button id="push-enable-btn" style="display:none;width:100%;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:10px 16px;margin:8px 0;text-align:left;cursor:pointer;color:inherit;font-size:13px;">🔔 Activá notificaciones para recibir picks antes de cada partido &nbsp;<span style="color:#3b82f6;font-weight:600;">Activar →</span></button>''' if uid else ''}
       <div class="home-carousel-strip" role="navigation" aria-label="Elegir liga">
         {home_league_carousel_html}
       </div>
@@ -1338,9 +1340,13 @@ def home_page(request: Request) -> str:
           <div class="twp-item">⚽ Picks de tu equipo favorito</div>
         </div>
         <button class="trial-welcome-btn" onclick="closeTrialWelcome()">Empezar a explorar</button>
+        <div id="trial-push-cta" style="margin-top:14px;display:none;">
+          <button id="trial-push-btn" class="pill" style="width:100%;background:var(--accent,#3b82f6);color:#fff;border:none;cursor:pointer;padding:10px;">🔔 Activar notificaciones de picks</button>
+        </div>
         <p class="trial-welcome-note">Sin tarjeta requerida · Se notifica antes de que venza</p>
       </div>
     </div>
+    <button id="push-reactivate-btn" style="display:none"></button>
 
     <!-- Premium Welcome Celebration -->
     <div id="premium-welcome-overlay" class="prem-welcome-overlay" style="{premium_modal_style}" aria-modal="true" role="dialog">
@@ -1392,7 +1398,22 @@ def home_page(request: Request) -> str:
       </div>
     </div>
     <script>
-    if ({show_trial_welcome}) history.replaceState({{}},'','/');
+    if ({show_trial_welcome}) {{
+      history.replaceState({{}},'','/');
+      // Show push CTA in trial welcome modal if permission not yet decided
+      if ('Notification' in window && Notification.permission === 'default') {{
+        var pushCta = document.getElementById('trial-push-cta');
+        if (pushCta) pushCta.style.display = 'block';
+        var trialPushBtn = document.getElementById('trial-push-btn');
+        if (trialPushBtn) {{
+          trialPushBtn.addEventListener('click', function() {{
+            Notification.requestPermission().then(function(perm) {{
+              if (pushCta) pushCta.style.display = 'none';
+            }});
+          }});
+        }}
+      }}
+    }}
     if ({show_premium_welcome}) {{ startConfetti(); setTimeout(showOnboardingModal, 3800); history.replaceState({{}},'','/'); }}
     </script>
     """
@@ -1914,6 +1935,7 @@ def home_page(request: Request) -> str:
     <script src="/static/aftr-share.js?v=1" defer></script>
     <script src="/static/aftr-onboarding.js?v=1" defer></script>
     <script src="/static/aftr-bankroll.js" defer></script>
+    <script src="/static/aftr-push.js" defer></script>
     <script>
     function openForgotModal() {
       document.getElementById('forgot-modal').style.display = 'flex';

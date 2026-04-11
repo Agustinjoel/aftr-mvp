@@ -279,63 +279,6 @@ def register(request: Request, payload: dict = Body(...)):
             content={"ok": False, "error": "Error interno del servidor."},
         )
 
-@router.post("/auth/signup")
-def signup_lead(payload: dict = Body(...)):
-    """Create user account with email + password. Always stores password_hash (bcrypt)."""
-    email = (payload.get("email") or "").strip().lower()
-    password = payload.get("password") or ""
-    username = (payload.get("username") or email or "").strip() or email
-
-    if not email or "@" not in email:
-        return JSONResponse(content={"ok": False, "error": "email_invalido"}, status_code=400)
-    if not password or not str(password).strip():
-        return JSONResponse(content={"ok": False, "error": "password_requerido"}, status_code=400)
-    if _password_too_long(password):
-        return JSONResponse(content={"ok": False, "error": "password_demasiado_larga"}, status_code=400)
-
-    try:
-        pw_hash = bcrypt.hash(password)
-    except Exception as e:
-        logger.warning("signup: bcrypt hash failed: %s", e)
-        return JSONResponse(
-            content={"ok": False, "error": "Error al procesar la contraseña."},
-            status_code=500,
-        )
-
-    logger.info("signup: password_hash generated OK")
-
-    now = datetime.now(timezone.utc)
-    now_iso = now.isoformat()
-    trial_end_iso = (now + timedelta(days=7)).isoformat()
-    conn = get_conn()
-    new_uid: int | None = None
-    try:
-        cur = conn.cursor()
-        cur.execute(
-            """INSERT INTO users(
-                email, username, password_hash, role, subscription_status,
-                subscription_start, subscription_end, created_at, updated_at
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id""",
-            (email, username or None, pw_hash, "premium_user", "trial",
-             now_iso, trial_end_iso, now_iso, now_iso),
-        )
-        new_uid = int(cur.fetchone()["id"])
-        conn.commit()
-    except psycopg2.errors.UniqueViolation:
-        conn.rollback()
-        return JSONResponse(content={"ok": False, "error": "email_ya_registrado"}, status_code=400)
-    finally:
-        put_conn(conn)
-
-    resp = JSONResponse(content={"ok": True})
-    if new_uid is not None:
-        set_session_on_response(resp, new_uid)
-        try:
-            send_welcome_email(email, username or email.split("@")[0])
-        except Exception:
-            logger.warning("signup: welcome email falló para %s", email, exc_info=True)
-    return resp
-
 @router.post("/auth/login")
 def login(request: Request, email: str = Form(...), password: str = Form(...)):
     """Form login (browser). Looks up user by email only. Sets aftr_session cookie and redirects."""
