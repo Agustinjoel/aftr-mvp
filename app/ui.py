@@ -321,7 +321,10 @@ def admin_dashboard(request: Request):
     conn = get_conn()
     try:
         cur = conn.cursor()
-        cur.execute("SELECT id, email, username, role, subscription_status, created_at FROM users ORDER BY id DESC")
+        cur.execute("""
+            SELECT id, email, username, role, subscription_status, subscription_end, created_at
+            FROM users ORDER BY id DESC
+        """)
         all_users = cur.fetchall()
         cur.execute("SELECT COUNT(*) AS n FROM user_picks")
         total_follows = cur.fetchone()["n"]
@@ -339,12 +342,24 @@ def admin_dashboard(request: Request):
         new_7d = cur.fetchone()["n"]
         cur.execute("SELECT result, COUNT(*) AS n FROM user_picks WHERE result IN ('WIN','LOSS','PUSH') GROUP BY result")
         result_rows = {r["result"]: r["n"] for r in cur.fetchall()}
+        cur.execute("SELECT COUNT(DISTINCT user_id) AS n FROM push_subscriptions")
+        push_subscribers = cur.fetchone()["n"]
+        try:
+            cur.execute("SELECT COUNT(*) AS n FROM user_bets")
+            total_bets = cur.fetchone()["n"]
+            cur.execute("SELECT COUNT(*) AS n FROM user_bets WHERE created_at::timestamptz >= NOW() - INTERVAL '7 days'")
+            bets_7d = cur.fetchone()["n"]
+        except Exception:
+            total_bets = bets_7d = 0
     finally:
         put_conn(conn)
 
     total_users   = len(all_users)
-    premium_users = sum(1 for r in all_users if str(r.get("role","")) in ("premium_user","admin") or str(r.get("subscription_status","")) == "active")
-    free_users    = total_users - premium_users
+    trial_users   = sum(1 for r in all_users if str(r.get("subscription_status","")) == "trial")
+    paid_users    = sum(1 for r in all_users if str(r.get("subscription_status","")) == "active")
+    admin_users   = sum(1 for r in all_users if str(r.get("role","")) == "admin")
+    premium_users = trial_users + paid_users
+    free_users    = total_users - premium_users - admin_users
 
     wins   = result_rows.get("WIN",  0)
     losses = result_rows.get("LOSS", 0)
@@ -374,8 +389,9 @@ def admin_dashboard(request: Request):
     ])
 
     kpis_users = "".join([
-        kpi(total_users, "Usuarios"),
-        kpi(premium_users, "Premium", "#eab308"),
+        kpi(total_users, "Usuarios totales"),
+        kpi(paid_users, "Premium pago", "#eab308"),
+        kpi(trial_users, "En trial", "#f97316"),
         kpi(free_users, "Free", "#94a3b8"),
         kpi(new_7d, "Nuevos 7d", "#22c55e"),
     ])
@@ -384,6 +400,9 @@ def admin_dashboard(request: Request):
         kpi(total_follows, "Follows totales"),
         kpi(follows_today, "Follows hoy", "#38bdf8"),
         kpi(follows_7d, "Follows 7d"),
+        kpi(push_subscribers, "Push activado", "#a78bfa"),
+        kpi(total_bets, "Bets tracker"),
+        kpi(bets_7d, "Bets 7d", "#22c55e"),
     ])
 
     kpis_perf = "".join([
@@ -468,28 +487,63 @@ def admin_dashboard(request: Request):
     ) or '<tr><td colspan="3" style="color:#64748b;padding:12px;">Sin datos</td></tr>'
 
     # User management rows
+    from datetime import timezone as _tz_u
+    _now_u = datetime.now(_tz_u.utc)
+
     user_rows_html = []
     for r in list(reversed(all_users)):
-        u_id = r["id"]
-        email = html_lib.escape(str(r.get("email") or ""))
-        uname = html_lib.escape(str(r.get("username") or "—"))
-        role  = str(r.get("role") or "free_user")
-        sub   = str(r.get("subscription_status") or "inactive")
+        u_id    = r["id"]
+        email   = html_lib.escape(str(r.get("email") or ""))
+        uname   = html_lib.escape(str(r.get("username") or "—"))
+        role    = str(r.get("role") or "free_user")
+        sub     = str(r.get("subscription_status") or "inactive")
+        sub_end = r.get("subscription_end")
         created = str(r.get("created_at") or "")[:10]
-        is_prem = role in ("premium_user","admin") or sub == "active"
         is_adm  = role == "admin"
-        plan_badge = badge("ADMIN","#a78bfa") if is_adm else (badge("PREMIUM","#eab308") if is_prem else badge("FREE","#64748b"))
+        is_trial = sub == "trial"
+        is_paid  = sub == "active"
+        is_prem  = is_trial or is_paid or is_adm
+
+        # Plan badge
+        if is_adm:
+            plan_badge = badge("ADMIN", "#a78bfa")
+        elif is_paid:
+            plan_badge = badge("PREMIUM", "#eab308")
+        elif is_trial:
+            # Calcular días restantes de trial
+            try:
+                if hasattr(sub_end, "year"):
+                    end_dt = sub_end if sub_end.tzinfo else sub_end.replace(tzinfo=_tz_u.utc)
+                else:
+                    end_dt = datetime.fromisoformat(str(sub_end).replace("Z", "+00:00"))
+                days_left = (end_dt - _now_u).days
+                trial_label = f"TRIAL {days_left}d" if days_left >= 0 else "TRIAL vencido"
+                trial_color = "#f97316" if days_left >= 0 else "#ef4444"
+            except Exception:
+                trial_label, trial_color = "TRIAL", "#f97316"
+            plan_badge = badge(trial_label, trial_color)
+        else:
+            plan_badge = badge("FREE", "#64748b")
+
+        # Fecha de vencimiento
+        try:
+            end_str = str(sub_end)[:10] if sub_end else "—"
+        except Exception:
+            end_str = "—"
+
         btn_prem = (
             f'<button onclick="setRole({u_id},\'free\')" class="adm-btn adm-btn--danger">− Premium</button>'
-            if is_prem else
+            if is_prem and not is_adm else
             f'<button onclick="setRole({u_id},\'premium\')" class="adm-btn adm-btn--success">+ Premium</button>'
         )
         btn_del = f'<button onclick="deleteUser({u_id},this)" data-email="{email}" class="adm-btn adm-btn--danger" style="margin-left:4px;" title="Borrar cuenta">🗑</button>'
         user_rows_html.append(
             f'<tr><td style="color:#475569;">{u_id}</td>'
-            f'<td>{email}</td><td style="color:#94a3b8;">{uname}</td>'
+            f'<td>{email}</td>'
+            f'<td style="color:#94a3b8;">{uname}</td>'
             f'<td>{plan_badge}</td>'
-            f'<td style="color:#475569;">{created}</td>'
+            f'<td style="color:#475569;font-size:11px;">{created}</td>'
+            f'<td style="color:#475569;font-size:11px;">{end_str}</td>'
             f'<td>{btn_prem}{btn_del}</td></tr>'
         )
 
@@ -569,7 +623,7 @@ def admin_dashboard(request: Request):
       {section("Gestión de usuarios",
         f'{msg_html}'
         f'<div class="adm-table-wrap"><table class="adm-table">'
-        f'<thead><tr><th>ID</th><th>Email</th><th>Usuario</th><th>Plan</th><th>Creado</th><th>Acción</th></tr></thead>'
+        f'<thead><tr><th>ID</th><th>Email</th><th>Usuario</th><th>Plan</th><th>Creado</th><th>Vence</th><th>Acción</th></tr></thead>'
         f'<tbody>{"".join(user_rows_html)}</tbody></table></div>'
       )}
 
