@@ -119,7 +119,7 @@ def isMatchFinished(match: dict) -> bool:
     # …pero sí si el kickoff ya pasó hace más de 3h30 (partido seguro terminado aunque el cache no se actualizó)
     if status_raw in MATCH_LIVE_STATUSES:
         dt = _parse_utcdate_maybe(match.get("utcDate"))
-        if dt is not None and datetime.now(timezone.utc) > dt + timedelta(hours=3, minutes=30):
+        if dt is not None and datetime.now(timezone.utc) > dt + timedelta(hours=2, minutes=15):
             return True
         return False
 
@@ -212,7 +212,7 @@ def _live_minute_suffix(match: dict) -> str | None:
 
 
 def _format_live_status_line(match: dict) -> str:
-    """Status compacto para headers live (ej. 🔴 LIVE 67', HT, 2H 74')."""
+    """Status compacto para headers live (ej. 🔴 67', HT, ET 105')."""
     if not isinstance(match, dict):
         return "🔴 LIVE"
     st = _match_live_status_token(match)
@@ -220,10 +220,9 @@ def _format_live_status_line(match: dict) -> str:
 
     if st in {"HT", "HALFTIME", "HALF_TIME", "BREAK"}:
         return "HT"
-    if st in {"1H", "FIRST_HALF", "H1"}:
-        return f"1H {minute_s}" if minute_s else "1H"
-    if st in {"2H", "SECOND_HALF", "H2"}:
-        return f"2H {minute_s}" if minute_s else "2H"
+    if st in {"1H", "FIRST_HALF", "H1", "2H", "SECOND_HALF", "H2",
+              "LIVE", "IN_PLAY", "INPLAY", "PLAYING", "LIVE_1H", "LIVE_2H"}:
+        return f"🔴 {minute_s}" if minute_s else "🔴 LIVE"
     if st in {"ET", "EXTRA_TIME", "AET"}:
         return f"ET {minute_s}" if minute_s else "ET"
     if st in {"PENALTIES", "PENALTY_SHOOTOUT"}:
@@ -233,5 +232,5 @@ def _format_live_status_line(match: dict) -> str:
     if st == "INT":
         return "Int."
     if minute_s:
-        return f"🔴 LIVE {minute_s}"
+        return f"🔴 {minute_s}"
     return "🔴 LIVE"
