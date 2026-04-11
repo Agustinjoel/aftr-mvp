@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
@@ -73,6 +74,28 @@ app = FastAPI(
 # Absolute path so uvicorn works when CWD is not the project root (e.g. some PaaS layouts).
 static_dir = settings.base_dir / "static"
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+
+@app.get("/.well-known/assetlinks.json", include_in_schema=False)
+async def assetlinks():
+    """TWA (Trusted Web Activity) — Digital Asset Links para Google Play."""
+    import json as _json
+    fingerprint = os.getenv("TWA_SHA256_FINGERPRINT", "").strip()
+    payload = [
+        {
+            "relation": ["delegate_permission/common.handle_all_urls"],
+            "target": {
+                "namespace": "android_app",
+                "package_name": "online.aftrapp.app",
+                "sha256_cert_fingerprints": [fingerprint] if fingerprint else [],
+            },
+        }
+    ]
+    return Response(
+        content=_json.dumps(payload),
+        media_type="application/json",
+        headers={"Cache-Control": "no-cache"},
+    )
 
 
 @app.get("/sw.js", include_in_schema=False)
