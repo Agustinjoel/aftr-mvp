@@ -8,6 +8,10 @@ from datetime import datetime, timezone
 from data.cache import read_json, write_json
 from services.refresh_utils import _parse_iso_utc, _safe_int
 
+import logging
+logger = logging.getLogger("services/refresh_teams.py")
+
+
 TEAM_NAMES_FILE = "team_names.json"
 LEAGUE_REFRESH_STATE_FILE = "league_refresh_state.json"
 
@@ -53,8 +57,8 @@ def _load_team_names_cache() -> dict[int, str]:
         for k, v in raw.items():
             try:
                 out[int(k)] = str(v)
-            except Exception:
-                pass
+            except Exception as _err:
+                logger.warning("unexpected exception (non-fatal): %s", _err)
         return out
     return {}
 

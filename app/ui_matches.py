@@ -9,6 +9,10 @@ from datetime import datetime, timedelta, timezone
 from app.ui_helpers import _safe_int, _parse_utcdate_maybe
 from app.ui_picks_calc import _result_norm
 
+import logging
+logger = logging.getLogger("app/ui_matches.py")
+
+
 
 # =========================================================
 # Constantes de estado live
@@ -133,8 +137,8 @@ def isMatchFinished(match: dict) -> bool:
         try:
             if str(finished_flag_raw).strip().lower() in {"1", "true", "yes", "y", "finished"}:
                 return True
-        except Exception:
-            pass
+        except Exception as _silent_err:
+            logger.debug("silenced exception (non-fatal): %s", _silent_err)
 
     # Heurística: score presente + kickoff pasó
     home_score = match.get("home_score")

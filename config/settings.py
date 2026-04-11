@@ -132,26 +132,74 @@ LEMONSQUEEZY_WEBHOOK_SECRET: str = (os.getenv("LEMONSQUEEZY_WEBHOOK_SECRET") or 
 
 # Ligas soportadas (código -> nombre)
 LEAGUES: dict[str, str] = {
-    "BSA": "Campeonato Brasileiro Série A",
-    "ELC": "Championship",
-    "PL": "Premier League",
-    "EC": "European Championship",
-    "DED": "Eredivisie",
-    "PPL": "Primeira Liga",
-    "CLI": "Copa Libertadores",
-    "WC": "FIFA World Cup",
-    "PD": "LaLiga",
-    "SA": "Serie A",
-    "BL1": "Bundesliga",
-    "FL1": "Ligue 1",
-    "CL": "UEFA Champions League",
-    "EL": "UEFA Europa League",
-    "NBA": "NBA",
+    # ── Top 5 europeas ─────────────────────────────────────────────────────
+    "PL":   "Premier League",
+    "PD":   "LaLiga",
+    "SA":   "Serie A",
+    "BL1":  "Bundesliga",
+    "FL1":  "Ligue 1",
+    # ── UEFA ────────────────────────────────────────────────────────────────
+    "CL":   "UEFA Champions League",
+    "EL":   "UEFA Europa League",
+    "CONF": "UEFA Conference League",
+    # ── Copas europeas ──────────────────────────────────────────────────────
+    "FAC":  "FA Cup",
+    "CREY": "Copa del Rey",
+    # ── Otras europeas ──────────────────────────────────────────────────────
+    "ELC":  "Championship",
+    "DED":  "Eredivisie",
+    "PPL":  "Primeira Liga",
+    # ── Sudamérica ──────────────────────────────────────────────────────────
+    "CLI":  "Copa Libertadores",
+    "BSA":  "Brasileirão Série A",
+    "ARG":  "Liga Argentina",
+    # ── Norteamérica ────────────────────────────────────────────────────────
+    "MLS":  "MLS",
+    # ── Competencias internacionales ────────────────────────────────────────
+    "WC":   "FIFA World Cup",
+    "EC":   "European Championship",
+    # ── Basketball ──────────────────────────────────────────────────────────
+    "NBA":  "NBA",
 }
-# Liga -> deporte para el pipeline (football usa Football-Data; basketball usa API-Sports)
+
+# Liga -> deporte para el pipeline (football usa Football-Data/API-Football; basketball usa API-Sports)
 LEAGUE_SPORT: dict[str, str] = {
     "NBA": "basketball",
 }
+
+# Mapeo código AFTR → ID de liga en API-Football v3
+# Los IDs se confirman con: GET https://api-football-v3.p.rapidapi.com/leagues
+# O con el script: python scripts/list_apif_leagues.py
+APIF_LEAGUE_MAP: dict[str, int] = {
+    "PL":   39,    # Premier League
+    "PD":   140,   # La Liga
+    "SA":   135,   # Serie A (Italy)
+    "BL1":  78,    # Bundesliga
+    "FL1":  61,    # Ligue 1
+    "CL":   2,     # UEFA Champions League
+    "EL":   3,     # UEFA Europa League
+    "CONF": 848,   # UEFA Conference League
+    "ELC":  40,    # Championship (EFL)
+    "DED":  88,    # Eredivisie
+    "PPL":  94,    # Primeira Liga
+    "FAC":  45,    # FA Cup
+    "CREY": 143,   # Copa del Rey  ← verificar con list_apif_leagues.py
+    "CLI":  11,    # Copa Libertadores
+    "BSA":  71,    # Brasileirão Série A
+    "ARG":  128,   # Liga Profesional Argentina  ← verificar con list_apif_leagues.py
+    "MLS":  253,   # MLS
+    "WC":   1,     # FIFA World Cup
+    "EC":   4,     # UEFA European Championship
+}
+
+# Temporadas: API-Football usa el año en que empieza la temporada.
+# European (PL/UCL etc.): 2025 = temporada 2025/26 (si el mes actual ≥ 7)
+# South American / MLS: año calendario actual.
+# Se pueden sobreescribir por liga con env var AFTR_APIF_SEASON_<CODE> (ej: AFTR_APIF_SEASON_PL=2025)
+_APIF_EUROPEAN_LEAGUES = frozenset({
+    "PL", "PD", "SA", "BL1", "FL1", "CL", "EL", "CONF", "ELC", "DED", "PPL", "FAC", "CREY", "EC",
+})
+
 FREE_LEAGUES: list[str] = ["PL", "PD", "SA", "NBA"]
 DEFAULT_LEAGUE: str = (os.getenv("AFTR_DEFAULT_LEAGUE", "PL") or "PL").strip()
 
@@ -317,6 +365,7 @@ class Settings:
         self.league_sport = LEAGUE_SPORT
         self.default_league = DEFAULT_LEAGUE
         self.free_leagues = FREE_LEAGUES
+        self.apif_league_map = APIF_LEAGUE_MAP
 
         self.min_prob_for_candidate = MIN_PROB_FOR_CANDIDATE
         self.default_xg_home = DEFAULT_XG_HOME
@@ -386,6 +435,36 @@ class Settings:
 
     def use_model_b(self) -> bool:
         return (self.picks_model or "B").upper() == "B"
+
+    def get_apif_league_id(self, code: str) -> int | None:
+        """Devuelve el ID de API-Football para el código AFTR, o None si no está mapeado."""
+        # Permite override por env var: AFTR_APIF_ID_PL=39
+        env_override = os.getenv(f"AFTR_APIF_ID_{code.upper()}", "").strip()
+        if env_override:
+            try:
+                return int(env_override)
+            except ValueError:
+                pass
+        return self.apif_league_map.get(code)
+
+    def get_apif_season(self, code: str) -> int:
+        """Devuelve el año de temporada para API-Football según el tipo de competición.
+        Override por env var: AFTR_APIF_SEASON_PL=2025
+        """
+        env_override = os.getenv(f"AFTR_APIF_SEASON_{code.upper()}", "").strip()
+        if env_override:
+            try:
+                return int(env_override)
+            except ValueError:
+                pass
+        from datetime import datetime
+        now = datetime.now()
+        y, m = now.year, now.month
+        # Ligas europeas: temporada empieza en julio/agosto
+        if code in _APIF_EUROPEAN_LEAGUES:
+            return y if m >= 7 else y - 1
+        # Resto (Sudamérica, MLS, competencias especiales): año calendario
+        return y
 
 
 settings = Settings()

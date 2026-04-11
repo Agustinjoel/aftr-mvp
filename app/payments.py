@@ -477,8 +477,8 @@ async def mercadopago_webhook(request: Request):
                             username = user.get("username") or email_addr.split("@")[0]
                             if email_addr:
                                 send_premium_welcome_email(email_addr, username)
-                        except Exception:
-                            pass
+                        except Exception as _silent_err:
+                            logger.debug("silenced exception (non-fatal): %s", _silent_err)
                     except (ValueError, TypeError):
                         logger.warning("MP payment: invalid ext_ref=%s", ext_ref)
         except Exception as e:

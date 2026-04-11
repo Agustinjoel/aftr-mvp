@@ -32,3 +32,12 @@ data/cache/
 # OS
 .DS_Store
 Thumbs.db
+
+# Credentials / sensitive files — NEVER commit these
+AFTR.txt
+*.credentials.txt
+secrets.txt
+credentials*.txt
+push_notified_cache.json
+live_events_state.json
+*.json.prev

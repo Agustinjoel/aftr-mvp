@@ -1,0 +1,1 @@
+postgresql://aftr_db_user:TTxpjn7l8P3EaqDdhBzg4ybTCO3UHJo2@dpg-d75keih5pdvs73aaq9i0-a.oregon-postgres.render.com/aftr_db

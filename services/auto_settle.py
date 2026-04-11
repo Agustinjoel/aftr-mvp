@@ -14,9 +14,22 @@ from datetime import datetime, timezone, timedelta
 
 logger = logging.getLogger("aftr.auto_settle")
 
-FINISHED_STATUSES = frozenset({"FINISHED", "FT", "FINAL", "AWARDED", "FINALIZADO"})
-# Tiempo mínimo tras el kickoff para intentar la liquidación (en minutos)
-SETTLE_AFTER_MIN = 100
+# Statuses that definitively mean the match is over
+FINISHED_STATUSES = frozenset({
+    "FINISHED", "FT", "FINAL", "AWARDED", "FINALIZADO",
+    "AET",      # after extra time (API-Football)
+    "PEN",      # after penalties (API-Football)
+    "FT_PEN",   # some providers
+})
+# Statuses that mean the match is still in progress — never settle against these
+LIVE_STATUSES = frozenset({
+    "1H", "2H", "HT", "ET", "BT", "P", "SUSP",
+    "LIVE", "IN_PLAY", "IN PLAY", "INPLAY",
+    "PAUSED", "HALFTIME",
+})
+# Time (minutes from kickoff) before we attempt settlement when status is unknown.
+# 120 min = kickoff + ~45' first half + 15' HT break + ~45' second half + ~15' stoppage buffer
+SETTLE_AFTER_MIN = 115
 
 
 def _normalize(name: str) -> str:
@@ -96,9 +109,13 @@ def _resolve_market(market: str, home_goals: int, away_goals: int) -> str:
 
 def _load_all_finished_matches() -> list[dict]:
     """
-    Lee todos los archivos de caché y devuelve partidos que tienen score final.
-    No filtra por status (el caché no siempre actualiza a FINISHED);
-    filtra por tener score válido Y kickoff en el pasado.
+    Lee todos los archivos de caché y devuelve partidos que tienen score FINAL confirmado.
+
+    Estrategia de filtrado (orden de precedencia):
+    1. Si el status es un LIVE_STATUS (partido en curso), siempre excluir.
+    2. Si el status es un FINISHED_STATUS, incluir aunque el kickoff sea reciente.
+    3. Si el status es desconocido/vacío, solo incluir si kickoff fue hace 120+ minutos
+       (buffer suficiente para 90' + halftime + stoppage time).
     """
     from config.settings import settings
     from data.cache import read_json
@@ -112,22 +129,39 @@ def _load_all_finished_matches() -> list[dict]:
         for m in data:
             if not isinstance(m, dict):
                 continue
-            # Excluir partidos que claramente no terminaron
-            st = (m.get("status") or "").upper()
-            if st in ("CANCELLED", "POSTPONED", "SUSPENDED"):
+
+            st = (m.get("status") or "").strip().upper()
+
+            # 1) Siempre excluir partidos en curso o cancelados/postergados
+            if st in LIVE_STATUSES:
+                continue
+            if st in ("CANCELLED", "POSTPONED", "SUSPENDED", "ABD", "AWD"):
                 continue
 
-            # Verificar kickoff pasado (al menos 85 min atrás)
+            # 2) ¿El status confirma que el partido terminó?
+            is_confirmed_finished = st in FINISHED_STATUSES
+
+            # 3) Verificar kickoff pasado
             utc_raw = m.get("utcDate") or ""
             try:
                 dt_str = str(utc_raw).replace("Z", "+00:00")
                 kickoff_dt = datetime.fromisoformat(dt_str)
                 if kickoff_dt.tzinfo is None:
                     kickoff_dt = kickoff_dt.replace(tzinfo=timezone.utc)
-                if (now - kickoff_dt).total_seconds() < 85 * 60:
-                    continue
+                elapsed_min = (now - kickoff_dt).total_seconds() / 60
+
+                if is_confirmed_finished:
+                    # Status confirms it — still require kickoff in past (>5 min) to avoid edge cases
+                    if elapsed_min < 5:
+                        continue
+                else:
+                    # Status unknown or not in FINISHED_STATUSES — require generous buffer
+                    # 120 min = ~45' 1H + 15' HT + 45' 2H + 15' stoppage/injury time buffer
+                    if elapsed_min < 120:
+                        continue
             except Exception:
-                continue
+                if not is_confirmed_finished:
+                    continue  # no kickoff date + unknown status → skip
 
             # Score: preferir extraTime (acumulativo, cubre partidos con ET),
             # luego fullTime (90 min), luego score.home/away o raíz del dict.
@@ -160,6 +194,7 @@ def _load_all_finished_matches() -> list[dict]:
                 "home_goals": gh,
                 "away_goals": ga,
                 "utcDate": utc_raw,
+                "status": st,
             })
     return finished
 
@@ -256,8 +291,8 @@ def auto_settle_tracker_legs() -> int:
                         # Permitir hasta 3h de diferencia (en caso de postergaciones menores)
                         if abs((match_dt - kickoff).total_seconds()) > 3 * 3600:
                             continue
-                    except Exception:
-                        pass
+                    except Exception as _err:
+                        logger.warning("unexpected exception (non-fatal): %s", _err)
                 matched = fm
                 break
 

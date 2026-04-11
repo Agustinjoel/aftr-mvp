@@ -95,8 +95,8 @@ def _account_created_display(created_at) -> str:
         try:
             y, m, d = s[:4], s[5:7], s[8:10]
             return f"{d}/{m}/{y}"
-        except Exception:
-            pass
+        except Exception as _silent_err:
+            logger.debug("silenced exception (non-fatal): %s", _silent_err)
     return html_lib.escape(s)
 
 

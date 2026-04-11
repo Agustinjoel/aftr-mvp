@@ -10,6 +10,10 @@ from typing import Any
 
 from data.cache import read_json
 
+import logging
+logger = logging.getLogger("services/refresh_utils.py")
+
+
 
 # -------------------------
 # Parsing de fechas
@@ -45,8 +49,8 @@ def _parse_utcdate_str(s: Any) -> datetime:
             if s.endswith("Z"):
                 return datetime.fromisoformat(s.replace("Z", "+00:00"))
             return datetime.fromisoformat(s)
-    except Exception:
-        pass
+    except Exception as _err:
+        logger.warning("unexpected exception (non-fatal): %s", _err)
     return datetime.now(timezone.utc)
 
 

@@ -5625,6 +5625,16 @@ input[type="datetime-local"].tracker-input{ color-scheme:dark; }
   color: rgba(251,191,36,1);
   background: rgba(251,191,36,.06);
 }
+.home-header-navlink--premium{
+  color: #f59e0b;
+  border-color: rgba(245,158,11,.3);
+  background: rgba(245,158,11,.07);
+}
+.home-header-navlink--premium:hover{
+  color: #fbbf24;
+  background: rgba(245,158,11,.13);
+  border-color: rgba(245,158,11,.5);
+}
 /* League dashboard: carousel needs full row width (same effective width as home strip). */
 .top.top-pro.top-pro--with-carousel{
   flex-wrap: wrap;
@@ -6637,6 +6647,33 @@ input[type="datetime-local"].tracker-input{ color-scheme:dark; }
 }
 .lc3d__item--active .lc3d__name{
   color: rgba(234,242,255,.98);
+}
+
+/* "Próximamente" league cards */
+.lc3d__item--soon{
+  cursor: default;
+  display: inline-block;
+}
+.lc3d__card--soon{
+  position: relative;
+  opacity: .45;
+  filter: grayscale(.7);
+}
+.lc3d__soon-badge{
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(60,80,120,.85);
+  border-radius: 4px;
+  padding: 2px 5px;
+  pointer-events: none;
 }
 
 /* reduced-motion */

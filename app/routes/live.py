@@ -9,6 +9,10 @@ from fastapi.responses import HTMLResponse
 from data.cache import read_json, write_json
 from data.providers.football_data import get_match_detail
 
+import logging
+logger = logging.getLogger("app/routes/live.py")
+
+
 router = APIRouter()
 
 # Cuántos segundos consideramos fresco el cache de detalle de partido
@@ -65,8 +69,8 @@ def _fetch_match_detail(match_id: int) -> dict:
         detail["_cached_at"] = time.time()
         try:
             write_json(cache_key, detail)
-        except Exception:
-            pass
+        except Exception as _err:
+            logger.warning("unexpected exception (non-fatal): %s", _err)
         return detail
 
     # Si la API falla, devolver cache viejo aunque esté expirado

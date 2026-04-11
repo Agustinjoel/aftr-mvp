@@ -66,7 +66,7 @@ def _vapid_private_key_pem() -> str:
 
 import time
 
-NOTIFY_BEFORE_MIN = 60  # notificar 60 min antes del kick-off
+NOTIFY_BEFORE_MIN = 30  # notificar 30 min antes del kick-off
 _NOTIFIED_CACHE_MAX = 5000  # cap para evitar memory leak en workers de larga duración
 _NOTIFIED_CACHE_TTL = 7200  # TTL en segundos (2 horas)
 _NOTIFIED_CACHE_FILE = "push_notified_cache.json"

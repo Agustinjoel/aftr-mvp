@@ -15,6 +15,10 @@ from fastapi.responses import JSONResponse
 from app.auth import get_user_id
 from app.db import get_conn, put_conn
 
+import logging
+logger = logging.getLogger("app/routes/tracker.py")
+
+
 
 def _lookup_kickoff_from_cache(home: str, away: str) -> str | None:
     """Busca el kickoff UTC en daily_matches_*.json por nombres de equipo."""
@@ -41,8 +45,8 @@ def _lookup_kickoff_from_cache(home: str, away: str) -> str | None:
                     utc = m.get("utcDate") or ""
                     if utc:
                         return str(utc)
-    except Exception:
-        pass
+    except Exception as _err:
+        logger.warning("unexpected exception (non-fatal): %s", _err)
     return None
 
 router = APIRouter()

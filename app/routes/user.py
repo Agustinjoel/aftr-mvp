@@ -17,6 +17,10 @@ from core.basketball_evaluation import evaluate_basketball_market
 from core.evaluation import evaluate_market
 from data.cache import read_json
 
+import logging
+logger = logging.getLogger("app/routes/user.py")
+
+
 router = APIRouter()
 
 # Short-lived cache: building league pick indexes reads many JSON files.
@@ -932,8 +936,8 @@ def user_follow_pick(request: Request, payload: dict = Body(...)):
                 args=(_u["email"], _uname, home_team or "", away_team or "", market or "", aftr_score, tier, None),
                 daemon=True,
             ).start()
-    except Exception:
-        pass
+    except Exception as _silent_err:
+        logger.debug("silenced exception (non-fatal): %s", _silent_err)
 
     return JSONResponse({"ok": True, "pick_id": pick_id})
 
@@ -972,8 +976,8 @@ def user_history(request: Request):
         return err
     try:
         _sync_followed_picks_for_user(uid)
-    except Exception:
-        pass
+    except Exception as _silent_err:
+        logger.debug("silenced exception (non-fatal): %s", _silent_err)
     items: list[dict] = []
     try:
         conn = get_conn()
@@ -1159,8 +1163,8 @@ def user_available_teams(request: Request):
                     _add(row.get("away_team"), None)
             finally:
                 put_conn(conn)
-        except Exception:
-            pass
+        except Exception as _silent_err:
+            logger.debug("silenced exception (non-fatal): %s", _silent_err)
 
     teams = sorted(seen.values(), key=lambda t: t["team_name"])
     return JSONResponse({"ok": True, "teams": teams})

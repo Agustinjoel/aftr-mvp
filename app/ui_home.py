@@ -79,30 +79,61 @@ def _build_home_league_snap_carousel_html(
     3D-style league carousel: viewport + transform track + .league-item anchors (home_league_carousel.js).
     Used on home and league dashboard; pass carousel_id + active_league on dashboard.
     """
+    from data.cache import read_json
+
     if active_league is not None:
         ac = (active_league or "").strip()
         active = ac if settings.is_valid_league(ac) else _home_league_active_code(request)
     else:
         active = _home_league_active_code(request)
+
+    # Determinar ligas con datos reales en caché
+    _leagues_with_data: set[str] = set()
+    for _code in settings.leagues:
+        _matches = read_json(f"daily_matches_{_code}.json")
+        if isinstance(_matches, list) and len(_matches) > 0:
+            _leagues_with_data.add(_code)
+
+    # Mapeo de código → slug de logo (para casos especiales)
+    _LOGO_SLUG = {"EL": "uel", "EC": "cl"}  # EC usa el logo de CL como placeholder visual
+
     items: list[str] = []
     ix = 0
     for code, name in settings.leagues.items():
         if code in unsupported:
             continue
-        logo_slug = {"EL": "uel"}.get(code, code.lower())
+        logo_slug = _LOGO_SLUG.get(code, code.lower())
         logo = f"/static/leagues/{logo_slug}.png"
         initial = (name or code or "?")[:1].upper()
-        items.append(
-            f'<a class="lc3d__item" href="/?league={html_lib.escape(code)}" '
-            f'data-code="{html_lib.escape(code)}" data-index="{ix}" aria-label="{html_lib.escape(name)}">'
-            f'<span class="lc3d__card">'
-            f'<span class="lc3d__glow" aria-hidden="true"></span>'
-            f'<img class="lc3d__logo" src="{html_lib.escape(logo)}" alt="" width="56" height="56" loading="eager" '
-            "onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\" />"
-            f'<span class="lc3d__logo-fallback" aria-hidden="true">{html_lib.escape(initial)}</span>'
-            f'<span class="lc3d__name">{html_lib.escape(name)}</span>'
-            f"</span></a>"
-        )
+        has_data = code in _leagues_with_data
+
+        if has_data:
+            # Liga activa con datos: enlace normal
+            items.append(
+                f'<a class="lc3d__item" href="/?league={html_lib.escape(code)}" '
+                f'data-code="{html_lib.escape(code)}" data-index="{ix}" aria-label="{html_lib.escape(name)}">'
+                f'<span class="lc3d__card">'
+                f'<span class="lc3d__glow" aria-hidden="true"></span>'
+                f'<img class="lc3d__logo" src="{html_lib.escape(logo)}" alt="" width="56" height="56" loading="eager" '
+                "onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\" />"
+                f'<span class="lc3d__logo-fallback" aria-hidden="true">{html_lib.escape(initial)}</span>'
+                f'<span class="lc3d__name">{html_lib.escape(name)}</span>'
+                f"</span></a>"
+            )
+        else:
+            # Liga sin datos: mostrar como "Próximamente" (no enlazable, visualmente atenuada)
+            items.append(
+                f'<span class="lc3d__item lc3d__item--soon" '
+                f'data-code="{html_lib.escape(code)}" data-index="{ix}" aria-label="{html_lib.escape(name)} — Próximamente">'
+                f'<span class="lc3d__card lc3d__card--soon">'
+                f'<span class="lc3d__glow" aria-hidden="true"></span>'
+                f'<img class="lc3d__logo" src="{html_lib.escape(logo)}" alt="" width="56" height="56" loading="eager" '
+                "onerror=\"this.style.display='none';this.nextElementSibling.style.display='flex'\" />"
+                f'<span class="lc3d__logo-fallback" aria-hidden="true">{html_lib.escape(initial)}</span>'
+                f'<span class="lc3d__name">{html_lib.escape(name)}</span>'
+                f'<span class="lc3d__soon-badge">Próximamente</span>'
+                f"</span></span>"
+            )
         ix += 1
     cid = html_lib.escape(carousel_id)
     core = (
@@ -244,8 +275,8 @@ def home_page(request: Request) -> str:
     if uid:
         try:
             streak_count, streak_kind = _get_user_streak(uid)
-        except Exception:
-            pass
+        except Exception as _silent_err:
+            logger.debug("silenced exception (non-fatal): %s", _silent_err)
     if streak_count >= 2 and streak_kind == "WIN":
         _fires = "🔥" * min(streak_count, 5)
         _streak_sub = ("¡Estás en racha!" if streak_count < 5
@@ -1134,6 +1165,7 @@ def home_page(request: Request) -> str:
         <nav class="home-header-nav">
           <a href="/" class="home-header-navlink home-header-navlink--active">Inicio</a>
           <a href="/tracker" class="home-header-navlink">Tracker</a>
+          {'<a href="/premium" class="home-header-navlink home-header-navlink--premium">⭐ Premium</a>' if can_see_all_picks(user) else ''}
           {'<a href="/admin" class="home-header-navlink home-header-navlink--admin">Admin</a>' if is_admin_user else ''}
         </nav>
         <div class="home-header-auth">

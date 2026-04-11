@@ -49,6 +49,26 @@ def _save_state(state: dict) -> None:
     write_json(_STATE_FILE, state)
 
 
+def _find_state_key_by_teams(state: dict, home: str, away: str) -> str | None:
+    """
+    Busca en el state dict si ya existe una entrada para este partido (por nombre de equipos).
+    Devuelve la clave existente (puede haber sido creada por cualquier motor) o None.
+    Sirve para que el motor de caché herede los flags del motor API-Football y viceversa,
+    evitando doble notificación cuando ambos motores corren en paralelo.
+    """
+    nh, na = _normalize(home), _normalize(away)
+    for key, entry in state.items():
+        if not isinstance(entry, dict):
+            continue
+        eh = _normalize(entry.get("home", ""))
+        ea = _normalize(entry.get("away", ""))
+        if not eh or not ea:
+            continue
+        if (nh in eh or eh in nh) and (na in ea or ea in na):
+            return key
+    return None
+
+
 def _normalize(name: str) -> str:
     return (name or "").lower().strip()
 
@@ -66,7 +86,14 @@ def _teams_match(fix_home: str, fix_away: str, leg_home: str, leg_away: str) -> 
 
 
 def _load_pending_legs() -> list[dict]:
-    """Carga bet_legs PENDING con kickoff en ventana de las últimas _KICKOFF_WINDOW_H horas."""
+    """
+    Carga bet_legs PENDING que podrían tener un partido en curso ahora mismo.
+    Incluye:
+    - Legs con kickoff_time en la ventana de las últimas _KICKOFF_WINDOW_H horas
+    - Legs con kickoff_time NULL (no pudimos determinar el horario — no excluir)
+      creados en las últimas _KICKOFF_WINDOW_H horas, para que también reciban
+      notificaciones de goles/FT cuando el team name matching las encuentre.
+    """
     from app.db import get_conn, put_conn
     now = datetime.now(timezone.utc)
     window_start = now - timedelta(hours=_KICKOFF_WINDOW_H)
@@ -80,9 +107,14 @@ def _load_pending_legs() -> list[dict]:
                FROM bet_legs bl
                JOIN user_bets ub ON bl.bet_id = ub.id
                WHERE bl.status = 'PENDING'
-                 AND bl.kickoff_time IS NOT NULL
-                 AND bl.kickoff_time BETWEEN %s AND %s""",
-            (window_start, now + timedelta(minutes=10)),
+                 AND (
+                   -- Tiene kickoff en ventana de las últimas 4 horas (puede seguir en juego)
+                   (bl.kickoff_time IS NOT NULL AND bl.kickoff_time BETWEEN %s AND %s)
+                   OR
+                   -- Sin kickoff pero apuesta reciente: confiar en matching por nombre
+                   (bl.kickoff_time IS NULL AND ub.created_at >= %s)
+                 )""",
+            (window_start, now + timedelta(minutes=30), window_start),
         )
         return list(cur.fetchall())
     finally:
@@ -585,8 +617,10 @@ def process_cache_live_events(league_codes: list[str]) -> int:
             if not all_users:
                 continue
 
-            # Clave de estado: prefijo "c_" para diferenciar de API-Football
-            state_key = f"c_{mid}"
+            # Clave de estado: buscar primero por equipos (para heredar flags del motor API-Football
+            # si ambos motores corren). Si no hay entrada previa, crear con prefijo "c_".
+            existing_key = _find_state_key_by_teams(state, home_name, away_name)
+            state_key = existing_key if existing_key else f"c_{mid}"
             prev_state = state.get(state_key) or {}
 
             state[state_key] = {

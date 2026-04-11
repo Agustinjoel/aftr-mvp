@@ -176,8 +176,8 @@ def _build_picks_from_matches(matches: list[dict], team_names: dict[int, str]) -
                 default_away=settings.default_xg_away,
             )
             xg_h, xg_a = float(axg_h), float(axg_a)
-        except Exception:
-            pass
+        except Exception as _err:
+            logger.warning("unexpected exception (non-fatal): %s", _err)
 
         stats_home: dict = {}
         stats_away: dict = {}
