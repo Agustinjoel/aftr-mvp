@@ -63,8 +63,8 @@ def apif_refresh_league(
         _load_team_names_cache,
         _save_team_names_cache,
         _update_team_names_from_matches,
-        _normalize_match,
     )
+    from services.refresh_utils import _read_json_list, _normalize_match
     from services.refresh_picks import _build_picks_from_matches
     from services.refresh_results import (
         _build_finished_lookup_by_id,
@@ -74,7 +74,6 @@ def apif_refresh_league(
         _window_daily,
         _write_league_cache,
     )
-    from services.refresh_utils import _read_json_list
     from services.aftr_score import enrich_pick_with_aftr_score, filter_premium_picks
 
     # ── 0. Verificar key y league ID ────────────────────────────────────────
