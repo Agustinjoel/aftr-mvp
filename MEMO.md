@@ -1,16 +1,17 @@
 # MEMO — AFTR Pick Engine
-**Fecha:** 2026-03-28
+**Fecha:** 2026-04-11
 **Branch activo:** `main`
-**Estado:** Refactor en curso (`services/refresh.py` → módulos especializados)
+**Estado:** Producción en Render — funcional
 
 ---
 
 ## 1. ¿Qué es este sistema?
 
-**AFTR Pick Engine** es una plataforma web de análisis de picks deportivos (fútbol + NBA).
-Genera predicciones estadísticas con modelos propios (Poisson + xG dinámico), enriquece con cuotas de mercado, y las publica en un dashboard web con gating por suscripción.
+**AFTR** es una plataforma web de análisis de picks deportivos (fútbol + NBA).
+Genera predicciones estadísticas con modelos propios (Poisson + xG dinámico), enriquece con cuotas de mercado, y las publica en un dashboard web con gating por suscripción freemium.
 
-**Target:** Usuarios que quieren picks con valor real vs. mercado, clasificados por score de confianza (AFTR Score 0–100).
+**Target:** Usuarios que quieren picks con valor real vs. mercado, clasificados por AFTR Score (0–100).
+**Modelo de negocio:** FREE (top 3 picks) → PREMIUM (todos los picks + combos) vía Mercado Pago.
 
 ---
 
@@ -20,13 +21,14 @@ Genera predicciones estadísticas con modelos propios (Poisson + xG dinámico), 
 |------|-----------|
 | Backend | Python 3, **FastAPI** + Uvicorn (ASGI) |
 | Frontend | HTML/CSS/JS vanilla + **Jinja2** (server-rendered) |
-| Mobile | Capacitor/Android + TypeScript *(parcial, no funcional)* |
-| Base de datos | **SQLite** (sin ORM, raw SQL) |
-| Cache de datos | **JSON files** en `data/cache/` |
+| Mobile | **PWA** (instalable) — TWA para Play Store en progreso |
+| Base de datos | **PostgreSQL** en Render (migrado desde SQLite) |
+| Cache de datos | **JSON files** en `/var/data/cache/` (Render disk) |
 | Auth | Cookies firmadas con `itsdangerous` + bcrypt/passlib |
-| Billing | **Stripe** (checkout sessions + webhooks) |
-| Deploy | **Render.com** (blueprint en `render.yaml`) |
-| Config | Variables de entorno + `.env` (python-dotenv) |
+| Billing | **Mercado Pago** (checkout + webhooks) ✅ activo |
+| Push notifications | **pywebpush** + VAPID keys + Service Worker |
+| Deploy | **Render.com** — Web Service + PostgreSQL + Persistent Disk |
+| Config | Variables de entorno en Render dashboard |
 
 ---
 
@@ -35,61 +37,69 @@ Genera predicciones estadísticas con modelos propios (Poisson + xG dinámico), 
 ```
 engine/
 ├── app/                    # Aplicación FastAPI
-│   ├── main.py             # Entrypoint: registra routers, lifespan, middleware
+│   ├── main.py             # Entrypoint: routers, lifespan, middleware
 │   ├── auth.py             # Login, register, sesión, reset password
-│   ├── payments.py         # Stripe checkout + webhooks
-│   ├── db.py               # Conexión SQLite + init_db()
+│   ├── payments.py         # Mercado Pago checkout + webhooks
+│   ├── db.py               # Conexión PostgreSQL + init_db()
 │   ├── models.py           # get_active_plan() → FREE/PREMIUM/PRO
 │   ├── auto_refresh.py     # Spawn de tareas background tiered
-│   ├── cli.py              # python -m app.cli refresh
 │   ├── ui.py               # Orquestador de páginas HTML
-│   ├── ui_home.py          # Página principal
+│   ├── ui_home.py          # Página principal + carrusel de ligas
 │   ├── ui_dashboard.py     # Dashboard por liga
+│   ├── ui_account.py       # Cuenta de usuario + streaks + tracker
 │   ├── ui_data.py          # Carga y agregación desde cache
 │   ├── ui_picks_calc.py    # ROI, ranking, cálculos de picks
 │   ├── ui_stats.py         # KPIs: winrate, ROI, net units
 │   ├── ui_combos.py        # Renderizado de combos/parlays
-│   ├── ui_matches.py       # Display de partidos (live status)
+│   ├── ui_matches.py       # Display de partidos (live status, minuto)
 │   ├── ui_card.py          # Componente card de pick
 │   ├── ui_team.py          # Crests/logos de equipos
 │   ├── ui_helpers.py       # Utilidades comunes de UI
-│   ├── ui_account.py       # Página de cuenta
+│   ├── ui_rendimiento.py   # Página de rendimiento histórico
 │   ├── timefmt.py          # UTC ↔ Argentina timezone
-│   ├── email_utils.py      # SMTP para reset password
+│   ├── email_utils.py      # Emails con Resend (en test mode, pendiente dominio)
 │   ├── user_helpers.py     # can_see_all_picks(), is_premium_active()
 │   └── routes/
 │       ├── matches.py      # GET /api/matches
 │       ├── picks.py        # GET /api/picks, /api/combos, /api/stats/summary
-│       ├── user.py         # Favoritos y tracking de picks
-│       └── live.py         # Actualizaciones live
+│       ├── user.py         # Favoritos, tracking, push subscriptions
+│       ├── live.py         # Actualizaciones live
+│       ├── tracker.py      # Tracker de apuestas (bets + legs)
+│       └── premium.py      # Endpoints premium/admin
 │
 ├── core/                   # Lógica matemática pura
-│   ├── poisson.py          # Modelo Poisson + corrección Dixon-Coles  ← MODIFICADO
-│   ├── model_b.py          # xG dinámico desde forma de equipo         ← MODIFICADO
+│   ├── poisson.py          # Modelo Poisson + corrección Dixon-Coles
+│   ├── model_b.py          # xG dinámico desde forma de equipo
 │   ├── evaluation.py       # WIN/LOSS/PUSH por mercado
-│   ├── value.py            # Tier thresholds (SAFE/MEDIUM/SPICY)
+│   ├── value.py            # Tier thresholds (SAFE/MEDIUM/RISKY)
+│   ├── ranking.py          # Ranking de picks por AFTR Score
 │   ├── combos.py           # Construcción de parlays
 │   ├── basketball_picks.py # Picks NBA
 │   └── basketball_evaluation.py
 │
 ├── services/               # Orquestación del pipeline de datos
-│   ├── refresh.py          # Orquestador principal  ← EN REFACTOR (−1563 líneas)
-│   ├── refresh_league.py   # Lógica por liga       ← NUEVO (untracked)
-│   ├── refresh_teams.py    # Form y stats de equipos ← NUEVO (untracked)
-│   ├── refresh_picks.py    # Generación de picks    ← NUEVO (untracked)
-│   ├── refresh_results.py  # Aplicar resultados     ← NUEVO (untracked)
-│   ├── refresh_odds.py     # Enriquecimiento cuotas ← NUEVO (untracked)
-│   ├── refresh_combos.py   # Construcción combos    ← NUEVO (untracked)
-│   ├── refresh_utils.py    # Parseo y utilidades    ← NUEVO (untracked)
+│   ├── tiered_refresh.py   # Scheduler LIVE/UPCOMING/RESULTS (round-robin)
+│   ├── refresh_apifootball.py  # Pipeline principal: API-Football → picks
+│   ├── refresh_league.py   # Lógica por liga (football-data.org fallback)
+│   ├── refresh_teams.py    # Form y stats de equipos
+│   ├── refresh_picks.py    # Generación de picks
+│   ├── refresh_results.py  # Aplicar resultados
+│   ├── refresh_odds.py     # Enriquecimiento cuotas
+│   ├── refresh_combos.py   # Construcción combos
+│   ├── refresh_utils.py    # Parseo y utilidades (_normalize_match, etc.)
 │   ├── refresh_basketball.py # Pipeline NBA
-│   ├── tiered_refresh.py   # Scheduler LIVE/UPCOMING/RESULTS
+│   ├── refresh_teams.py    # Form y cache de nombres de equipos
 │   ├── refresh_rate_guard.py # Rate limiting + backoff
-│   └── aftr_score.py       # AFTR Score 0–100       ← MODIFICADO
+│   ├── live_events.py      # Detección de eventos live + push (goles, FT, etc.)
+│   ├── push_notifications.py # Envío de push via pywebpush
+│   ├── auto_settle.py      # Liquidación automática de bets
+│   └── aftr_score.py       # AFTR Score 0–100
 │
 ├── data/
 │   ├── cache.py            # read/write JSON cache
 │   └── providers/
-│       ├── football_data.py       # Football-Data.org API client
+│       ├── api_football.py        # API-Football (api-sports.io) — proveedor principal
+│       ├── football_data.py       # Football-Data.org — fallback ligas sin APIF
 │       ├── api_sports_basketball.py # API-Sports (NBA)
 │       ├── odds_football.py       # The Odds API
 │       └── team_form.py           # Cálculo de métricas de forma
@@ -98,156 +108,118 @@ engine/
 │   └── settings.py         # Configuración centralizada desde env vars
 │
 ├── static/                 # Assets frontend
-│   ├── style.css           # Estilos principales (112KB)
+│   ├── style.css           # Estilos principales
 │   ├── aftr-ui.js          # Interactividad UI
-│   ├── league_carousel.js  # Carrusel de ligas
-│   ├── home_league_carousel.js
-│   └── sw.js               # Service worker (PWA)
+│   ├── aftr-push.js        # Lógica de suscripción push
+│   ├── aftr-tracker.js     # Tracker de apuestas
+│   ├── aftr-bankroll.js    # Gestión de bankroll
+│   ├── aftr-share.js       # Compartir picks
+│   ├── home_lc3d.js        # Carrusel 3D de ligas
+│   ├── sw.js               # Service Worker (PWA + push)
+│   ├── manifest.webmanifest # PWA manifest
+│   ├── leagues/            # Logos de ligas (PNG)
+│   └── teams/              # Escudos de equipos
 │
+├── scripts/                # Scripts de utilidad
+│   ├── list_apif_leagues.py  # Verificar IDs de ligas en API-Football
+│   └── test_live_events.py   # Test del sistema de live events
 ├── tests/                  # pytest
-├── scripts/                # PowerShell + Python scripts de utilidad
-├── daily/                  # Fallback legacy (solo lectura)
-├── models/                 # enums.py, schemas.py (mínimos)
-├── templates/              # Jinja2 (components/ — mínimo por ahora)
-├── android/                # Capacitor Android (parcial)
+├── models/                 # enums.py
 ├── requirements.txt
-├── render.yaml
-└── .env / .env.example
+└── render.yaml
 ```
 
 ---
 
 ## 4. Base de Datos
 
-### SQLite — `aftr.db`
+### PostgreSQL en Render
 
-| Tabla | Propósito | Columnas clave |
-|-------|-----------|----------------|
-| `users` | Cuentas | id, email, username, password_hash, role, stripe_customer_id |
-| `subscriptions` | Planes | user_id, plan (FREE/PREMIUM/PRO), expires_at |
-| `password_reset_tokens` | Reset flow | token_hash, user_id, expires_at, used_at |
-| `user_favorites` | Picks guardados | user_id, pick_id, action, market, aftr_score |
-| `user_picks` | Tracking picks | user_id, pick_id, result, market, settled_at |
+| Tabla | Propósito |
+|-------|-----------|
+| `users` | Cuentas: id, email, username, password_hash, role, subscription_status, subscription_end |
+| `push_subscriptions` | Suscripciones push: user_id, endpoint, p256dh, auth |
+| `user_picks` | Tracking picks: user_id, pick_id, action (follow/save), result |
+| `user_bets` | Tracker bets: user_id, tipo (simple/combinada), estado |
+| `bet_legs` | Legs de bets: home_team, away_team, market, kickoff_time, status |
+| `password_reset_tokens` | Reset flow |
 
-**No ORM** — raw SQL directo con `sqlite3`. Init en `app/db.py:init_db()`.
+**Migrado de SQLite a PostgreSQL.** Raw SQL con psycopg2, sin ORM.
 
-### Cache JSON — `data/cache/`
+### Cache JSON — `/var/data/cache/` (Render Persistent Disk)
 
 | Archivo | Contenido |
 |---------|-----------|
-| `daily_matches_{LEAGUE}.json` | Partidos por liga |
+| `daily_matches_{LEAGUE}.json` | Partidos por liga (con status live + minuto) |
 | `daily_picks_{LEAGUE}.json` | Picks generados por liga |
 | `daily_combos.json` | Combos/parlays globales |
 | `picks_history_{LEAGUE}.json` | Historial de picks resueltos |
-| `team_form_{TEAM_ID}_30.json` | Forma reciente por equipo |
+| `live_events_state.json` | Estado de notificaciones live (evita duplicados) |
+| `push_notified_cache.json` | Cache de notificaciones ya enviadas (TTL 2h) |
 | `team_names.json` | Mapa ID ↔ nombre de equipo |
-| `cache_meta.json` | Estado del refresh (lock, last_updated) |
 
 ---
 
-## 5. Modelo de Predicción
-
-### Flujo de generación de picks
-
-```
-Football-Data API → matches + team history
-        ↓
-Model A (xG estático: home=1.45, away=1.15)
-    o
-Model B (xG dinámico desde últimos 30 días, weighted by recency)   ← default
-        ↓
-core/poisson.py → distribución Poisson + corrección Dixon-Coles
-        ↓
-Probabilidades: 1X2, Over/Under 2.5, BTTS
-        ↓
-The Odds API → cuotas de mercado
-        ↓
-services/aftr_score.py → AFTR Score (0–100)
-```
-
-### AFTR Score — `services/aftr_score.py`
-
-Ponderación:
-- `model_score` (prob. del modelo) → **35%**
-- `value_score` (edge vs. implied odds) → **35%**
-- `form_score` (form_diff equipo) → **15%**
-- `xg_score` (xg_diff) → **15%**
-
-Tiers resultantes:
-| Score | Tier |
-|-------|------|
-| ≥ 85 | `elite` |
-| ≥ 70 | `strong` |
-| ≥ 55 | `risky` |
-| < 55 | `pass` |
-
-Guardrails: edge ≤ 0 → tier baja a máximo `risky`. prob < 0.45 → no puede ser `elite`.
-
-### Combos/Parlays — `services/refresh_combos.py`
-
-- Tiers: `SAFE` / `MEDIUM` / `SPICY` con umbrales de confianza distintos
-- Prevención de overlap (no duplicar legs)
-- Ventana de 3 días para combos `next-3d`
-
----
-
-## 6. APIs Externas
+## 5. APIs Externas
 
 | API | Base URL | Auth | Uso |
 |-----|----------|------|-----|
-| **Football-Data.org** | `https://api.football-data.org/v4/` | Header `X-Auth-Token` | Partidos, standings, historial de equipos |
-| **API-Sports** | `https://api-sports.io/v1/` | Header `x-rapidapi-key` | Partidos NBA |
-| **The Odds API** | `https://api.the-odds-api.com/v4/` | Query param `apiKey` | Cuotas de mercado fútbol |
-| **Stripe** | `https://api.stripe.com` | Secret key | Checkout, suscripciones, webhooks |
-
-**Rate limiting:** Football-Data = 10 req/min (free tier). Manejado por `services/refresh_rate_guard.py` con backoff exponencial hasta 120s (configurable).
+| **API-Football** (api-sports.io) | `https://v3.football.api-sports.io` | Header `x-apisports-key` | Proveedor principal: fixtures, live, standings |
+| **Football-Data.org** | `https://api.football-data.org/v4/` | Header `X-Auth-Token` | Fallback para ligas sin ID en APIF |
+| **API-Sports** | Basketball API | Header `x-apisports-key` | Partidos NBA |
+| **The Odds API** | `https://api.the-odds-api.com/v4/` | Query param `apiKey` | Cuotas de mercado |
+| **Mercado Pago** | `https://api.mercadopago.com` | Access token | Checkout, webhooks ✅ |
+| **Resend** | `https://api.resend.com` | API key | Emails transaccionales (en test mode, sin dominio propio aún) |
 
 ---
 
-## 7. Endpoints REST Internos
+## 6. Ligas Soportadas
 
-### Picks & Matches
-```
-GET  /api/picks?league=PL            → picks de una liga (JSON)
-GET  /api/picks/{league}             → alias
-GET  /api/combos                     → combos globales Safe/Medium/Spicy
-GET  /api/stats/summary?league=PL   → KPIs (ROI, winrate, net units)
-GET  /api/matches?league=PL         → partidos por liga
-GET  /api/matches/by-day            → agrupados por fecha
-```
+| Código | Liga | Datos | Logo |
+|--------|------|-------|------|
+| PL | Premier League | ✅ | ✅ |
+| PD | LaLiga | ✅ | ✅ |
+| SA | Serie A | ✅ | ✅ |
+| BL1 | Bundesliga | ✅ | ✅ |
+| FL1 | Ligue 1 | ✅ | ✅ |
+| CL | Champions League | ✅ | ✅ |
+| EL | Europa League | ⏳ pendiente refresh | ✅ |
+| CONF | Conference League | ⏳ | — |
+| ELC | Championship | ✅ | ✅ |
+| DED | Eredivisie | ✅ | ✅ |
+| PPL | Primeira Liga | ✅ | ✅ |
+| FAC | FA Cup | ⏳ pendiente refresh | ✅ |
+| CREY | Copa del Rey | ⏳ pendiente refresh | ✅ |
+| CLI | Copa Libertadores | ✅ | ✅ |
+| BSA | Brasileirão | ✅ | ✅ |
+| ARG | Liga Argentina | ⏳ pendiente refresh | ✅ |
+| MLS | MLS | ⏳ pendiente refresh | ✅ |
+| EC | Eurocopa | ✅ (data de 2024) | ✅ |
+| WC | World Cup | ✅ (data histórica) | ✅ |
+| NBA | NBA | ✅ | ✅ |
 
-### Auth
-```
-POST /auth/register                  → crear cuenta
-POST /auth/login                     → form login → cookie sesión
-POST /auth/login/json                → JSON login (para Android)
-GET  /auth/me                        → usuario actual (401 si no logueado)
-GET  /auth/logout                    → limpiar sesión
-POST /auth/forgot-password           → enviar email de reset
-POST /auth/reset-password            → nueva contraseña con token
-```
+---
 
-### Billing
-```
-POST /billing/create-checkout-session → Stripe checkout
-GET  /billing/success                 → redirect post-pago
-POST /webhooks/stripe                 → eventos Stripe (firma verificada)
-```
+## 7. Sistema de Push Notifications
 
-### Status
-```
-GET  /health                          → {"status": "ok"}
-GET  /api/status                      → refresh_running, last_update, picks_total
-```
+- **VAPID keys** configuradas en Render (VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY, VAPID_EMAIL)
+- **Suscripciones** guardadas en tabla `push_subscriptions` en PostgreSQL
+- **Envío** via `pywebpush` con conversión PEM automática (`_vapid_private_key_pem()`)
+- **Service Worker** (`sw.js`) maneja `push` y `notificationclick`
+- **`requireInteraction: true`** — notificaciones quedan en pantalla hasta que el usuario las toca
 
-### UI (HTML server-rendered)
-```
-GET  /                                → Home dashboard
-GET  /league/{code}                   → Dashboard de liga
-GET  /account                         → Cuenta de usuario
-GET  /auth/login                      → Form de login
-GET  /auth/register                   → Form de registro
-```
+### Eventos que disparan push
+| Evento | Cuándo |
+|--------|--------|
+| Upcoming pick | 30 min antes del partido (pick seguido) |
+| Kickoff | Cuando arranca el partido |
+| Gol | Cada gol (reemplaza notificación anterior) |
+| Half-time | Fin del 1er tiempo |
+| 2° tiempo | Inicio del 2do tiempo |
+| Full-time | Resultado final |
+| Trial expiring | 48h antes de que venza el trial |
+
+**Tag único por partido** — todos los eventos de un mismo partido usan `live-{fix_id}`, reemplazando la notificación anterior. Efecto: score que se actualiza en el lock screen.
 
 ---
 
@@ -257,164 +229,124 @@ Iniciado automáticamente en el lifespan de FastAPI si `AUTO_REFRESH=true`.
 
 | Tier | Intervalo default | Propósito |
 |------|-------------------|-----------|
-| LIVE | 60 segundos | Partidos en curso |
+| LIVE | 60 segundos | Partidos en curso + live events + minutos |
 | UPCOMING | 15 minutos | Próximos partidos y picks |
 | RESULTS | 10 minutos | Resultados de partidos finalizados |
 
-Archivo: `app/auto_refresh.py` → `spawn_auto_refresh_tasks()`
-Scheduler: `services/tiered_refresh.py`
+Round-robin: `AUTO_REFRESH_LEAGUES_PER_CYCLE=4` ligas por ciclo.
+Ligas con ID en `APIF_LEAGUE_MAP` → `refresh_apifootball.py`
+Ligas sin ID → `football_data.py` (fallback)
 
 ---
 
-## 9. Autenticación y Billing
+## 9. Modelo de Predicción
 
-- **Sesiones:** Cookie firmada con `itsdangerous` → `{"uid": user_id}`
+```
+API-Football → fixtures + team history
+        ↓
+Model B (xG dinámico — default) o Model A (xG estático)
+        ↓
+core/poisson.py → Poisson + Dixon-Coles
+        ↓
+Probabilidades: 1X2, Over/Under, BTTS
+        ↓
+The Odds API → cuotas de mercado
+        ↓
+services/aftr_score.py → AFTR Score (0–100)
+```
+
+### AFTR Score
+
+| Componente | Peso |
+|-----------|------|
+| model_score (prob. modelo) | 35% |
+| value_score (edge vs. odds) | 35% |
+| form_score (forma equipo) | 15% |
+| xg_score (xg_diff) | 15% |
+
+| Score | Tier |
+|-------|------|
+| ≥ 85 | `elite` |
+| ≥ 70 | `strong` |
+| ≥ 55 | `risky` |
+| < 55 | `pass` |
+
+---
+
+## 10. Autenticación y Billing
+
+- **Sesiones:** Cookie firmada `itsdangerous` → `{"uid": user_id}`
 - **Passwords:** bcrypt/passlib
-- **Planes:** FREE → PREMIUM → PRO determinados por tabla `subscriptions`
-- **Gating UI:** free users ven top 3 picks; premium ve todos
-- **Premium filter:** `aftr_score >= 70 AND edge > 0` → `services/aftr_score.py:filter_premium_picks()`
-- **Stripe flow:** checkout → webhook `checkout.session.completed` → activa plan en DB
+- **Planes:** FREE / PREMIUM determinados por `subscription_status` + `subscription_end` en `users`
+- **Gating:** free users ven picks limitados; premium ve todos + combos
+- **Mercado Pago:** checkout sessions + webhooks → activa plan en DB ✅
+- **LemonSqueezy:** descartado (cuenta rechazada)
+- **Stripe:** configurado pero no activo (reemplazado por MP)
 
 ---
 
-## 10. Ligas Soportadas
+## 11. Variables de Entorno en Render
 
-| Código | Liga |
-|--------|------|
-| PL | Premier League (Inglaterra) |
-| PD | La Liga (España) |
-| SA | Serie A (Italia) |
-| BL1 | Bundesliga (Alemania) |
-| FL1 | Ligue 1 (Francia) |
-| ELC | Championship (Inglaterra) |
-| DED | Eredivisie (Holanda) |
-| PPL | Primeira Liga (Portugal) |
-| CL | Champions League |
-| EL | Europa League |
-| BSA | Brasileirão Serie A |
-| EC | Euros / Copa |
-| WC | World Cup |
-| CLI | Copa Libertadores |
-| NBA | NBA Basketball |
-
----
-
-## 11. Configuración de Entorno
-
-### Variables clave
-
-| Variable | Default | Propósito |
-|----------|---------|-----------|
-| `AFTR_SECRET_KEY` | `dev-secret-change-me` | Firma de cookies |
-| `AFTR_DB_PATH` | `./aftr.db` | Path SQLite |
-| `AFTR_CACHE_DIR` | `data/cache` | Path cache JSON |
-| `APP_BASE_URL` | — | URL pública (para emails/Stripe) |
-| `FOOTBALL_DATA_API_KEY` | — | Requerida |
-| `API_SPORTS_KEY` | — | Requerida para NBA |
-| `ODDS_API_KEY` | — | Opcional |
-| `STRIPE_SECRET_KEY` | — | Producción |
-| `STRIPE_WEBHOOK_SECRET` | — | Producción |
-| `AUTO_REFRESH` | `true` | Scheduler background |
-| `AFTR_PICKS_MODEL` | `B` | Modelo A (estático) o B (dinámico) |
-| `LIVE_REFRESH_SECONDS` | `60` | Intervalo live |
-| `UPCOMING_REFRESH_MIN` | `15` | Intervalo upcoming |
-| `RESULTS_REFRESH_MIN` | `10` | Intervalo results |
-| `COOKIE_SECURE` | auto (HTTPS) | Secure flag en cookies |
-
-### Dev vs Prod
-
-```
-# .env local (dev)
-AFTR_SECRET_KEY=dev-secret
-AUTO_REFRESH=false
-AFTR_DEBUG=1
-AFTR_LOG_LEVEL=DEBUG
-AFTR_CACHE_DIR=./data/cache
-AFTR_DB_PATH=./aftr.db
-
-# Render.com (prod)
-AFTR_DB_PATH=/var/data/aftr.db
-AFTR_CACHE_DIR=/var/data/cache
-COOKIE_SECURE=true
-AUTO_REFRESH=true
-APP_BASE_URL=https://aftr-api.onrender.com
-```
+| Variable | Propósito |
+|----------|-----------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `AFTR_SECRET_KEY` | Firma de cookies |
+| `API_FOOTBALL_KEY` | api-sports.io (32 chars hex) |
+| `FOOTBALL_DATA_API_KEY` | Football-Data.org fallback |
+| `API_SPORTS_KEY` | NBA |
+| `ODDS_API_KEY` | The Odds API |
+| `VAPID_PRIVATE_KEY` | Push notifications |
+| `VAPID_PUBLIC_KEY` | Push notifications |
+| `VAPID_EMAIL` | Push notifications |
+| `MP_ACCESS_TOKEN` | Mercado Pago |
+| `MP_WEBHOOK_SECRET` | Mercado Pago |
+| `RESEND_API_KEY` | Emails |
+| `APP_BASE_URL` | URL pública |
+| `AUTO_REFRESH` | `true` en prod |
 
 ---
 
-## 12. Entry Points
+## 12. Estado Mobile / PWA
+
+| Canal | Estado |
+|-------|--------|
+| PWA (web) | ✅ Instalable — manifest + service worker |
+| Android TWA (Play Store) | 🔧 En progreso — pendiente bubblewrap + assetlinks.json |
+| iOS App Store | ⏳ Requiere Mac + Apple Developer ($99/año) |
+
+**Estrategia Play Store:** TWA (Trusted Web Activity) via Bubblewrap.
+La app nativa con Capacitor está en standby — se reemplazó por TWA.
+
+### Checklist TWA
+- [ ] `manifest.webmanifest` completo con todos los campos requeridos
+- [ ] `/.well-known/assetlinks.json` en el servidor
+- [ ] Cuenta Google Play Developer ($25 USD, pago único)
+- [ ] Generar APK con `bubblewrap build`
+- [ ] Screenshots + descripción para el store listing
+
+---
+
+## 13. Pendientes / Roadmap
+
+### Bloqueantes para launch completo
+- [ ] Dominio propio (para Resend + credibilidad)
+- [ ] Términos y condiciones / Política de privacidad
+- [ ] Email de trial (Resend en test mode, necesita dominio)
+
+### Próximo
+- [ ] TWA → Play Store
+- [ ] Racha de picks (streak display)
+- [ ] Share de picks
+- [ ] Bankroll tracking avanzado
+- [ ] EL, ARG, MLS, FAC, CREY con datos reales (pendiente refresh API-Football)
+
+---
+
+## 14. Entry Points
 
 | Forma | Comando |
 |-------|---------|
-| Servidor web | `uvicorn app.main:app --host 127.0.0.1 --port 8000` |
-| Refresh manual | `python -m app.cli refresh` |
+| Servidor web | `uvicorn app.main:app --host 0.0.0.0 --port 8000` |
+| Refresh manual una liga | `python -c "from services.refresh_apifootball import apif_refresh_league; print(apif_refresh_league('PL'))"` |
 | Tests | `pytest tests/` |
-| Daily (Windows) | `scripts/run_daily.ps1` |
-| Deploy | `render.yaml` → build: `pip install -r requirements.txt` |
-
----
-
-## 13. Estado Actual del Código (2026-03-28)
-
-### Cambios en working tree (no commiteados)
-
-| Archivo | Estado | Nota |
-|---------|--------|------|
-| `services/refresh.py` | **Modificado** (−1563 líneas) | Refactor: monolito → módulos especializados |
-| `services/refresh_combos.py` | **Nuevo** (untracked) | Extraído de refresh.py |
-| `services/refresh_league.py` | **Nuevo** (untracked) | Extraído de refresh.py |
-| `services/refresh_odds.py` | **Nuevo** (untracked) | Extraído de refresh.py |
-| `services/refresh_picks.py` | **Nuevo** (untracked) | Extraído de refresh.py |
-| `services/refresh_results.py` | **Nuevo** (untracked) | Extraído de refresh.py |
-| `services/refresh_teams.py` | **Nuevo** (untracked) | Extraído de refresh.py |
-| `services/refresh_utils.py` | **Nuevo** (untracked) | Extraído de refresh.py |
-| `core/model_b.py` | **Modificado** | Ajustes modelo xG dinámico |
-| `core/poisson.py` | **Modificado** | Ajustes distribución + Dixon-Coles |
-| `services/aftr_score.py` | **Modificado** | Ajustes scoring/guardrails |
-
-> El refactor del pipeline de refresh es el trabajo principal en curso.
-> `services/refresh.py` pasó de ser un monolito de ~1600 líneas a ser un orquestador delgado que re-exporta desde los sub-módulos.
-
-### Últimos commits
-
-```
-7780e5f fix: replace drum carousel with native scroll-snap
-fb0b4ea fix: carousel class names + viewport height for drum 3D mode
-e0cf2d1 feat: UX visual improvements — gauge, badges, skeleton, stagger
-fd98563 feat: drum/wheel 3D league carousel
-fbd3b35 fix: router not defined in ui_account.py on import
-03e15af refactor: split app/ui.py (6068 lines) into 11 focused modules
-90f014f fix: activate premium on billing success when webhook is missing
-1baba4d fix: homepage fallback + persistent snapshot
-```
-
----
-
-## 14. Dependencias Python
-
-```
-fastapi            # Web framework
-uvicorn            # ASGI server
-python-dotenv      # Carga .env
-requests           # HTTP client para APIs externas
-pytest             # Testing
-passlib            # Hashing de contraseñas
-bcrypt==4.0.1      # Backend bcrypt (pinneado)
-python-multipart   # Parsing de formularios
-stripe             # SDK Stripe
-itsdangerous       # Firma de cookies de sesión
-tzdata             # Datos de timezone
-jinja2             # Templates HTML
-```
-
----
-
-## 15. Notas de Arquitectura
-
-1. **Sin ORM** — SQLite directo. Justificado por la simpleza del schema (solo usuarios/auth/billing). Los datos de picks/partidos no pasan por DB.
-2. **Cache JSON es la fuente de verdad de picks** — el pipeline de refresh escribe, las rutas web leen. No hay DB de picks.
-3. **Model B es el default** — xG dinámico con ventana de 30 días, ponderado por recencia. Model A (estático) disponible con `AFTR_PICKS_MODEL=A`.
-4. **Separación dura: refresh ≠ web server** — el refresh es CPU-bound y corre en threads separados o como proceso CLI. El web server solo lee cache.
-5. **Frontend 100% server-rendered** — no SPA, no React. Jinja2 genera HTML completo en cada request. JS es mínimo (interactividad, carousel, modales).
-6. **PWA** — service worker + manifest para instalación en móvil. Mobile nativo (Capacitor) está en standby.
-7. **Premium gating** — se controla en `app/user_helpers.py` y en los renderers UI. El criterio de picks premium es `aftr_score >= 70 AND edge > 0`.
+| Deploy | Push a `main` → Render auto-deploy |
