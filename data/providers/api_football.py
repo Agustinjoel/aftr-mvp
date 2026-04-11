@@ -1,7 +1,7 @@
 """
-API-Football (RapidAPI) provider — fixtures en vivo, próximos y finalizados.
-API by Api-Sports: api-football-v3.p.rapidapi.com
-Requiere env var API_FOOTBALL_KEY (X-RapidAPI-Key).
+API-Football (api-sports.io) provider — fixtures en vivo, próximos y finalizados.
+API by Api-Sports: v3.football.api-sports.io
+Requiere env var API_FOOTBALL_KEY (x-apisports-key).
 Si la key no está configurada, todas las funciones retornan vacío sin error.
 
 Funciones públicas:
@@ -23,10 +23,8 @@ import requests
 
 logger = logging.getLogger("aftr.api_football")
 
-BASE_URL = "https://api-football-v3.p.rapidapi.com"
-HEADERS_TEMPLATE = {
-    "X-RapidAPI-Host": "api-football-v3.p.rapidapi.com",
-}
+BASE_URL = "https://v3.football.api-sports.io"
+HEADERS_TEMPLATE: dict[str, str] = {}
 
 _HTTP_TIMEOUT = 10
 _MIN_CALL_INTERVAL = 5.0
@@ -38,7 +36,7 @@ def _api_key() -> str:
 
 
 def _headers() -> dict[str, str]:
-    return {**HEADERS_TEMPLATE, "X-RapidAPI-Key": _api_key()}
+    return {"x-apisports-key": _api_key()}
 
 
 def _throttle() -> None:
