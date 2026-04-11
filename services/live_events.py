@@ -361,6 +361,10 @@ def process_live_events() -> int:
         score_str = f"{score_h}–{score_a}"
         match_title = f"{home_name} vs {away_name}"
 
+        # Tag único por partido — así cada evento REEMPLAZA la notificación anterior
+        # en el lock screen en vez de apilar. Queda una sola "live score" por partido.
+        live_tag = f"live-{fix_id}"
+
         # ── KICK-OFF ──────────────────────────────────────────────────────────
         if (
             fix_status in _STATUS_KICKOFF
@@ -369,10 +373,10 @@ def process_live_events() -> int:
             and int(fix_elapsed or 0) <= 30
         ):
             payload = {
-                "title": f"Arrancó: {match_title}",
-                "body":  f"El partido comenzó • min {fix_elapsed}",
+                "title": f"🔴 {home_name} 0–0 {away_name}",
+                "body":  "El partido comenzó",
                 "icon":  home_logo,
-                "tag":   f"kickoff-{fix_id}",
+                "tag":   live_tag,
                 "url":   "/",
                 "data":  {"fixture_id": fix_id},
             }
@@ -389,10 +393,10 @@ def process_live_events() -> int:
             and not state[fix_id]["notified_ht"]
         ):
             payload = {
-                "title": f"Descanso: {home_name} {score_str} {away_name}",
-                "body":  "Fin del primer tiempo",
+                "title": f"HT: {home_name} {score_str} {away_name}",
+                "body":  "Descanso — fin del primer tiempo",
                 "icon":  home_logo,
-                "tag":   f"ht-{fix_id}",
+                "tag":   live_tag,
                 "url":   "/",
                 "data":  {"fixture_id": fix_id},
             }
@@ -409,10 +413,10 @@ def process_live_events() -> int:
             and not state[fix_id]["notified_2h"]
         ):
             payload = {
-                "title": f"2° tiempo: {home_name} {score_str} {away_name}",
+                "title": f"🔴 {home_name} {score_str} {away_name}",
                 "body":  "Arrancó el segundo tiempo",
                 "icon":  home_logo,
-                "tag":   f"2h-{fix_id}",
+                "tag":   live_tag,
                 "url":   "/",
                 "data":  {"fixture_id": fix_id},
             }
@@ -424,7 +428,6 @@ def process_live_events() -> int:
 
         # ── FULL-TIME ─────────────────────────────────────────────────────────
         if is_final and not state[fix_id]["notified_final"]:
-            # Para tracker legs, agregar los mercados en juego
             legs_by_user: dict[int, list[dict]] = {}
             for leg in matched_legs:
                 legs_by_user.setdefault(leg["user_id"], []).append(leg)
@@ -433,15 +436,15 @@ def process_live_events() -> int:
                 legs = legs_by_user.get(uid, [])
                 if legs:
                     markets = ", ".join(leg["market"] for leg in legs if leg.get("market"))
-                    body = f"Tu apuesta: {markets}" if markets else "Partido terminado"
+                    body = f"Tu apuesta: {markets}" if markets else "Resultado final"
                 else:
-                    body = "Partido terminado"
+                    body = "Resultado final"
 
                 payload = {
                     "title": f"FT: {home_name} {score_str} {away_name}",
                     "body":  body,
                     "icon":  home_logo,
-                    "tag":   f"ft-{fix_id}",
+                    "tag":   live_tag,
                     "url":   "/tracker",
                     "data":  {"fixture_id": fix_id},
                 }
@@ -474,18 +477,18 @@ def process_live_events() -> int:
                             if early == "WON":
                                 early_results.append(f"{leg['market']} ✅")
                         if early_results:
-                            body = f"⚽ {score_str} | {', '.join(early_results)}"
+                            body = f"⚽ min {fix_elapsed} | {', '.join(early_results)}"
                         else:
                             markets = ", ".join(leg["market"] for leg in legs if leg.get("market"))
-                            body = f"⚽ {score_str} min {fix_elapsed}" + (f" | {markets}" if markets else "")
+                            body = f"⚽ min {fix_elapsed}" + (f" | {markets}" if markets else "")
                     else:
-                        body = f"⚽ Gol — {score_str} · min {fix_elapsed}"
+                        body = f"⚽ Gol — min {fix_elapsed}"
 
                     payload = {
-                        "title": f"{home_name} {score_str} {away_name}",
+                        "title": f"🔴 {home_name} {score_str} {away_name}",
                         "body":  body,
                         "icon":  home_logo,
-                        "tag":   f"goal-{fix_id}-{score_key}",
+                        "tag":   live_tag,
                         "url":   "/",
                         "data":  {"fixture_id": fix_id},
                     }
@@ -640,13 +643,14 @@ def process_cache_live_events(league_codes: list[str]) -> int:
             score_str   = f"{score_h}–{score_a}"
             match_title = f"{home_name} vs {away_name}"
             is_final    = cur_status in _FDO_FINAL
-            # prev_h puede ser -1 si el partido aún no había arrancado (score null).
-            # Aceptamos la transición null→gol cuando el score actual ya tiene algún gol.
             goal_scored = (
                 not first_time_seen
                 and (score_h != prev_h or score_a != prev_a)
                 and (prev_h >= 0 or score_h > 0 or score_a > 0)
             )
+
+            # Tag único por partido para que cada evento REEMPLACE el anterior en lock screen
+            live_tag = f"live-c-{mid}"
 
             # ── KICK-OFF ──────────────────────────────────────────────────────
             if (
@@ -655,10 +659,10 @@ def process_cache_live_events(league_codes: list[str]) -> int:
                 and not prev_state.get("notified_kickoff")
             ):
                 payload = {
-                    "title": f"Arrancó: {match_title}",
+                    "title": f"🔴 {home_name} 0–0 {away_name}",
                     "body":  "El partido comenzó",
                     "icon":  home_crest,
-                    "tag":   f"kickoff-c-{mid}",
+                    "tag":   live_tag,
                     "url":   "/",
                 }
                 n = _send_all(send_to_user, all_users, payload)
@@ -674,10 +678,10 @@ def process_cache_live_events(league_codes: list[str]) -> int:
                 and not prev_state.get("notified_ht")
             ):
                 payload = {
-                    "title": f"Descanso: {home_name} {score_str} {away_name}",
-                    "body":  "Fin del primer tiempo",
+                    "title": f"HT: {home_name} {score_str} {away_name}",
+                    "body":  "Descanso — fin del primer tiempo",
                     "icon":  home_crest,
-                    "tag":   f"ht-c-{mid}",
+                    "tag":   live_tag,
                     "url":   "/",
                 }
                 n = _send_all(send_to_user, all_users, payload)
@@ -687,23 +691,19 @@ def process_cache_live_events(league_codes: list[str]) -> int:
                     logger.info("cache_live HT: mid=%s %s %s users=%d", mid, match_title, score_str, n)
 
             # ── INICIO 2° TIEMPO ──────────────────────────────────────────────
-            # Condición principal: venía de PAUSED (HT detectado en ciclo anterior).
-            # Condición alternativa: si el poll salteó el ciclo de PAUSED, detectamos
-            # 2H cuando estamos IN_PLAY + ya se había notificado el HT + aún no se
-            # notificó el 2H. Esto evita perder la notificación por backoff/lag.
             if (
                 cur_status in _FDO_KICKOFF
                 and not prev_state.get("notified_2h")
                 and (
-                    prev_status in _FDO_HALFTIME                     # camino normal
-                    or prev_state.get("notified_ht")                 # camino fallback
+                    prev_status in _FDO_HALFTIME
+                    or prev_state.get("notified_ht")
                 )
             ):
                 payload = {
-                    "title": f"2° tiempo: {home_name} {score_str} {away_name}",
+                    "title": f"🔴 {home_name} {score_str} {away_name}",
                     "body":  "Arrancó el segundo tiempo",
                     "icon":  home_crest,
-                    "tag":   f"2h-c-{mid}",
+                    "tag":   live_tag,
                     "url":   "/",
                 }
                 n = _send_all(send_to_user, all_users, payload)
@@ -722,13 +722,13 @@ def process_cache_live_events(league_codes: list[str]) -> int:
                     legs = legs_by_user.get(uid, [])
                     body = (
                         f"Tu apuesta: {', '.join(l['market'] for l in legs if l.get('market'))}"
-                        if legs else "Partido terminado"
+                        if legs else "Resultado final"
                     )
                     payload = {
                         "title": f"FT: {home_name} {score_str} {away_name}",
                         "body":  body,
                         "icon":  home_crest,
-                        "tag":   f"ft-c-{mid}",
+                        "tag":   live_tag,
                         "url":   "/tracker",
                     }
                     sent = send_to_user(uid, payload)
@@ -758,18 +758,18 @@ def process_cache_live_events(league_codes: list[str]) -> int:
                                 if _resolve_market_for_push(l["market"], score_h, score_a) == "WON"
                             ]
                             if early:
-                                body = f"⚽ {score_str} | {', '.join(early)}"
+                                body = f"⚽ Gol | {', '.join(early)}"
                             else:
                                 markets = ", ".join(l["market"] for l in legs if l.get("market"))
-                                body = f"⚽ {score_str}" + (f" | {markets}" if markets else "")
+                                body = f"⚽ Gol" + (f" | {markets}" if markets else "")
                         else:
-                            body = f"⚽ Gol — {score_str}"
+                            body = "⚽ Gol"
 
                         payload = {
-                            "title": f"{home_name} {score_str} {away_name}",
+                            "title": f"🔴 {home_name} {score_str} {away_name}",
                             "body":  body,
                             "icon":  home_crest,
-                            "tag":   f"goal-c-{mid}-{score_key}",
+                            "tag":   live_tag,
                             "url":   "/",
                         }
                         sent = send_to_user(uid, payload)
