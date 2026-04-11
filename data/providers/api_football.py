@@ -240,6 +240,112 @@ def fetch_standings(league_id: int, season: int) -> list[dict]:
     return rows
 
 
+def fetch_odds_apif(league_id: int, season: int, date_str: str) -> list[dict]:
+    """
+    Trae odds de API-Football para una liga/fecha específica.
+    Devuelve lista normalizada al formato AFTR:
+      { home_team, away_team, date_iso, fixture_id, odds_by_market }
+
+    Bets mapeados:
+      - id=1 "Match Winner"   → h2h: { Home Win, Draw, Away Win }
+      - id=5 "Goals Over/Under" → totals_25: { Over 2.5, Under 2.5 }
+    """
+    items = _get("/odds", {"league": league_id, "season": season, "date": date_str})
+    out: list[dict] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        norm = _normalize_apif_odds_event(item)
+        if norm:
+            out.append(norm)
+    logger.info(
+        "api_football fetch_odds_apif: league=%s season=%s date=%s → %d events",
+        league_id, season, date_str, len(out),
+    )
+    return out
+
+
+def _normalize_apif_odds_event(item: dict) -> dict | None:
+    """Convierte un evento de /odds de API-Football al formato de odds AFTR."""
+    fixture = item.get("fixture") or {}
+    teams = (item.get("teams") or {})
+    home_team = (teams.get("home") or {}).get("name", "")
+    away_team = (teams.get("away") or {}).get("name", "")
+    fix_date = fixture.get("date") or ""
+
+    if not home_team or not away_team:
+        return None
+
+    # date_iso from fixture.date (ISO string)
+    date_iso = ""
+    if fix_date:
+        try:
+            from datetime import datetime, timezone as _tz
+            s = fix_date.replace("Z", "+00:00")
+            dt = datetime.fromisoformat(s)
+            date_iso = dt.date().isoformat()
+        except Exception:
+            date_iso = fix_date[:10] if len(fix_date) >= 10 else ""
+
+    if not date_iso:
+        return None
+
+    odds_by_market: dict[str, dict[str, float]] = {}
+    bookmaker_title = ""
+
+    for bm in item.get("bookmakers") or []:
+        bm_name = (bm.get("name") or "").strip()
+        for bet in bm.get("bets") or []:
+            bet_id = bet.get("id")
+            if bet_id == 1 and "h2h" not in odds_by_market:
+                # Match Winner: Home / Draw / Away
+                by_outcome: dict[str, float] = {}
+                for v in bet.get("values") or []:
+                    val = (v.get("value") or "").strip()
+                    try:
+                        dec = float(v.get("odd") or 0)
+                    except (TypeError, ValueError):
+                        continue
+                    if val == "Home":
+                        by_outcome["Home Win"] = dec
+                    elif val == "Draw":
+                        by_outcome["Draw"] = dec
+                    elif val == "Away":
+                        by_outcome["Away Win"] = dec
+                if by_outcome:
+                    odds_by_market["h2h"] = by_outcome
+                    if not bookmaker_title and bm_name:
+                        bookmaker_title = bm_name
+            elif bet_id == 5 and "totals_25" not in odds_by_market:
+                # Goals Over/Under — pick the 2.5 line
+                for v in bet.get("values") or []:
+                    val = (v.get("value") or "").strip()
+                    try:
+                        dec = float(v.get("odd") or 0)
+                    except (TypeError, ValueError):
+                        continue
+                    if val == "Over 2.5":
+                        odds_by_market.setdefault("totals_25", {})["Over 2.5"] = dec
+                    elif val == "Under 2.5":
+                        odds_by_market.setdefault("totals_25", {})["Under 2.5"] = dec
+                    if not bookmaker_title and bm_name:
+                        bookmaker_title = bm_name
+
+    if not odds_by_market:
+        return None
+
+    result: dict = {
+        "home_team": home_team,
+        "away_team": away_team,
+        "date_iso": date_iso,
+        "fixture_id": fixture.get("id"),
+        "odds_by_market": odds_by_market,
+    }
+    if bookmaker_title:
+        result["bookmaker_title"] = bookmaker_title
+    return result
+
+
 def list_leagues(search: str = "", country: str = "") -> list[dict]:
     """
     Lista todas las ligas disponibles en API-Football.

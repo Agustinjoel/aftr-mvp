@@ -141,12 +141,20 @@ def _normalize_event(ev: dict, sport_key: str) -> dict | None:
 
 def fetch_odds_for_league(league_code: str) -> list[dict]:
     """
-    Fetch upcoming odds from The Odds API for the given football league.
+    Fetch upcoming odds for the given football league.
+    Priority:
+      1. API-Football (/odds) — same key already in use, no extra cost
+      2. The Odds API — fallback if ODDS_API_KEY is set and APIF returns nothing
     Returns list of normalized odds events { home_team, away_team, date_iso, odds_by_market }.
-    Empty list on missing key, API error, or non-football league.
     """
+    # --- Primary: API-Football odds ---
+    apif_results = _fetch_odds_apif(league_code)
+    if apif_results:
+        return apif_results
+
+    # --- Fallback: The Odds API (only if key is configured) ---
     if not ODDS_API_KEY:
-        logger.debug("ODDS_API_KEY not set; skipping odds fetch for %s", league_code)
+        logger.debug("ODDS_API_KEY not set and APIF odds empty; skipping odds for %s", league_code)
         return []
     sport_key = ODDS_LEAGUE_SPORT_KEYS.get(league_code)
     if not sport_key:
@@ -180,6 +188,43 @@ def fetch_odds_for_league(league_code: str) -> list[dict]:
         norm = _normalize_event(ev, sport_key)
         if norm:
             out.append(norm)
+    return out
+
+
+def _fetch_odds_apif(league_code: str) -> list[dict]:
+    """
+    Fetch odds from API-Football for the next 7 days.
+    Returns normalized list (same format as fetch_odds_for_league output) or [].
+    """
+    from config.settings import settings
+    from data.providers.api_football import fetch_odds_apif
+    from datetime import datetime, timezone, timedelta
+
+    league_id = settings.get_apif_league_id(league_code)
+    if not league_id:
+        return []
+
+    season = datetime.now(timezone.utc).year
+    today = datetime.now(timezone.utc)
+    out: list[dict] = []
+    seen_fixture_ids: set = set()
+
+    for day_offset in range(8):
+        date_str = (today + timedelta(days=day_offset)).strftime("%Y-%m-%d")
+        try:
+            events = fetch_odds_apif(league_id, season, date_str)
+        except Exception as e:
+            logger.debug("APIF odds fetch error league=%s date=%s: %s", league_code, date_str, e)
+            continue
+        for ev in events:
+            fid = ev.get("fixture_id")
+            if fid and fid in seen_fixture_ids:
+                continue
+            if fid:
+                seen_fixture_ids.add(fid)
+            out.append(ev)
+
+    logger.info("APIF odds for %s: %d events over 8 days", league_code, len(out))
     return out
 
 
