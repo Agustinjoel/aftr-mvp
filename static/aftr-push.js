@@ -55,33 +55,11 @@
       var reactivateBtn = document.getElementById('push-reactivate-btn');
 
       if (Notification.permission === 'granted') {
-        reg.pushManager.getSubscription().then(function (existing) {
-          if (existing) {
-            // Check if this subscription uses the current VAPID key by trying to send it.
-            // If it fails (key mismatch), unsubscribe and re-subscribe.
-            sendSubscriptionToServer(existing).then(function (res) {
-              return res.json();
-            }).then(function (data) {
-              if (!data.ok) {
-                // Server rejected it — refresh subscription
-                existing.unsubscribe().then(function () {
-                  return clearServerSubscriptions();
-                }).then(function () {
-                  subscribe(reg, null, null);
-                });
-              }
-            }).catch(function () {});
-          } else {
-            // No local subscription — clear server-side stale ones and re-subscribe
-            clearServerSubscriptions().then(function () {
-              subscribe(reg, null, null);
-            });
-          }
-        });
-
-        // Show reactivate button so user can force re-register if needed
-        if (reactivateBtn) {
-          reactivateBtn.style.display = '';
+        // Wires up the reactivate button click handler (button stays hidden unless needed)
+        function wireReactivateBtn() {
+          if (!reactivateBtn) return;
+          if (reactivateBtn._wired) return;
+          reactivateBtn._wired = true;
           reactivateBtn.addEventListener('click', function () {
             reactivateBtn.disabled = true;
             reactivateBtn.textContent = '⏳ Activando...';
@@ -90,9 +68,7 @@
                 clearServerSubscriptions().then(function () {
                   subscribe(reg, function () {
                     reactivateBtn.textContent = '✅ Activadas';
-                    setTimeout(function () {
-                      reactivateBtn.style.display = 'none';
-                    }, 3000);
+                    setTimeout(function () { reactivateBtn.style.display = 'none'; }, 3000);
                   }, function (err) {
                     reactivateBtn.disabled = false;
                     var msg = (err && err.message) ? err.message : String(err);
@@ -109,6 +85,40 @@
             });
           });
         }
+
+        reg.pushManager.getSubscription().then(function (existing) {
+          if (existing) {
+            // Validate subscription with server; refresh if rejected
+            sendSubscriptionToServer(existing).then(function (res) {
+              return res.json();
+            }).then(function (data) {
+              if (!data.ok) {
+                // Server rejected — silently resubscribe
+                existing.unsubscribe().then(function () {
+                  return clearServerSubscriptions();
+                }).then(function () {
+                  subscribe(reg, null, function () {
+                    // Auto-resubscribe failed — show button as fallback
+                    wireReactivateBtn();
+                    if (reactivateBtn) reactivateBtn.style.display = '';
+                  });
+                });
+              }
+              // data.ok === true: subscription is healthy, button stays hidden
+            }).catch(function () {});
+          } else {
+            // No local subscription — silently resubscribe
+            clearServerSubscriptions().then(function () {
+              subscribe(reg, null, function () {
+                // Failed — show button as fallback
+                wireReactivateBtn();
+                if (reactivateBtn) reactivateBtn.style.display = '';
+              });
+            });
+          }
+        });
+
+        wireReactivateBtn();
         return;
       }
 

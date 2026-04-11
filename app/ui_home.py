@@ -95,7 +95,7 @@ def _build_home_league_snap_carousel_html(
             _leagues_with_data.add(_code)
 
     # Mapeo de código → slug de logo (para casos especiales)
-    _LOGO_SLUG = {"EL": "uel", "EC": "cl"}  # EC usa el logo de CL como placeholder visual
+    _LOGO_SLUG = {"EL": "el", "EC": "ec"}  # EL→el.png; EC→ec.png (Eurocopa, no duplicar CL)
 
     items: list[str] = []
     ix = 0
