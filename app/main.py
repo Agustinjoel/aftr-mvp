@@ -98,6 +98,14 @@ async def assetlinks():
     )
 
 
+@app.get("/manifest.webmanifest", include_in_schema=False)
+async def manifest():
+    """Sirve el PWA manifest desde la raíz (requerido para TWA/bubblewrap)."""
+    content = (static_dir / "manifest.webmanifest").read_bytes()
+    return Response(content=content, media_type="application/manifest+json",
+                    headers={"Cache-Control": "no-cache"})
+
+
 @app.get("/sw.js", include_in_schema=False)
 async def service_worker():
     """Sirve el service worker desde el root para que tenga scope '/'."""
