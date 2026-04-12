@@ -23,23 +23,14 @@ from data.cache import (
     try_begin_global_refresh_busy,
     write_json,
 )
-from data.providers.football_data import (
-    football_data_refresh_cycle,
-    get_football_data_cycle_stats_snapshot,
-)
 from services.refresh import (
     RefreshMetrics,
     _league_is_fresh,
     _load_league_last_refresh,
     _parse_utcdate_str,
     _save_league_last_refresh,
-    refresh_league,
 )
-from services.refresh_rate_guard import (
-    apply_backoff_seconds,
-    register_rate_pressure_from_stats,
-    seconds_to_wait_for_backoff,
-)
+from services.refresh_rate_guard import seconds_to_wait_for_backoff
 
 logger = logging.getLogger("aftr.tiered_refresh")
 
@@ -236,26 +227,24 @@ def run_live_refresh_job() -> JobOutcome:
         logger.info("LIVE REFRESH RUNNING | leagues=%s | %s", hints, _utc_iso())
 
         metrics = RefreshMetrics()
-        with football_data_refresh_cycle():
+        try:
+            from services.refresh_apifootball import apif_refresh_league
             for code in hints:
                 try:
-                    refresh_league(
+                    apif_refresh_league(
                         code,
-                        mode="live",
+                        days_upcoming=1,
+                        days_finished=1,
                         fetch_odds=False,
                         metrics=metrics,
                     )
                 except Exception as e:
                     logger.warning("AUTO REFRESH LIVE league %s: %s", code, e)
+        except Exception as _apif_err:
+            logger.warning("apif_refresh import error (live): %s", _apif_err)
 
-        stats = get_football_data_cycle_stats_snapshot()
-        out.http_requests = int(stats.get("http_requests", 0))
-        out.rate_limit_sleep_sec = int(stats.get("rate_limit_sleep_sec", 0))
         out.matches_updated = metrics.matches_updated
         out.leagues_touched = len(hints)
-
-        cap = float(getattr(settings, "refresh_backoff_seconds", 120) or 120)
-        apply_backoff_seconds(register_rate_pressure_from_stats(stats), cap)
 
         _save_state_patch({"last_live_ts": time.time()})
 
@@ -271,10 +260,9 @@ def run_live_refresh_job() -> JobOutcome:
         except Exception as _live_err:
             logger.warning("live_events error (non-fatal): %s", _live_err)
 
-        # Live events — motor de caché (football-data.org / cache diff): corre SIEMPRE
-        # como cobertura complementaria para ligas que API-Football no devuelve en live.
-        # La deduplicación se hace por nombre de equipos en el state file compartido:
-        # el motor de caché hereda los flags del motor API-Football y no vuelve a notificar.
+        # Live events — motor de caché (diff de caché): corre SIEMPRE como cobertura
+        # complementaria. La deduplicación se hace por nombre de equipos en el state file
+        # compartido: hereda los flags del motor API-Football y no vuelve a notificar.
         try:
             from services.live_events import process_cache_live_events
             n_cache = process_cache_live_events(hints)
@@ -362,56 +350,31 @@ def run_results_refresh_job() -> JobOutcome:
         with _rr_lock:
             batch, _rr_results_idx = _round_robin_batch(fb, _rr_results_idx, batch_n)
 
-        # Separar ligas: API-Football (pago) vs football-data.org (gratis)
-        apif_batch = [c for c in batch if settings.get_apif_league_id(c)]
-        fdo_batch  = [c for c in batch if not settings.get_apif_league_id(c)]
-
         metrics = RefreshMetrics()
         touched = 0
 
         # ── API-Football leagues ──────────────────────────────────────────────
-        if apif_batch:
-            try:
-                from services.refresh_apifootball import apif_refresh_league
-                for code in apif_batch:
-                    try:
-                        apif_refresh_league(
-                            code,
-                            days_upcoming=7,
-                            days_finished=finished_days,
-                            fetch_odds=settings.auto_refresh_fetch_odds,
-                            metrics=metrics,
-                        )
-                        touched += 1
-                    except Exception as e:
-                        logger.warning("AUTO REFRESH RESULTS (apif) league %s: %s", code, e)
-            except Exception as _apif_err:
-                logger.warning("apif_refresh import error: %s", _apif_err)
-                fdo_batch = batch  # fallback a football-data.org
-
-        # ── Football-data.org leagues (fallback para las que no tienen APIF ID) ──
-        with football_data_refresh_cycle():
-            for code in fdo_batch:
+        try:
+            from services.refresh_apifootball import apif_refresh_league
+            for code in batch:
                 try:
-                    refresh_league(
+                    apif_refresh_league(
                         code,
-                        mode="results",
-                        finished_days_back=finished_days,
-                        fetch_odds=False,
+                        days_upcoming=7,
+                        days_finished=finished_days,
+                        fetch_odds=settings.auto_refresh_fetch_odds,
                         metrics=metrics,
                     )
                     touched += 1
                 except Exception as e:
-                    logger.warning("AUTO REFRESH RESULTS (fdo) league %s: %s", code, e)
+                    logger.warning("AUTO REFRESH RESULTS (apif) league %s: %s", code, e)
+        except Exception as _apif_err:
+            logger.warning("apif_refresh import error: %s", _apif_err)
 
-        stats = get_football_data_cycle_stats_snapshot()
-        out.http_requests = int(stats.get("http_requests", 0))
-        out.rate_limit_sleep_sec = int(stats.get("rate_limit_sleep_sec", 0))
+        out.http_requests = 0
+        out.rate_limit_sleep_sec = 0
         out.matches_updated = metrics.matches_updated
         out.leagues_touched = touched
-
-        cap = float(getattr(settings, "refresh_backoff_seconds", 120) or 120)
-        apply_backoff_seconds(register_rate_pressure_from_stats(stats), cap)
 
         _save_state_patch({"last_results_ts": time.time()})
 
@@ -529,82 +492,40 @@ def run_odds_refresh_job() -> JobOutcome:
         skip_fresh_min = int(getattr(settings, "refresh_skip_if_fresh_min", 0) or 0)
         last_ok = _load_league_last_refresh() if skip_fresh_min > 0 else {}
 
-        # Separar ligas: API-Football (pago) vs football-data.org (gratis)
-        apif_batch_up = [c for c in batch if settings.get_apif_league_id(c)]
-        fdo_batch_up  = [c for c in batch if not settings.get_apif_league_id(c)]
-
         metrics = RefreshMetrics()
         touched = 0
 
-        # ── API-Football: upcoming + picks (no necesita prematch window ni odds)
-        if apif_batch_up:
-            try:
-                from services.refresh_apifootball import apif_refresh_league
-                for code in apif_batch_up:
-                    league_matches = read_json(f"daily_matches_{code}.json")
-                    league_has_cache = isinstance(league_matches, list) and len(league_matches) > 0
-                    if league_has_cache and not _league_in_prematch_window(code, prematch_h, data=league_matches):
-                        logger.info("AUTO REFRESH ODDS skip (apif) %s (no match in prematch window)", code)
-                        continue
-                    if skip_fresh_min > 0 and _league_is_fresh(code, last_ok, skip_fresh_min):
-                        logger.info("AUTO REFRESH ODDS skip (apif) %s (league fresh)", code)
-                        continue
-                    try:
-                        apif_refresh_league(
-                            code,
-                            days_upcoming=7,
-                            days_finished=3,
-                            fetch_odds=want_odds and not _odds_file_is_fresh(code, odds_min),
-                            metrics=metrics,
-                        )
-                        touched += 1
-                        _save_league_last_refresh({code: datetime.now(timezone.utc).isoformat()})
-                    except Exception as e:
-                        logger.warning("AUTO REFRESH ODDS (apif) league %s: %s", code, e)
-            except Exception as _apif_err:
-                logger.warning("apif_refresh import error: %s", _apif_err)
-                fdo_batch_up = batch  # fallback
-
-        # ── Football-data.org leagues ─────────────────────────────────────────
-        with football_data_refresh_cycle():
-            for code in fdo_batch_up:
-                # Cold-start bootstrap: when cache is empty, allow one upcoming refresh
-                # to seed daily_matches/daily_picks before prematch-window filtering.
+        # ── API-Football: upcoming + picks ────────────────────────────────────
+        try:
+            from services.refresh_apifootball import apif_refresh_league
+            for code in batch:
                 league_matches = read_json(f"daily_matches_{code}.json")
-                league_has_matches_cache = isinstance(league_matches, list) and len(league_matches) > 0
-                if league_has_matches_cache and not _league_in_prematch_window(code, prematch_h, data=league_matches):
-                    logger.info("AUTO REFRESH ODDS skip league %s (no match in prematch window)", code)
+                league_has_cache = isinstance(league_matches, list) and len(league_matches) > 0
+                if league_has_cache and not _league_in_prematch_window(code, prematch_h, data=league_matches):
+                    logger.info("AUTO REFRESH ODDS skip %s (no match in prematch window)", code)
                     continue
                 if skip_fresh_min > 0 and _league_is_fresh(code, last_ok, skip_fresh_min):
-                    logger.info("AUTO REFRESH ODDS skip league %s (league fresh)", code)
+                    logger.info("AUTO REFRESH ODDS skip %s (league fresh)", code)
                     continue
-                fetch_odds = want_odds and (not _odds_file_is_fresh(code, odds_min))
-                if want_odds and not fetch_odds:
-                    logger.info(
-                        "AUTO REFRESH ODDS league %s: picks refresh only (odds cache fresh <%dm)",
-                        code,
-                        odds_min,
-                    )
                 try:
-                    refresh_league(
+                    apif_refresh_league(
                         code,
-                        mode="upcoming",
-                        fetch_odds=fetch_odds,
+                        days_upcoming=7,
+                        days_finished=3,
+                        fetch_odds=want_odds and not _odds_file_is_fresh(code, odds_min),
                         metrics=metrics,
                     )
                     touched += 1
                     _save_league_last_refresh({code: datetime.now(timezone.utc).isoformat()})
                 except Exception as e:
                     logger.warning("AUTO REFRESH ODDS league %s: %s", code, e)
+        except Exception as _apif_err:
+            logger.warning("apif_refresh import error: %s", _apif_err)
 
-        stats = get_football_data_cycle_stats_snapshot()
-        out.http_requests = int(stats.get("http_requests", 0))
-        out.rate_limit_sleep_sec = int(stats.get("rate_limit_sleep_sec", 0))
+        out.http_requests = 0
+        out.rate_limit_sleep_sec = 0
         out.matches_updated = metrics.matches_updated
         out.leagues_touched = touched
-
-        cap = float(getattr(settings, "refresh_backoff_seconds", 120) or 120)
-        apply_backoff_seconds(register_rate_pressure_from_stats(stats), cap)
 
         now_ts = time.time()
         _save_state_patch({"last_odds_ts": now_ts, "last_upcoming_ts": now_ts})
