@@ -7,6 +7,8 @@ from __future__ import annotations
 import logging
 import os
 import re
+import time
+import threading
 from datetime import datetime, timezone
 from typing import Any
 
@@ -215,6 +217,11 @@ def _debug_log_live_match_candidates(league_code: str, matches: list[dict]) -> N
 # Carga de datos de todas las ligas
 # =========================================================
 
+_HOME_CACHE_TTL_SECONDS = 180  # 3 minutos
+_home_cache: dict = {}
+_home_cache_lock = threading.Lock()
+
+
 def _load_all_leagues_data(
     league_codes: list[str] | None = None,
 ) -> tuple[
@@ -234,6 +241,18 @@ def _load_all_leagues_data(
     - picks_by_league: código → lista de picks
     - matches_by_league: código → lista de partidos
     """
+    # --- TTL cache ---
+    cache_key = tuple(sorted(league_codes)) if league_codes else "__all__"
+    now_mono = time.monotonic()
+    with _home_cache_lock:
+        cached = _home_cache.get(cache_key)
+        if cached is not None:
+            ts, result = cached
+            if now_mono - ts < _HOME_CACHE_TTL_SECONDS:
+                logger.debug("_load_all_leagues_data: cache HIT key=%s", cache_key)
+                return result
+        logger.debug("_load_all_leagues_data: cache MISS key=%s", cache_key)
+
     codes = league_codes or list(settings.leagues.keys())
     all_picks:        list[dict]           = []
     match_by_key:     dict[Any, dict]      = {}
@@ -297,7 +316,10 @@ def _load_all_leagues_data(
         len(all_picks), len(all_settled), len(all_upcoming), list(picks_by_league.keys()),
     )
 
-    return all_picks, match_by_key, all_settled, all_upcoming, picks_by_league, matches_by_league
+    result = all_picks, match_by_key, all_settled, all_upcoming, picks_by_league, matches_by_league
+    with _home_cache_lock:
+        _home_cache[cache_key] = (time.monotonic(), result)
+    return result
 
 
 _USER_COUNT_BASE = 50  # offset inicial para parecer orgánico desde el día 1

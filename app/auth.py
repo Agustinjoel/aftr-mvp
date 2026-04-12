@@ -30,6 +30,16 @@ _rl_attempts: dict[str, collections.deque] = {}
 _RL_MAX_ATTEMPTS = 10
 _RL_WINDOW_SECONDS = 60
 
+# Per-endpoint buckets: key = (endpoint, ip)
+_rl_endpoint_attempts: dict[tuple[str, str], collections.deque] = {}
+
+_RL_ENDPOINT_RULES: dict[str, tuple[int, int]] = {
+    # endpoint -> (max_attempts, window_seconds)
+    "/auth/login":            (5, 15 * 60),
+    "/auth/register":         (3, 60 * 60),
+    "/auth/forgot-password":  (3, 60 * 60),
+}
+
 
 def _rate_limit_check(ip: str) -> bool:
     """Returns True if request is allowed, False if IP exceeded the limit."""
@@ -39,6 +49,24 @@ def _rate_limit_check(ip: str) -> bool:
         while bucket and bucket[0] < now - _RL_WINDOW_SECONDS:
             bucket.popleft()
         if len(bucket) >= _RL_MAX_ATTEMPTS:
+            return False
+        bucket.append(now)
+        return True
+
+
+def _rate_limit_endpoint(ip: str, endpoint: str) -> bool:
+    """Per-endpoint rate limit. Returns True if allowed, False if blocked."""
+    rule = _RL_ENDPOINT_RULES.get(endpoint)
+    if rule is None:
+        return True  # no rule → always allow
+    max_attempts, window_seconds = rule
+    now = time.monotonic()
+    key = (endpoint, ip)
+    with _rl_lock:
+        bucket = _rl_endpoint_attempts.setdefault(key, collections.deque())
+        while bucket and bucket[0] < now - window_seconds:
+            bucket.popleft()
+        if len(bucket) >= max_attempts:
             return False
         bucket.append(now)
         return True
@@ -224,7 +252,7 @@ def _password_too_long(password: str) -> bool:
 @router.post("/auth/register")
 def register(request: Request, payload: dict = Body(...)):
     client_ip = request.client.host if request.client else "unknown"
-    if not _rate_limit_check(client_ip):
+    if not _rate_limit_endpoint(client_ip, "/auth/register"):
         logger.warning("rate_limit: /auth/register blocked ip=%s", client_ip)
         return JSONResponse({"ok": False, "error": "demasiados_intentos"}, status_code=429)
     logger.debug("register: endpoint hit")
@@ -283,7 +311,7 @@ def register(request: Request, payload: dict = Body(...)):
 def login(request: Request, email: str = Form(...), password: str = Form(...)):
     """Form login (browser). Looks up user by email only. Sets aftr_session cookie and redirects."""
     client_ip = request.client.host if request.client else "unknown"
-    if not _rate_limit_check(client_ip):
+    if not _rate_limit_endpoint(client_ip, "/auth/login"):
         logger.warning("rate_limit: /auth/login blocked ip=%s", client_ip)
         return RedirectResponse(url="/?msg=demasiados_intentos", status_code=302)
     logger.info("LOGIN ENDPOINT HIT: method=POST path=/auth/login")
@@ -338,7 +366,7 @@ def login(request: Request, email: str = Form(...), password: str = Form(...)):
 def login_json(request: Request, payload: dict = Body(...)):
     """JSON login (API/Android). Looks up user by email only. Sets aftr_session cookie and returns user info."""
     client_ip = request.client.host if request.client else "unknown"
-    if not _rate_limit_check(client_ip):
+    if not _rate_limit_endpoint(client_ip, "/auth/login"):
         logger.warning("rate_limit: /auth/login/json blocked ip=%s", client_ip)
         return JSONResponse({"ok": False, "error": "demasiados_intentos"}, status_code=429)
     email_raw = payload.get("email") or ""
@@ -460,7 +488,7 @@ def _consume_reset_token(token: str) -> Optional[int]:
 @router.post("/auth/forgot-password")
 def forgot_password(request: Request, payload: dict = Body(...)):
     client_ip = request.client.host if request.client else "unknown"
-    if not _rate_limit_check(client_ip):
+    if not _rate_limit_endpoint(client_ip, "/auth/forgot-password"):
         logger.warning("rate_limit: /auth/forgot-password blocked ip=%s", client_ip)
         return JSONResponse({"ok": True, "message": "Si el email existe, recibirás instrucciones."})
     email = (payload.get("email") or "").strip().lower()

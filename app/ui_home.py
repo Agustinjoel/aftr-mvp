@@ -269,6 +269,10 @@ def home_page(request: Request) -> str:
     user_premium = bool(uid and (is_admin(user, request) or is_premium_active(user) or get_active_plan(uid) == settings.plan_premium))
     trial_days = trial_days_remaining(user) if user else None
     user_on_trial = bool(user and (user.get("subscription_status") or "").strip().lower() == "trial" and user_premium)
+    user_trial_expired = bool(
+        user and not user_premium
+        and (user.get("subscription_status") or "").strip().lower() == "trial"
+    )
 
     # Racha del usuario (server-side)
     streak_count, streak_kind = (0, None)
@@ -1151,6 +1155,9 @@ def home_page(request: Request) -> str:
             <div id="forgot-error"  style="color:#ef4444;font-size:13px;margin:8px 0;display:none;"></div>
             <div id="forgot-success" style="color:#22c55e;font-size:13px;margin:8px 0;display:none;"></div>
             <button class="pill modal-cta" onclick="forgotSubmit()" style="width:100%;margin-top:8px;">Enviar enlace</button>
+            <div class="modal-line" style="margin-top:12px;">
+              <a href="#" onclick="closeForgotModal(); openLoginModal(); return false;" class="muted" style="font-size:13px;">← Volver al login</a>
+            </div>
           </div>
         </div>
       </div>
@@ -1178,7 +1185,11 @@ def home_page(request: Request) -> str:
         <span class="trial-banner-icon">🎁</span>
         <span class="trial-banner-copy">Probás <strong>Premium gratis</strong> — te quedan <strong>{trial_days} día{"s" if trial_days != 1 else ""}</strong></span>
         <button class="trial-banner-cta pill" onclick="openPremium()">Activar ahora →</button>
-      </div>''' if user_on_trial and trial_days is not None else ''}
+      </div>''' if user_on_trial and trial_days is not None else ('''<div class="trial-banner trial-banner--expired">
+        <span class="trial-banner-icon">⏰</span>
+        <span class="trial-banner-copy">Tu trial expiró — <strong>activá Premium</strong> para seguir viendo todos los picks</span>
+        <button class="trial-banner-cta pill" onclick="openPremium()">Activar Premium →</button>
+      </div>''' if user_trial_expired else '')}
       {'''<button id="push-enable-btn" style="display:none;width:100%;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:10px 16px;margin:8px 0;text-align:left;cursor:pointer;color:inherit;font-size:13px;">🔔 Activá notificaciones para recibir picks antes de cada partido &nbsp;<span style="color:#3b82f6;font-weight:600;">Activar →</span></button>''' if uid else ''}
       <div class="home-carousel-strip" role="navigation" aria-label="Elegir liga">
         {home_league_carousel_html}
@@ -1937,6 +1948,10 @@ def home_page(request: Request) -> str:
     <script src="/static/aftr-bankroll.js" defer></script>
     <script src="/static/aftr-push.js" defer></script>
     <script>
+    function openLoginModal() {
+      var m = document.getElementById('login-modal');
+      if (m) m.style.display = 'flex';
+    }
     function openForgotModal() {
       document.getElementById('forgot-modal').style.display = 'flex';
     }
