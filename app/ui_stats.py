@@ -102,6 +102,96 @@ def _chips_from_form(form_str: str, max_n: int = 5) -> str:
 
 
 # =========================================================
+# Team stats: córners y tarjetas por equipo
+# =========================================================
+
+def _render_team_corners_cards(p: dict) -> str:
+    """
+    Bloque compacto con promedios de córners y tarjetas para home y away.
+    Solo se renderiza si al menos uno de los dos equipos tiene stats.
+    """
+    home_s = p.get("home_team_stats") if isinstance(p.get("home_team_stats"), dict) else None
+    away_s = p.get("away_team_stats") if isinstance(p.get("away_team_stats"), dict) else None
+    if not home_s and not away_s:
+        return ""
+
+    home_name = html_lib.escape(str(p.get("home") or "Local"))
+    away_name = html_lib.escape(str(p.get("away") or "Visitante"))
+
+    def _fmt_val(v) -> str:
+        if v is None:
+            return "—"
+        return str(v)
+
+    def _team_row(name: str, s: dict | None) -> str:
+        if not s:
+            return ""
+        corners = _fmt_val(s.get("corners_avg"))
+        yellow  = _fmt_val(s.get("yellow_avg"))
+        red     = _fmt_val(s.get("red_avg"))
+        games   = s.get("games", 0)
+        suffix  = f'<span class="ts-games muted">({games}p)</span>' if games else ""
+        return (
+            f'<div class="ts-row">'
+            f'<span class="ts-name">{name}</span>'
+            f'<span class="ts-val">🔢 {corners}</span>'
+            f'<span class="ts-val">🟨 {yellow}</span>'
+            f'<span class="ts-val">🟥 {red}</span>'
+            f'{suffix}'
+            f'</div>'
+        )
+
+    home_row = _team_row(home_name, home_s)
+    away_row = _team_row(away_name, away_s)
+    if not home_row and not away_row:
+        return ""
+
+    return (
+        f'<div class="team-stats-block">'
+        f'<div class="ts-header muted">STATS/PARTIDO</div>'
+        f'{home_row}{away_row}'
+        f'</div>'
+    )
+
+
+def _render_corners_cards_odds(p: dict) -> str:
+    """
+    Bloque de odds de córners y tarjetas si están disponibles en odds_by_market.
+    """
+    odds = p.get("odds_by_market") if isinstance(p.get("odds_by_market"), dict) else {}
+    corners = odds.get("corners") if isinstance(odds.get("corners"), dict) else {}
+    cards   = odds.get("cards")   if isinstance(odds.get("cards"), dict) else {}
+    if not corners and not cards:
+        return ""
+
+    parts = []
+    for market_name, mkt_odds in [("Córners", corners), ("Tarjetas", cards)]:
+        if not mkt_odds:
+            continue
+        items = []
+        for label, val in mkt_odds.items():
+            try:
+                items.append(f"{html_lib.escape(label)} @{float(val):.2f}")
+            except (TypeError, ValueError):
+                pass
+        if items:
+            parts.append(
+                f'<div class="cc-odds-row">'
+                f'<span class="cc-label muted">{html_lib.escape(market_name)}</span>'
+                f'<span class="cc-vals">{" · ".join(items)}</span>'
+                f'</div>'
+            )
+
+    if not parts:
+        return ""
+    return (
+        f'<div class="corners-cards-odds">'
+        + "".join(parts) +
+        f'</div>'
+    )
+
+
+# =========================================================
 # Back del flip card
 # =========================================================
 

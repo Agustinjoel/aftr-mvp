@@ -163,6 +163,24 @@ def apif_refresh_league(
         except Exception as _e:
             logger.debug("apif_refresh_league %s: odds error: %s", league_code, _e)
 
+    # ── 8b. Team stats (córners y tarjetas por equipo) ────────────────────────
+    try:
+        from services.team_stats import update_team_stats_from_fixtures, get_team_averages
+        team_stats = update_team_stats_from_fixtures(league_code, finished_raw)
+        for p in picks_all:
+            home_id = p.get("home_id") or p.get("homeTeam", {}).get("id")
+            away_id = p.get("away_id") or p.get("awayTeam", {}).get("id")
+            if home_id:
+                avg = get_team_averages(home_id, team_stats)
+                if avg:
+                    p["home_team_stats"] = avg
+            if away_id:
+                avg = get_team_averages(away_id, team_stats)
+                if avg:
+                    p["away_team_stats"] = avg
+    except Exception as _e:
+        logger.debug("apif_refresh_league %s: team_stats error: %s", league_code, _e)
+
     # ── 9. Guardar caché ──────────────────────────────────────────────────────
     keep_days = getattr(settings, "daily_keep_days", None)
     picks_daily = _window_daily(picks_all, keep_days)

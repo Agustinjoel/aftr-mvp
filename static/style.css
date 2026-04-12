@@ -355,6 +355,18 @@ h2::after{
 .pick-odds{ font-size: 11px; margin-top: 4px; }
 .pick-odds .pick-bookmaker{ margin-left: 4px; }
 
+/* Team stats: córners y tarjetas */
+.team-stats-block{ margin: 6px 0; padding: 6px 8px; background: rgba(255,255,255,0.04); border-radius: 8px; border: 1px solid rgba(255,255,255,0.07); }
+.ts-header{ font-size: 9px; letter-spacing: .08em; margin-bottom: 4px; }
+.ts-row{ display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 2px 0; }
+.ts-name{ font-weight: 600; min-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ts-val{ white-space: nowrap; }
+.ts-games{ font-size: 9px; margin-left: auto; }
+.corners-cards-odds{ margin: 4px 0; padding: 5px 8px; background: rgba(255,255,255,0.03); border-radius: 7px; border: 1px solid rgba(255,255,255,0.06); }
+.cc-odds-row{ display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 2px 0; }
+.cc-label{ min-width: 70px; font-size: 10px; }
+.cc-vals{ color: rgba(200,230,255,0.9); }
+
 /* ── Result badge ──────────────────────────────────────────── */
 .pick-badge{
   display:inline-block;

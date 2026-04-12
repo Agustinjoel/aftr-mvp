@@ -330,6 +330,62 @@ def _normalize_apif_odds_event(item: dict) -> dict | None:
                         odds_by_market.setdefault("totals_25", {})["Under 2.5"] = dec
                     if not bookmaker_title and bm_name:
                         bookmaker_title = bm_name
+            elif bet_id == 45 and "corners" not in odds_by_market:
+                # Corners Over/Under — preferred line 9.5, fallback to first available
+                corner_candidates: dict[str, dict[str, float]] = {}
+                for v in bet.get("values") or []:
+                    val = (v.get("value") or "").strip()
+                    try:
+                        dec = float(v.get("odd") or 0)
+                    except (TypeError, ValueError):
+                        continue
+                    # val format: "Over 9.5" / "Under 9.5"
+                    parts = val.split()
+                    if len(parts) == 2 and parts[0] in ("Over", "Under"):
+                        line = parts[1]
+                        corner_candidates.setdefault(line, {})[parts[0]] = dec
+                # Pick preferred line: 9.5 > 10.5 > 8.5 > first available
+                for preferred in ("9.5", "10.5", "8.5"):
+                    if preferred in corner_candidates and len(corner_candidates[preferred]) == 2:
+                        mk = {f"Over {preferred}": corner_candidates[preferred]["Over"],
+                              f"Under {preferred}": corner_candidates[preferred]["Under"]}
+                        odds_by_market["corners"] = mk
+                        if not bookmaker_title and bm_name:
+                            bookmaker_title = bm_name
+                        break
+                if "corners" not in odds_by_market and corner_candidates:
+                    line = next(iter(corner_candidates))
+                    if len(corner_candidates[line]) == 2:
+                        mk = {f"Over {line}": corner_candidates[line]["Over"],
+                              f"Under {line}": corner_candidates[line]["Under"]}
+                        odds_by_market["corners"] = mk
+            elif bet_id == 80 and "cards" not in odds_by_market:
+                # Cards Over/Under — preferred line 3.5, fallback to first available
+                card_candidates: dict[str, dict[str, float]] = {}
+                for v in bet.get("values") or []:
+                    val = (v.get("value") or "").strip()
+                    try:
+                        dec = float(v.get("odd") or 0)
+                    except (TypeError, ValueError):
+                        continue
+                    parts = val.split()
+                    if len(parts) == 2 and parts[0] in ("Over", "Under"):
+                        line = parts[1]
+                        card_candidates.setdefault(line, {})[parts[0]] = dec
+                for preferred in ("3.5", "4.5", "2.5"):
+                    if preferred in card_candidates and len(card_candidates[preferred]) == 2:
+                        mk = {f"Over {preferred}": card_candidates[preferred]["Over"],
+                              f"Under {preferred}": card_candidates[preferred]["Under"]}
+                        odds_by_market["cards"] = mk
+                        if not bookmaker_title and bm_name:
+                            bookmaker_title = bm_name
+                        break
+                if "cards" not in odds_by_market and card_candidates:
+                    line = next(iter(card_candidates))
+                    if len(card_candidates[line]) == 2:
+                        mk = {f"Over {line}": card_candidates[line]["Over"],
+                              f"Under {line}": card_candidates[line]["Under"]}
+                        odds_by_market["cards"] = mk
 
     if not odds_by_market:
         return None
@@ -343,6 +399,38 @@ def _normalize_apif_odds_event(item: dict) -> dict | None:
     }
     if bookmaker_title:
         result["bookmaker_title"] = bookmaker_title
+    return result
+
+
+def fetch_fixture_statistics(fixture_id: int) -> dict:
+    """
+    Trae estadísticas de un partido finalizado.
+    Devuelve {team_id: {corners, yellow_cards, red_cards}} para los dos equipos.
+    """
+    items = _get("/fixtures/statistics", {"fixture": fixture_id})
+    result: dict[int, dict] = {}
+    for team_block in items:
+        if not isinstance(team_block, dict):
+            continue
+        team = team_block.get("team") or {}
+        team_id = team.get("id")
+        if not team_id:
+            continue
+        stats: dict[str, int] = {"corners": 0, "yellow_cards": 0, "red_cards": 0}
+        for s in team_block.get("statistics") or []:
+            stype = (s.get("type") or "").strip()
+            val = s.get("value")
+            try:
+                n = int(val) if val is not None else 0
+            except (TypeError, ValueError):
+                n = 0
+            if stype == "Corner Kicks":
+                stats["corners"] = n
+            elif stype == "Yellow Cards":
+                stats["yellow_cards"] = n
+            elif stype == "Red Cards":
+                stats["red_cards"] = n
+        result[int(team_id)] = stats
     return result
 
 
