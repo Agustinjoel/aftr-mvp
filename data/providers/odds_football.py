@@ -1,5 +1,5 @@
 """
-Football odds provider. Fetches bookmaker odds (The Odds API), normalizes to AFTR market names,
+Football odds provider. Fetches odds via API-Football, normalizes to AFTR market names,
 matches to existing matches by home/away/date, and supports cache read/write.
 NBA/other sports: use separate provider later; this module is football-only.
 """
@@ -10,17 +10,11 @@ import re as _re
 from datetime import datetime, timezone
 from typing import Any
 
-import requests
-
-from config.settings import ODDS_API_BASE, ODDS_API_KEY, ODDS_LEAGUE_SPORT_KEYS
 from data.cache import read_json, write_json
 
 logger = logging.getLogger(__name__)
 
 ODDS_CACHE_FILE = "daily_odds_{league_code}.json"
-ODDS_REGIONS = "uk,eu"
-ODDS_MARKETS = "h2h,totals"
-ODDS_FORMAT = "decimal"
 
 
 # Club-type tokens to remove from the start or end of the name
@@ -141,59 +135,17 @@ def _normalize_event(ev: dict, sport_key: str) -> dict | None:
 
 def fetch_odds_for_league(league_code: str) -> list[dict]:
     """
-    Fetch upcoming odds for the given football league.
-    Priority:
-      1. API-Football (/odds) — same key already in use, no extra cost
-      2. The Odds API — fallback if ODDS_API_KEY is set and APIF returns nothing
+    Fetch upcoming odds for the given football league via API-Football.
     Returns list of normalized odds events { home_team, away_team, date_iso, odds_by_market }.
     """
-    # --- Primary: API-Football odds ---
-    apif_results = _fetch_odds_apif(league_code)
-    if apif_results:
-        return apif_results
-
-    # --- Fallback: The Odds API (only if key is configured) ---
-    if not ODDS_API_KEY:
-        logger.debug("ODDS_API_KEY not set and APIF odds empty; skipping odds for %s", league_code)
-        return []
-    sport_key = ODDS_LEAGUE_SPORT_KEYS.get(league_code)
-    if not sport_key:
-        logger.debug("No odds sport key for league %s; skipping", league_code)
-        return []
-    url = f"{ODDS_API_BASE}/v4/sports/{sport_key}/odds"
-    params = {
-        "apiKey": ODDS_API_KEY,
-        "regions": ODDS_REGIONS,
-        "markets": ODDS_MARKETS,
-        "oddsFormat": ODDS_FORMAT,
-    }
-    try:
-        r = requests.get(url, params=params, timeout=25)
-        if r.status_code == 401:
-            logger.warning("Odds API 401 Unauthorized; check ODDS_API_KEY")
-            return []
-        if r.status_code == 429:
-            logger.warning("Odds API 429 rate limit")
-            return []
-        r.raise_for_status()
-        data = r.json()
-    except Exception as e:
-        logger.warning("Odds API request failed for %s: %s", league_code, e)
-        return []
-
-    out: list[dict] = []
-    for ev in (data if isinstance(data, list) else []):
-        if not isinstance(ev, dict):
-            continue
-        norm = _normalize_event(ev, sport_key)
-        if norm:
-            out.append(norm)
-    return out
+    return _fetch_odds_apif(league_code)
 
 
 def _fetch_odds_apif(league_code: str) -> list[dict]:
     """
     Fetch odds from API-Football for the next 7 days.
+    Uses the same season logic as refresh_apifootball: tries current year,
+    falls back to previous year if no events found.
     Returns normalized list (same format as fetch_odds_for_league output) or [].
     """
     from config.settings import settings
@@ -204,25 +156,37 @@ def _fetch_odds_apif(league_code: str) -> list[dict]:
     if not league_id:
         return []
 
-    season = datetime.now(timezone.utc).year
-    today = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc)
+    today = now
     out: list[dict] = []
     seen_fixture_ids: set = set()
 
-    for day_offset in range(8):
-        date_str = (today + timedelta(days=day_offset)).strftime("%Y-%m-%d")
-        try:
-            events = fetch_odds_apif(league_id, season, date_str)
-        except Exception as e:
-            logger.debug("APIF odds fetch error league=%s date=%s: %s", league_code, date_str, e)
-            continue
-        for ev in events:
-            fid = ev.get("fixture_id")
-            if fid and fid in seen_fixture_ids:
+    def _fetch_season(season: int) -> list[dict]:
+        results: list[dict] = []
+        seen: set = set()
+        for day_offset in range(8):
+            date_str = (today + timedelta(days=day_offset)).strftime("%Y-%m-%d")
+            try:
+                events = fetch_odds_apif(league_id, season, date_str)
+            except Exception as e:
+                logger.debug("APIF odds fetch error league=%s date=%s: %s", league_code, date_str, e)
                 continue
-            if fid:
-                seen_fixture_ids.add(fid)
-            out.append(ev)
+            for ev in events:
+                fid = ev.get("fixture_id")
+                if fid and fid in seen:
+                    continue
+                if fid:
+                    seen.add(fid)
+                results.append(ev)
+        return results
+
+    season = settings.get_apif_season(league_code)
+    out = _fetch_season(season)
+    if not out:
+        prev = season - 1
+        out = _fetch_season(prev)
+        if out:
+            logger.info("APIF odds for %s: using prev season %s (%d events)", league_code, prev, len(out))
 
     logger.info("APIF odds for %s: %d events over 8 days", league_code, len(out))
     return out
