@@ -181,25 +181,29 @@ def apif_refresh_league(
     except Exception as _e:
         logger.debug("apif_refresh_league %s: team_stats error: %s", league_code, _e)
 
-    # ── 9. Guardar caché ──────────────────────────────────────────────────────
+    # ── 9. Guardar caché ─────────────────────────────────────────────────────
     keep_days = getattr(settings, "daily_keep_days", None)
     picks_daily = _window_daily(picks_all, keep_days)
     _write_league_cache(league_code, final_matches, picks_daily)
     _save_history(league_code, picks_all)
     _save_team_names_cache(team_names)
 
+    # ── 10. Standings (best-effort) ───────────────────────────────────────────
+    try:
+        from data.providers.api_football import fetch_standings
+        from data.cache import write_json
+        standings = fetch_standings(league_id, season)
+        if standings:
+            write_json(f"standings_{league_code}.json", standings)
+            logger.debug("standings %s: %d rows", league_code, len(standings))
+    except Exception as _e:
+        logger.debug("apif_refresh_league %s: standings error: %s", league_code, _e)
+
     premium_picks = filter_premium_picks(picks_all)
-    settled = sum(1 for p in picks_daily if (p.get("result") or "").upper() in ("WIN", "LOSS", "PUSH"))
-    pending = sum(1 for p in picks_daily if (p.get("result") or "").upper() == "PENDING")
-
+    n_upcoming = len([m for m in upcoming_matches if isinstance(m, dict)])
+    n_picks    = len(picks_daily)
     logger.info(
-        "apif_refresh %s (id=%s season=%s): up=%d fin=%d daily_picks=%d (settled=%d pending=%d) premium=%d",
-        league_code, league_id, season,
-        len(upcoming_matches), len(finished_matches),
-        len(picks_daily), settled, pending, len(premium_picks),
+        "apif_refresh_league %s: upcoming=%d | picks=%d (premium=%d) | season=%s",
+        league_code, n_upcoming, n_picks, len(premium_picks), season,
     )
-
-    if metrics is not None:
-        metrics.matches_updated += len(final_matches)
-
-    return len(upcoming_matches), len(picks_daily)
+    return n_upcoming, n_picks

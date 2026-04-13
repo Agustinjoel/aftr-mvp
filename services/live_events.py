@@ -428,34 +428,51 @@ def process_live_events() -> int:
 
         # ── FULL-TIME ─────────────────────────────────────────────────────────
         if is_final and not state[fix_id]["notified_final"]:
-            legs_by_user: dict[int, list[dict]] = {}
-            for leg in matched_legs:
-                legs_by_user.setdefault(leg["user_id"], []).append(leg)
+            # Guard: partido terminado hace más de 24h → marcar sin push (caché vieja)
+            _ko_str = fix_info.get("date") or ""
+            _stale = False
+            if _ko_str:
+                try:
+                    from datetime import datetime, timezone, timedelta
+                    _ko = datetime.fromisoformat(_ko_str.replace("Z", "+00:00"))
+                    if _ko.tzinfo is None:
+                        _ko = _ko.replace(tzinfo=timezone.utc)
+                    _stale = (datetime.now(timezone.utc) - _ko) > timedelta(hours=24)
+                except Exception:
+                    pass
 
-            for uid in all_users:
-                legs = legs_by_user.get(uid, [])
-                if legs:
-                    markets = ", ".join(leg["market"] for leg in legs if leg.get("market"))
-                    body = f"Tu apuesta: {markets}" if markets else "Resultado final"
-                else:
-                    body = "Resultado final"
+            if _stale:
+                logger.debug("live_events FT stale (>24h), skip push: fix=%s %s", fix_id, match_title)
+                state[fix_id]["notified_final"] = True
+            else:
+                legs_by_user: dict[int, list[dict]] = {}
+                for leg in matched_legs:
+                    legs_by_user.setdefault(leg["user_id"], []).append(leg)
 
-                payload = {
-                    "title": f"FT: {home_name} {score_str} {away_name}",
-                    "body":  body,
-                    "icon":  home_logo,
-                    "tag":   live_tag,
-                    "url":   "/tracker",
-                    "data":  {"fixture_id": fix_id},
-                }
-                sent = send_to_user(uid, payload)
-                notifications_sent += sent
-                if sent:
-                    logger.info(
-                        "live_events FT push: fix=%s %s %s user=%s", fix_id, match_title, score_str, uid
-                    )
+                for uid in all_users:
+                    legs = legs_by_user.get(uid, [])
+                    if legs:
+                        markets = ", ".join(leg["market"] for leg in legs if leg.get("market"))
+                        body = f"Tu apuesta: {markets}" if markets else "Resultado final"
+                    else:
+                        body = "Resultado final"
 
-            state[fix_id]["notified_final"] = True
+                    payload = {
+                        "title": f"FT: {home_name} {score_str} {away_name}",
+                        "body":  body,
+                        "icon":  home_logo,
+                        "tag":   live_tag,
+                        "url":   "/tracker",
+                        "data":  {"fixture_id": fix_id},
+                    }
+                    sent = send_to_user(uid, payload)
+                    notifications_sent += sent
+                    if sent:
+                        logger.info(
+                            "live_events FT push: fix=%s %s %s user=%s", fix_id, match_title, score_str, uid
+                        )
+
+                state[fix_id]["notified_final"] = True
 
         # ── GOLES ─────────────────────────────────────────────────────────────
         elif goal_scored and not is_final:
@@ -714,29 +731,47 @@ def process_cache_live_events(league_codes: list[str]) -> int:
 
             # ── FULL-TIME ─────────────────────────────────────────────────────
             if is_final and not prev_state.get("notified_final"):
-                legs_by_user: dict[int, list[dict]] = {}
-                for leg in matched_legs:
-                    legs_by_user.setdefault(leg["user_id"], []).append(leg)
+                # Guard: si el partido terminó hace más de 24h, marcar silenciosamente
+                # para no spamear al reiniciar con caché vieja.
+                _utc_date_str = match.get("utcDate") or match.get("kickoff") or ""
+                _stale = False
+                if _utc_date_str:
+                    try:
+                        from datetime import datetime, timezone, timedelta
+                        _ko = datetime.fromisoformat(_utc_date_str.replace("Z", "+00:00"))
+                        if _ko.tzinfo is None:
+                            _ko = _ko.replace(tzinfo=timezone.utc)
+                        _stale = (datetime.now(timezone.utc) - _ko) > timedelta(hours=24)
+                    except Exception:
+                        pass
 
-                for uid in all_users:
-                    legs = legs_by_user.get(uid, [])
-                    body = (
-                        f"Tu apuesta: {', '.join(l['market'] for l in legs if l.get('market'))}"
-                        if legs else "Resultado final"
-                    )
-                    payload = {
-                        "title": f"FT: {home_name} {score_str} {away_name}",
-                        "body":  body,
-                        "icon":  home_crest,
-                        "tag":   live_tag,
-                        "url":   "/tracker",
-                    }
-                    sent = send_to_user(uid, payload)
-                    notifications_sent += sent
-                    if sent:
-                        logger.info("cache_live FT: mid=%s %s %s user=%s", mid, match_title, score_str, uid)
+                if _stale:
+                    logger.debug("cache_live FT stale (>24h), skip push: mid=%s %s", mid, match_title)
+                    state[state_key]["notified_final"] = True
+                else:
+                    legs_by_user: dict[int, list[dict]] = {}
+                    for leg in matched_legs:
+                        legs_by_user.setdefault(leg["user_id"], []).append(leg)
 
-                state[state_key]["notified_final"] = True
+                    for uid in all_users:
+                        legs = legs_by_user.get(uid, [])
+                        body = (
+                            f"Tu apuesta: {', '.join(l['market'] for l in legs if l.get('market'))}"
+                            if legs else "Resultado final"
+                        )
+                        payload = {
+                            "title": f"FT: {home_name} {score_str} {away_name}",
+                            "body":  body,
+                            "icon":  home_crest,
+                            "tag":   live_tag,
+                            "url":   "/tracker",
+                        }
+                        sent = send_to_user(uid, payload)
+                        notifications_sent += sent
+                        if sent:
+                            logger.info("cache_live FT: mid=%s %s %s user=%s", mid, match_title, score_str, uid)
+
+                    state[state_key]["notified_final"] = True
 
             # ── GOLES ─────────────────────────────────────────────────────────
             elif goal_scored and not is_final:
