@@ -247,14 +247,30 @@ def build_candidates(
     """
     Candidatos con prob >= min_prob: { market, prob, fair }.
     fair = 1/prob si prob > 0. Ordenados por prob desc.
+
+    Garantía: siempre devuelve al menos 1 candidato (el de mayor probabilidad),
+    aunque ningún mercado supere min_prob. Esto evita que partidos con equipos
+    muy defensivos (xG bajo) queden sin best_market y se evalúen como PUSH.
     """
     out = []
+    best_fallback: dict[str, Any] | None = None
+    best_fallback_prob: float = -1.0
+
     for market_name, key in CANDIDATE_MARKETS:
         p = probs.get(key, 0.0)
+        cand: dict[str, Any] = {"market": market_name, "prob": round(float(p), 4)}
+        if p > 0:
+            cand["fair"] = round(1.0 / p, 2)
         if p >= min_prob:
-            cand: dict[str, Any] = {"market": market_name, "prob": round(float(p), 4)}
-            if p > 0:
-                cand["fair"] = round(1.0 / p, 2)
             out.append(cand)
+        if p > best_fallback_prob:
+            best_fallback_prob = p
+            best_fallback = cand
+
     out.sort(key=lambda x: x["prob"], reverse=True)
+
+    # Si ningún mercado superó min_prob, incluir el mejor disponible
+    if not out and best_fallback is not None:
+        out.append(best_fallback)
+
     return out

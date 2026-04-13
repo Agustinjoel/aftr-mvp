@@ -124,6 +124,23 @@ def _apply_results_by_match_id(
         # Siempre re-evaluar cuando el partido está confirmado FINISHED.
         # Evita que resultados parciales (de live) queden como definitivos.
         market = (p.get("best_market") or "").strip()
+
+        # Si no hay market pero el pick tiene probs guardados, re-derivar el mejor.
+        # Ocurre cuando Model B produjo xG tan bajo que ningún mercado superó min_prob
+        # y best_market quedó vacío. Usamos los probs almacenados para recuperarlo.
+        if not market:
+            stored_probs = p.get("probs")
+            if isinstance(stored_probs, dict) and stored_probs:
+                try:
+                    from core.poisson import build_candidates, select_best_candidate
+                    cands = build_candidates(stored_probs, min_prob=0.0)
+                    best = select_best_candidate(cands)
+                    if best and best.get("market"):
+                        market = best["market"]
+                        p["best_market"] = market
+                except Exception:
+                    pass
+
         result, _reason = evaluate_market(market, hg, ag)
         p["result"] = result
 
