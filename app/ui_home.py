@@ -440,7 +440,11 @@ def home_page(request: Request) -> str:
         _r = _result_norm(_pp)
         if not _r or _r == "PENDING":
             continue
-        _mkt  = html_lib.escape(str(_pp.get("best_market") or _pp.get("market") or "—"))
+        # Ignorar picks sin mercado — son resultados inválidos del historial viejo
+        _raw_mkt = (_pp.get("best_market") or _pp.get("market") or "").strip()
+        if not _raw_mkt:
+            continue
+        _mkt  = html_lib.escape(_raw_mkt)
         _home = html_lib.escape(str(_pp.get("home") or ""))
         _away = html_lib.escape(str(_pp.get("away") or ""))
         _match = f"{_home} vs {_away}" if (_home and _away) else ""
