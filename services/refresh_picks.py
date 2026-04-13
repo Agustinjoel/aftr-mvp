@@ -110,8 +110,8 @@ def _build_pick_entry(m: dict, xg_h: float, xg_a: float, model: str, stats_home:
         "away": m.get("away", ""),
         "home_crest": m.get("home_crest"),
         "away_crest": m.get("away_crest"),
-        "home_team_id": m.get("home_team_id") or m.get("home_id"),
-        "away_team_id": m.get("away_team_id") or m.get("away_id"),
+        "home_team_id": m.get("home_team_id"),
+        "away_team_id": m.get("away_team_id"),
         "xg_home": round(float(xg_h), 2),
         "xg_away": round(float(xg_a), 2),
         "xg_total": round(float(xg_total), 2),
@@ -176,13 +176,13 @@ def _build_picks_from_matches(matches: list[dict], team_names: dict[int, str]) -
                 default_away=settings.default_xg_away,
             )
             xg_h, xg_a = float(axg_h), float(axg_a)
-        except Exception as _err:
-            logger.warning("unexpected exception (non-fatal): %s", _err)
+        except Exception:
+            pass
 
         stats_home: dict = {}
         stats_away: dict = {}
-        hid = m.get("home_team_id") or m.get("home_id")
-        aid = m.get("away_team_id") or m.get("away_id")
+        hid = m.get("home_team_id")
+        aid = m.get("away_team_id")
 
         try:
             if hid:
@@ -197,21 +197,6 @@ def _build_picks_from_matches(matches: list[dict], team_names: dict[int, str]) -
                 stats_away = base
         except Exception as e:
             logger.warning("Team stats error (%s vs %s): %s", hid, aid, e)
-
-        # xG dinámico basado en forma real: gf del equipo × ga del rival / promedio liga
-        # Con ventaja de local (~+10% home, -10% away)
-        _LEAGUE_AVG = 1.3
-        try:
-            h_gf = stats_home.get("gf") if isinstance(stats_home.get("gf"), float) else None
-            h_ga = stats_home.get("ga") if isinstance(stats_home.get("ga"), float) else None
-            a_gf = stats_away.get("gf") if isinstance(stats_away.get("gf"), float) else None
-            a_ga = stats_away.get("ga") if isinstance(stats_away.get("ga"), float) else None
-            if h_gf is not None and a_ga is not None and h_gf > 0 and a_ga > 0:
-                xg_h = round(min(max(h_gf * (a_ga / _LEAGUE_AVG) * 1.1, 0.3), 3.5), 2)
-            if a_gf is not None and h_ga is not None and a_gf > 0 and h_ga > 0:
-                xg_a = round(min(max(a_gf * (h_ga / _LEAGUE_AVG) * 0.9, 0.3), 3.5), 2)
-        except Exception:
-            pass
 
         picks.append(_build_pick_entry(m, xg_h, xg_a, "A", stats_home, stats_away))
 
