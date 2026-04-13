@@ -68,6 +68,7 @@ def apif_refresh_league(
     from services.refresh_picks import _build_picks_from_matches
     from services.refresh_results import (
         _build_finished_lookup_by_id,
+        _build_finished_lookup_from_cache,
         _apply_results_by_match_id,
         _merge_by_match_id,
         _save_history,
@@ -144,10 +145,20 @@ def apif_refresh_league(
     finished_by_id = _build_finished_lookup_by_id(finished_raw)
     picks_all      = _apply_results_by_match_id(merged, finished_by_id)
 
-    # ── 7. AFTR score ─────────────────────────────────────────────────────────
+    # ── 6b. Backfill: resolver picks PENDING contra caché local ───────────────
+    # Partidos más viejos que days_finished no aparecen en la respuesta de la API,
+    # pero daily_matches ya tiene su score final. Los resolvemos sin llamadas extra.
+    # Los dicts son mutables — los cambios en pending_picks reflejan en picks_all.
     all_matches = _merge_by_match_id(upcoming_matches, finished_matches)
     existing_matches = _read_json_list(f"daily_matches_{league_code}.json")
     final_matches = _merge_by_match_id(existing_matches, all_matches)
+
+    pending_picks = [p for p in picks_all if (p.get("result") or "PENDING").upper() == "PENDING"]
+    if pending_picks:
+        cached_finished = _build_finished_lookup_from_cache(final_matches)
+        _apply_results_by_match_id(pending_picks, cached_finished)
+
+    # ── 7. AFTR score ─────────────────────────────────────────────────────────
 
     for p in picks_all:
         try:

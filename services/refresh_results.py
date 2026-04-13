@@ -15,6 +15,45 @@ from services.refresh_utils import _safe_int, _parse_utcdate_str, _read_json_lis
 # Lookups de resultados
 # -------------------------
 
+# Statuses que confirman que un partido terminó definitivamente
+_FINAL_STATUSES: frozenset[str] = frozenset({
+    "FINISHED", "FT", "FINAL", "AWARDED", "FINALIZADO",
+    "AET", "PEN", "FT_PEN",
+})
+
+
+def _build_finished_lookup_from_cache(matches: list[dict]) -> dict[int, tuple[int, int]]:
+    """
+    Arma lookup {match_id: (home_goals, away_goals)} desde el caché local de partidos.
+    Solo incluye partidos con status definitivamente finalizado y scores válidos.
+    Usado para resolver picks históricos fuera de la ventana de fetch de la API.
+    """
+    lookup: dict[int, tuple[int, int]] = {}
+    for m in matches or []:
+        if not isinstance(m, dict):
+            continue
+        status = (m.get("status") or "").upper()
+        if status not in _FINAL_STATUSES:
+            continue
+        mid = _safe_int(m.get("match_id") or m.get("id"))
+        if mid is None:
+            continue
+        h: Any = None
+        a: Any = None
+        sc = m.get("score")
+        if isinstance(sc, dict):
+            h, a = sc.get("home"), sc.get("away")
+        if h is None and m.get("home_goals") is not None:
+            h, a = m.get("home_goals"), m.get("away_goals")
+        if h is None or a is None:
+            continue
+        try:
+            lookup[mid] = (int(h), int(a))
+        except Exception:
+            continue
+    return lookup
+
+
 def _build_finished_lookup_by_id(finished_matches: list[dict]) -> dict[int, tuple[int, int]]:
     """Arma lookup {match_id: (home_goals, away_goals)} desde partidos finalizados de la API."""
     lookup: dict[int, tuple[int, int]] = {}

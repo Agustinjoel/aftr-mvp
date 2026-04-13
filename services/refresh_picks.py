@@ -203,11 +203,10 @@ def _build_picks_from_matches(matches: list[dict], team_names: dict[int, str]) -
     if topn_b <= 0:
         return picks
 
-    # 2) Top-N recalculados con modelo B
-    ranked = sorted(enumerate(picks), key=lambda t: _best_prob(t[1]), reverse=True)
-    top_idxs = [idx for idx, _p in ranked[:topn_b]]
-
-    for idx in top_idxs:
+    # 2) Modelo B para todos los picks (forma real de la API, no defaults)
+    # topn_b se ignora — con bootstrap corrido, todos los equipos tienen cache de forma.
+    # Model A queda como fallback si Model B falla para algún partido (try/except abajo).
+    for idx in range(len(picks)):
         p = picks[idx]
         hid = p.get("home_team_id")
         aid = p.get("away_team_id")
