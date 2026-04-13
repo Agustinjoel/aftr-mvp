@@ -435,6 +435,122 @@ def fetch_fixture_statistics(fixture_id: int) -> dict:
     return result
 
 
+def get_unsupported_leagues() -> set[str]:
+    """Lee el archivo local de ligas no soportadas (sin HTTP)."""
+    import json
+    from config.settings import settings
+    p = settings.cache_dir / "unsupported_leagues.json"
+    try:
+        if p.exists():
+            data = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(data, list):
+                return set(data)
+    except Exception:
+        pass
+    return set()
+
+
+def get_match_detail_apif(fixture_id: int) -> dict:
+    """
+    Detalle de partido via API-Football: eventos (goles, tarjetas, cambios) + info básica.
+    Devuelve dict compatible con el formato usado en live.py:
+      { status, minute, home, away, score_home, score_away, goals, bookings, substitutions }
+    """
+    # Fixture info (status, score, teams)
+    fix_items = _get("/fixtures", {"id": fixture_id})
+    fix = fix_items[0] if fix_items else {}
+    fixture = fix.get("fixture") or {}
+    teams = fix.get("teams") or {}
+    goals_obj = fix.get("goals") or {}
+    status_obj = fixture.get("status") or {}
+
+    result: dict = {
+        "status": status_obj.get("long") or status_obj.get("short") or "TIMED",
+        "minute": status_obj.get("elapsed"),
+        "home":   (teams.get("home") or {}).get("name", ""),
+        "away":   (teams.get("away") or {}).get("name", ""),
+        "score_home": goals_obj.get("home"),
+        "score_away": goals_obj.get("away"),
+        "goals":         [],
+        "bookings":      [],
+        "substitutions": [],
+    }
+
+    home_id = (teams.get("home") or {}).get("id")
+
+    # Match events
+    ev_items = _get("/fixtures/events", {"fixture": fixture_id})
+    for ev in ev_items:
+        if not isinstance(ev, dict):
+            continue
+        team_id = (ev.get("team") or {}).get("id")
+        side = "home" if team_id == home_id else "away"
+        elapsed = (ev.get("time") or {}).get("elapsed")
+        player_name = (ev.get("player") or {}).get("name") or "—"
+        assist_name = (ev.get("assist") or {}).get("name")
+        etype = (ev.get("type") or "").strip()
+        detail = (ev.get("detail") or "").strip()
+
+        if etype == "Goal":
+            result["goals"].append({
+                "minute": elapsed,
+                "side": side,
+                "player": player_name,
+                "assist": assist_name,
+            })
+        elif etype == "Card":
+            card_type = "RED" if "Red" in detail else "YELLOW"
+            result["bookings"].append({
+                "minute": elapsed,
+                "side": side,
+                "player": player_name,
+                "card": card_type,
+            })
+        elif etype == "subst":
+            result["substitutions"].append({
+                "minute": elapsed,
+                "side": side,
+                "player_in": player_name,
+                "player_out": assist_name,
+            })
+
+    return result
+
+
+def get_standings_apif(league_code: str) -> list[dict]:
+    """
+    Tabla de posiciones via API-Football.
+    Devuelve lista normalizada igual que FD get_standings:
+      {position, team_id, team_name, team_crest, played, won, draw, lost, gf, ga, gd, points}
+    """
+    from config.settings import settings
+    league_id = settings.get_apif_league_id(league_code)
+    if not league_id:
+        return []
+    season = settings.get_apif_season(league_code)
+    rows = fetch_standings(league_id, season)
+    out = []
+    for row in rows:
+        team = row.get("team") or {}
+        all_stats = row.get("all") or {}
+        goals = all_stats.get("goals") or {}
+        out.append({
+            "position":   row.get("rank"),
+            "team_id":    team.get("id"),
+            "team_name":  team.get("name") or "—",
+            "team_crest": team.get("logo"),
+            "played":     all_stats.get("played", 0),
+            "won":        all_stats.get("win", 0),
+            "draw":       all_stats.get("draw", 0),
+            "lost":       all_stats.get("lose", 0),
+            "gf":         goals.get("for", 0),
+            "ga":         goals.get("against", 0),
+            "gd":         row.get("goalsDiff", 0),
+            "points":     row.get("points", 0),
+        })
+    return out
+
+
 def list_leagues(search: str = "", country: str = "") -> list[dict]:
     """
     Lista todas las ligas disponibles en API-Football.

@@ -11,7 +11,7 @@ from fastapi import Request
 
 from config.settings import settings
 from data.cache import read_json, read_json_with_fallback, read_cache_meta
-from data.providers.football_data import get_unsupported_leagues
+from data.providers.api_football import get_unsupported_leagues
 from app.routes.matches import group_matches_by_day
 from app.timefmt import AFTR_DISPLAY_TZ, format_match_kickoff_ar, parse_utc_instant
 from app.auth import get_user_id, get_user_by_id

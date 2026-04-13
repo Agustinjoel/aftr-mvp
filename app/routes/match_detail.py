@@ -300,9 +300,9 @@ def match_detail(league: str, match_id: int) -> HTMLResponse:
     # Si no hay standings en cache, intentar fetchearlos on-demand y cachearlos
     if not standings:
         try:
-            from data.providers.football_data import get_standings
+            from data.providers.api_football import get_standings_apif
             from data.cache import write_json
-            standings = get_standings(league) or []
+            standings = get_standings_apif(league) or []
             if standings:
                 write_json(f"standings_{league}.json", standings)
         except Exception:

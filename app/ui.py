@@ -14,7 +14,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from config.settings import settings
 from data.cache import read_json, read_json_with_fallback, read_cache_meta, write_json
-from data.providers.football_data import get_unsupported_leagues
+from data.providers.api_football import get_unsupported_leagues
 from app.routes.matches import group_matches_by_day
 from core.poisson import market_priority
 

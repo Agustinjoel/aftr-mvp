@@ -7,7 +7,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
 from data.cache import read_json, write_json
-from data.providers.football_data import get_match_detail
+from data.providers.api_football import get_match_detail_apif as get_match_detail
 
 import logging
 logger = logging.getLogger("app/routes/live.py")
