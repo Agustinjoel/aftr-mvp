@@ -164,8 +164,8 @@ def _odds_file_is_fresh(league_code: str, min_minutes: int) -> bool:
 
 
 def _finished_days_from_results_hours(hours: int) -> int:
-    """Máx. 2 días de ventana API (24–48h típico)."""
-    return max(1, min(2, (int(hours) + 23) // 24))
+    """Hasta 14 días de historial — un solo call a la API con rango de fechas extendido."""
+    return max(1, min(14, (int(hours) + 23) // 24))
 
 
 def _global_refresh_blocks() -> bool:

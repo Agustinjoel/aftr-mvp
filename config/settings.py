@@ -321,8 +321,8 @@ except ValueError:
     RESULTS_FINISHED_HOURS = 48
 if RESULTS_FINISHED_HOURS < 6:
     RESULTS_FINISHED_HOURS = 6
-if RESULTS_FINISHED_HOURS > 168:
-    RESULTS_FINISHED_HOURS = 168
+if RESULTS_FINISHED_HOURS > 336:
+    RESULTS_FINISHED_HOURS = 336
 
 # Pre-match / odds: solo ligas con partido en las próximas N horas
 try:
