@@ -198,6 +198,21 @@ def _build_picks_from_matches(matches: list[dict], team_names: dict[int, str]) -
         except Exception as e:
             logger.warning("Team stats error (%s vs %s): %s", hid, aid, e)
 
+        # xG dinámico basado en forma real: gf del equipo × ga del rival / promedio liga
+        # Con ventaja de local (~+10% home, -10% away)
+        _LEAGUE_AVG = 1.3
+        try:
+            h_gf = stats_home.get("gf") if isinstance(stats_home.get("gf"), float) else None
+            h_ga = stats_home.get("ga") if isinstance(stats_home.get("ga"), float) else None
+            a_gf = stats_away.get("gf") if isinstance(stats_away.get("gf"), float) else None
+            a_ga = stats_away.get("ga") if isinstance(stats_away.get("ga"), float) else None
+            if h_gf is not None and a_ga is not None and h_gf > 0 and a_ga > 0:
+                xg_h = round(min(max(h_gf * (a_ga / _LEAGUE_AVG) * 1.1, 0.3), 3.5), 2)
+            if a_gf is not None and h_ga is not None and a_gf > 0 and h_ga > 0:
+                xg_a = round(min(max(a_gf * (h_ga / _LEAGUE_AVG) * 0.9, 0.3), 3.5), 2)
+        except Exception:
+            pass
+
         picks.append(_build_pick_entry(m, xg_h, xg_a, "A", stats_home, stats_away))
 
     if topn_b <= 0:
