@@ -272,9 +272,7 @@ def _normalize_apif_odds_event(item: dict) -> dict | None:
     home_team = (teams.get("home") or {}).get("name", "")
     away_team = (teams.get("away") or {}).get("name", "")
     fix_date = fixture.get("date") or ""
-
-    if not home_team or not away_team:
-        return None
+    fixture_id = fixture.get("id")
 
     # date_iso from fixture.date (ISO string)
     date_iso = ""
@@ -390,11 +388,14 @@ def _normalize_apif_odds_event(item: dict) -> dict | None:
     if not odds_by_market:
         return None
 
+    if not fixture_id and not date_iso:
+        return None
+
     result: dict = {
         "home_team": home_team,
         "away_team": away_team,
         "date_iso": date_iso,
-        "fixture_id": fixture.get("id"),
+        "fixture_id": fixture_id,
         "odds_by_market": odds_by_market,
     }
     if bookmaker_title:

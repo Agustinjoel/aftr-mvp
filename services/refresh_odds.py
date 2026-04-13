@@ -104,6 +104,15 @@ def _enrich_football_picks_with_odds(
         if not odds_events:
             return picks
         odds_lookup = match_odds_to_matches(odds_events, matches)
+        # Lookup secundario por fixture_id (APIF no incluye team names en /odds)
+        odds_by_fixture_id: dict[int, dict] = {}
+        for ev in odds_events:
+            fid = ev.get("fixture_id")
+            if fid is not None:
+                try:
+                    odds_by_fixture_id[int(fid)] = ev
+                except (TypeError, ValueError):
+                    pass
     except Exception as e:
         logger.debug("Odds enrichment skipped for %s: %s", league_code, e)
         return picks
@@ -119,12 +128,21 @@ def _enrich_football_picks_with_odds(
         old_implied_prob = p.get("implied_prob")
         old_edge = p.get("edge")
 
-        match_placeholder = {
-            "home": p.get("home"),
-            "away": p.get("away"),
-            "utcDate": p.get("utcDate"),
-        }
-        odds_row = get_odds_for_match(match_placeholder, odds_lookup)
+        # Primero intentar match por fixture_id, luego por nombre de equipo
+        mid = p.get("match_id")
+        odds_row = None
+        if mid is not None:
+            try:
+                odds_row = odds_by_fixture_id.get(int(mid))
+            except (TypeError, ValueError):
+                pass
+        if odds_row is None:
+            match_placeholder = {
+                "home": p.get("home"),
+                "away": p.get("away"),
+                "utcDate": p.get("utcDate"),
+            }
+            odds_row = get_odds_for_match(match_placeholder, odds_lookup)
         best_market = (p.get("best_market") or "").strip()
 
         if not odds_row or not best_market:
