@@ -153,10 +153,15 @@ def apif_refresh_league(
     existing_matches = _read_json_list(f"daily_matches_{league_code}.json")
     final_matches = _merge_by_match_id(existing_matches, all_matches)
 
-    pending_picks = [p for p in picks_all if (p.get("result") or "PENDING").upper() == "PENDING"]
-    if pending_picks:
+    # PUSH también se incluye: evaluate_market solo devuelve PUSH cuando best_market
+    # es vacío/irreconocible — nunca es un resultado legítimo para fútbol.
+    needs_resolve = [
+        p for p in picks_all
+        if (p.get("result") or "PENDING").upper() in ("PENDING", "PUSH")
+    ]
+    if needs_resolve:
         cached_finished = _build_finished_lookup_from_cache(final_matches)
-        _apply_results_by_match_id(pending_picks, cached_finished)
+        _apply_results_by_match_id(needs_resolve, cached_finished)
 
     # ── 7. AFTR score ─────────────────────────────────────────────────────────
 
