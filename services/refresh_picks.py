@@ -181,8 +181,8 @@ def _build_picks_from_matches(matches: list[dict], team_names: dict[int, str]) -
 
         stats_home: dict = {}
         stats_away: dict = {}
-        hid = m.get("home_team_id")
-        aid = m.get("away_team_id")
+        hid = m.get("home_team_id") or m.get("home_id")
+        aid = m.get("away_team_id") or m.get("away_id")
 
         try:
             if hid:

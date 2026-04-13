@@ -168,8 +168,8 @@ def apif_refresh_league(
         from services.team_stats import update_team_stats_from_fixtures, get_team_averages
         team_stats = update_team_stats_from_fixtures(league_code, finished_raw)
         for p in picks_all:
-            home_id = p.get("home_id") or p.get("homeTeam", {}).get("id")
-            away_id = p.get("away_id") or p.get("awayTeam", {}).get("id")
+            home_id = p.get("home_team_id") or p.get("home_id") or p.get("homeTeam", {}).get("id")
+            away_id = p.get("away_team_id") or p.get("away_id") or p.get("awayTeam", {}).get("id")
             if home_id:
                 avg = get_team_averages(home_id, team_stats)
                 if avg:

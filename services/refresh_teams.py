@@ -81,8 +81,8 @@ def _update_team_names_from_matches(team_names: dict[int, str], matches: list[di
     for m in matches or []:
         if not isinstance(m, dict):
             continue
-        hid = m.get("home_team_id")
-        aid = m.get("away_team_id")
+        hid = m.get("home_team_id") or m.get("home_id")
+        aid = m.get("away_team_id") or m.get("away_id")
         hname = m.get("home")
         aname = m.get("away")
         try:
