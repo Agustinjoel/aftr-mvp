@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from data.providers.football_data import _get
 from data.cache import read_json, write_json
 
 
@@ -18,7 +17,6 @@ def _is_fresh(fetched_at_iso: str | None, ttl_seconds: int) -> bool:
     if not fetched_at_iso:
         return False
     try:
-        # soporta "Z" o "+00:00"
         if fetched_at_iso.endswith("Z"):
             fetched_at = datetime.fromisoformat(fetched_at_iso.replace("Z", "+00:00"))
         else:
@@ -37,16 +35,13 @@ def get_team_recent_matches(
     ttl_seconds: int = 12 * 60 * 60,  # 12h
 ) -> list[dict]:
     """
-    Devuelve últimos partidos (FINISHED) del equipo.
+    Devuelve últimos partidos (FINISHED) del equipo via API-Football.
     Cachea por team_id + days_back, con TTL.
     Si la API falla, usa cache viejo si existe.
     """
     key = _cache_key(team_id, days_back)
     cached = read_json(key)
 
-    # ✅ Compatibilidad hacia atrás:
-    # - formato viejo: lista[dict]
-    # - formato nuevo: {"meta": {...}, "matches": [...]}
     cached_matches: list[dict] | None = None
     cached_fetched_at: str | None = None
 
@@ -56,13 +51,10 @@ def get_team_recent_matches(
         cached_fetched_at = meta.get("fetched_at")
         if cached_matches is not None and _is_fresh(cached_fetched_at, ttl_seconds):
             return cached_matches[:limit]
-
     elif isinstance(cached, list) and cached:
-        # viejo: si hay lista y no está vacía, úsala (sin TTL)
-        # pero igual vamos a refrescar si podemos (para que no se quede congelado para siempre)
         cached_matches = cached
 
-    # ---- Fetch API ----
+    # ---- Fetch via API-Football ----
     end = _now_utc()
     start = end - timedelta(days=days_back)
 
@@ -70,40 +62,49 @@ def get_team_recent_matches(
     date_to = end.strftime("%Y-%m-%d")
 
     try:
-        data = _get(
-            f"/teams/{team_id}/matches",
-            params={
-                "status": "FINISHED",
-                "dateFrom": date_from,
-                "dateTo": date_to,
-                "limit": limit,
-            },
-        )
+        from data.providers.api_football import _get
+        items = _get("/fixtures", {
+            "team": team_id,
+            "from": date_from,
+            "to": date_to,
+            "status": "FT-AET-PEN",
+        })
     except Exception:
-        # ✅ Si la API falla (429, etc.), devolvemos cache viejo si había
         if cached_matches:
             return cached_matches[:limit]
         return []
 
-    matches = data.get("matches", []) or []
     out: list[dict] = []
+    for fx in (items or []):
+        if not isinstance(fx, dict):
+            continue
+        fix = fx.get("fixture") or {}
+        teams = fx.get("teams") or {}
+        goals = fx.get("goals") or {}
+        score = fx.get("score") or {}
 
-    for m in matches:
-        ft = ((m.get("score") or {}).get("fullTime")) or {}
-        hg = ft.get("home")
-        ag = ft.get("away")
+        hg = goals.get("home")
+        ag = goals.get("away")
+        if hg is None or ag is None:
+            ft = score.get("fulltime") or score.get("fullTime") or {}
+            hg = ft.get("home")
+            ag = ft.get("away")
         if hg is None or ag is None:
             continue
 
-        out.append(
-            {
-                "utcDate": m.get("utcDate", ""),
-                "home_id": (m.get("homeTeam") or {}).get("id"),
-                "away_id": (m.get("awayTeam") or {}).get("id"),
-                "home_goals": int(hg),
-                "away_goals": int(ag),
-            }
-        )
+        home_team = (teams.get("home") or {})
+        away_team = (teams.get("away") or {})
+
+        out.append({
+            "utcDate": fix.get("date", ""),
+            "home_id": home_team.get("id"),
+            "away_id": away_team.get("id"),
+            "home_goals": int(hg),
+            "away_goals": int(ag),
+        })
+
+    if not out and cached_matches:
+        return cached_matches[:limit]
 
     payload = {
         "meta": {
