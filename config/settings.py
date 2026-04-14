@@ -107,6 +107,9 @@ LEMONSQUEEZY_STORE_ID: str = (os.getenv("LEMONSQUEEZY_STORE_ID") or "").strip()
 LEMONSQUEEZY_VARIANT_ID: str = (os.getenv("LEMONSQUEEZY_VARIANT_ID") or "1485723").strip()
 LEMONSQUEEZY_WEBHOOK_SECRET: str = (os.getenv("LEMONSQUEEZY_WEBHOOK_SECRET") or "").strip()
 
+# Gemini (AFF chat)
+GEMINI_API_KEY: str = (os.getenv("GEMINI_API_KEY") or "").strip()
+
 # Ligas soportadas (código -> nombre)
 LEAGUES: dict[str, str] = {
     # ── Top 5 europeas ─────────────────────────────────────────────────────
@@ -402,6 +405,9 @@ class Settings:
         self.lemonsqueezy_store_id = LEMONSQUEEZY_STORE_ID
         self.lemonsqueezy_variant_id = LEMONSQUEEZY_VARIANT_ID
         self.lemonsqueezy_webhook_secret = LEMONSQUEEZY_WEBHOOK_SECRET
+
+        # Gemini (AFF chat)
+        self.GEMINI_API_KEY = GEMINI_API_KEY
 
     def league_codes(self) -> list[str]:
         return list(self.leagues.keys())

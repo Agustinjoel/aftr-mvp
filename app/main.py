@@ -20,6 +20,7 @@ from app.db import init_db
 from app.auth import router as auth_router, clear_session_if_invalid
 from app.payments import router as pay_router
 from app.routes.premium import router as premium_router
+from app.routes.chat import router as chat_router
 from starlette.middleware.base import BaseHTTPMiddleware
 from data.cache import read_cache_meta, read_json_with_fallback
 
@@ -128,6 +129,7 @@ app.include_router(user_router, prefix="/user", tags=["user"])
 app.include_router(tracker_router, prefix="/tracker", tags=["tracker"])
 app.include_router(pay_router)
 app.include_router(premium_router, tags=["premium"])
+app.include_router(chat_router)
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):

@@ -12,3 +12,4 @@ tzdata
 jinja2
 psycopg2-binary==2.9.9
 pywebpush
+httpx
