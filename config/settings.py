@@ -89,26 +89,6 @@ NBA_SEASON: str = (os.getenv("NBA_SEASON") or os.getenv("AFTR_NBA_SEASON") or ""
 NBA_DATE_FROM: str = (os.getenv("NBA_DATE_FROM") or os.getenv("AFTR_NBA_DATE_FROM") or "").strip()
 NBA_DATE_TO: str = (os.getenv("NBA_DATE_TO") or os.getenv("AFTR_NBA_DATE_TO") or "").strip()
 
-# Odds (The Odds API) — football only for now; extensible for NBA later. Set in .env as ODDS_API_KEY.
-ODDS_API_KEY: str = (os.getenv("ODDS_API_KEY") or os.getenv("THE_ODDS_API_KEY") or "").strip()
-ODDS_API_BASE: str = (os.getenv("ODDS_API_BASE") or "https://api.the-odds-api.com").strip().rstrip("/")
-# AFTR league_code -> The Odds API sport_key (soccer_*). Leagues not in map skip odds.
-ODDS_LEAGUE_SPORT_KEYS: dict[str, str] = {
-    "PL": "soccer_epl",
-    "PD": "soccer_spain_la_liga",
-    "BL1": "soccer_germany_bundesliga",
-    "SA": "soccer_italy_serie_a",
-    "FL1": "soccer_france_ligue_one",
-    "ELC": "soccer_england_championship",
-    "DED": "soccer_netherlands_eredivisie",
-    "PPL": "soccer_portugal_primeira_liga",
-    "CL": "soccer_uefa_champs_league",
-    "EL": "soccer_uefa_europa_league",
-    "BSA": "soccer_brazil_campeonato",
-    "EC": "soccer_uefa_european_championship",
-    "WC": "soccer_fifa_world_cup",
-}
-
 # Stripe (legacy — reemplazado por Lemon Squeezy)
 STRIPE_SECRET_KEY: str = (os.getenv("STRIPE_SECRET_KEY") or "").strip()
 STRIPE_PUBLISHABLE_KEY: str = (os.getenv("STRIPE_PUBLISHABLE_KEY") or "").strip()
