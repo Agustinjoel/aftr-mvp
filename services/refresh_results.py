@@ -297,3 +297,48 @@ def _write_league_cache(league_code: str, matches: list[dict], picks: list[dict]
     write_json(f"daily_matches_{league_code}.json", matches)
     backup_current_to_prev(f"daily_picks_{league_code}.json")
     write_json(f"daily_picks_{league_code}.json", picks)
+
+
+# -------------------------
+# Settlement preservation
+# -------------------------
+
+def _restore_settled_picks(picks: list[dict], existing: list[dict]) -> None:
+    """
+    In-place: restores WIN/LOSS results from `existing` for any pick in `picks`
+    that lost its settlement during the refresh cycle (e.g. due to fresh
+    computation overwriting a previously settled pick, or a match falling
+    outside the days_finished API window).
+
+    Called as a final safety net after all merge/apply steps.
+    """
+    settled: dict[int, dict] = {}
+    for p in existing or []:
+        if not isinstance(p, dict):
+            continue
+        mid = _safe_int(p.get("match_id") or p.get("id"))
+        if mid is None:
+            continue
+        r = (p.get("result") or "").upper()
+        if r in ("WIN", "LOSS"):
+            settled[mid] = p
+
+    if not settled:
+        return
+
+    for p in picks or []:
+        if not isinstance(p, dict):
+            continue
+        mid = _safe_int(p.get("match_id") or p.get("id"))
+        if mid is None or mid not in settled:
+            continue
+        r = (p.get("result") or "PENDING").upper()
+        if r in ("WIN", "LOSS"):
+            continue  # already correctly settled, nothing to restore
+        # Pick lost its settlement — restore from existing cache
+        orig = settled[mid]
+        p["result"] = orig["result"]
+        if p.get("score_home") is None and orig.get("score_home") is not None:
+            p["score_home"] = orig["score_home"]
+        if p.get("score_away") is None and orig.get("score_away") is not None:
+            p["score_away"] = orig["score_away"]

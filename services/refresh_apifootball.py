@@ -71,6 +71,7 @@ def apif_refresh_league(
         _build_finished_lookup_from_cache,
         _apply_results_by_match_id,
         _merge_by_match_id,
+        _restore_settled_picks,
         _save_history,
         _window_daily,
         _write_league_cache,
@@ -162,6 +163,12 @@ def apif_refresh_league(
     if needs_resolve:
         cached_finished = _build_finished_lookup_from_cache(final_matches)
         _apply_results_by_match_id(needs_resolve, cached_finished)
+
+    # ── 6c. Restore settled picks that got wiped by fresh computation ─────────
+    # Safety net: if any WIN/LOSS from existing_picks was overwritten by a freshly
+    # computed PENDING pick (e.g. because the match appeared in upcoming_raw or
+    # finished_raw) and backfill didn't re-settle it, restore from existing.
+    _restore_settled_picks(picks_all, existing_picks)
 
     # ── 7. AFTR score ─────────────────────────────────────────────────────────
 
