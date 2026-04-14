@@ -78,9 +78,6 @@ VAPID_PUBLIC_KEY: str  = (os.getenv("VAPID_PUBLIC_KEY")  or "").strip()
 VAPID_PRIVATE_KEY: str = (os.getenv("VAPID_PRIVATE_KEY") or "").strip()
 VAPID_EMAIL: str       = (os.getenv("VAPID_EMAIL")       or "mailto:aftrapp@outlook.com").strip()
 
-# API Football-Data.org
-FOOTBALL_DATA_API_KEY: str = (os.getenv("FOOTBALL_DATA_API_KEY") or "").strip()
-
 # API-Football (RapidAPI) — live events: goals, red cards, final scores
 API_FOOTBALL_KEY: str = (os.getenv("API_FOOTBALL_KEY") or "").strip()
 
@@ -162,7 +159,7 @@ LEAGUES: dict[str, str] = {
     "NBA":  "NBA",
 }
 
-# Liga -> deporte para el pipeline (football usa Football-Data/API-Football; basketball usa API-Sports)
+# Liga -> deporte para el pipeline (football usa API-Football v3; basketball usa API-Sports)
 LEAGUE_SPORT: dict[str, str] = {
     "NBA": "basketball",
 }
@@ -358,7 +355,6 @@ class Settings:
         self.database_url = DATABASE_URL
         self.db_path = DB_PATH  # legacy — solo para script de migración
         self.app_base_url = APP_BASE_URL
-        self.football_data_api_key = FOOTBALL_DATA_API_KEY
         self.api_sports_key = API_SPORTS_KEY
 
         self.leagues = LEAGUES

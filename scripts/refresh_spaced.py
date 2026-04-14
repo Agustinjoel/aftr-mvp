@@ -4,7 +4,8 @@ import time
 import os
 from datetime import datetime
 
-from services.refresh import refresh_league
+from services.refresh_apifootball import apif_refresh_league
+from services.refresh_basketball import refresh_league_basketball
 from config.settings import settings
 
 
@@ -13,8 +14,7 @@ def _now() -> str:
 
 
 def main() -> None:
-    # segundos entre ligas (seguro para Football-Data en free)
-    sleep_between = int(os.getenv("AFTR_REFRESH_SLEEP_BETWEEN", "65"))
+    sleep_between = int(os.getenv("AFTR_REFRESH_SLEEP_BETWEEN", "5"))
 
     # si querés que haga loop infinito: AFTR_REFRESH_LOOP=1
     loop = (os.getenv("AFTR_REFRESH_LOOP", "0").strip() == "1")
@@ -34,7 +34,11 @@ def main() -> None:
         for code in leagues:
             print(f"\n[{_now()}] === Refresh {code} ===")
             try:
-                nm, np = refresh_league(code)
+                sport = settings.league_sport.get(code, "football")
+                if sport == "basketball":
+                    nm, np = refresh_league_basketball(code)
+                else:
+                    nm, np = apif_refresh_league(code)
                 print(f"[{_now()}] OK {code}: {nm} matches | {np} picks")
             except Exception as e:
                 print(f"[{_now()}] ERROR {code}: {e}")

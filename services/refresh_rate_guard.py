@@ -1,5 +1,5 @@
 """
-Backoff compartido entre jobs de auto-refresh cuando Football-Data reporta rate limit bajo / sleeps.
+Backoff compartido entre jobs de auto-refresh cuando la API reporta rate limit bajo / sleeps.
 Usa time.monotonic() para no depender del reloj de pared.
 """
 from __future__ import annotations
@@ -17,8 +17,8 @@ _backoff_until_mono: float = 0.0
 
 def register_rate_pressure_from_stats(stats: dict[str, Any] | None) -> float:
     """
-    Tras un job con football_data_refresh_cycle, si hubo sleeps por rate limit,
-    programa backoff. Devuelve segundos extra sugeridos para el próximo sleep del job.
+    Si hubo sleeps por rate limit en el ciclo anterior, programa backoff.
+    Devuelve segundos extra sugeridos para el próximo sleep del job.
     """
     global _backoff_until_mono
     if not stats:

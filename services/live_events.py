@@ -12,7 +12,7 @@ Eventos detectados:
 
 Dos motores:
   - process_live_events(): usa API-Football (RapidAPI) si API_FOOTBALL_KEY está configurada.
-  - process_cache_live_events(): usa daily_matches_*.json vs .prev (football-data.org, siempre gratis).
+  - process_cache_live_events(): compara daily_matches_*.json vs .prev para detectar cambios.
 
 Ambos comparten el mismo state file para evitar notificaciones duplicadas.
 Corre al final de cada live refresh job.
@@ -535,11 +535,11 @@ def process_live_events() -> int:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# MOTOR GRATUITO: detección via daily_matches_*.json vs .prev
-# Usa football-data.org (ya disponible), sin costo adicional.
+# Detección de eventos via daily_matches_*.json vs .prev
+# Compara el cache actual con el anterior para detectar cambios de estado.
 # ──────────────────────────────────────────────────────────────────────────────
 
-# Statuses de football-data.org
+# Statuses normalizados de partidos
 _FDO_KICKOFF  = frozenset({"IN_PLAY"})
 _FDO_HALFTIME = frozenset({"PAUSED"})
 _FDO_FINAL    = frozenset({"FINISHED", "FT", "AWARDED"})
@@ -549,7 +549,7 @@ _FDO_LIVE     = frozenset({"IN_PLAY", "PAUSED"})
 def process_cache_live_events(league_codes: list[str]) -> int:
     """
     Detecta eventos comparando daily_matches_{code}.json (actual) vs .prev (anterior).
-    Funciona sin API-Football — solo usa football-data.org que ya tenemos.
+    Usa los archivos de cache generados por API-Football.
 
     Detecta: kickoff, goles, half-time, inicio 2T, full-time.
     Comparte el mismo state file que process_live_events para evitar duplicados.

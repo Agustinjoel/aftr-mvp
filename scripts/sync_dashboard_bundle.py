@@ -8,8 +8,6 @@ FILES = [
     "app/main.py",
     "app/routes/picks.py",
     "static/style.css",
-    "data/providers/football_data.py",
-    "daily/refresh.py",
 ]
 
 

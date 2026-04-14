@@ -65,12 +65,9 @@ def _save_team_names_cache(cache: dict[int, str]) -> None:
 
 
 def _crest_from_id(team_id: int | None) -> str | None:
-    if not team_id:
-        return None
-    try:
-        return f"https://crests.football-data.org/{int(team_id)}.png"
-    except Exception:
-        return None
+    # Los crests vienen directamente del payload de API-Football en cada partido.
+    # Esta función se mantiene por compatibilidad pero ya no construye URLs externas.
+    return None
 
 
 def _update_team_names_from_matches(team_names: dict[int, str], matches: list[dict]) -> None:

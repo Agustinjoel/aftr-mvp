@@ -82,7 +82,7 @@ def fetch_live_fixtures() -> list[dict]:
 # Fixtures por liga — próximos y finalizados
 # ──────────────────────────────────────────────────────────────────────────────
 
-# Mapeo de status API-Football → status interno AFTR (mismo formato que football-data.org)
+# Mapeo de status API-Football → status interno AFTR
 _STATUS_MAP: dict[str, str] = {
     "NS": "TIMED", "TBD": "TIMED",
     "1H": "IN_PLAY", "2H": "IN_PLAY", "ET": "IN_PLAY", "P": "IN_PLAY", "LIVE": "IN_PLAY",
@@ -96,8 +96,7 @@ _STATUS_MAP: dict[str, str] = {
 def normalize_apif_fixture(fx: dict, league_code: str = "") -> dict | None:
     """
     Convierte un fixture de API-Football al formato interno AFTR
-    (mismo schema que daily_matches_{code}.json generado por football-data.org).
-    Devuelve None si el fixture es inválido.
+    (daily_matches_{code}.json). Devuelve None si el fixture es inválido.
     """
     if not isinstance(fx, dict):
         return None
@@ -158,7 +157,7 @@ def normalize_apif_fixture(fx: dict, league_code: str = "") -> dict | None:
         "away_goals":  ag,
         "sport":       "football",
         "league_code": league_code,
-        # Compatibilidad con football-data.org: algunos módulos leen "homeTeam"/"awayTeam"
+        # Algunos módulos leen "homeTeam"/"awayTeam" para compatibilidad interna
         "homeTeam":    {"name": home_name, "crest": home_team.get("logo") or ""},
         "awayTeam":    {"name": away_name, "crest": away_team.get("logo") or ""},
     }

@@ -8,8 +8,6 @@ DEFAULT_FILES = [
     "app/ui.py",
     "app/main.py",
     "app/routes/picks.py",
-    "data/providers/football_data.py",
-    "daily/refresh.py",
     "scripts/verify_no_patch_markers.py",
 ]
 

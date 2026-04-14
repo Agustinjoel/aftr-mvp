@@ -7,17 +7,14 @@ Mantiene todos los exports anteriores para compatibilidad con:
   - services/tiered_refresh.py
   - services/refresh_basketball.py
   - app/cli.py
-  - scripts/refresh_spaced.py
-  - scripts/verify_nba_refresh.py
 
-Módulos nuevos:
+Módulos:
   refresh_utils.py    — parsing de fechas, safe casts, normalize_match
   refresh_teams.py    — team names, team stats, league freshness state
   refresh_results.py  — resultados, merge, history, window diaria
   refresh_picks.py    — construcción de picks modelo A+B
   refresh_odds.py     — odds enrichment + debug consolidado
   refresh_combos.py   — combos/parlays globales
-  refresh_league.py   — orquestación por liga (live/upcoming/results/full)
 """
 from __future__ import annotations
 
@@ -33,11 +30,6 @@ from data.cache import (
     release_refresh_running_meta,
     write_cache_meta,
 )
-from data.providers.football_data import (
-    football_data_refresh_cycle,
-    get_football_data_cycle_stats_snapshot,
-)
-
 # ── Re-exports para backward compat ──────────────────────────────────────────
 # (los archivos que ya importan de services.refresh siguen funcionando sin cambios)
 
@@ -91,12 +83,6 @@ from services.refresh_combos import (         # noqa: F401
     _prune_next3d_overlap,
     _build_and_save_combos,
 )
-from services.refresh_league import (         # noqa: F401
-    refresh_league,
-    _refresh_league_live_only,
-    _refresh_league_upcoming_only,
-    _refresh_league_results_only,
-)
 
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -120,9 +106,6 @@ class RefreshAllResult:
     light_mode: bool = False
     leagues_refreshed: int = 0
     leagues_skipped_fresh: int = 0
-    football_http_requests: int = 0
-    football_cache_hits: int = 0
-    rate_limit_sleep_sec: int = 0
     matches_updated: int = 0
 
 
@@ -174,63 +157,61 @@ def refresh_all(
 
         m_metrics = RefreshMetrics()
 
-        with football_data_refresh_cycle():
-            codes = list(settings.league_codes())
-            skip_min = int(getattr(settings, "refresh_skip_if_fresh_min", 0) or 0) if light else 0
-            batch_n = int(getattr(settings, "auto_refresh_leagues_per_cycle", 0) or 0)
+        codes = list(settings.league_codes())
+        skip_min = int(getattr(settings, "refresh_skip_if_fresh_min", 0) or 0) if light else 0
+        batch_n = int(getattr(settings, "auto_refresh_leagues_per_cycle", 0) or 0)
 
-            if light:
-                finished_days = max(1, int(getattr(settings, "auto_refresh_finished_days", 3) or 3))
-                fetch_odds = bool(getattr(settings, "auto_refresh_fetch_odds", False))
-            else:
-                finished_days = 7
-                fetch_odds = True
+        if light:
+            finished_days = max(1, int(getattr(settings, "auto_refresh_finished_days", 3) or 3))
+            fetch_odds = bool(getattr(settings, "auto_refresh_fetch_odds", False))
+        else:
+            finished_days = 7
+            fetch_odds = True
 
-            if light and batch_n > 0 and batch_n < len(codes):
-                n = len(codes)
-                batch = [codes[(_auto_rr_index + i) % n] for i in range(batch_n)]
-                _auto_rr_index = (_auto_rr_index + batch_n) % n
+        if light and batch_n > 0 and batch_n < len(codes):
+            n = len(codes)
+            batch = [codes[(_auto_rr_index + i) % n] for i in range(batch_n)]
+            _auto_rr_index = (_auto_rr_index + batch_n) % n
+            logger.info(
+                "refresh (light): round-robin batch %s (%d de %d ligas por ciclo)",
+                batch, batch_n, n,
+            )
+        else:
+            batch = codes
+
+        last_ok = _load_league_last_refresh()
+
+        for code in batch:
+            if light and skip_min > 0 and _league_is_fresh(code, last_ok, skip_min):
+                result.leagues_skipped_fresh += 1
                 logger.info(
-                    "refresh (light): round-robin batch %s (%d de %d ligas por ciclo)",
-                    batch, batch_n, n,
+                    "refresh: skipping league %s (updated within last %d min)",
+                    code, skip_min,
                 )
-            else:
-                batch = codes
-
-            last_ok = _load_league_last_refresh()
-
-            for code in batch:
-                if light and skip_min > 0 and _league_is_fresh(code, last_ok, skip_min):
-                    result.leagues_skipped_fresh += 1
-                    logger.info(
-                        "refresh: skipping league %s (updated within last %d min)",
-                        code, skip_min,
-                    )
-                    continue
-                try:
-                    refresh_league(
+                continue
+            try:
+                sport = settings.league_sport.get(code, "football")
+                if sport == "basketball":
+                    from services.refresh_basketball import refresh_league_basketball
+                    refresh_league_basketball(code, finished_days_back=finished_days, metrics=m_metrics)
+                else:
+                    from services.refresh_apifootball import apif_refresh_league
+                    apif_refresh_league(
                         code,
-                        finished_days_back=finished_days,
+                        days_upcoming=7,
+                        days_finished=finished_days,
                         fetch_odds=fetch_odds,
                         metrics=m_metrics,
                     )
-                    result.leagues_refreshed += 1
-                    _save_league_last_refresh({code: datetime.now(timezone.utc).isoformat()})
-                except Exception as e:
-                    logger.exception("Error refrescando liga %s: %s", code, e)
+                result.leagues_refreshed += 1
+                _save_league_last_refresh({code: datetime.now(timezone.utc).isoformat()})
+            except Exception as e:
+                logger.exception("Error refrescando liga %s: %s", code, e)
 
-        fd = get_football_data_cycle_stats_snapshot()
-        result.football_http_requests = int(fd.get("http_requests", 0))
-        result.football_cache_hits = int(fd.get("cache_hits", 0))
-        result.rate_limit_sleep_sec = int(fd.get("rate_limit_sleep_sec", 0))
         result.matches_updated = m_metrics.matches_updated
 
         logger.info(
-            "refresh summary: football_http_requests=%d cache_hits=%d rate_limit_sleep_s=%d "
-            "leagues_refreshed=%d skipped_fresh=%d matches_updated=%d",
-            result.football_http_requests,
-            result.football_cache_hits,
-            result.rate_limit_sleep_sec,
+            "refresh summary: leagues_refreshed=%d skipped_fresh=%d matches_updated=%d",
             result.leagues_refreshed,
             result.leagues_skipped_fresh,
             result.matches_updated,

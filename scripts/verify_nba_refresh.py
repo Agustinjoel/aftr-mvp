@@ -59,10 +59,10 @@ def main() -> None:
     print(f"   Finished (kept): {len(finished)}")
 
     # 3) Run refresh for NBA only
-    print("\n3) RUNNING refresh_league('NBA')")
-    from services.refresh import refresh_league
-    n_matches, n_picks = refresh_league("NBA")
-    print(f"   refresh_league returned: upcoming_matches={n_matches}, picks_daily={n_picks}")
+    print("\n3) RUNNING refresh_league_basketball('NBA')")
+    from services.refresh_basketball import refresh_league_basketball
+    n_matches, n_picks = refresh_league_basketball("NBA")
+    print(f"   refresh_league_basketball returned: upcoming_matches={n_matches}, picks_daily={n_picks}")
 
     # 4) Check output files
     matches_file = CACHE_DIR / "daily_matches_NBA.json"

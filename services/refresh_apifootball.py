@@ -1,10 +1,8 @@
 """
 AFTR API-Football Refresh — refresco de ligas usando API-Football v3 (RapidAPI).
 
-Reemplaza football-data.org para las ligas configuradas en APIF_LEAGUE_MAP.
-Produce el mismo formato de caché (daily_matches_*.json, daily_picks_*.json)
-que el pipeline de football-data.org, por lo que el resto del sistema funciona
-sin cambios (live events, auto_settle, notificaciones, UI).
+Produce el formato de caché estándar (daily_matches_*.json, daily_picks_*.json)
+para todas las ligas configuradas en APIF_LEAGUE_MAP.
 
 Uso interno (llamado desde services.tiered_refresh):
     from services.refresh_apifootball import apif_refresh_league
@@ -50,7 +48,7 @@ def apif_refresh_league(
     1. Fetch próximos (next days_upcoming días) y finalizados (last days_finished días)
     2. Normaliza a formato AFTR
     3. Merge con caché existente
-    4. Construye picks (Poisson model, igual que football-data.org)
+    4. Construye picks (Poisson model)
     5. Aplica resultados a picks finalizados
     6. Escribe caché (daily_matches_*, daily_picks_*)
     7. Actualiza historial y team names
