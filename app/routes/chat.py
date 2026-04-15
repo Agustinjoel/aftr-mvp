@@ -93,9 +93,12 @@ async def chat(request: Request):
     try:
         async with httpx.AsyncClient(timeout=20) as client:
             resp = await client.post(url, json=payload)
-            resp.raise_for_status()
-            data = resp.json()
-            reply = data["candidates"][0]["content"]["parts"][0]["text"]
+            if resp.status_code != 200:
+                logger.warning("Gemini error %s: %s", resp.status_code, resp.text[:300])
+                reply = "Hubo un error al consultar AFF. Intentá de nuevo."
+            else:
+                data = resp.json()
+                reply = data["candidates"][0]["content"]["parts"][0]["text"]
     except Exception as e:
         logger.warning("Gemini error: %s", e)
         reply = "Hubo un error al consultar AFF. Intentá de nuevo."
