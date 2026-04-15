@@ -81,7 +81,7 @@ async def chat(request: Request):
     system = SYSTEM_PROMPT.format(picks_context=picks_context)
 
     payload = {
-        "system_instruction": {"parts": [{"text": system}]},
+        "systemInstruction": {"parts": [{"text": system}]},
         "contents": [{"role": "user", "parts": [{"text": user_message}]}],
     }
 
