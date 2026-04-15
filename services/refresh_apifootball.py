@@ -213,14 +213,27 @@ def apif_refresh_league(
     _save_history(league_code, picks_all)
     _save_team_names_cache(team_names)
 
-    # ── 10. Standings (best-effort) ───────────────────────────────────────────
+    # ── 10. Standings (best-effort, máx 1 vez cada 6 horas por liga) ────────────
     try:
-        from data.providers.api_football import fetch_standings
-        from data.cache import write_json
-        standings = fetch_standings(league_id, season)
-        if standings:
-            write_json(f"standings_{league_code}.json", standings)
-            logger.debug("standings %s: %d rows", league_code, len(standings))
+        import time as _time
+        from data.cache import write_json, read_json
+        _st_key = f"standings_last_fetch_{league_code}"
+        _st_meta = read_json("cache_meta.json") or {}
+        _st_last = float(_st_meta.get(_st_key) or 0)
+        if _time.time() - _st_last > 6 * 3600:
+            from data.providers.api_football import fetch_standings
+            standings = fetch_standings(league_id, season)
+            if standings:
+                write_json(f"standings_{league_code}.json", standings)
+                logger.debug("standings %s: %d rows", league_code, len(standings))
+            # Actualizar timestamp en meta (best-effort)
+            try:
+                _st_meta[_st_key] = _time.time()
+                write_json("cache_meta.json", _st_meta)
+            except Exception:
+                pass
+        else:
+            logger.debug("standings %s: skipped (fetched recently)", league_code)
     except Exception as _e:
         logger.debug("apif_refresh_league %s: standings error: %s", league_code, _e)
 
