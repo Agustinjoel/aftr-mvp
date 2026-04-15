@@ -147,8 +147,11 @@ def normalize_apif_fixture(fx: dict, league_code: str = "") -> dict | None:
         "away":        away_name,
         "home_crest":  home_team.get("logo") or None,
         "away_crest":  away_team.get("logo") or None,
-        "home_id":     home_team.get("id"),
-        "away_id":     away_team.get("id"),
+        "home_id":      home_team.get("id"),
+        "away_id":      away_team.get("id"),
+        # Aliases usados por refresh_picks._build_picks_from_matches para Model B
+        "home_team_id": home_team.get("id"),
+        "away_team_id": away_team.get("id"),
         "status":      aftr_status,
         "status_short": st_short,
         "elapsed":     elapsed,

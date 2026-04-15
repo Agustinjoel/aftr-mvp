@@ -335,10 +335,7 @@ def _restore_settled_picks(picks: list[dict], existing: list[dict]) -> None:
         r = (p.get("result") or "PENDING").upper()
         if r in ("WIN", "LOSS"):
             continue  # already correctly settled, nothing to restore
-        # Pick lost its settlement — restore from existing cache
+        # Pick lost its settlement — restore ALL data from the settled pick
+        # (not just result/score, but also best_market, best_prob, candidates, etc.)
         orig = settled[mid]
-        p["result"] = orig["result"]
-        if p.get("score_home") is None and orig.get("score_home") is not None:
-            p["score_home"] = orig["score_home"]
-        if p.get("score_away") is None and orig.get("score_away") is not None:
-            p["score_away"] = orig["score_away"]
+        p.update(orig)

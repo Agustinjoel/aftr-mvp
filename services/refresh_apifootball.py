@@ -138,6 +138,10 @@ def apif_refresh_league(
     # ── 5. Merge con existentes ───────────────────────────────────────────────
     existing_picks = _read_json_list(f"daily_picks_{league_code}.json")
     merged = _merge_by_match_id(existing_picks, upcoming_picks)
+    # Restore settled picks immediately: upcoming_picks may have overwritten WIN/LOSS
+    # picks for matches that appear in both upcoming_raw and finished_raw
+    # (e.g. a match that just ended still shows up in today's upcoming date range).
+    _restore_settled_picks(merged, existing_picks)
     merged = _merge_by_match_id(finished_picks, merged)
 
     # ── 6. Aplicar resultados ─────────────────────────────────────────────────
