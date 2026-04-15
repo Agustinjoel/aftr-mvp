@@ -285,21 +285,19 @@ def _fix_push_with_score(picks: list[dict]) -> None:
 
 
 def _save_history(league_code: str, picks: list[dict]) -> None:
-    """Guarda historial eterno de picks por liga (merge acumulativo)."""
+    """Guarda historial eterno de picks por liga (merge acumulativo).
+
+    El historial es MONOTÓNICO: una vez que un pick tiene WIN/LOSS, nunca
+    vuelve a PENDING por un refresh que traiga datos incompletos.
+    """
     hist_file = f"picks_history_{league_code}.json"
     history = _read_json_list(hist_file)
-    # Sanity: si un pick tiene result WIN/LOSS/PUSH pero sin score, resetear a PENDING
-    # para que el próximo ciclo lo re-evalúe correctamente con el score real.
-    for p in picks or []:
-        if not isinstance(p, dict):
-            continue
-        r = (p.get("result") or "").strip().upper()
-        if r in ("WIN", "LOSS", "PUSH"):
-            if p.get("score_home") is None or p.get("score_away") is None:
-                p["result"] = "PENDING"
     merged = _merge_by_match_id(history, picks)
+    # Picks que vienen como PENDING nunca deben sobrescribir WIN/LOSS ya
+    # registrados. Esto cubre: ventana days_finished < edad del partido,
+    # job LIVE con days_finished=1, race conditions entre jobs, etc.
+    _restore_settled_picks(merged, history)
     # Fix: re-evaluar picks PUSH del historial que tienen score + market
-    # Cubre casos históricos donde best_market era None y quedaron como PUSH
     _fix_push_with_score(merged)
     write_json(hist_file, merged)
 
