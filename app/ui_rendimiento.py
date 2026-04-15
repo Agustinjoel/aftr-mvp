@@ -75,14 +75,17 @@ def _league_name(code: str) -> str:
 def _load_picks_from_db() -> list[dict]:
     """
     Carga picks resueltos (WIN/LOSS/PUSH) desde los archivos picks_history_*.json.
-    Devuelve lista ordenada por utcDate asc, en el mismo formato que antes usaba la DB.
+    Aplica corrección in-memory de PUSH con score para mostrar datos correctos
+    aunque el ciclo de refresh no haya corrido todavía.
     """
     import glob as _glob
     import os as _os
     from data.cache import CACHE_DIR
     from services.refresh_utils import _read_json_list
+    from services.refresh_results import _fix_push_with_score
+    from core.evaluation import evaluate_market
 
-    rows: list[dict] = []
+    all_picks: list[dict] = []
     pattern = _os.path.join(str(CACHE_DIR), "picks_history_*.json")
     for fpath in sorted(_glob.glob(pattern)):
         fname = _os.path.basename(fpath)
@@ -94,21 +97,34 @@ def _load_picks_from_db() -> list[dict]:
             res = (p.get("result") or "").strip().upper()
             if res not in ("WIN", "LOSS", "PUSH"):
                 continue
-            rows.append({
-                "league":       league,
-                "match_id":     p.get("match_id"),
-                "created_at":   p.get("utcDate"),
-                "best_market":  p.get("best_market"),
-                "best_prob":    p.get("best_prob"),
-                "best_fair":    p.get("best_fair"),
-                "result":       res,
-                "result_reason": None,
-                "home":         p.get("home"),
-                "away":         p.get("away"),
-                "utcDate":      p.get("utcDate"),
-                "home_goals":   p.get("score_home"),
-                "away_goals":   p.get("score_away"),
-            })
+            # Copia para no mutar el cache
+            row = dict(p)
+            row["league"] = league
+            all_picks.append(row)
+
+    # Corregir PUSH in-memory (picks con score pero sin market resuelto)
+    _fix_push_with_score(all_picks)
+
+    rows: list[dict] = []
+    for p in all_picks:
+        res = (p.get("result") or "").strip().upper()
+        if res not in ("WIN", "LOSS", "PUSH"):
+            continue
+        rows.append({
+            "league":        p.get("league"),
+            "match_id":      p.get("match_id"),
+            "created_at":    p.get("utcDate"),
+            "best_market":   p.get("best_market"),
+            "best_prob":     p.get("best_prob"),
+            "best_fair":     p.get("best_fair"),
+            "result":        res,
+            "result_reason": None,
+            "home":          p.get("home"),
+            "away":          p.get("away"),
+            "utcDate":       p.get("utcDate"),
+            "home_goals":    p.get("score_home"),
+            "away_goals":    p.get("score_away"),
+        })
 
     rows.sort(key=lambda r: (r.get("utcDate") or ""))
     return rows
