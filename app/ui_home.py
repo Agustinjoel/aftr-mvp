@@ -2063,6 +2063,50 @@ def home_page(request: Request) -> str:
     <div class="aftr-sticky-banner">
       <iframe scrolling='no' frameBorder='0' style='width:100%;height:50px;display:block;border:none;' src="https://refbanners.com/I?tag=d_5458956m_91411c_&site=5458956&ad=91411"></iframe>
     </div>
+    <!-- AFF Chat Widget -->
+    <div id="aff-chat-widget" style="position:fixed;bottom:24px;right:24px;z-index:9999;font-family:inherit">
+      <div id="aff-panel" style="display:none;width:320px;height:460px;background:#1a1a2e;border:1px solid #2d2d4e;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.5);flex-direction:column;overflow:hidden">
+        <div style="padding:14px 16px;background:#12122a;border-bottom:1px solid #2d2d4e;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px">
+            <img src="/static/logo_aftr.png" style="width:28px;height:28px;border-radius:50%">
+            <div>
+              <div style="color:#fff;font-weight:700;font-size:14px">AFF</div>
+              <div style="color:#6b7280;font-size:11px">Asistente AFTR</div>
+            </div>
+          </div>
+          <button onclick="document.getElementById('aff-panel').style.display='none'" style="background:none;border:none;color:#6b7280;cursor:pointer;font-size:18px;padding:4px">&#215;</button>
+        </div>
+        <div id="aff-messages" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px">
+          <div style="background:#2d2d4e;color:#e5e7eb;padding:10px 12px;border-radius:12px 12px 12px 4px;font-size:13px;max-width:90%">Hola! Soy AFF &#x1F44B; Preguntame lo que quieras sobre los picks de hoy o c&#xF3;mo funciona la app.</div>
+        </div>
+        <div style="padding:10px;border-top:1px solid #2d2d4e;display:flex;gap:8px">
+          <input id="aff-input" type="text" placeholder="Escrib&#xED; tu pregunta..." style="flex:1;background:#2d2d4e;border:none;border-radius:8px;padding:8px 12px;color:#fff;font-size:13px;outline:none" onkeydown="if(event.key==='Enter')affSend()">
+          <button onclick="affSend()" style="background:#6366f1;border:none;border-radius:8px;padding:8px 12px;color:#fff;cursor:pointer;font-size:13px">&#x2191;</button>
+        </div>
+      </div>
+      <button id="aff-btn" onclick="affToggle()" style="width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;background:transparent;padding:0;box-shadow:0 4px 16px rgba(0,0,0,0.4);margin-top:8px;display:block">
+        <img src="/static/logo_aftr.png" style="width:52px;height:52px;border-radius:50%;object-fit:cover">
+      </button>
+    </div>
+    <script>
+    function affToggle(){var p=document.getElementById('aff-panel');p.style.display=p.style.display==='none'||p.style.display===''?'flex':'none';}
+    function affSend(){
+      var inp=document.getElementById('aff-input');
+      var msg=inp.value.trim();
+      if(!msg)return;
+      inp.value='';
+      var msgs=document.getElementById('aff-messages');
+      msgs.innerHTML+='<div style="background:#6366f1;color:#fff;padding:10px 12px;border-radius:12px 12px 4px 12px;font-size:13px;max-width:90%;align-self:flex-end">'+msg+'</div>';
+      msgs.innerHTML+='<div id="aff-typing" style="background:#2d2d4e;color:#9ca3af;padding:10px 12px;border-radius:12px;font-size:13px;max-width:60%">...</div>';
+      msgs.scrollTop=msgs.scrollHeight;
+      fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})})
+        .then(r=>r.json()).then(d=>{
+          var t=document.getElementById('aff-typing');if(t)t.remove();
+          msgs.innerHTML+='<div style="background:#2d2d4e;color:#e5e7eb;padding:10px 12px;border-radius:12px 12px 12px 4px;font-size:13px;max-width:90%">'+d.reply+'</div>';
+          msgs.scrollTop=msgs.scrollHeight;
+        }).catch(function(){var t=document.getElementById('aff-typing');if(t)t.remove();});
+    }
+    </script>
     </body>
     </html>
     """
