@@ -239,6 +239,51 @@ def _merge_by_match_id(existing: list[dict], new: list[dict]) -> list[dict]:
 # Historial y ventana diaria
 # -------------------------
 
+def _fix_push_with_score(picks: list[dict]) -> None:
+    """
+    In-place: re-evalúa picks que tienen result=PUSH pero tienen score y market
+    (o probs almacenados). PUSH solo es válido para mercados genuinamente desconocidos;
+    si el partido terminó y hay datos suficientes, debería ser WIN o LOSS.
+    """
+    from core.evaluation import evaluate_market as _eval
+    for p in picks or []:
+        if not isinstance(p, dict):
+            continue
+        if (p.get("result") or "").strip().upper() != "PUSH":
+            continue
+        hg = p.get("score_home")
+        ag = p.get("score_away")
+        if hg is None or ag is None:
+            continue
+        try:
+            hg, ag = int(hg), int(ag)
+        except (TypeError, ValueError):
+            continue
+
+        market = (p.get("best_market") or "").strip()
+
+        # Si no hay market, intentar derivarlo de probs almacenados
+        if not market:
+            stored_probs = p.get("probs")
+            if isinstance(stored_probs, dict) and stored_probs:
+                try:
+                    from core.poisson import build_candidates, select_best_candidate
+                    cands = build_candidates(stored_probs, min_prob=0.0)
+                    best = select_best_candidate(cands)
+                    if best and best.get("market"):
+                        market = best["market"]
+                        p["best_market"] = market
+                except Exception:
+                    pass
+
+        if not market:
+            continue
+
+        result, _ = _eval(market, hg, ag)
+        if result != "PUSH":
+            p["result"] = result
+
+
 def _save_history(league_code: str, picks: list[dict]) -> None:
     """Guarda historial eterno de picks por liga (merge acumulativo)."""
     hist_file = f"picks_history_{league_code}.json"
@@ -253,6 +298,9 @@ def _save_history(league_code: str, picks: list[dict]) -> None:
             if p.get("score_home") is None or p.get("score_away") is None:
                 p["result"] = "PENDING"
     merged = _merge_by_match_id(history, picks)
+    # Fix: re-evaluar picks PUSH del historial que tienen score + market
+    # Cubre casos históricos donde best_market era None y quedaron como PUSH
+    _fix_push_with_score(merged)
     write_json(hist_file, merged)
 
 

@@ -70,61 +70,71 @@ def _league_name(code: str) -> str:
     return settings.leagues.get(code, code)
 
 
-# ─── DB query ────────────────────────────────────────────────────────────────
+# ─── JSON history load ───────────────────────────────────────────────────────
 
 def _load_picks_from_db() -> list[dict]:
-    """Returns all picks with result WIN/LOSS/PUSH joined with match info, ordered by utcDate asc."""
-    conn = get_conn()
-    try:
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT
-                p.league,
-                p.match_id,
-                p.created_at,
-                p.best_market,
-                p.best_prob,
-                p.best_fair,
-                p.result,
-                p.result_reason,
-                m.home,
-                m.away,
-                m."utcDate",
-                m.home_goals,
-                m.away_goals
-            FROM picks p
-            LEFT JOIN matches m
-                   ON m.league = p.league
-                  AND m.match_id = p.match_id
-            WHERE UPPER(p.result) IN ('WIN', 'LOSS', 'PUSH')
-            ORDER BY m."utcDate" ASC NULLS LAST, p.created_at ASC
-        """)
-        rows = cur.fetchall()
-        return [dict(r) for r in rows] if rows else []
-    except Exception:
-        logger.exception("_load_picks_from_db: query failed")
-        return []
-    finally:
-        put_conn(conn)
+    """
+    Carga picks resueltos (WIN/LOSS/PUSH) desde los archivos picks_history_*.json.
+    Devuelve lista ordenada por utcDate asc, en el mismo formato que antes usaba la DB.
+    """
+    import glob as _glob
+    import os as _os
+    from data.cache import CACHE_DIR
+    from services.refresh_utils import _read_json_list
+
+    rows: list[dict] = []
+    pattern = _os.path.join(str(CACHE_DIR), "picks_history_*.json")
+    for fpath in sorted(_glob.glob(pattern)):
+        fname = _os.path.basename(fpath)
+        league = fname.replace("picks_history_", "").replace(".json", "")
+        picks = _read_json_list(fname)
+        for p in picks or []:
+            if not isinstance(p, dict):
+                continue
+            res = (p.get("result") or "").strip().upper()
+            if res not in ("WIN", "LOSS", "PUSH"):
+                continue
+            rows.append({
+                "league":       league,
+                "match_id":     p.get("match_id"),
+                "created_at":   p.get("utcDate"),
+                "best_market":  p.get("best_market"),
+                "best_prob":    p.get("best_prob"),
+                "best_fair":    p.get("best_fair"),
+                "result":       res,
+                "result_reason": None,
+                "home":         p.get("home"),
+                "away":         p.get("away"),
+                "utcDate":      p.get("utcDate"),
+                "home_goals":   p.get("score_home"),
+                "away_goals":   p.get("score_away"),
+            })
+
+    rows.sort(key=lambda r: (r.get("utcDate") or ""))
+    return rows
 
 
 def _count_pending() -> tuple[int, int]:
-    """Returns (pending_count, total_count)."""
-    conn = get_conn()
-    try:
-        cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) AS n FROM picks")
-        total = int((cur.fetchone() or {}).get("n", 0))
-        cur.execute("""
-            SELECT COUNT(*) AS n FROM picks
-            WHERE result IS NULL OR result = '' OR UPPER(result) = 'PENDING'
-        """)
-        pending = int((cur.fetchone() or {}).get("n", 0))
-        return pending, total
-    except Exception:
-        return 0, 0
-    finally:
-        put_conn(conn)
+    """Returns (pending_count, total_count) from JSON history files."""
+    import glob as _glob
+    import os as _os
+    from data.cache import CACHE_DIR
+    from services.refresh_utils import _read_json_list
+
+    total = 0
+    pending = 0
+    pattern = _os.path.join(str(CACHE_DIR), "picks_history_*.json")
+    for fpath in sorted(_glob.glob(pattern)):
+        fname = _os.path.basename(fpath)
+        picks = _read_json_list(fname)
+        for p in picks or []:
+            if not isinstance(p, dict):
+                continue
+            total += 1
+            res = (p.get("result") or "PENDING").strip().upper()
+            if res in ("", "PENDING"):
+                pending += 1
+    return pending, total
 
 
 # ─── stats calculation ───────────────────────────────────────────────────────
