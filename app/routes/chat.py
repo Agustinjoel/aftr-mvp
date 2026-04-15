@@ -93,7 +93,10 @@ async def chat(request: Request):
     try:
         async with httpx.AsyncClient(timeout=20) as client:
             resp = await client.post(url, json=payload)
-            if resp.status_code != 200:
+            if resp.status_code == 429:
+                logger.warning("Gemini 429 (quota): %s", resp.text[:300])
+                reply = "AFF está muy ocupado en este momento. Intentá en unos minutos."
+            elif resp.status_code != 200:
                 logger.warning("Gemini error %s: %s", resp.status_code, resp.text[:300])
                 reply = "Hubo un error al consultar AFF. Intentá de nuevo."
             else:
