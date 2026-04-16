@@ -197,6 +197,29 @@ def api_status():
     }
 
 
+@app.post("/api/admin/release-lock", tags=["status"])
+async def release_lock(request: Request):
+    """Fuerza refresh_running=False si el lock quedó trabado."""
+    from app.auth import get_user_id, get_user_by_id, is_admin
+    uid = get_user_id(request)
+    user = get_user_by_id(uid) if uid else None
+    if not is_admin(user, request):
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"ok": False, "error": "forbidden"}, status_code=403)
+    from data.cache import release_refresh_running_meta, write_cache_meta, read_json
+    import json as _json
+    release_refresh_running_meta()
+    # Reset last_results_ts so RESULTS corre inmediatamente en el próximo ciclo
+    try:
+        raw = read_json("cache_meta.json")
+        base = dict(raw) if isinstance(raw, dict) else {}
+        base["last_results_ts"] = 0
+        write_cache_meta(base)
+    except Exception:
+        pass
+    return {"ok": True, "message": "refresh_running liberado, RESULTS se ejecutará en el próximo ciclo"}
+
+
 @app.get("/api/history-stats", tags=["status"])
 def api_history_stats():
     """Stats del historial de picks en disco (sin auth — solo conteos)."""
