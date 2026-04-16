@@ -22,7 +22,7 @@ from app.payments import router as pay_router
 from app.routes.premium import router as premium_router
 from app.routes.chat import router as chat_router
 from starlette.middleware.base import BaseHTTPMiddleware
-from data.cache import read_cache_meta, read_json_with_fallback
+from data.cache import read_cache_meta, read_json_with_fallback, CACHE_DIR
 
 # Logging
 logging.basicConfig(
@@ -195,6 +195,33 @@ def api_status():
         "leagues_loaded": leagues_loaded,
         "picks_total": picks_total,
     }
+
+
+@app.get("/api/history-stats", tags=["status"])
+def api_history_stats():
+    """Stats del historial de picks en disco (sin auth — solo conteos)."""
+    import glob as _glob, os as _os
+    from services.refresh_utils import _read_json_list
+    result = {}
+    for pattern, label in [("picks_history_*.json", "history"), ("daily_picks_*.json", "daily")]:
+        files = sorted(_glob.glob(_os.path.join(str(CACHE_DIR), pattern)))
+        for fpath in files:
+            fname = _os.path.basename(fpath)
+            picks = _read_json_list(fname)
+            by_result: dict = {}
+            for p in picks or []:
+                r = (p.get("result") or "PENDING").upper()
+                by_result[r] = by_result.get(r, 0) + 1
+            result[fname] = {"total": len(picks or []), "by_result": by_result}
+    meta_path = CACHE_DIR / "cache_meta.json"
+    try:
+        import json as _json
+        meta = _json.loads(meta_path.read_text()) if meta_path.exists() else {}
+        rr = meta.get("refresh_running")
+        rs = meta.get("refresh_started_at")
+    except Exception:
+        rr, rs = None, None
+    return {"files": result, "refresh_running": rr, "refresh_started_at": rs}
 
 
 init_db()
