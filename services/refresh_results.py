@@ -6,8 +6,10 @@ from __future__ import annotations
 from datetime import datetime, timezone, timedelta
 from typing import Any
 
+import json as _json
+
 from core.evaluation import evaluate_market
-from data.cache import backup_current_to_prev, write_json
+from data.cache import backup_current_to_prev, write_json, CACHE_DIR
 from services.refresh_utils import _safe_int, _parse_utcdate_str, _read_json_list
 
 
@@ -338,11 +340,33 @@ def _window_daily(picks: list[dict], keep_days: int | None) -> list[dict]:
 # -------------------------
 
 def _write_league_cache(league_code: str, matches: list[dict], picks: list[dict]) -> None:
-    """Guarda matches y picks al cache con backup previo."""
+    """Guarda matches y picks al cache con backup previo.
+
+    Antes de escribir daily_picks_*.json hace una lectura fresca del disco para
+    preservar cualquier WIN/LOSS que haya escrito un job concurrente (ej: LIVE)
+    entre el inicio del ciclo y este punto. Sin esto, el job RESULTS puede
+    sobreescribir un WIN del job LIVE porque leyó existing_picks stale al inicio.
+    """
     backup_current_to_prev(f"daily_matches_{league_code}.json")
     write_json(f"daily_matches_{league_code}.json", matches)
-    backup_current_to_prev(f"daily_picks_{league_code}.json")
-    write_json(f"daily_picks_{league_code}.json", picks)
+
+    picks_file = f"daily_picks_{league_code}.json"
+    backup_current_to_prev(picks_file)
+    # Leer el estado ACTUAL del disco DIRECTO (sin TTL cache) para capturar
+    # cualquier WIN/LOSS escrito por un job concurrente (ej: LIVE thread) entre
+    # el inicio de este ciclo y ahora.
+    _p = CACHE_DIR / picks_file
+    try:
+        if _p.exists():
+            _raw = _json.loads(_p.read_text(encoding="utf-8"))
+            fresh = [x for x in _raw if isinstance(x, dict)] if isinstance(_raw, list) else []
+        else:
+            fresh = []
+    except Exception:
+        fresh = []
+    if fresh:
+        _restore_settled_picks(picks, fresh)
+    write_json(picks_file, picks)
 
 
 # -------------------------
