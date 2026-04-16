@@ -95,7 +95,12 @@ def _build_home_league_snap_carousel_html(
             _leagues_with_data.add(_code)
 
     # Mapeo de código → slug de logo (para casos especiales)
-    _LOGO_SLUG = {"EL": "el", "EC": "ec"}  # EL→el.png; EC→ec.png (Eurocopa, no duplicar CL)
+    _LOGO_SLUG = {
+        "EL":   "el",    # UEFA Europa League → el.png
+        "EC":   "ec",    # European Championship → ec.png
+        "CONF": "uel",   # Conference League → uel.png (placeholder)
+        "CSA":  "cli",   # Copa Sudamericana → cli.png (placeholder CONMEBOL)
+    }
 
     items: list[str] = []
     ix = 0
