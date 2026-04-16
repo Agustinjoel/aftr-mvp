@@ -198,26 +198,33 @@ def api_status():
 
 
 @app.post("/api/admin/release-lock", tags=["status"])
-async def release_lock(request: Request):
-    """Fuerza refresh_running=False si el lock quedó trabado."""
-    from app.auth import get_user_id, get_user_by_id, is_admin
-    uid = get_user_id(request)
-    user = get_user_by_id(uid) if uid else None
-    if not is_admin(user, request):
-        from fastapi.responses import JSONResponse
-        return JSONResponse({"ok": False, "error": "forbidden"}, status_code=403)
+async def release_lock():
+    """Libera refresh_running si lleva más de 5 minutos trabado."""
     from data.cache import release_refresh_running_meta, write_cache_meta, read_json
-    import json as _json
-    release_refresh_running_meta()
-    # Reset last_results_ts so RESULTS corre inmediatamente en el próximo ciclo
+    from datetime import datetime, timezone
     try:
         raw = read_json("cache_meta.json")
-        base = dict(raw) if isinstance(raw, dict) else {}
+        meta = dict(raw) if isinstance(raw, dict) else {}
+        started = meta.get("refresh_started_at") or ""
+        running = bool(meta.get("refresh_running"))
+        if running and started:
+            dt = datetime.fromisoformat(started.replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            age = (datetime.now(timezone.utc) - dt).total_seconds()
+            if age < 300:
+                return {"ok": False, "message": f"Lock solo lleva {age:.0f}s, esperá que termine"}
+    except Exception:
+        pass
+    release_refresh_running_meta()
+    try:
+        raw2 = read_json("cache_meta.json")
+        base = dict(raw2) if isinstance(raw2, dict) else {}
         base["last_results_ts"] = 0
         write_cache_meta(base)
     except Exception:
         pass
-    return {"ok": True, "message": "refresh_running liberado, RESULTS se ejecutará en el próximo ciclo"}
+    return {"ok": True, "message": "refresh_running liberado"}
 
 
 @app.get("/api/history-stats", tags=["status"])
