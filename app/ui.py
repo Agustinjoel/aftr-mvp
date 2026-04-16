@@ -912,6 +912,40 @@ def admin_picks_debug(request: Request):
         _put(conn)
 
 
+@router.get("/admin/cache-debug")
+def admin_cache_debug(request: Request):
+    """Admin-only: diagnóstico del estado de picks_history y daily_picks en disco."""
+    from fastapi.responses import JSONResponse as _JSONResponse
+    uid = get_user_id(request)
+    acting_user = get_user_by_id(uid) if uid else None
+    if not is_admin(acting_user, request):
+        return _JSONResponse({"ok": False, "error": "forbidden"}, status_code=403)
+    import glob as _glob, os as _os
+    from data.cache import CACHE_DIR
+    from services.refresh_utils import _read_json_list
+
+    summary = {}
+    for pattern, label in [("picks_history_*.json", "history"), ("daily_picks_*.json", "daily")]:
+        files = sorted(_glob.glob(_os.path.join(str(CACHE_DIR), pattern)))
+        for fpath in files:
+            fname = _os.path.basename(fpath)
+            picks = _read_json_list(fname)
+            by_result: dict = {}
+            for p in picks or []:
+                r = (p.get("result") or "PENDING").upper()
+                by_result[r] = by_result.get(r, 0) + 1
+            summary[fname] = {"total": len(picks or []), "by_result": by_result}
+
+    cache_meta_path = CACHE_DIR / "cache_meta.json"
+    try:
+        import json as _json
+        meta = _json.loads(cache_meta_path.read_text()) if cache_meta_path.exists() else {}
+    except Exception:
+        meta = {"error": "unreadable"}
+
+    return _JSONResponse({"cache_dir": str(CACHE_DIR), "files": summary, "cache_meta": meta})
+
+
 @router.post("/admin/set-role")
 async def admin_set_role(request: Request):
     """Admin-only: update user role and subscription_status."""
