@@ -309,14 +309,12 @@ def _window_daily(picks: list[dict], keep_days: int | None) -> list[dict]:
     Filtra picks para el cache diario:
     - Siempre incluye PENDING (sin importar edad)
     - Para settled (WIN/LOSS/PUSH): solo incluye los de los últimos `keep_days` días
+    - Descarta picks PUSH sin market ni probs (basura irrecuperable de antes del fix Model B)
     """
     try:
-        kd = int(keep_days) if keep_days is not None else None
+        kd = int(keep_days) if keep_days is not None else 14
     except Exception:
-        kd = None
-
-    if not kd or kd <= 0:
-        return picks
+        kd = 14
 
     now = datetime.now(timezone.utc)
     cutoff = now - timedelta(days=kd)
@@ -326,6 +324,11 @@ def _window_daily(picks: list[dict], keep_days: int | None) -> list[dict]:
         if not isinstance(p, dict):
             continue
         r = (p.get("result") or "").strip().upper()
+
+        # Descartar PUSH irrecuperables: sin market ni probs almacenados
+        if r == "PUSH" and not (p.get("best_market") or p.get("probs")):
+            continue
+
         if r == "PENDING":
             out.append(p)
             continue
