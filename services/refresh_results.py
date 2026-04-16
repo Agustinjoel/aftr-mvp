@@ -332,9 +332,14 @@ def _window_daily(picks: list[dict], keep_days: int | None) -> list[dict]:
         if r == "PENDING":
             out.append(p)
             continue
-        dt = _parse_utcdate_str(p.get("utcDate"))
-        if dt >= cutoff:
-            out.append(p)
+        try:
+            dt = _parse_utcdate_str(p.get("utcDate"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            if dt >= cutoff:
+                out.append(p)
+        except Exception:
+            out.append(p)  # si falla la comparación, incluir el pick
     return out
 
 
