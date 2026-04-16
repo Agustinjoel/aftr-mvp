@@ -60,6 +60,19 @@ Picks disponibles hoy:
 {picks_context}"""
 
 
+@router.get("/api/chat/models")
+async def list_gemini_models(request: Request):
+    """Diagnóstico: lista modelos disponibles para la API key configurada."""
+    api_key = getattr(settings, "GEMINI_API_KEY", "") or ""
+    if not api_key:
+        return JSONResponse({"error": "GEMINI_API_KEY no configurada"})
+    async with httpx.AsyncClient(timeout=10) as client:
+        r = await client.get(
+            f"https://generativelanguage.googleapis.com/v1/models?key={api_key}"
+        )
+        return JSONResponse({"status": r.status_code, "body": r.json()})
+
+
 @router.post("/api/chat")
 async def chat(request: Request):
     try:
