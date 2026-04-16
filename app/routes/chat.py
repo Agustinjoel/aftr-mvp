@@ -80,14 +80,19 @@ async def chat(request: Request):
     picks_context = _build_picks_context(league)
     system = SYSTEM_PROMPT.format(picks_context=picks_context)
 
+    # Inyectar system prompt como primer turn user/model — funciona en cualquier
+    # versión de la API sin depender de systemInstruction ni system_instruction.
     payload = {
-        "systemInstruction": {"parts": [{"text": system}]},
-        "contents": [{"role": "user", "parts": [{"text": user_message}]}],
+        "contents": [
+            {"role": "user", "parts": [{"text": system}]},
+            {"role": "model", "parts": [{"text": "Entendido. Soy AFF, listo para ayudarte."}]},
+            {"role": "user", "parts": [{"text": user_message}]},
+        ],
     }
 
     url = (
-        "https://generativelanguage.googleapis.com/v1/models/"
-        f"gemini-1.5-flash:generateContent?key={api_key}"
+        "https://generativelanguage.googleapis.com/v1beta/models/"
+        f"gemini-2.0-flash-lite:generateContent?key={api_key}"
     )
 
     try:
