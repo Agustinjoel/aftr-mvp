@@ -4,7 +4,7 @@ import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Request, Response
 from fastapi.staticfiles import StaticFiles
 
 from app.auto_refresh import spawn_auto_refresh_tasks
