@@ -46,20 +46,26 @@ def read_json(filename: str) -> list[Any] | dict[str, Any]:
 
     path = CACHE_DIR / filename
     if path.exists():
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        n = len(data) if isinstance(data, list) else (len(data) if isinstance(data, dict) else 0)
-        _logger.info("read_json: %s -> %s items (from %s)", filename, n, str(path))
-        _json_read_cache[filename] = (now, data)
-        return data
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            n = len(data) if isinstance(data, list) else (len(data) if isinstance(data, dict) else 0)
+            _logger.info("read_json: %s -> %s items (from %s)", filename, n, str(path))
+            _json_read_cache[filename] = (now, data)
+            return data
+        except (json.JSONDecodeError, ValueError) as e:
+            _logger.warning("read_json: %s corrupto (%s), ignorando", filename, e)
     daily_path = DAILY_DIR / filename
     if daily_path.exists():
-        with open(daily_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        n = len(data) if isinstance(data, list) else (len(data) if isinstance(data, dict) else 0)
-        _logger.info("read_json: %s -> %s items (from daily fallback %s)", filename, n, str(daily_path))
-        _json_read_cache[filename] = (now, data)
-        return data
+        try:
+            with open(daily_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            n = len(data) if isinstance(data, list) else (len(data) if isinstance(data, dict) else 0)
+            _logger.info("read_json: %s -> %s items (from daily fallback %s)", filename, n, str(daily_path))
+            _json_read_cache[filename] = (now, data)
+            return data
+        except (json.JSONDecodeError, ValueError) as e:
+            _logger.warning("read_json: %s (daily fallback) corrupto (%s), ignorando", filename, e)
     _logger.info("read_json: %s -> not found (checked %s and %s)", filename, str(path), str(daily_path))
     return []
 
