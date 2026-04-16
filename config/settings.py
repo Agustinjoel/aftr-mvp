@@ -131,10 +131,12 @@ LEAGUES: dict[str, str] = {
     "PPL":  "Primeira Liga",
     # ── Sudamérica ──────────────────────────────────────────────────────────
     "CLI":  "Copa Libertadores",
+    "CSA":  "Copa Sudamericana",
     "BSA":  "Brasileirão Série A",
     "ARG":  "Liga Argentina",
     # ── Norteamérica ────────────────────────────────────────────────────────
     "MLS":  "MLS",
+    "LMX":  "Liga MX",
     # ── Competencias internacionales ────────────────────────────────────────
     "WC":   "FIFA World Cup",
     "EC":   "European Championship",
@@ -165,9 +167,11 @@ APIF_LEAGUE_MAP: dict[str, int] = {
     "FAC":  45,    # FA Cup
     "CREY": 143,   # Copa del Rey  ← verificar con list_apif_leagues.py
     "CLI":  13,    # Copa Libertadores (CONMEBOL Libertadores)
+    "CSA":  11,    # Copa Sudamericana (CONMEBOL Sudamericana)
     "BSA":  71,    # Brasileirão Série A
-    "ARG":  128,   # Liga Profesional Argentina  ← verificar con list_apif_leagues.py
+    "ARG":  128,   # Liga Profesional Argentina
     "MLS":  253,   # MLS
+    "LMX":  262,   # Liga MX (México)
     "WC":   1,     # FIFA World Cup
     "EC":   4,     # UEFA European Championship
 }
