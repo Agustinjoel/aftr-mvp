@@ -197,8 +197,8 @@ def api_status():
     }
 
 
-@app.post("/api/admin/release-lock", tags=["status"])
-async def release_lock():
+@app.get("/api/admin/release-lock", tags=["status"])
+def release_lock():
     """Libera refresh_running si lleva más de 5 minutos trabado."""
     from data.cache import release_refresh_running_meta, write_cache_meta, read_json
     from datetime import datetime, timezone
