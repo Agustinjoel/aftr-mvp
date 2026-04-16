@@ -164,7 +164,7 @@ APIF_LEAGUE_MAP: dict[str, int] = {
     "PPL":  94,    # Primeira Liga
     "FAC":  45,    # FA Cup
     "CREY": 143,   # Copa del Rey  ← verificar con list_apif_leagues.py
-    "CLI":  11,    # Copa Libertadores
+    "CLI":  13,    # Copa Libertadores (CONMEBOL Libertadores)
     "BSA":  71,    # Brasileirão Série A
     "ARG":  128,   # Liga Profesional Argentina  ← verificar con list_apif_leagues.py
     "MLS":  253,   # MLS
