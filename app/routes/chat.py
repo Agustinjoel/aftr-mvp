@@ -92,7 +92,7 @@ async def chat(request: Request):
 
     url = (
         "https://generativelanguage.googleapis.com/v1beta/models/"
-        f"gemini-2.0-flash-lite:generateContent?key={api_key}"
+        f"gemini-1.5-flash:generateContent?key={api_key}"
     )
 
     try:
