@@ -233,7 +233,8 @@ def api_history_stats():
     import glob as _glob, os as _os
     from services.refresh_utils import _read_json_list
     result = {}
-    for pattern, label in [("picks_history_*.json", "history"), ("daily_picks_*.json", "daily")]:
+    push_sample = []  # sample de picks PUSH para ver si tienen probs/market
+    for pattern in ["picks_history_*.json", "daily_picks_*.json"]:
         files = sorted(_glob.glob(_os.path.join(str(CACHE_DIR), pattern)))
         for fpath in files:
             fname = _os.path.basename(fpath)
@@ -242,6 +243,15 @@ def api_history_stats():
             for p in picks or []:
                 r = (p.get("result") or "PENDING").upper()
                 by_result[r] = by_result.get(r, 0) + 1
+                if r == "PUSH" and len(push_sample) < 3:
+                    push_sample.append({
+                        "file": fname,
+                        "match_id": p.get("match_id"),
+                        "best_market": p.get("best_market"),
+                        "has_probs": bool(p.get("probs")),
+                        "score_home": p.get("score_home"),
+                        "score_away": p.get("score_away"),
+                    })
             result[fname] = {"total": len(picks or []), "by_result": by_result}
     meta_path = CACHE_DIR / "cache_meta.json"
     try:
@@ -251,7 +261,7 @@ def api_history_stats():
         rs = meta.get("refresh_started_at")
     except Exception:
         rr, rs = None, None
-    return {"files": result, "refresh_running": rr, "refresh_started_at": rs}
+    return {"files": result, "refresh_running": rr, "refresh_started_at": rs, "push_sample": push_sample}
 
 
 init_db()
