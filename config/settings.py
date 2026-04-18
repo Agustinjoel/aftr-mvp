@@ -184,6 +184,19 @@ _APIF_EUROPEAN_LEAGUES = frozenset({
     "PL", "PD", "SA", "BL1", "FL1", "CL", "EL", "CONF", "ELC", "DED", "PPL", "FAC", "CREY", "EC",
 })
 
+# Temporada mínima permitida por liga (el fallback season-1 no bajará de aquí).
+# Europeas: floor=2025 (temporada 2025/26 en curso en abril 2026).
+# Americanas: floor=2025 (el fallback desde 2026 → 2025 está OK, pero no 2024).
+_APIF_SEASON_FLOOR: dict[str, int] = {
+    **{code: 2025 for code in _APIF_EUROPEAN_LEAGUES},
+    "BSA": 2025,
+    "ARG": 2025,
+    "MLS": 2025,
+    "LMX": 2025,
+    "CLI": 2025,
+    "CSA": 2025,
+}
+
 FREE_LEAGUES: list[str] = ["PL", "PD", "SA", "NBA"]
 DEFAULT_LEAGUE: str = (os.getenv("AFTR_DEFAULT_LEAGUE", "PL") or "PL").strip()
 
@@ -448,9 +461,17 @@ class Settings:
         y, m = now.year, now.month
         # Ligas europeas: temporada empieza en julio/agosto
         if code in _APIF_EUROPEAN_LEAGUES:
-            return y if m >= 7 else y - 1
-        # Resto (Sudamérica, MLS, competencias especiales): año calendario
-        return y
+            season = y if m >= 7 else y - 1
+        else:
+            # Resto (Sudamérica, MLS, competencias especiales): año calendario
+            season = y
+        # Aplicar piso: nunca devolver menos que _APIF_SEASON_FLOOR
+        floor = _APIF_SEASON_FLOOR.get(code, 0)
+        return max(season, floor)
+
+    def get_apif_season_floor(self, code: str) -> int:
+        """Temporada mínima permitida para esta liga (el fallback no bajará de aquí)."""
+        return _APIF_SEASON_FLOOR.get(code, 2024)
 
 
 settings = Settings()

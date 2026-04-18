@@ -215,11 +215,12 @@ def fetch_fixtures_by_league(
     league_code: str = "",
     days_upcoming: int = 7,
     days_finished: int = 7,
+    season_floor: int = 2024,
 ) -> tuple[list[dict], list[dict]]:
     """
     Trae próximos y finalizados para una liga/temporada dada.
     Si la temporada solicitada devuelve 0 upcoming Y 0 finished, reintenta
-    automáticamente con season-1 (cubre ligas que aún usan la temporada anterior).
+    automáticamente con season-1 — pero nunca por debajo de season_floor.
     """
     upcoming, finished = _fetch_fixtures_for_season(
         league_id, season, league_code, days_upcoming, days_finished
@@ -231,18 +232,24 @@ def fetch_fixtures_by_league(
 
     if not upcoming and not finished:
         prev = season - 1
-        logger.info(
-            "api_football fetch_fixtures_by_league: season=%s empty, retrying season=%s for %s",
-            season, prev, league_code,
-        )
-        upcoming, finished = _fetch_fixtures_for_season(
-            league_id, prev, league_code, days_upcoming, days_finished
-        )
-        if upcoming or finished:
+        if prev < season_floor:
             logger.info(
-                "api_football fetch_fixtures_by_league: found data in season=%s for %s (up=%d fin=%d)",
-                prev, league_code, len(upcoming), len(finished),
+                "api_football fetch_fixtures_by_league: season=%s empty but floor=%s blocks retry for %s",
+                season, season_floor, league_code,
             )
+        else:
+            logger.info(
+                "api_football fetch_fixtures_by_league: season=%s empty, retrying season=%s for %s",
+                season, prev, league_code,
+            )
+            upcoming, finished = _fetch_fixtures_for_season(
+                league_id, prev, league_code, days_upcoming, days_finished
+            )
+            if upcoming or finished:
+                logger.info(
+                    "api_football fetch_fixtures_by_league: found data in season=%s for %s (up=%d fin=%d)",
+                    prev, league_code, len(upcoming), len(finished),
+                )
 
     return upcoming, finished
 

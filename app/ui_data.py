@@ -9,13 +9,14 @@ import os
 import re
 import time
 import threading
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Any
 
 from config.settings import settings
 from data.cache import read_json_with_fallback
 
 from app.ui_helpers import _safe_int, _is_pick_valid, _parse_utcdate_maybe
+from app.ui_picks_calc import _result_norm as _pick_result_norm
 from app.ui_matches import (
     MATCH_LIVE_STATUSES,
     _match_live_status_token,
@@ -324,13 +325,48 @@ def _load_all_leagues_data(
 
     all_settled:  list[dict] = []
     all_upcoming: list[dict] = []
+    now_utc = datetime.now(timezone.utc)
+    today_str = now_utc.strftime("%Y-%m-%d")
+
     for p in all_picks:
         league_code = (p.get("_league") or p.get("league") or "").strip()
         mid         = _safe_int(p.get("match_id") or p.get("id"))
         match_obj   = match_by_key.get((league_code, mid)) if league_code and mid is not None else None
-        finished    = isMatchFinished(p) or (isMatchFinished(match_obj) if isinstance(match_obj, dict) else False)
-        (all_settled if finished else all_upcoming).append(p)
 
+        pick_result = _pick_result_norm(p)
+
+        if pick_result in ("WIN", "LOSS", "PUSH"):
+            all_settled.append(p)
+        elif pick_result == "PENDING":
+            # Pick no resuelto: usar utcDate como referencia principal.
+            # Solo marcar como settled si el match_obj confirma explícitamente FT,
+            # o si el kickoff pasó hace más de 4h sin match_obj que diga lo contrario.
+            match_explicitly_finished = isMatchFinished(match_obj) if isinstance(match_obj, dict) else False
+            if match_explicitly_finished:
+                all_settled.append(p)
+            else:
+                dt = _parse_utcdate_maybe(p.get("utcDate"))
+                if dt is not None and dt < now_utc - timedelta(hours=4):
+                    # Sin datos del partido y kickoff ya pasó hace >4h → asumir terminado
+                    all_settled.append(p)
+                else:
+                    all_upcoming.append(p)
+        else:
+            # Fallback para resultados no reconocidos
+            finished = isMatchFinished(p) or (isMatchFinished(match_obj) if isinstance(match_obj, dict) else False)
+            (all_settled if finished else all_upcoming).append(p)
+
+    # Log: qué partidos ve el motor para hoy
+    today_ids = [
+        p.get("match_id") or p.get("id")
+        for p in all_upcoming
+        if (p.get("utcDate") or "").startswith(today_str)
+    ]
+    logger.info(
+        "Partidos encontrados para hoy (%s): %s",
+        today_str,
+        today_ids if today_ids else "(ninguno — picks futuros o sin fecha de hoy)",
+    )
     logger.info(
         "load_all_leagues: total picks=%s settled=%s upcoming=%s leagues=%s",
         len(all_picks), len(all_settled), len(all_upcoming), list(picks_by_league.keys()),

@@ -540,35 +540,60 @@ def _build_home_premium_combos(
 
         return combos
 
+    def _valid_any_edge(p: dict) -> bool:
+        """Tier mínimo debug: cualquier pick con edge > 0 y best_market presente."""
+        edge_val = p.get("edge")
+        if edge_val is None:
+            return False
+        try:
+            if float(edge_val) <= 0:
+                return False
+        except (TypeError, ValueError):
+            return False
+        return bool(p.get("best_market"))
+
     combos = _assemble(_valid_strict)
     filled = sum(1 for c in combos if len(c.get("legs") or []) >= 3)
 
     if filled < 3 and upcoming:
-        n_strict  = sum(1 for p in upcoming if _valid_strict(p))
-        n_relaxed = sum(1 for p in upcoming if _valid_relaxed(p))
-        no_key    = sum(1 for p in upcoming if _combo_match_key_for_home(p) is None)
-        no_date   = sum(1 for p in upcoming if _pick_local_date(p, match_by_key) is None)
-        in_day    = sum(1 for p in upcoming if _in_local_window(p, 0, 0))
-        in_72     = sum(1 for p in upcoming if _in_local_window(p, 0, 3))
+        n_strict    = sum(1 for p in upcoming if _valid_strict(p))
+        n_relaxed   = sum(1 for p in upcoming if _valid_relaxed(p))
+        n_any_edge  = sum(1 for p in upcoming if _valid_any_edge(p))
+        no_key      = sum(1 for p in upcoming if _combo_match_key_for_home(p) is None)
+        no_date     = sum(1 for p in upcoming if _pick_local_date(p, match_by_key) is None)
+        in_day      = sum(1 for p in upcoming if _in_local_window(p, 0, 0))
+        in_72       = sum(1 for p in upcoming if _in_local_window(p, 0, 3))
         logger.warning(
-            "premium_combos[%s]: 0 filled | upcoming=%s strict_ok=%s relaxed_ok=%s "
+            "premium_combos[%s]: filled=%s | upcoming=%s strict_ok=%s relaxed_ok=%s any_edge_ok=%s "
             "no_match_key=%s no_local_date=%s in_today=%s in_72h=%s",
-            ctx or "—", len(upcoming), n_strict, n_relaxed, no_key, no_date, in_day, in_72,
+            ctx or "—", filled, len(upcoming), n_strict, n_relaxed, n_any_edge,
+            no_key, no_date, in_day, in_72,
         )
+
+        def _merge_combos(base: list[dict], fallback: list[dict]) -> list[dict]:
+            merged = []
+            for cs, cr in zip(base, fallback):
+                merged.append(cs if len(cs.get("legs") or []) >= 3 else cr)
+            return merged
 
         if n_relaxed >= 3:
             combos_r = _assemble(_valid_relaxed)
             filled_r = sum(1 for c in combos_r if len(c.get("legs") or []) >= 3)
             if filled_r > 0:
                 logger.warning("premium_combos[%s]: usando thresholds RELAJADOS (AFTR≥62, CONF≥5)", ctx or "—")
-                # Merge: keep strict combos where they have legs, fill empty slots with relaxed
-                merged = []
-                for cs, cr in zip(combos, combos_r):
-                    if len(cs.get("legs") or []) >= 3:
-                        merged.append(cs)
-                    else:
-                        merged.append(cr)
-                return merged
+                return _merge_combos(combos, combos_r)
+
+        # Tercer tier: cualquier pick con edge > 0 (modo debug / inventario mínimo)
+        if n_any_edge >= 3:
+            combos_min = _assemble(_valid_any_edge)
+            filled_min = sum(1 for c in combos_min if len(c.get("legs") or []) >= 3)
+            if filled_min > 0:
+                logger.warning(
+                    "premium_combos[%s]: usando thresholds MÍNIMOS (edge>0) — %d combos llenos",
+                    ctx or "—", filled_min,
+                )
+                base = combos_r if n_relaxed >= 3 else combos
+                return _merge_combos(base, combos_min)
 
     return combos
 

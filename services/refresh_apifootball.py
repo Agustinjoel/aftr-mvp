@@ -89,6 +89,7 @@ def apif_refresh_league(
     season = settings.get_apif_season(league_code)
 
     # ── 1. Fetch próximos + finalizados ─────────────────────────────────────
+    season_floor = settings.get_apif_season_floor(league_code)
     try:
         upcoming_raw, finished_raw = fetch_fixtures_by_league(
             league_id,
@@ -96,35 +97,28 @@ def apif_refresh_league(
             league_code=league_code,
             days_upcoming=days_upcoming,
             days_finished=days_finished,
+            season_floor=season_floor,
         )
     except Exception as e:
         logger.warning("apif_refresh_league %s: fetch error: %s", league_code, e)
         return 0, 0
 
-    if not upcoming_raw and not finished_raw:
-        logger.info("apif_refresh_league %s: no fixtures returned (season=%s)", league_code, season)
-        # Intentar temporada anterior si no hay datos
-        prev_season = season - 1
-        try:
-            upcoming_raw, finished_raw = fetch_fixtures_by_league(
-                league_id,
-                prev_season,
-                league_code=league_code,
-                days_upcoming=days_upcoming,
-                days_finished=days_finished,
-            )
-            if upcoming_raw or finished_raw:
-                season = prev_season
-                logger.info(
-                    "apif_refresh_league %s: found data in season %s", league_code, season
-                )
-        except Exception as e2:
-            logger.debug("apif_refresh_league %s: prev season fetch failed: %s", league_code, e2)
-
     # ── 2. Normalizar a formato AFTR ─────────────────────────────────────────
-    # _normalize_match asegura que score/status estén en el formato canónico AFTR
     upcoming_matches  = [_normalize_match(m) for m in upcoming_raw  if isinstance(m, dict)]
     finished_matches  = [_normalize_match(m) for m in finished_raw  if isinstance(m, dict)]
+
+    # Log: partidos encontrados para hoy en este refresco
+    from datetime import datetime as _dt, timezone as _tz
+    _today = _dt.now(_tz.utc).strftime("%Y-%m-%d")
+    _today_ids = [
+        m.get("match_id") for m in upcoming_matches
+        if isinstance(m, dict) and (m.get("utcDate") or "").startswith(_today)
+    ]
+    logger.info(
+        "%s — Partidos encontrados para hoy (%s): %s",
+        league_code, _today,
+        _today_ids if _today_ids else "(ninguno en upcoming_matches — API sin NS para hoy)",
+    )
 
     # ── 3. Team names cache ──────────────────────────────────────────────────
     team_names = _load_team_names_cache()
