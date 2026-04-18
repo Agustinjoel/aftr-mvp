@@ -38,6 +38,29 @@ async def lifespan(app: FastAPI):
     Startup: optional multi-tier auto-refresh (AUTO_REFRESH=true): LIVE + UPCOMING + RESULTS.
     Shutdown: cancel all asyncio tasks (in-flight work may finish in thread pool).
     """
+    # ── Diagnóstico de memoria al arranque ──────────────────────────────────
+    try:
+        from data.cache import read_json_with_fallback
+        _total_picks = 0
+        _total_matches = 0
+        _picks_by_league: list[str] = []
+        for _code in settings.league_codes():
+            _p = read_json_with_fallback(f"daily_picks_{_code}.json") or []
+            _m = read_json_with_fallback(f"daily_matches_{_code}.json") or []
+            _np = len(_p) if isinstance(_p, list) else 0
+            _nm = len(_m) if isinstance(_m, list) else 0
+            _total_picks += _np
+            _total_matches += _nm
+            if _np:
+                _picks_by_league.append(f"{_code}:{_np}")
+        logger.info(
+            "STARTUP — Total de picks en memoria: %s | Total de partidos en memoria: %s | por liga: %s",
+            _total_picks, _total_matches,
+            ", ".join(_picks_by_league) if _picks_by_league else "(vacío — filesystem efímero)",
+        )
+    except Exception as _diag_err:
+        logger.warning("STARTUP — error leyendo memoria: %s", _diag_err)
+
     tasks: list[asyncio.Task[None]] = []
     if settings.auto_refresh:
         logger.info(

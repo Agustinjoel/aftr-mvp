@@ -300,24 +300,15 @@ def _load_all_leagues_data(
         matches_by_league[code] = matches
         _debug_log_live_match_candidates(code, matches)
 
+        # MODO DEBUG: incluir TODOS los picks sin filtro de validez.
+        # Si el pick existe en caché o Postgres, se muestra.
         filtered: list[dict] = []
         for p in picks:
             p = dict(p)
             p["_league"] = code
-            if _is_pick_valid(p):
-                filtered.append(p)
+            filtered.append(p)
 
-        if picks and not filtered:
-            logger.warning(
-                "load_all_leagues: %s had %s raw picks but 0 passed _is_pick_valid; usando fallback",
-                code, len(picks),
-            )
-            for p in picks:
-                p = dict(p)
-                p["_league"] = code
-                filtered.append(p)
-
-        logger.info("load_all_leagues: %s after filter picks=%s", code, len(filtered))
+        logger.info("load_all_leagues: %s picks cargados (sin filtro)=%s", code, len(filtered))
 
         for p in filtered:
             all_picks.append(p)
@@ -325,36 +316,21 @@ def _load_all_leagues_data(
 
     all_settled:  list[dict] = []
     all_upcoming: list[dict] = []
-    now_utc = datetime.now(timezone.utc)
+    now_utc   = datetime.now(timezone.utc)
     today_str = now_utc.strftime("%Y-%m-%d")
 
+    # MODO DEBUG: todos los picks van a all_upcoming para confirmar que la UI los dibuja.
+    # Los WIN/LOSS/PUSH también van a all_settled para estadísticas.
     for p in all_picks:
         league_code = (p.get("_league") or p.get("league") or "").strip()
         mid         = _safe_int(p.get("match_id") or p.get("id"))
         match_obj   = match_by_key.get((league_code, mid)) if league_code and mid is not None else None
-
         pick_result = _pick_result_norm(p)
 
         if pick_result in ("WIN", "LOSS", "PUSH"):
             all_settled.append(p)
-        elif pick_result == "PENDING":
-            # Pick no resuelto: usar utcDate como referencia principal.
-            # Solo marcar como settled si el match_obj confirma explícitamente FT,
-            # o si el kickoff pasó hace más de 4h sin match_obj que diga lo contrario.
-            match_explicitly_finished = isMatchFinished(match_obj) if isinstance(match_obj, dict) else False
-            if match_explicitly_finished:
-                all_settled.append(p)
-            else:
-                dt = _parse_utcdate_maybe(p.get("utcDate"))
-                if dt is not None and dt < now_utc - timedelta(hours=4):
-                    # Sin datos del partido y kickoff ya pasó hace >4h → asumir terminado
-                    all_settled.append(p)
-                else:
-                    all_upcoming.append(p)
-        else:
-            # Fallback para resultados no reconocidos
-            finished = isMatchFinished(p) or (isMatchFinished(match_obj) if isinstance(match_obj, dict) else False)
-            (all_settled if finished else all_upcoming).append(p)
+        # En modo debug: cualquier pick que no sea definitivamente settled → upcoming
+        all_upcoming.append(p)
 
     # Log: qué partidos ve el motor para hoy
     today_ids = [
@@ -365,10 +341,10 @@ def _load_all_leagues_data(
     logger.info(
         "Partidos encontrados para hoy (%s): %s",
         today_str,
-        today_ids if today_ids else "(ninguno — picks futuros o sin fecha de hoy)",
+        today_ids if today_ids else "(ninguno — revisar utcDate en los picks)",
     )
     logger.info(
-        "load_all_leagues: total picks=%s settled=%s upcoming=%s leagues=%s",
+        "load_all_leagues [DEBUG]: total picks=%s settled=%s upcoming=%s leagues=%s",
         len(all_picks), len(all_settled), len(all_upcoming), list(picks_by_league.keys()),
     )
 

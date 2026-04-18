@@ -181,13 +181,26 @@ def isMatchFinished(match: dict) -> bool:
 
 
 def isMatchLive(match: dict) -> bool:
-    """True si el partido está en curso (por status) y no fue marcado como finalizado."""
+    """
+    True si el partido está en curso. Además del status explícito, fuerza LIVE si:
+    - el kickoff fue hace entre 1 min y 115 min (duración típica de un partido), y
+    - el partido no tiene resultado final.
+    """
     if not isinstance(match, dict):
         return False
     if isMatchFinished(match):
         return False
     status_raw = _match_live_status_token(match)
-    return status_raw in MATCH_LIVE_STATUSES
+    if status_raw in MATCH_LIVE_STATUSES:
+        return True
+    # Forzar LIVE por hora de kickoff aunque la API no reporte el status
+    if status_raw not in {"FINISHED", "FINAL", "SETTLED", "POSTPONED", "CANCELLED", "SUSPENDED"}:
+        dt = _parse_utcdate_maybe(match.get("utcDate"))
+        if dt is not None:
+            elapsed_min = (datetime.now(timezone.utc) - dt).total_seconds() / 60
+            if 1 <= elapsed_min <= 115:
+                return True
+    return False
 
 
 # =========================================================
