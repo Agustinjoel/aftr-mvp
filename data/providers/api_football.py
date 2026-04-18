@@ -166,26 +166,20 @@ def normalize_apif_fixture(fx: dict, league_code: str = "") -> dict | None:
     }
 
 
-def fetch_fixtures_by_league(
+def _fetch_fixtures_for_season(
     league_id: int,
     season: int,
-    *,
-    league_code: str = "",
-    days_upcoming: int = 7,
-    days_finished: int = 7,
+    league_code: str,
+    days_upcoming: int,
+    days_finished: int,
 ) -> tuple[list[dict], list[dict]]:
-    """
-    Trae próximos y finalizados para una liga/temporada dada.
-    Devuelve (upcoming_normalized, finished_normalized) — ambas en formato AFTR.
-
-    Hace 2 llamadas: una para partidos desde hoy hasta +days_upcoming, otra para
-    los últimos days_finished días (para resultados y forma de equipos).
-    """
+    """Hace las 2 llamadas a la API para una temporada concreta. Uso interno."""
     now   = datetime.now(timezone.utc)
     today = now.strftime("%Y-%m-%d")
 
-    # Próximos
-    date_to_up = (now + timedelta(days=days_upcoming)).strftime("%Y-%m-%d")
+    date_to_up    = (now + timedelta(days=days_upcoming)).strftime("%Y-%m-%d")
+    date_from_fin = (now - timedelta(days=days_finished)).strftime("%Y-%m-%d")
+
     raw_up = _get("/fixtures", {
         "league": league_id,
         "season": season,
@@ -198,8 +192,6 @@ def fetch_fixtures_by_league(
         if n:
             upcoming.append(n)
 
-    # Finalizados recientes
-    date_from_fin = (now - timedelta(days=days_finished)).strftime("%Y-%m-%d")
     raw_fin = _get("/fixtures", {
         "league": league_id,
         "season": season,
@@ -213,10 +205,45 @@ def fetch_fixtures_by_league(
         if n and n.get("home_goals") is not None:
             finished.append(n)
 
+    return upcoming, finished
+
+
+def fetch_fixtures_by_league(
+    league_id: int,
+    season: int,
+    *,
+    league_code: str = "",
+    days_upcoming: int = 7,
+    days_finished: int = 7,
+) -> tuple[list[dict], list[dict]]:
+    """
+    Trae próximos y finalizados para una liga/temporada dada.
+    Si la temporada solicitada devuelve 0 upcoming Y 0 finished, reintenta
+    automáticamente con season-1 (cubre ligas que aún usan la temporada anterior).
+    """
+    upcoming, finished = _fetch_fixtures_for_season(
+        league_id, season, league_code, days_upcoming, days_finished
+    )
     logger.info(
         "api_football fetch_fixtures_by_league: id=%s season=%s code=%s → up=%d fin=%d",
         league_id, season, league_code, len(upcoming), len(finished),
     )
+
+    if not upcoming and not finished:
+        prev = season - 1
+        logger.info(
+            "api_football fetch_fixtures_by_league: season=%s empty, retrying season=%s for %s",
+            season, prev, league_code,
+        )
+        upcoming, finished = _fetch_fixtures_for_season(
+            league_id, prev, league_code, days_upcoming, days_finished
+        )
+        if upcoming or finished:
+            logger.info(
+                "api_football fetch_fixtures_by_league: found data in season=%s for %s (up=%d fin=%d)",
+                prev, league_code, len(upcoming), len(finished),
+            )
+
     return upcoming, finished
 
 
@@ -245,26 +272,33 @@ def fetch_standings(league_id: int, season: int) -> list[dict]:
 def fetch_odds_apif(league_id: int, season: int, date_str: str) -> list[dict]:
     """
     Trae odds de API-Football para una liga/fecha específica.
-    Devuelve lista normalizada al formato AFTR:
-      { home_team, away_team, date_iso, fixture_id, odds_by_market }
-
-    Bets mapeados:
-      - id=1 "Match Winner"   → h2h: { Home Win, Draw, Away Win }
-      - id=5 "Goals Over/Under" → totals_25: { Over 2.5, Under 2.5 }
+    Reintenta con season-1 si no hay resultados para la temporada solicitada.
     """
-    items = _get("/odds", {"league": league_id, "season": season, "date": date_str})
-    out: list[dict] = []
-    for item in items:
-        if not isinstance(item, dict):
-            continue
-        norm = _normalize_apif_odds_event(item)
-        if norm:
-            out.append(norm)
+    def _fetch_odds(s: int) -> list[dict]:
+        items = _get("/odds", {"league": league_id, "season": s, "date": date_str})
+        out: list[dict] = []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            norm = _normalize_apif_odds_event(item)
+            if norm:
+                out.append(norm)
+        return out
+
+    result = _fetch_odds(season)
     logger.info(
         "api_football fetch_odds_apif: league=%s season=%s date=%s → %d events",
-        league_id, season, date_str, len(out),
+        league_id, season, date_str, len(result),
     )
-    return out
+    if not result:
+        prev = season - 1
+        result = _fetch_odds(prev)
+        if result:
+            logger.info(
+                "api_football fetch_odds_apif: found %d odds in season=%s for league=%s",
+                len(result), prev, league_id,
+            )
+    return result
 
 
 def _normalize_apif_odds_event(item: dict) -> dict | None:

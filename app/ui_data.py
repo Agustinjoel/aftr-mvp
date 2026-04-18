@@ -259,6 +259,13 @@ def _load_all_leagues_data(
     picks_by_league:  dict[str, list[dict]] = {}
     matches_by_league: dict[str, list[dict]] = {}
 
+    # Lazy-import DB helpers (best-effort; may not be available in tests)
+    try:
+        from app.db import get_published_picks_for_league as _db_get_picks
+        _db_available = True
+    except Exception:
+        _db_available = False
+
     for code in codes:
         raw_matches = read_json_with_fallback(f"daily_matches_{code}.json") or []
         raw_picks   = read_json_with_fallback(f"daily_picks_{code}.json")   or []
@@ -266,6 +273,19 @@ def _load_all_leagues_data(
             raw_matches = []
         if not isinstance(raw_picks, list):
             raw_picks = []
+
+        # Si el JSON de picks está vacío (reinicio de Render), cargar desde Postgres
+        if not raw_picks and _db_available:
+            try:
+                db_picks = _db_get_picks(code)
+                if db_picks:
+                    raw_picks = db_picks
+                    logger.info(
+                        "load_all_leagues: %s — Cargando %d picks desde Postgres (JSON vacío)",
+                        code, len(raw_picks),
+                    )
+            except Exception as _db_err:
+                logger.debug("load_all_leagues: %s DB fallback error: %s", code, _db_err)
 
         matches = [m for m in raw_matches if isinstance(m, dict)]
         picks   = [p for p in raw_picks   if isinstance(p, dict)]
