@@ -170,7 +170,21 @@ def _apply_value_filter(p: dict) -> None:
         return
 
     # Priorizar BTTS / Over 2.5 / DC frente al resto
-    priority = [c for c in qualifying if (c.get("market") or "").lower() in _VALUE_PRIORITY]
+    # Excluir DC que contradicen la dirección del modelo original:
+    #   HOME WIN original → no sugerir X2 (apuesta contraria al local favorito)
+    #   AWAY WIN original → no sugerir 1X
+    orig_mkt = (p.get("best_market") or "").strip().lower()
+    _exclude: set[str] = set()
+    if orig_mkt in ("home win", "home", "1"):
+        _exclude.add("x2")
+    elif orig_mkt in ("away win", "away", "2"):
+        _exclude.add("1x")
+
+    priority = [
+        c for c in qualifying
+        if (c.get("market") or "").lower() in _VALUE_PRIORITY
+        and (c.get("market") or "").lower() not in _exclude
+    ]
     chosen = (priority or qualifying)[0]
     second = (priority or qualifying)[1] if len(priority or qualifying) > 1 else None
 

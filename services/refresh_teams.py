@@ -211,7 +211,7 @@ def _build_recent_compact(
             opp_id = hid_i
 
         res = _result_letter_from_goals(gf, ga)
-        opp_name = team_names.get(opp_id) or f"Equipo {opp_id}"
+        opp_name = team_names.get(opp_id) or ""
         opp_crest = _crest_from_id(opp_id)
 
         out.append(

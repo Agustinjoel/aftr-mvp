@@ -217,6 +217,29 @@ def apif_refresh_league(
     except Exception as _e:
         logger.debug("apif_refresh_league %s: gemini_insight error: %s", league_code, _e)
 
+    # ── 8d. Estabilizar picks publicados ─────────────────────────────────────
+    # Si un pick PENDING ya fue publicado (best_market válido en ciclo anterior),
+    # no lo blanqueamos aunque la re-computación lo rechace. Preserva estabilidad
+    # en la UI especialmente para ligas con datos escasos (MLS, copas regionales).
+    _ex_by_id = {
+        int(ep.get("match_id") or ep.get("id") or 0): ep
+        for ep in (existing_picks or [])
+        if isinstance(ep, dict) and (ep.get("match_id") or ep.get("id"))
+    }
+    for p in picks_all:
+        if (p.get("result") or "PENDING").upper() != "PENDING":
+            continue
+        if p.get("best_market"):
+            continue  # ya tiene mercado, no tocar
+        mid = int(p.get("match_id") or p.get("id") or 0)
+        ex = _ex_by_id.get(mid)
+        if ex and ex.get("best_market") and float(ex.get("best_fair") or 0) >= 1.60:
+            # Restaurar el mercado previamente publicado
+            for _k in ("best_market", "best_prob", "best_fair", "edge", "confidence",
+                        "second_market", "second_prob"):
+                if ex.get(_k) is not None:
+                    p[_k] = ex[_k]
+
     # ── 9. Guardar caché ─────────────────────────────────────────────────────
     keep_days = getattr(settings, "daily_keep_days", None)
     picks_daily = _window_daily(picks_all, keep_days)

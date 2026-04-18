@@ -191,6 +191,11 @@ def pick_side_from_market(best_market: str) -> str:
         return "away"
     if m in ("draw", "x"):
         return "draw"
+    # Doble oportunidad: 1X respalda al local, X2 al visitante
+    if m == "1x":
+        return "home"
+    if m == "x2":
+        return "away"
     return "neutral"
 
 
