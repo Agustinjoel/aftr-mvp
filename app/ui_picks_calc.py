@@ -140,6 +140,8 @@ def _aftr_score(p: dict) -> int:
     Compatible con NBA (sin edge).
     """
     bp = _safe_float(p.get("best_prob"), 0)
+    if bp <= 0:
+        return 0
     conf_raw = _safe_int(p.get("confidence"))
     if conf_raw is None:
         conf_norm = 0.5

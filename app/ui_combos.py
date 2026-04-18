@@ -379,7 +379,7 @@ def _build_home_premium_combos(
     def _in_local_window(p: dict, start_day: int, end_day: int) -> bool:
         d = _pick_local_date(p, match_by_key)
         if d is None:
-            return False
+            return True  # fecha desconocida → incluir en ventana (evita excluir picks válidos)
         return (today_local + timedelta(days=start_day)) <= d <= (today_local + timedelta(days=end_day))
 
     def _target_leg_count(candidates: list[dict]) -> int:

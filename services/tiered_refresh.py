@@ -184,6 +184,103 @@ class JobOutcome:
     rate_limit_sleep_sec: int = 0
 
 
+def _refresh_live_from_api() -> int:
+    """
+    Llama a fetch_live_fixtures() (endpoint /fixtures?live=all, sin filtro de liga/season),
+    normaliza los resultados y parchea daily_matches_*.json con scores y status en vivo.
+    Devuelve el número de partidos actualizados.
+    Funciona aunque daily_matches_*.json esté vacío (filesystem efímero).
+    """
+    try:
+        from data.providers.api_football import fetch_live_fixtures, normalize_apif_fixture, _api_key
+        from services.refresh_utils import _normalize_match
+        from config.settings import settings as _settings
+    except Exception as _import_err:
+        logger.warning("_refresh_live_from_api: import error: %s", _import_err)
+        return 0
+
+    if not _api_key():
+        return 0
+
+    try:
+        live_raw = fetch_live_fixtures()
+    except Exception as _e:
+        logger.warning("_refresh_live_from_api: fetch_live_fixtures error: %s", _e)
+        return 0
+
+    if not live_raw:
+        return 0
+
+    # Build reverse index: apif fixture_id → league_code
+    apif_id_map: dict[int, str] = {}
+    for code in _football_league_codes():
+        lid = _settings.get_apif_league_id(code)
+        if lid:
+            apif_id_map[int(lid)] = code
+
+    # Group live fixtures by league_code
+    by_league: dict[str, list[dict]] = {}
+    for fx in live_raw:
+        if not isinstance(fx, dict):
+            continue
+        league_info = (fx.get("league") or {})
+        lid = league_info.get("id")
+        if lid is None:
+            continue
+        code = apif_id_map.get(int(lid))
+        if not code:
+            continue
+        normalized = normalize_apif_fixture(fx, code)
+        if normalized:
+            by_league.setdefault(code, []).append(normalized)
+
+    updated = 0
+    for code, live_matches in by_league.items():
+        existing = read_json(f"daily_matches_{code}.json")
+        existing_list: list[dict] = existing if isinstance(existing, list) else []
+
+        # Build lookup of existing matches by match_id
+        ex_by_id: dict[int, dict] = {}
+        for m in existing_list:
+            if not isinstance(m, dict):
+                continue
+            mid_raw = m.get("match_id") or m.get("id")
+            if mid_raw is not None:
+                try:
+                    ex_by_id[int(mid_raw)] = m
+                except (TypeError, ValueError):
+                    pass
+
+        for lm in live_matches:
+            mid_raw = lm.get("match_id") or lm.get("id")
+            if mid_raw is None:
+                continue
+            try:
+                mid = int(mid_raw)
+            except (TypeError, ValueError):
+                continue
+            if mid in ex_by_id:
+                # Patch in-place: update score + status fields
+                ex_by_id[mid].update({
+                    k: lm[k] for k in (
+                        "status", "home_goals", "away_goals", "minute",
+                        "score_home", "score_away", "home_score", "away_score",
+                    )
+                    if k in lm
+                })
+                updated += 1
+            else:
+                existing_list.append(lm)
+                ex_by_id[mid] = lm
+                updated += 1
+
+        write_json(f"daily_matches_{code}.json", existing_list)
+        logger.info("_refresh_live_from_api: %s — %d live matches patched", code, len(live_matches))
+
+    logger.info("_refresh_live_from_api: total updated=%d leagues=%s", updated, list(by_league.keys()))
+    return updated
+
+
 def run_live_refresh_job() -> JobOutcome:
     out = JobOutcome(job="live")
     if not _live_lock.acquire(blocking=False):
@@ -215,11 +312,15 @@ def run_live_refresh_job() -> JobOutcome:
             )
             return out
 
+        # Always attempt direct live poll first (works even with empty daily_matches_*.json)
+        n_live_direct = _refresh_live_from_api()
+        logger.info("AUTO REFRESH LIVE direct_api_updated=%d | %s", n_live_direct, _utc_iso())
+
         hints = _leagues_needing_live_poll()
         if not hints:
             out.skipped = True
             out.skip_reason = "no_live_matches"
-            logger.info("AUTO REFRESH LIVE SKIPPED (no live matches) | %s", _utc_iso())
+            logger.info("AUTO REFRESH LIVE SKIPPED (no live matches via hints) | %s", _utc_iso())
             _save_state_patch({"last_live_ts": time.time()})
             return out
 
