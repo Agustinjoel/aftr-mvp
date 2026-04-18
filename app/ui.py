@@ -341,6 +341,31 @@ def admin_dashboard(request: Request):
     pushes = result_rows.get("PUSH", 0)
     wr     = round(wins / (wins + losses) * 100, 1) if (wins + losses) > 0 else None
 
+    # ROI persistente desde settled_picks_history (sobrevive reinicios de Render)
+    db_roi_str = "—"
+    db_net_units = "—"
+    try:
+        conn_r = get_conn()
+        try:
+            cur_r = conn_r.cursor()
+            cur_r.execute(
+                """SELECT
+                    SUM(CASE WHEN is_win AND decimal_odds IS NOT NULL THEN decimal_odds - 1
+                             WHEN NOT is_win THEN -1 ELSE 0 END) AS net,
+                    COUNT(*) AS total
+                   FROM settled_picks_history"""
+            )
+            row_r = cur_r.fetchone()
+            if row_r and row_r["total"]:
+                net_u = float(row_r["net"] or 0)
+                tot_r = int(row_r["total"])
+                db_roi_str = f"{net_u / tot_r * 100:+.1f}%"
+                db_net_units = f"{net_u:+.2f}u"
+        finally:
+            put_conn(conn_r)
+    except Exception:
+        pass
+
     # ── Top picks ─────────────────────────────────────────────────────────────
     try:
         _, _, _, all_upcoming, _, _ = _load_all_leagues_data()
@@ -385,6 +410,8 @@ def admin_dashboard(request: Request):
         kpi(losses, "Losses", "#ef4444"),
         kpi(pushes, "Pushes", "#94a3b8"),
         kpi(f"{wr}%" if wr is not None else "—", "Winrate", "#38bdf8"),
+        kpi(db_roi_str, "ROI (DB)", "#a78bfa"),
+        kpi(db_net_units, "Net units", "#38bdf8"),
     ])
 
     # League cards
@@ -1077,21 +1104,26 @@ def _simple_page(title: str, body: str) -> str:
   </div>
   <script>
   function affToggle(){var p=document.getElementById('aff-panel');p.style.display=p.style.display==='none'||p.style.display===''?'flex':'none';}
+  function _affEsc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
   function affSend(){
     var inp=document.getElementById('aff-input');
     var msg=inp.value.trim();
     if(!msg)return;
     inp.value='';
     var msgs=document.getElementById('aff-messages');
-    msgs.innerHTML+='<div style="background:#6366f1;color:#fff;padding:10px 12px;border-radius:12px 12px 4px 12px;font-size:13px;max-width:90%;align-self:flex-end">'+msg+'</div>';
+    msgs.innerHTML+='<div style="background:#6366f1;color:#fff;padding:10px 12px;border-radius:12px 12px 4px 12px;font-size:13px;max-width:90%;align-self:flex-end">'+_affEsc(msg)+'</div>';
     msgs.innerHTML+='<div id="aff-typing" style="background:#2d2d4e;color:#9ca3af;padding:10px 12px;border-radius:12px;font-size:13px;max-width:60%">...</div>';
     msgs.scrollTop=msgs.scrollHeight;
     fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})})
-      .then(r=>r.json()).then(d=>{
+      .then(function(r){return r.json();}).then(function(d){
         var t=document.getElementById('aff-typing');if(t)t.remove();
-        msgs.innerHTML+='<div style="background:#2d2d4e;color:#e5e7eb;padding:10px 12px;border-radius:12px 12px 12px 4px;font-size:13px;max-width:90%">'+d.reply+'</div>';
+        msgs.innerHTML+='<div style="background:#2d2d4e;color:#e5e7eb;padding:10px 12px;border-radius:12px 12px 12px 4px;font-size:13px;max-width:90%">'+_affEsc(d.reply||'Sin respuesta.')+'</div>';
         msgs.scrollTop=msgs.scrollHeight;
-      }).catch(function(){var t=document.getElementById('aff-typing');if(t)t.remove();});
+      }).catch(function(){
+        var t=document.getElementById('aff-typing');if(t)t.remove();
+        msgs.innerHTML+='<div style="background:#2d2d4e;color:#ef4444;padding:10px 12px;border-radius:12px;font-size:13px;max-width:90%">Error de conexi\u00f3n. Intent\u00e1 de nuevo.</div>';
+        msgs.scrollTop=msgs.scrollHeight;
+      });
   }
   </script>
 </body>

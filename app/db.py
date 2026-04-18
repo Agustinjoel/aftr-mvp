@@ -214,6 +214,28 @@ def init_db() -> None:
         """)
         cur.execute("CREATE INDEX IF NOT EXISTS idx_push_subs_user_id ON push_subscriptions(user_id)")
 
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS settled_picks_history (
+            id           SERIAL PRIMARY KEY,
+            match_id     BIGINT NOT NULL UNIQUE,
+            league_code  TEXT,
+            market       TEXT,
+            decimal_odds NUMERIC(8,3),
+            is_win       BOOLEAN NOT NULL,
+            settled_at   TIMESTAMPTZ DEFAULT NOW()
+        )
+        """)
+        cur.execute(
+            "CREATE INDEX IF NOT EXISTS idx_sph_settled_at ON settled_picks_history(settled_at DESC)"
+        )
+
+        # match_id en bet_legs para sync preciso de combinadas
+        try:
+            cur.execute("ALTER TABLE bet_legs ADD COLUMN match_id BIGINT")
+            conn.commit()
+        except Exception:
+            conn.rollback()
+
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_picks_user_id ON user_picks(user_id)")
         cur.execute(

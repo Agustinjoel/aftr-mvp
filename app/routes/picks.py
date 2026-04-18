@@ -3,7 +3,8 @@ from typing import Iterable
 
 import psycopg2.extras
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Request
+from fastapi.responses import JSONResponse
 
 from config.settings import settings
 from data.cache import read_json
@@ -188,3 +189,45 @@ def _compute_metrics(rows: Iterable) -> dict[str, float | int]:
         "yield": round((net_units / total_picks) * 100, 2) if total_picks else 0.0,
         "net_units": round(net_units, 2),
     }
+
+
+@router.get("/stats/roi-db")
+def roi_from_db():
+    """
+    ROI calculado desde settled_picks_history (persiste en Render tras reinicios).
+    A diferencia del ROI del JSON diario, este nunca se pierde.
+    """
+    from app.db import get_conn, put_conn
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            """SELECT
+                COUNT(*)                                 AS total,
+                SUM(CASE WHEN is_win THEN 1 ELSE 0 END)      AS wins,
+                SUM(CASE WHEN NOT is_win THEN 1 ELSE 0 END)  AS losses,
+                SUM(CASE WHEN is_win AND decimal_odds IS NOT NULL
+                         THEN decimal_odds - 1
+                         WHEN NOT is_win THEN -1
+                         ELSE 0 END)                     AS net_units
+               FROM settled_picks_history"""
+        )
+        row = cur.fetchone()
+        total     = int(row["total"]  or 0)
+        wins      = int(row["wins"]   or 0)
+        losses    = int(row["losses"] or 0)
+        net_units = float(row["net_units"] or 0)
+        decided   = wins + losses
+        return JSONResponse({
+            "source": "settled_picks_history",
+            "total": total,
+            "wins": wins,
+            "losses": losses,
+            "winrate":   round(wins / decided * 100, 2) if decided else 0.0,
+            "roi":       round(net_units / decided * 100, 2) if decided else 0.0,
+            "net_units": round(net_units, 2),
+        })
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+    finally:
+        put_conn(conn)

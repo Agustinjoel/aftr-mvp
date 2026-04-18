@@ -99,6 +99,40 @@ def _scores_lookup_from_match_list(matches: list[dict]) -> dict[int, tuple[int, 
     return lookup
 
 
+def _persist_settled_pick(pick: dict) -> None:
+    """Guarda pick WIN/LOSS en settled_picks_history para sobrevivir reinicios de Render."""
+    try:
+        from app.db import get_conn, put_conn
+        mid = int(pick["match_id"])
+        market = (pick.get("best_market") or "").strip() or None
+        best_prob = pick.get("best_prob")
+        decimal_odds = round(1.0 / float(best_prob), 3) if best_prob and float(best_prob) > 0 else None
+        is_win = pick.get("result") == "WIN"
+        conn = get_conn()
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                """INSERT INTO settled_picks_history
+                       (match_id, market, decimal_odds, is_win)
+                   VALUES (%s, %s, %s, %s)
+                   ON CONFLICT (match_id) DO UPDATE SET
+                       market = EXCLUDED.market,
+                       decimal_odds = EXCLUDED.decimal_odds,
+                       is_win = EXCLUDED.is_win,
+                       settled_at = NOW()""",
+                (mid, market, decimal_odds, is_win),
+            )
+            conn.commit()
+        except Exception as _e:
+            conn.rollback()
+            import logging as _l
+            _l.getLogger("aftr.results").warning("persist_settled_pick error: %s", _e)
+        finally:
+            put_conn(conn)
+    except Exception:
+        pass
+
+
 def _apply_results_by_match_id(
     picks: list[dict], finished_by_id: dict[int, tuple[int, int]]
 ) -> list[dict]:
@@ -145,6 +179,10 @@ def _apply_results_by_match_id(
 
         result, _reason = evaluate_market(market, hg, ag)
         p["result"] = result
+
+        # Persistir en DB para sobrevivir reinicios del servidor
+        if result in ("WIN", "LOSS"):
+            _persist_settled_pick(p)
 
     # Second pass: fix stale PUSH picks whose market was set after evaluation
     _reevaluate_stale_push(picks)

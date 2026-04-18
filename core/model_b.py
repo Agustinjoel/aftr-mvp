@@ -60,8 +60,8 @@ def compute_team_form_split(team_id: int, matches: list[dict], mode: str) -> Tea
     wsum = 0.0
     n = 0
 
-    # asumimos matches vienen del endpoint ya ordenados por más recientes primero
-    weights = [1.50, 1.35, 1.25, 1.15, 1.10, 1.05, 1.00, 1.00, 1.00, 1.00]
+    # Ponderación fuertemente decreciente: los últimos 5 partidos pesan mucho más
+    weights = [2.00, 1.75, 1.50, 1.25, 1.10, 0.95, 0.85, 0.80, 0.75, 0.70]
 
     for i, m in enumerate(matches):
         w = weights[i] if i < len(weights) else 1.0
@@ -87,11 +87,11 @@ def compute_team_form_split(team_id: int, matches: list[dict], mode: str) -> Tea
 
     return TeamForm(gf / wsum, ga / wsum, n)
 
-def _blend_weight(n: int, min_w: float = 0.45, max_w: float = 0.85, scale: int = 8) -> float:
+def _blend_weight(n: int, min_w: float = 0.55, max_w: float = 0.90, scale: int = 5) -> float:
     """
     Peso para los datos de forma según tamaño de muestra.
-    Con n=0 → min_w, con n>=scale → max_w. Crece linealmente entre ambos.
-    Evita confiar mucho en pocos partidos y confiar poco en muchos.
+    Con n=0 → min_w, con n>=scale(5) → max_w. Crece linealmente entre ambos.
+    Con 5+ partidos recientes el modelo usa 90% forma real y solo 10% default_xg.
     """
     if n <= 0:
         return min_w

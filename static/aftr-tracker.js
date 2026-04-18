@@ -137,11 +137,30 @@
       '</div>';
     }).join('');
 
-    var wonLegs  = legs.filter(function (l) { return l.status === 'WON'; }).length;
+    var wonLegs   = legs.filter(function (l) { return l.status === 'WON'; }).length;
+    var lostLegs  = legs.filter(function (l) { return l.status === 'LOST'; }).length;
+    var pendLegs  = legs.filter(function (l) { return l.status === 'PENDING'; }).length;
     var totalLegs = legs.length;
-    var progressHtml = isCombinada
-      ? '<div class="bet-progress"><span class="bet-progress-num">' + wonLegs + '/' + totalLegs + '</span> <span class="muted">acertadas</span></div>'
-      : '';
+
+    var progressHtml = '';
+    if (isCombinada && totalLegs > 0) {
+      var segs = legs.map(function (leg) {
+        var segColor = leg.status === 'WON'  ? '#22c55e'
+                     : leg.status === 'LOST' ? '#ef4444'
+                     : leg.status === 'VOID' ? '#6b7280'
+                     : '#f59e0b';
+        var title = leg.home_team + ' vs ' + leg.away_team + ' — ' + (MARKET_LABELS[leg.market] || leg.market);
+        return '<span title="' + title + '" style="flex:1;height:6px;border-radius:3px;background:' + segColor + ';margin:0 1px;display:inline-block"></span>';
+      }).join('');
+      progressHtml = '<div class="bet-progress" style="display:flex;align-items:center;gap:8px;margin:6px 0">' +
+        '<div style="display:flex;flex:1;border-radius:4px;overflow:hidden;height:6px;gap:2px">' + segs + '</div>' +
+        '<span class="bet-progress-num" style="font-size:12px;white-space:nowrap">' +
+          (bet.status === 'LOST' ? '<span style="color:#ef4444">' + wonLegs + '/' + totalLegs + ' \u2717</span>'
+           : bet.status === 'WON' ? '<span style="color:#22c55e">' + totalLegs + '/' + totalLegs + ' \u2713</span>'
+           : '<span style="color:#f59e0b">' + wonLegs + '/' + totalLegs + ' acertadas</span>') +
+        '</span>' +
+      '</div>';
+    }
 
     var deleteBtn = settled
       ? '<button class="bet-delete-btn" data-bet="' + bet.id + '" title="Eliminar">🗑</button>'

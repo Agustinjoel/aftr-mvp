@@ -188,6 +188,11 @@ def _load_all_finished_matches() -> list[dict]:
             except (TypeError, ValueError):
                 continue
 
+            raw_mid = m.get("match_id") or m.get("id")
+            try:
+                finished_mid = int(raw_mid) if raw_mid is not None else None
+            except Exception:
+                finished_mid = None
             finished.append({
                 "home": m.get("home") or (m.get("homeTeam") or {}).get("name", ""),
                 "away": m.get("away") or (m.get("awayTeam") or {}).get("name", ""),
@@ -195,6 +200,7 @@ def _load_all_finished_matches() -> list[dict]:
                 "away_goals": ga,
                 "utcDate": utc_raw,
                 "status": st,
+                "match_id": finished_mid,
             })
     return finished
 
@@ -242,7 +248,7 @@ def auto_settle_tracker_legs() -> int:
         cur = conn.cursor()
         cur.execute(
             """SELECT bl.id AS leg_id, bl.bet_id, bl.home_team, bl.away_team,
-                      bl.market, bl.kickoff_time
+                      bl.market, bl.kickoff_time, bl.match_id
                FROM bet_legs bl
                JOIN user_bets ub ON bl.bet_id = ub.id
                WHERE bl.status = 'PENDING'
@@ -277,24 +283,32 @@ def auto_settle_tracker_legs() -> int:
                 kickoff = kickoff.replace(tzinfo=timezone.utc)
 
             # Buscar partido terminado coincidente
+            # Prioridad: match por match_id exacto; fallback: nombres de equipo
+            leg_match_id = leg.get("match_id")
             matched = None
-            for fm in finished_matches:
-                if not _teams_match(leg_home, leg_away, fm["home"], fm["away"]):
-                    continue
-                # Verificar que la fecha del partido es compatible con el kickoff almacenado
-                if kickoff:
-                    try:
-                        utc_raw = str(fm["utcDate"]).replace("Z", "+00:00")
-                        match_dt = datetime.fromisoformat(utc_raw)
-                        if match_dt.tzinfo is None:
-                            match_dt = match_dt.replace(tzinfo=timezone.utc)
-                        # Permitir hasta 3h de diferencia (en caso de postergaciones menores)
-                        if abs((match_dt - kickoff).total_seconds()) > 3 * 3600:
-                            continue
-                    except Exception as _err:
-                        logger.warning("unexpected exception (non-fatal): %s", _err)
-                matched = fm
-                break
+
+            if leg_match_id:
+                for fm in finished_matches:
+                    if fm.get("match_id") == leg_match_id:
+                        matched = fm
+                        break
+
+            if not matched:
+                for fm in finished_matches:
+                    if not _teams_match(leg_home, leg_away, fm["home"], fm["away"]):
+                        continue
+                    if kickoff:
+                        try:
+                            utc_raw = str(fm["utcDate"]).replace("Z", "+00:00")
+                            match_dt = datetime.fromisoformat(utc_raw)
+                            if match_dt.tzinfo is None:
+                                match_dt = match_dt.replace(tzinfo=timezone.utc)
+                            if abs((match_dt - kickoff).total_seconds()) > 3 * 3600:
+                                continue
+                        except Exception as _err:
+                            logger.warning("unexpected exception (non-fatal): %s", _err)
+                    matched = fm
+                    break
 
             if not matched:
                 continue

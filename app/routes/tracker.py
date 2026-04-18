@@ -20,8 +20,9 @@ logger = logging.getLogger("app/routes/tracker.py")
 
 
 
-def _lookup_kickoff_from_cache(home: str, away: str) -> str | None:
-    """Busca el kickoff UTC en daily_matches_*.json por nombres de equipo."""
+def _lookup_match_from_cache(home: str, away: str) -> tuple[str | None, int | None]:
+    """Busca kickoff UTC y match_id en daily_matches_*.json por nombres de equipo.
+    Retorna (utcDate, match_id) o (None, None) si no se encuentra."""
     try:
         from config.settings import settings
         from data.cache import read_json
@@ -43,11 +44,21 @@ def _lookup_kickoff_from_cache(home: str, away: str) -> str | None:
                     continue
                 if (nh in mh or mh in nh) and (na in ma or ma in na):
                     utc = m.get("utcDate") or ""
-                    if utc:
-                        return str(utc)
+                    mid = m.get("match_id") or m.get("id")
+                    try:
+                        mid_int = int(mid) if mid is not None else None
+                    except Exception:
+                        mid_int = None
+                    return (str(utc) if utc else None, mid_int)
     except Exception as _err:
         logger.warning("unexpected exception (non-fatal): %s", _err)
-    return None
+    return None, None
+
+
+def _lookup_kickoff_from_cache(home: str, away: str) -> str | None:
+    """Compatibilidad: devuelve solo el kickoff UTC."""
+    utc, _ = _lookup_match_from_cache(home, away)
+    return utc
 
 router = APIRouter()
 
@@ -151,14 +162,22 @@ def create_bet(request: Request, payload: dict = Body(...)):
         bet_id = cur.fetchone()["id"]
         for i, leg in enumerate(legs):
             kickoff = leg.get("kickoff_time") or None
-            if not kickoff:
-                # Intentar auto-poblar desde el caché para que auto_settle y notificaciones funcionen
-                kickoff = _lookup_kickoff_from_cache(leg["home_team"], leg["away_team"])
+            leg_mid = leg.get("match_id") or None
+            if not kickoff or not leg_mid:
+                cached_utc, cached_mid = _lookup_match_from_cache(leg["home_team"], leg["away_team"])
+                if not kickoff:
+                    kickoff = cached_utc
+                if leg_mid is None:
+                    leg_mid = cached_mid
+            try:
+                leg_mid = int(leg_mid) if leg_mid is not None else None
+            except Exception:
+                leg_mid = None
             cur.execute(
                 """INSERT INTO bet_legs
-                   (bet_id, home_team, away_team, market, odds, status, sort_order, kickoff_time)
-                   VALUES (%s, %s, %s, %s, %s, 'PENDING', %s, %s)""",
-                (bet_id, leg["home_team"], leg["away_team"], leg["market"], float(leg["odds"]), i, kickoff),
+                   (bet_id, home_team, away_team, market, odds, status, sort_order, kickoff_time, match_id)
+                   VALUES (%s, %s, %s, %s, %s, 'PENDING', %s, %s, %s)""",
+                (bet_id, leg["home_team"], leg["away_team"], leg["market"], float(leg["odds"]), i, kickoff, leg_mid),
             )
         conn.commit()
         return JSONResponse({"ok": True, "bet_id": bet_id})

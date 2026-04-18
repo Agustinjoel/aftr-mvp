@@ -7,7 +7,7 @@ from __future__ import annotations
 import time
 from datetime import datetime, timezone, timedelta
 
-from fastapi import APIRouter, Request, Body
+from fastapi import APIRouter, Request, Body, BackgroundTasks
 from fastapi.responses import JSONResponse
 
 from app.auth import get_user_id, get_user_by_id
@@ -1286,13 +1286,12 @@ def push_debug(request: Request):
 
 @router.get("/push/test")
 @router.post("/push/test")
-def push_test(request: Request):
-    """Envía un push de prueba al usuario logueado y retorna el resultado."""
+async def push_test(request: Request, background_tasks: BackgroundTasks):
+    """Envía un push de prueba en background para no bloquear el hilo principal de FastAPI."""
     uid, err = _require_user(request)
     if err:
         return err
-    import traceback, json as _json
-    from config.settings import VAPID_PRIVATE_KEY
+
     from app.db import get_conn, put_conn
     conn = get_conn()
     try:
@@ -1305,22 +1304,36 @@ def push_test(request: Request):
     if not subs:
         return JSONResponse({"ok": False, "error": "no_subscriptions"})
 
-    results = []
-    for sub in subs:
-        try:
-            from pywebpush import webpush
-            payload = {"title": "AFTR Test", "body": "Si ves esto, las notificaciones funcionan.", "tag": "test", "url": "/"}
-            webpush(
-                subscription_info={"endpoint": sub["endpoint"], "keys": {"p256dh": sub["p256dh"], "auth": sub["auth"]}},
-                data=_json.dumps(payload),
-                vapid_private_key=VAPID_PRIVATE_KEY,
-                vapid_claims={"sub": "mailto:aftrapp@outlook.com"},
-            )
-            results.append({"endpoint": sub["endpoint"][:60], "ok": True})
-        except Exception as e:
-            results.append({"endpoint": sub["endpoint"][:60], "ok": False, "error": str(e), "trace": traceback.format_exc()})
+    def _send_test_pushes(subs_list: list) -> None:
+        import json as _json
+        from services.push_notifications import _send_one, _vapid_private_key_pem
+        dead = []
+        for sub in subs_list:
+            payload = {
+                "title": "AFTR Test",
+                "body": "Si ves esto, las notificaciones funcionan correctamente.",
+                "tag": "test",
+                "url": "/",
+            }
+            ok = _send_one(sub["endpoint"], sub["p256dh"], sub["auth"], payload)
+            if not ok:
+                dead.append(sub["endpoint"])
+        # Limpiar endpoints muertos
+        if dead:
+            conn2 = get_conn()
+            try:
+                cur2 = conn2.cursor()
+                for ep in dead:
+                    cur2.execute("DELETE FROM push_subscriptions WHERE endpoint = %s", (ep,))
+                conn2.commit()
+            except Exception:
+                conn2.rollback()
+            finally:
+                put_conn(conn2)
+        logger.info("push_test sent to %d/%d subs (uid=%s)", len(subs_list) - len(dead), len(subs_list), uid)
 
-    return JSONResponse({"results": results})
+    background_tasks.add_task(_send_test_pushes, list(subs))
+    return JSONResponse({"ok": True, "queued": len(subs), "message": "Notificaciones enviadas en background."})
 
 
 @router.get("/push/diagnose")

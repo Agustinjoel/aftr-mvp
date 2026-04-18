@@ -137,6 +137,57 @@ def _build_pick_entry(m: dict, xg_h: float, xg_a: float, model: str, stats_home:
 # Builder principal
 # -------------------------
 
+_MIN_FAIR_ODDS = 1.60
+_VALUE_PRIORITY = frozenset({"btts_yes", "btts_no", "over 2.5", "1x", "x2", "12"})
+
+
+def _apply_value_filter(p: dict) -> None:
+    """
+    In-place: si best_fair < 1.60, busca un candidato alternativo que supere ese umbral.
+    Prioriza BTTS, Over 2.5 y doble oportunidad (1X/X2).
+    Si ningún candidato llega a 1.60, borra best_market (pick sin mercado publicable).
+    """
+    candidates = p.get("candidates") or []
+    if not candidates:
+        return
+
+    # Si ya cumple el mínimo, no hacer nada
+    if float(p.get("best_fair") or 0) >= _MIN_FAIR_ODDS:
+        return
+
+    qualifying = sorted(
+        [c for c in candidates
+         if isinstance(c, dict) and c.get("prob") is not None
+         and float(c.get("fair") or 0) >= _MIN_FAIR_ODDS],
+        key=lambda c: float(c.get("prob") or 0),
+        reverse=True,
+    )
+
+    if not qualifying:
+        p["best_market"] = None
+        p["best_prob"] = None
+        p["best_fair"] = None
+        return
+
+    # Priorizar BTTS / Over 2.5 / DC frente al resto
+    priority = [c for c in qualifying if (c.get("market") or "").lower() in _VALUE_PRIORITY]
+    chosen = (priority or qualifying)[0]
+    second = (priority or qualifying)[1] if len(priority or qualifying) > 1 else None
+
+    best_prob  = _safe_float(chosen.get("prob"))
+    second_prob = _safe_float(second.get("prob")) if second else None
+    fair       = float(chosen.get("fair") or 0)
+    edge_val   = (float(best_prob) - float(second_prob)) if (best_prob is not None and second_prob is not None) else None
+
+    p["best_market"]  = chosen.get("market")
+    p["best_prob"]    = best_prob
+    p["best_fair"]    = round(fair, 2)
+    p["second_market"] = second.get("market") if second else None
+    p["second_prob"]  = second_prob
+    p["edge"]         = round(float(edge_val), 4) if edge_val is not None else None
+    p["confidence"]   = _confidence_score(best_prob, second_prob, float(p.get("xg_total") or 0), p.get("model", "A"))
+
+
 def _build_picks_from_matches(matches: list[dict], team_names: dict[int, str]) -> list[dict]:
     """
     Genera picks para todos los matches:
@@ -259,5 +310,10 @@ def _build_picks_from_matches(matches: list[dict], team_names: dict[int, str]) -
 
         except Exception as e:
             logger.warning("Modelo B fallback a A (%s vs %s): %s", p.get("home"), p.get("away"), e)
+
+    # Filtro de valor: descartar mercados con fair_odds < 1.60
+    # (búsqueda automática de alternativas: BTTS, Over 2.5, DC)
+    for p in picks:
+        _apply_value_filter(p)
 
     return picks
