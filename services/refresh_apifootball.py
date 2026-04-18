@@ -221,8 +221,8 @@ def apif_refresh_league(
         _st_meta = read_json("cache_meta.json") or {}
         _st_last = float(_st_meta.get(_st_key) or 0)
         if _time.time() - _st_last > 6 * 3600:
-            from data.providers.api_football import fetch_standings
-            standings = fetch_standings(league_id, season)
+            from data.providers.api_football import get_standings_apif
+            standings = get_standings_apif(league_code)
             if standings:
                 write_json(f"standings_{league_code}.json", standings)
                 logger.debug("standings %s: %d rows", league_code, len(standings))

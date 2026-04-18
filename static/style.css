@@ -468,6 +468,8 @@ h2::after{
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
+  flex: 1;
+  justify-content: center;
 }
 .aftr-badge{
   font-size: 10px;
@@ -776,25 +778,28 @@ h2::after{
 .pick-actions-wrap{
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.07);
 }
 .pick-detail-link{
   width: 100%;
   background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.13);
+  border: 1px solid rgba(255,255,255,.15);
   border-radius: 8px;
-  color: rgba(203,213,225,.9);
+  color: rgba(203,213,225,.95);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   text-align: center;
   cursor: pointer;
-  padding: 8px 12px;
-  letter-spacing: .02em;
+  padding: 9px 12px;
+  letter-spacing: .03em;
   transition: background .15s, border-color .15s;
 }
 .pick-detail-link:hover{
-  background: rgba(255,255,255,.11);
-  border-color: rgba(255,255,255,.25);
+  background: rgba(255,255,255,.12);
+  border-color: rgba(255,255,255,.28);
 }
 
 /* =========================

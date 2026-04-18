@@ -13,7 +13,7 @@ from app.ui_picks_calc import _aftr_score, _risk_label_from_conf, _result_norm
 from app.ui_matches import isMatchFinished, isMatchLive, _format_live_status_line
 from app.ui_data import _extract_score, _extract_score_from_match, _pick_id_for_card
 from app.ui_team import _team_with_crest
-from app.ui_stats import _render_back_stats, _render_team_corners_cards, _render_corners_cards_odds
+from app.ui_stats import _render_back_stats
 
 logger = logging.getLogger("aftr.ui.card")
 
@@ -604,11 +604,6 @@ def _render_pick_card(
             f'</div>'
         )
 
-    # ── Team stats + odds extra (córners/tarjetas) ─────────
-    extra_stats_html = ""
-    if not is_finished:
-        extra_stats_html = _render_team_corners_cards(p) + _render_corners_cards_odds(p)
-
     score_and_actions_html = (
         pick_actions_html + aftr_block_html if is_finished
         else aftr_block_html + pick_actions_html
@@ -623,7 +618,6 @@ def _render_pick_card(
         f'</div>'
         f'{teams_html}'
         f'{mainpick_html}'
-        f'{extra_stats_html}'
         f'{score_and_actions_html}'
         f'</div>'
     )
