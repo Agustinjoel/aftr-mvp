@@ -217,28 +217,53 @@ def apif_refresh_league(
     except Exception as _e:
         logger.debug("apif_refresh_league %s: gemini_insight error: %s", league_code, _e)
 
-    # ── 8d. Estabilizar picks publicados ─────────────────────────────────────
-    # Si un pick PENDING ya fue publicado (best_market válido en ciclo anterior),
-    # no lo blanqueamos aunque la re-computación lo rechace. Preserva estabilidad
-    # en la UI especialmente para ligas con datos escasos (MLS, copas regionales).
+    # ── 8d. Estabilizar picks publicados (JSON + DB) ──────────────────────────
+    # Fuente 1: ciclo anterior en memoria (JSON cache)
     _ex_by_id = {
         int(ep.get("match_id") or ep.get("id") or 0): ep
         for ep in (existing_picks or [])
         if isinstance(ep, dict) and (ep.get("match_id") or ep.get("id"))
     }
+    # Fuente 2: Postgres — picks que sobrevivieron reinicios de Render
+    try:
+        from app.db import get_published_pick, upsert_published_pick
+        _db_available = True
+    except Exception:
+        _db_available = False
+
     for p in picks_all:
         if (p.get("result") or "PENDING").upper() != "PENDING":
             continue
-        if p.get("best_market"):
-            continue  # ya tiene mercado, no tocar
+
         mid = int(p.get("match_id") or p.get("id") or 0)
+
+        if p.get("best_market") and float(p.get("best_fair") or 0) >= 1.60:
+            # Pick válido: persistir en DB para sobrevivir reinicios
+            if _db_available:
+                try:
+                    upsert_published_pick(p, league_code)
+                except Exception:
+                    pass
+            continue
+
+        # Pick sin mercado válido: intentar restaurar desde JSON previo o DB
         ex = _ex_by_id.get(mid)
         if ex and ex.get("best_market") and float(ex.get("best_fair") or 0) >= 1.60:
-            # Restaurar el mercado previamente publicado
             for _k in ("best_market", "best_prob", "best_fair", "edge", "confidence",
                         "second_market", "second_prob"):
                 if ex.get(_k) is not None:
                     p[_k] = ex[_k]
+        elif _db_available:
+            db_pick = None
+            try:
+                db_pick = get_published_pick(mid)
+            except Exception:
+                pass
+            if db_pick and db_pick.get("best_market") and float(db_pick.get("best_fair") or 0) >= 1.60:
+                for _k in ("best_market", "best_prob", "best_fair", "edge", "confidence",
+                            "second_market", "second_prob"):
+                    if db_pick.get(_k) is not None:
+                        p[_k] = db_pick[_k]
 
     # ── 9. Guardar caché ─────────────────────────────────────────────────────
     keep_days = getattr(settings, "daily_keep_days", None)

@@ -454,6 +454,19 @@ h2::after{
   dominant-baseline: middle;
   font-family: inherit;
 }
+.aftr-gauge-num--edge{
+  font-size: 10px;
+  font-weight: 800;
+}
+.aftr-gauge-logo{
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  fill: rgba(234,242,255,.6);
+  text-anchor: middle;
+  dominant-baseline: middle;
+  font-family: inherit;
+}
 
 .aftr-score-label{
   font-size: 10px;

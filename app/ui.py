@@ -659,9 +659,10 @@ def admin_dashboard(request: Request):
 
 def _admin_page_html(title: str, body: str) -> str:
     return f"""<!DOCTYPE html>
-<html lang="es">
+<html lang="es" translate="no">
 <head>
   <meta charset="utf-8"/>
+  <meta name="google" content="notranslate"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="icon" type="image/png" href="/static/logo_aftr.png">
@@ -1056,9 +1057,10 @@ async def admin_delete_user(request: Request):
 
 def _simple_page(title: str, body: str) -> str:
     return f"""<!DOCTYPE html>
-<html>
+<html translate="no">
 <head>
   <meta charset="utf-8"/>
+  <meta name="google" content="notranslate"/>
   <title>{html_lib.escape(title)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/static/style.css?v=35">

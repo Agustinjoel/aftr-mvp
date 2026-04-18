@@ -466,6 +466,13 @@ def _render_pick_card(
     except (TypeError, ValueError):
         aftr_score_val = _aftr_score(p)
 
+    # model_score drives arc fill; edge% or model_score shown as center text
+    try:
+        model_score_val = int(round(float(p["model_score"]))) if p.get("model_score") is not None else None
+    except (TypeError, ValueError):
+        model_score_val = None
+    _gauge_fill_val = model_score_val if model_score_val is not None else aftr_score_val
+
     _t         = p.get("tier")
     tier       = (str(_t).strip().lower() if _t is not None else "pass") or "pass"
     tier_colors = {"elite": "#FFD700", "strong": "#00C853", "risky": "#FF9800", "pass": "#9E9E9E"}
@@ -489,8 +496,16 @@ def _render_pick_card(
             f'<span class="aftr-badge aftr-badge-edge">{html_lib.escape(edge_badge)} EDGE</span>'
         )
     # ── SVG circular gauge (r=28, C=175.93) ───────────────
+    # Center: edge% → model_score → "AFTR" logo fallback
+    if edge_badge:
+        _gauge_num_el = f'<text class="aftr-gauge-num aftr-gauge-num--edge" x="32" y="37">{html_lib.escape(edge_badge)}</text>'
+    elif model_score_val is not None:
+        _gauge_num_el = f'<text class="aftr-gauge-num" x="32" y="37">{model_score_val}</text>'
+    else:
+        _gauge_num_el = '<text class="aftr-gauge-logo" x="32" y="36">AFTR</text>'
+
     _GAUGE_C = 175.93
-    _gauge_pct    = max(0, min(100, aftr_score_val)) / 100
+    _gauge_pct    = max(0, min(100, _gauge_fill_val)) / 100
     _gauge_offset = _GAUGE_C * (1.0 - _gauge_pct)   # JS animates from C → this value
     _gauge_svg = (
         f'<svg class="aftr-gauge-svg" viewBox="0 0 64 64" width="58" height="58" aria-hidden="true">'
@@ -500,7 +515,7 @@ def _render_pick_card(
         f' stroke-dasharray="{_GAUGE_C:.2f}"'
         f' stroke-dashoffset="{_GAUGE_C:.2f}"'
         f' data-gauge-to="{_gauge_offset:.2f}"/>'
-        f'<text class="aftr-gauge-num" x="32" y="37">{aftr_score_val}</text>'
+        f'{_gauge_num_el}'
         f'</svg>'
     )
     aftr_block_html = (

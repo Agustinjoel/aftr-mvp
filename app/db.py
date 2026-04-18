@@ -24,16 +24,25 @@ _pool: psycopg2.pool.ThreadedConnectionPool | None = None
 _pool_lock = threading.Lock()
 
 
+def _ensure_sslmode(url: str) -> str:
+    """Agrega sslmode=require si no está presente. Obligatorio en Render Postgres."""
+    if not url or "sslmode" in url:
+        return url
+    sep = "&" if "?" in url else "?"
+    return url + sep + "sslmode=require"
+
+
 def _get_pool() -> psycopg2.pool.ThreadedConnectionPool:
     global _pool
     if _pool is not None:
         return _pool
     with _pool_lock:
         if _pool is None:
+            dsn = _ensure_sslmode(DATABASE_URL)
             _pool = psycopg2.pool.ThreadedConnectionPool(
                 minconn=1,
                 maxconn=10,
-                dsn=DATABASE_URL,
+                dsn=dsn,
                 cursor_factory=psycopg2.extras.RealDictCursor,
             )
             logger.info("psycopg2 connection pool created (max=10) | %s", DATABASE_URL.split("@")[-1])
@@ -259,6 +268,24 @@ def init_db() -> None:
         except Exception:
             conn.rollback()
 
+        # Picks publicados — fuente de verdad para persistencia más allá del JSON
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS published_picks (
+            match_id     BIGINT PRIMARY KEY,
+            league_code  TEXT NOT NULL,
+            best_market  TEXT NOT NULL,
+            best_prob    NUMERIC(6,4),
+            best_fair    NUMERIC(6,3),
+            utc_date     TEXT,
+            pick_json    TEXT,
+            published_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at   TIMESTAMPTZ DEFAULT NOW()
+        )
+        """)
+        cur.execute(
+            "CREATE INDEX IF NOT EXISTS idx_pp_league ON published_picks(league_code)"
+        )
+
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_picks_user_id ON user_picks(user_id)")
         cur.execute(
@@ -274,3 +301,97 @@ def init_db() -> None:
         raise
     finally:
         put_conn(conn)
+
+
+# ---------------------------------------------------------------------------
+# Published picks — persistencia de picks que pasaron el filtro 1.60
+# ---------------------------------------------------------------------------
+
+import json as _json_mod
+
+
+def upsert_published_pick(pick: dict, league_code: str) -> None:
+    """Guarda o actualiza un pick publicado en Postgres. Best-effort: no lanza excepción."""
+    try:
+        mid = int(pick.get("match_id") or pick.get("id") or 0)
+        if not mid:
+            return
+        market = pick.get("best_market") or ""
+        if not market:
+            return
+        conn = get_conn()
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                """
+                INSERT INTO published_picks
+                    (match_id, league_code, best_market, best_prob, best_fair, utc_date, pick_json, updated_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+                ON CONFLICT (match_id) DO UPDATE SET
+                    best_market = EXCLUDED.best_market,
+                    best_prob   = EXCLUDED.best_prob,
+                    best_fair   = EXCLUDED.best_fair,
+                    pick_json   = EXCLUDED.pick_json,
+                    updated_at  = NOW()
+                """,
+                (
+                    mid,
+                    league_code,
+                    market,
+                    pick.get("best_prob"),
+                    pick.get("best_fair"),
+                    pick.get("utcDate"),
+                    _json_mod.dumps(pick, default=str),
+                ),
+            )
+            conn.commit()
+        finally:
+            put_conn(conn)
+    except Exception as e:
+        logger.debug("upsert_published_pick match_id=%s: %s", pick.get("match_id"), e)
+
+
+def get_published_pick(match_id: int) -> dict | None:
+    """Recupera un pick publicado por match_id. Devuelve el pick_json deserializado o None."""
+    try:
+        conn = get_conn()
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT pick_json FROM published_picks WHERE match_id = %s",
+                (int(match_id),),
+            )
+            row = cur.fetchone()
+            if row and row["pick_json"]:
+                return _json_mod.loads(row["pick_json"])
+        finally:
+            put_conn(conn)
+    except Exception as e:
+        logger.debug("get_published_pick match_id=%s: %s", match_id, e)
+    return None
+
+
+def get_published_picks_for_league(league_code: str) -> list[dict]:
+    """Recupera todos los picks publicados de una liga. Devuelve lista de dicts."""
+    try:
+        conn = get_conn()
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT pick_json FROM published_picks WHERE league_code = %s",
+                (league_code,),
+            )
+            rows = cur.fetchall()
+            out = []
+            for r in rows:
+                try:
+                    if r["pick_json"]:
+                        out.append(_json_mod.loads(r["pick_json"]))
+                except Exception:
+                    pass
+            return out
+        finally:
+            put_conn(conn)
+    except Exception as e:
+        logger.debug("get_published_picks_for_league %s: %s", league_code, e)
+    return []
