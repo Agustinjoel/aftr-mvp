@@ -184,9 +184,21 @@ _APIF_EUROPEAN_LEAGUES = frozenset({
     "PL", "PD", "SA", "BL1", "FL1", "CL", "EL", "CONF", "ELC", "DED", "PPL", "FAC", "CREY", "EC",
 })
 
-# Temporada mínima permitida por liga — DESACTIVADO (floor=0 = sin restricción).
-# Permite que el fallback busque en cualquier temporada que devuelva datos.
-_APIF_SEASON_FLOOR: dict[str, int] = {}
+# Temporada mínima permitida por liga.
+# Ligas europeas activas en 2025/26: no permitir que el fallback caiga a 2024.
+_APIF_SEASON_FLOOR: dict[str, int] = {
+    "PL":   2025,   # Premier League 2025/26
+    "PD":   2025,   # LaLiga 2025/26
+    "SA":   2025,   # Serie A 2025/26
+    "BL1":  2025,   # Bundesliga 2025/26
+    "FL1":  2025,   # Ligue 1 2025/26
+    "CL":   2024,   # UCL puede tener datos en 2024/25 aún
+    "EL":   2024,
+    "CONF": 2024,
+    "ELC":  2025,
+    "DED":  2025,
+    "PPL":  2025,
+}
 
 FREE_LEAGUES: list[str] = ["PL", "PD", "SA", "NBA"]
 DEFAULT_LEAGUE: str = (os.getenv("AFTR_DEFAULT_LEAGUE", "PL") or "PL").strip()

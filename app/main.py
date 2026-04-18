@@ -61,6 +61,20 @@ async def lifespan(app: FastAPI):
     except Exception as _diag_err:
         logger.warning("STARTUP — error leyendo memoria: %s", _diag_err)
 
+    # ── Limpiar locks colgados de arranques anteriores ──────────────────────────
+    try:
+        from data.cache import release_refresh_running_meta
+        release_refresh_running_meta()
+        logger.info("STARTUP — refresh_running liberado (limpieza de arranque)")
+    except Exception as _lock_err:
+        logger.warning("STARTUP — error liberando refresh_running: %s", _lock_err)
+    try:
+        from services.tiered_refresh import reset_live_lock
+        reset_live_lock()
+        logger.info("STARTUP — live lock reseteado")
+    except Exception as _live_lock_err:
+        logger.warning("STARTUP — error reseteando live lock: %s", _live_lock_err)
+
     tasks: list[asyncio.Task[None]] = []
     if settings.auto_refresh:
         logger.info(

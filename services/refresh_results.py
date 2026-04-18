@@ -413,6 +413,13 @@ def _write_league_cache(league_code: str, matches: list[dict], picks: list[dict]
     if fresh:
         _restore_settled_picks(picks, fresh)
     write_json(picks_file, picks)
+    # Invalidar home cache para que la próxima request lea los datos frescos
+    try:
+        from app.ui_data import _home_cache, _home_cache_lock
+        with _home_cache_lock:
+            _home_cache.clear()
+    except Exception:
+        pass
 
 
 # -------------------------

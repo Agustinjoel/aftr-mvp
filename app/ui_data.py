@@ -218,7 +218,7 @@ def _debug_log_live_match_candidates(league_code: str, matches: list[dict]) -> N
 # Carga de datos de todas las ligas
 # =========================================================
 
-_HOME_CACHE_TTL_SECONDS = 180  # 3 minutos
+_HOME_CACHE_TTL_SECONDS = 60  # 1 minuto (reduce stale data)
 _home_cache: dict = {}
 _home_cache_lock = threading.Lock()
 
@@ -319,18 +319,18 @@ def _load_all_leagues_data(
     now_utc   = datetime.now(timezone.utc)
     today_str = now_utc.strftime("%Y-%m-%d")
 
-    # MODO DEBUG: todos los picks van a all_upcoming para confirmar que la UI los dibuja.
-    # Los WIN/LOSS/PUSH también van a all_settled para estadísticas.
     for p in all_picks:
-        league_code = (p.get("_league") or p.get("league") or "").strip()
-        mid         = _safe_int(p.get("match_id") or p.get("id"))
-        match_obj   = match_by_key.get((league_code, mid)) if league_code and mid is not None else None
         pick_result = _pick_result_norm(p)
 
         if pick_result in ("WIN", "LOSS", "PUSH"):
             all_settled.append(p)
-        # En modo debug: cualquier pick que no sea definitivamente settled → upcoming
-        all_upcoming.append(p)
+
+        # Upcoming: picks PENDING o con utcDate futura (ignora lo que diga el fixture de la API)
+        if pick_result not in ("WIN", "LOSS"):
+            all_upcoming.append(p)
+        else:
+            # WIN/LOSS confirmados: incluir igualmente para debug (la UI los filtra por fecha)
+            all_upcoming.append(p)
 
     # Log: qué partidos ve el motor para hoy
     today_ids = [

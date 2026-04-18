@@ -39,6 +39,9 @@ STATE_FILE = "auto_refresh_tiered_state.json"
 LIVE_HINT_STATUSES = frozenset({"IN_PLAY", "PAUSED", "LIVE"})
 
 _live_lock = threading.Lock()
+_live_lock_ts: float = 0.0          # timestamp de adquisición del live lock
+_live_lock_mu = threading.Lock()    # protege _live_lock_ts
+_LIVE_LOCK_MAX_SEC = 300            # 5 minutos → fuerza liberación
 _odds_lock = threading.Lock()
 _results_lock = threading.Lock()
 
@@ -50,6 +53,13 @@ _state_lock = threading.Lock()
 
 def _utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def reset_live_lock() -> None:
+    """Libera el live lock en memoria (llamar al arrancar la app para limpiar locks colgados)."""
+    global _live_lock_ts
+    with _live_lock_mu:
+        _live_lock_ts = 0.0
 
 
 def _football_league_codes() -> list[str]:
@@ -283,17 +293,18 @@ def _refresh_live_from_api() -> int:
 
 def run_live_refresh_job() -> JobOutcome:
     out = JobOutcome(job="live")
-    if not _live_lock.acquire(blocking=False):
-        out.skipped = True
-        out.skip_reason = "lock"
-        logger.info("AUTO REFRESH LIVE SKIPPED (already running) | %s", _utc_iso())
-        return out
-    try:
-        if _global_refresh_blocks():
+    # Time-based live lock: expires after _LIVE_LOCK_MAX_SEC (5 min) to avoid eternal block
+    with _live_lock_mu:
+        global _live_lock_ts
+        now_ts = time.time()
+        if _live_lock_ts > 0 and now_ts - _live_lock_ts < _LIVE_LOCK_MAX_SEC:
             out.skipped = True
-            out.skip_reason = "global_refresh_running"
-            logger.info("REFRESH SKIPPED (already running) | job=live | %s", _utc_iso())
+            out.skip_reason = "lock"
+            logger.info("AUTO REFRESH LIVE SKIPPED (lock, %.0fs remaining) | %s",
+                        _LIVE_LOCK_MAX_SEC - (now_ts - _live_lock_ts), _utc_iso())
             return out
+        _live_lock_ts = now_ts
+    try:
 
         w = seconds_to_wait_for_backoff()
         if w > 0:
@@ -385,7 +396,9 @@ def run_live_refresh_job() -> JobOutcome:
         logger.exception("AUTO REFRESH LIVE ERROR: %s | %s", e, _utc_iso())
         return out
     finally:
-        _live_lock.release()
+        global _live_lock_ts
+        with _live_lock_mu:
+            _live_lock_ts = 0.0
         logger.info("AUTO REFRESH END | job=live | %s", _utc_iso())
 
 
