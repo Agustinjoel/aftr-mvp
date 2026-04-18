@@ -278,6 +278,11 @@ def _refresh_live_from_api() -> int:
                     )
                     if k in lm
                 })
+                # También actualizar score dict anidado para que _extract_score_from_match() lo lea
+                hg = lm.get("home_goals")
+                ag = lm.get("away_goals")
+                if hg is not None and ag is not None:
+                    ex_by_id[mid]["score"] = {"home": hg, "away": ag}
                 updated += 1
             else:
                 existing_list.append(lm)

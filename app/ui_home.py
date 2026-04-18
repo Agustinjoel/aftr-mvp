@@ -558,7 +558,7 @@ def home_page(request: Request) -> str:
 
     # Mejores Picks del Día: only picks scheduled for today or within near-term window (exclude far-future)
     today_local = datetime.now().astimezone().date()
-    top_picks_max_days_ahead = 2  # today + up to 2 days ahead
+    top_picks_max_days_ahead = 7  # today + up to 7 days ahead
     end_local = today_local + timedelta(days=top_picks_max_days_ahead)
     picks_near_term = []
     for p in all_upcoming:
@@ -615,7 +615,7 @@ def home_page(request: Request) -> str:
         except Exception as e:
             logger.warning("home_page: snapshot write failed: %s", e)
 
-    active_picks_now = len(live_picks) + len(picks_near_term)
+    active_picks_now = len(live_picks) + len(picks_near_term)  # se recalcula abajo con picks_to_render
     user_count_str = get_display_user_count()
     top_picks_source_note = ""
     if top_picks_source == "nearest_upcoming":
@@ -689,6 +689,8 @@ def home_page(request: Request) -> str:
         picks_to_render = picks_to_render[1:] if len(picks_to_render) > 1 else picks_to_render
 
     locked_count = max(0, total_picks_today - len(picks_to_render)) if not user_premium else 0
+    # Recalcular con el pool real ya filtrado por plan
+    active_picks_now = len(picks_to_render) + len(live_picks)
 
     top_pick_cards = []
     ad_slot_html = """<div class="aftr-ad-slot">

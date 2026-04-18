@@ -244,13 +244,23 @@ def apif_refresh_league(
     _restored_from_cache = 0
 
     for p in picks_all:
-        if (p.get("result") or "PENDING").upper() != "PENDING":
-            continue
-
+        result_upper = (p.get("result") or "PENDING").upper()
         mid = int(p.get("match_id") or p.get("id") or 0)
         home = p.get("home") or "?"
         away = p.get("away") or "?"
         match_label = f"{home} vs {away}"
+
+        # Picks liquidados (WIN/LOSS): persistir en DB para historial entre reinicios
+        if result_upper in ("WIN", "LOSS"):
+            if _db_available and p.get("best_market"):
+                try:
+                    upsert_published_pick(p, league_code)
+                except Exception:
+                    pass
+            continue
+
+        if result_upper != "PENDING":
+            continue
 
         has_market = bool(p.get("best_market"))
         fair_ok    = float(p.get("best_fair") or 0) >= 1.60
