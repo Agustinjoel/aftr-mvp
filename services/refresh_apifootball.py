@@ -206,6 +206,17 @@ def apif_refresh_league(
     except Exception as _e:
         logger.debug("apif_refresh_league %s: team_stats error: %s", league_code, _e)
 
+    # ── 8c. Gemini Scout — match_insight (best-effort, solo elite/strong) ────
+    try:
+        from services.gemini_insight import get_match_insight
+        for p in picks_all:
+            if p.get("tier") in ("elite", "strong") and not p.get("match_insight"):
+                insight = get_match_insight(p)
+                if insight:
+                    p["match_insight"] = insight
+    except Exception as _e:
+        logger.debug("apif_refresh_league %s: gemini_insight error: %s", league_code, _e)
+
     # ── 9. Guardar caché ─────────────────────────────────────────────────────
     keep_days = getattr(settings, "daily_keep_days", None)
     picks_daily = _window_daily(picks_all, keep_days)

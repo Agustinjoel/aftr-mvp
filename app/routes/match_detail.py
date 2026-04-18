@@ -43,9 +43,30 @@ def _form_dot(result: str) -> str:
     return f'<span class="form-dot {cls}" title="{r}">{label}</span>'
 
 
+def _clean_opp_name(name: str | None) -> str:
+    """Oculta IDs internos como 'Equipo 351' — solo el fallback del pipeline."""
+    s = str(name or "").strip()
+    if s.startswith("Equipo ") and s[7:].isdigit():
+        return "—"
+    return s or "—"
+
+
 def _render_form_col(team_name: str, crest: str | None, stats: dict) -> str:
-    if not stats:
-        return f'<div class="md-form-col"><div class="md-form-name">{html_lib.escape(team_name)}</div><p class="muted">Sin datos</p></div>'
+    no_data = not stats or stats.get("n", 1) == 0
+
+    header = (
+        f'<div class="md-form-name">'
+        f'{_crest_img(crest, 20, "md-crest-sm")} {html_lib.escape(team_name)}'
+        f'</div>'
+    )
+
+    if no_data:
+        return (
+            f'<div class="md-form-col md-form-col--empty">'
+            f'{header}'
+            f'<p class="muted md-no-data">Sin datos de forma</p>'
+            f'</div>'
+        )
 
     form_str  = str(stats.get("form") or "")
     form_dots = "".join(_form_dot(r) for r in form_str.replace(" ", "").upper()[:5])
@@ -66,7 +87,7 @@ def _render_form_col(team_name: str, crest: str | None, stats: dict) -> str:
         res   = (r.get("res") or "").upper()
         gf_r  = r.get("gf")
         ga_r  = r.get("ga")
-        opp   = html_lib.escape(str(r.get("opp_name") or "—"))
+        opp   = html_lib.escape(_clean_opp_name(r.get("opp_name")))
         is_home = r.get("is_home", True)
         loc   = "L" if is_home else "V"
         score = f"{gf_r}-{ga_r}" if gf_r is not None and ga_r is not None else "—"
@@ -84,9 +105,7 @@ def _render_form_col(team_name: str, crest: str | None, stats: dict) -> str:
 
     return (
         f'<div class="md-form-col">'
-        f'<div class="md-form-name">'
-        f'{_crest_img(crest, 20, "md-crest-sm")} {html_lib.escape(team_name)}'
-        f'</div>'
+        f'{header}'
         f'<div class="md-form-dots">{form_dots}</div>'
         f'<div class="md-form-stats">'
         f'<div class="md-stat"><span class="md-stat-lbl">GF/PJ</span><span class="md-stat-val">{gf_str}</span></div>'
@@ -145,6 +164,54 @@ def _render_tab_pred(pick: dict) -> str:
             f'</div>'
         )
 
+    # ── Córners y tarjetas ────────────────────────────────────
+    home_ts   = pick.get("home_team_stats") or {}
+    away_ts   = pick.get("away_team_stats") or {}
+    home_name = html_lib.escape(str(pick.get("home") or "Local"))
+    away_name = html_lib.escape(str(pick.get("away") or "Visita"))
+
+    def _fmt_ts(v) -> str:
+        if v is None:
+            return "—"
+        try:
+            return f"{float(v):.1f}"
+        except (TypeError, ValueError):
+            return "—"
+
+    corners_html = ""
+    h_c = home_ts.get("corners_avg")
+    a_c = away_ts.get("corners_avg")
+    h_y = home_ts.get("yellow_avg")
+    a_y = away_ts.get("yellow_avg")
+    if any(v is not None for v in (h_c, a_c, h_y, a_y)):
+        corners_html = (
+            f'<div class="md-corners-block">'
+            f'<div class="md-corners-header">Stats / partido (últ. partidos)</div>'
+            f'<div class="md-corners-row">'
+            f'<span class="md-corners-lbl"></span>'
+            f'<span class="md-corners-col-hdr">🚩 Córners</span>'
+            f'<span class="md-corners-col-hdr">🟨 Amarillas</span>'
+            f'</div>'
+            f'<div class="md-corners-row">'
+            f'<span class="md-corners-lbl">{home_name}</span>'
+            f'<span class="md-corners-val">{_fmt_ts(h_c)}</span>'
+            f'<span class="md-corners-val">{_fmt_ts(h_y)}</span>'
+            f'</div>'
+            f'<div class="md-corners-row">'
+            f'<span class="md-corners-lbl">{away_name}</span>'
+            f'<span class="md-corners-val">{_fmt_ts(a_c)}</span>'
+            f'<span class="md-corners-val">{_fmt_ts(a_y)}</span>'
+            f'</div>'
+            f'</div>'
+        )
+
+    # ── Gemini Scout insight ──────────────────────────────────
+    insight_raw = str(pick.get("match_insight") or "").strip()
+    if insight_raw:
+        insight_html = f'<div class="md-insight">{html_lib.escape(insight_raw)}</div>'
+    else:
+        insight_html = '<p class="md-insight-placeholder muted">🔍 Análisis táctico disponible en breve.</p>'
+
     return (
         f'<div class="md-pred-hero">'
         f'<div class="md-pred-market">{market}</div>'
@@ -161,7 +228,9 @@ def _render_tab_pred(pick: dict) -> str:
         f'<div class="md-xg-block"><span class="md-xg-val">{xg_t_str}</span><span class="md-xg-lbl">xG Total</span></div>'
         f'<div class="md-xg-block"><span class="md-xg-val">{xg_a_str}</span><span class="md-xg-lbl">xG Visita</span></div>'
         f'</div>'
+        f'{corners_html}'
         f'<div class="md-probs">{prob_rows}</div>'
+        f'{insight_html}'
     )
 
 
@@ -169,9 +238,13 @@ def _render_tab_tabla(standings: list[dict], home_id: int | None, away_id: int |
     if not standings:
         return '<p class="muted" style="padding:12px 0">Tabla no disponible aún (se carga en el próximo refresh).</p>'
 
+    # Detectar cache stale con formato crudo de API-Football (sin team_name normalizado)
+    if "team_name" not in standings[0]:
+        return '<p class="muted" style="padding:12px 0">Clasificación actualizándose... (disponible en el próximo refresh).</p>'
+
     rows = ""
-    for s in standings:
-        pos     = s.get("position") or "—"
+    for i, s in enumerate(standings, 1):
+        pos     = s.get("position") or i
         tid     = s.get("team_id")
         name    = html_lib.escape(str(s.get("team_name") or "—"))
         crest   = s.get("team_crest")
@@ -297,16 +370,19 @@ def match_detail(league: str, match_id: int) -> HTMLResponse:
     picks     = read_json_with_fallback(f"daily_picks_{league}.json") or []
     standings = read_json_with_fallback(f"standings_{league}.json") or []
 
-    # Si no hay standings en cache, intentar fetchearlos on-demand y cachearlos
-    if not standings:
+    # Si no hay standings o el cache tiene formato crudo (sin team_name), re-fetchear
+    stale = standings and "team_name" not in standings[0]
+    if not standings or stale:
         try:
             from data.providers.api_football import get_standings_apif
             from data.cache import write_json
-            standings = get_standings_apif(league) or []
-            if standings:
+            fresh = get_standings_apif(league) or []
+            if fresh:
+                standings = fresh
                 write_json(f"standings_{league}.json", standings)
         except Exception:
-            standings = []
+            if stale:
+                standings = []  # mejor mostrar vacío que datos corruptos
 
     match = next(
         (m for m in matches if isinstance(m, dict) and _safe_int(m.get("match_id") or m.get("id")) == match_id),
