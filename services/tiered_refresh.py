@@ -292,10 +292,10 @@ def _refresh_live_from_api() -> int:
 
 
 def run_live_refresh_job() -> JobOutcome:
+    global _live_lock_ts
     out = JobOutcome(job="live")
     # Time-based live lock: expires after _LIVE_LOCK_MAX_SEC (5 min) to avoid eternal block
     with _live_lock_mu:
-        global _live_lock_ts
         now_ts = time.time()
         if _live_lock_ts > 0 and now_ts - _live_lock_ts < _LIVE_LOCK_MAX_SEC:
             out.skipped = True
@@ -396,7 +396,6 @@ def run_live_refresh_job() -> JobOutcome:
         logger.exception("AUTO REFRESH LIVE ERROR: %s | %s", e, _utc_iso())
         return out
     finally:
-        global _live_lock_ts
         with _live_lock_mu:
             _live_lock_ts = 0.0
         logger.info("AUTO REFRESH END | job=live | %s", _utc_iso())
