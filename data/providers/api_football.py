@@ -51,18 +51,33 @@ def _get(path: str, params: dict | None = None) -> list[Any]:
     """Wrapper GET que retorna response[] o [] en caso de error."""
     key = _api_key()
     if not key:
+        logger.warning("api_football: API_FOOTBALL_KEY no configurada — saltando llamada a %s", path)
         return []
     _throttle()
     url = f"{BASE_URL}{path}"
+    params_clean = params or {}
+    logger.info("api_football REQUEST: GET %s params=%s", url, params_clean)
     try:
-        resp = requests.get(url, headers=_headers(), params=params or {}, timeout=_HTTP_TIMEOUT)
+        resp = requests.get(url, headers=_headers(), params=params_clean, timeout=_HTTP_TIMEOUT)
+        try:
+            data = resp.json()
+        except Exception:
+            data = {}
+        n_results = len(data.get("response") or [])
+        errors    = data.get("errors") or {}
+        quota_used = (data.get("paging") or {}).get("current")
+        logger.info(
+            "api_football RESPONSE: status=%s url=%s results=%d errors=%s",
+            resp.status_code, resp.url, n_results, errors if errors else "none",
+        )
         if resp.status_code == 429:
-            logger.warning("api_football: rate limit hit (429)")
+            logger.warning("api_football: rate limit hit (429) — %s", url)
             return []
         if resp.status_code != 200:
-            logger.warning("api_football: HTTP %s for %s", resp.status_code, path)
+            logger.warning("api_football: HTTP %s for %s | body=%s", resp.status_code, path, str(data)[:300])
             return []
-        data = resp.json()
+        if errors:
+            logger.warning("api_football: API errors for %s: %s", path, errors)
         return data.get("response") or []
     except requests.RequestException as e:
         logger.warning("api_football: request error %s: %s", path, e)

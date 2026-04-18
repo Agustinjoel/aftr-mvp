@@ -264,6 +264,65 @@ def release_lock():
     return {"ok": True, "message": "refresh_running liberado"}
 
 
+@app.get("/api/admin/test-pick", tags=["status"])
+def test_pick():
+    """
+    Inserta un pick falso de prueba en Postgres y en el JSON cache.
+    Si aparece en la home → UI OK, solo falta el cable de la API.
+    """
+    import json as _json
+    from datetime import datetime, timezone, timedelta
+    from app.db import upsert_published_pick, get_all_published_picks
+    from app.ui_data import _home_cache, _home_cache_lock
+
+    tomorrow = (datetime.now(timezone.utc) + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    fake_pick = {
+        "match_id":    99999999,
+        "home":        "TEST United",
+        "away":        "DEBUG City",
+        "utcDate":     tomorrow,
+        "best_market": "HOME_WIN",
+        "best_prob":   0.62,
+        "best_fair":   1.75,
+        "edge":        0.085,
+        "confidence":  7,
+        "model_score": 68,
+        "result":      "PENDING",
+        "tier":        "strong",
+        "_league":     "PL",
+        "league":      "PL",
+        "_test":       True,
+    }
+    upsert_published_pick(fake_pick, "PL")
+
+    # También escribir en JSON cache para cobertura inmediata
+    try:
+        from data.cache import read_json, write_json
+        existing = read_json("daily_picks_PL.json")
+        picks_list = existing if isinstance(existing, list) else []
+        picks_list = [p for p in picks_list if isinstance(p, dict) and p.get("match_id") != 99999999]
+        picks_list.append(fake_pick)
+        write_json("daily_picks_PL.json", picks_list)
+    except Exception as _e:
+        logger.warning("test_pick: no se pudo escribir JSON: %s", _e)
+
+    # Invalidar home cache
+    with _home_cache_lock:
+        _home_cache.clear()
+
+    # Verificar que quedó en DB
+    all_db = get_all_published_picks()
+    in_db = any(p.get("match_id") == 99999999 for p in all_db)
+
+    return {
+        "ok": True,
+        "message": "Pick de prueba insertado. Recargá la home para verificar.",
+        "pick": fake_pick,
+        "in_db": in_db,
+        "total_db_picks": len(all_db),
+    }
+
+
 @app.get("/api/admin/maintenance", tags=["status"])
 def maintenance():
     """
