@@ -371,6 +371,64 @@ def get_published_pick(match_id: int) -> dict | None:
     return None
 
 
+def get_all_published_picks() -> list[dict]:
+    """Recupera TODOS los picks publicados de todas las ligas. Para la home page."""
+    try:
+        conn = get_conn()
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT league_code, pick_json FROM published_picks ORDER BY updated_at DESC")
+            rows = cur.fetchall()
+            out = []
+            for r in rows:
+                try:
+                    if r["pick_json"]:
+                        p = _json_mod.loads(r["pick_json"])
+                        if isinstance(p, dict):
+                            p.setdefault("_league", r["league_code"])
+                            out.append(p)
+                except Exception:
+                    pass
+            return out
+        finally:
+            put_conn(conn)
+    except Exception as e:
+        logger.debug("get_all_published_picks: %s", e)
+    return []
+
+
+def maintenance_reset(*, clear_picks: bool = True) -> dict:
+    """
+    Mantenimiento: limpia published_picks y resetea flags de lock en cache_meta.
+    Devuelve un dict con las acciones realizadas.
+    """
+    result: dict = {}
+    if clear_picks:
+        try:
+            conn = get_conn()
+            try:
+                cur = conn.cursor()
+                cur.execute("DELETE FROM published_picks")
+                result["picks_deleted"] = cur.rowcount
+                conn.commit()
+                logger.info("maintenance_reset: deleted %d published_picks", cur.rowcount)
+            finally:
+                put_conn(conn)
+        except Exception as e:
+            result["picks_error"] = str(e)
+            logger.warning("maintenance_reset picks error: %s", e)
+
+    # Reset cache_meta refresh_running
+    try:
+        from data.cache import release_refresh_running_meta
+        release_refresh_running_meta()
+        result["refresh_running_reset"] = True
+    except Exception as e:
+        result["refresh_running_error"] = str(e)
+
+    return result
+
+
 def get_published_picks_for_league(league_code: str) -> list[dict]:
     """Recupera todos los picks publicados de una liga. Devuelve lista de dicts."""
     try:

@@ -264,6 +264,53 @@ def release_lock():
     return {"ok": True, "message": "refresh_running liberado"}
 
 
+@app.get("/api/admin/maintenance", tags=["status"])
+def maintenance():
+    """
+    Mantenimiento de arranque limpio:
+    - Vacía published_picks en Postgres
+    - Resetea refresh_running y live lock
+    - Invalida home cache
+    """
+    from app.db import maintenance_reset
+    from services.tiered_refresh import reset_live_lock
+    result = maintenance_reset(clear_picks=True)
+    reset_live_lock()
+    result["live_lock_reset"] = True
+    # Invalidar home cache
+    try:
+        from app.ui_data import _home_cache, _home_cache_lock
+        with _home_cache_lock:
+            _home_cache.clear()
+        result["home_cache_cleared"] = True
+    except Exception:
+        pass
+    logger.info("MAINTENANCE: %s", result)
+    return {"ok": True, "result": result}
+
+
+@app.get("/api/admin/db-sync", tags=["status"])
+def db_sync_status():
+    """Muestra cuántos picks hay en Postgres por liga."""
+    try:
+        from app.db import get_conn, put_conn
+        conn = get_conn()
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT league_code, COUNT(*) as n FROM published_picks GROUP BY league_code ORDER BY n DESC"
+            )
+            rows = cur.fetchall()
+            by_league = {r["league_code"]: r["n"] for r in rows}
+            total = sum(by_league.values())
+        finally:
+            put_conn(conn)
+        logger.info("[DB-SYNC] db_sync_status: total=%d by_league=%s", total, by_league)
+        return {"total": total, "by_league": by_league}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 @app.get("/api/history-stats", tags=["status"])
 def api_history_stats():
     """Stats del historial de picks en disco (sin auth — solo conteos)."""

@@ -251,6 +251,42 @@ def fetch_fixtures_by_league(
                     prev, league_code, len(upcoming), len(finished),
                 )
 
+    # Fallback final: búsqueda por rango de fechas sin temporada.
+    # Si ambos intentos con season dan 0 resultados, pedimos directamente
+    # por fecha (today → today+days_upcoming) ignorando el año de temporada.
+    # Esto captura partidos que la API asigna a una temporada inesperada.
+    if not upcoming and not finished:
+        logger.info(
+            "api_football fetch_fixtures_by_league: %s still empty — trying date-only (no season param)",
+            league_code,
+        )
+        now   = datetime.now(timezone.utc)
+        today = now.strftime("%Y-%m-%d")
+        date_to_up    = (now + timedelta(days=days_upcoming)).strftime("%Y-%m-%d")
+        date_from_fin = (now - timedelta(days=days_finished)).strftime("%Y-%m-%d")
+
+        raw_up = _get("/fixtures", {"league": league_id, "from": today, "to": date_to_up})
+        for fx in raw_up:
+            n = normalize_apif_fixture(fx, league_code)
+            if n:
+                upcoming.append(n)
+
+        raw_fin = _get("/fixtures", {
+            "league": league_id,
+            "from": date_from_fin,
+            "to": today,
+            "status": "FT-AET-PEN-AWD",
+        })
+        for fx in raw_fin:
+            n = normalize_apif_fixture(fx, league_code)
+            if n and n.get("home_goals") is not None:
+                finished.append(n)
+
+        logger.info(
+            "api_football date-only fallback %s: up=%d fin=%d",
+            league_code, len(upcoming), len(finished),
+        )
+
     return upcoming, finished
 
 
