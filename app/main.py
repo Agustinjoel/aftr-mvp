@@ -324,16 +324,15 @@ def test_pick():
 
 
 @app.get("/api/admin/maintenance", tags=["status"])
-def maintenance():
+def maintenance(clear_picks: bool = False):
     """
-    Mantenimiento de arranque limpio:
-    - Vacía published_picks en Postgres
-    - Resetea refresh_running y live lock
-    - Invalida home cache
+    Mantenimiento: resetea locks y opcionalmente borra picks de Postgres.
+    ?clear_picks=true para vaciar published_picks (irreversible).
+    Sin parámetro: solo resetea locks, preserva todos los picks.
     """
     from app.db import maintenance_reset
     from services.tiered_refresh import reset_live_lock
-    result = maintenance_reset(clear_picks=True)
+    result = maintenance_reset(clear_picks=clear_picks)
     reset_live_lock()
     result["live_lock_reset"] = True
     # Invalidar home cache

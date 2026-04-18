@@ -397,7 +397,7 @@ def get_all_published_picks() -> list[dict]:
     return []
 
 
-def maintenance_reset(*, clear_picks: bool = True) -> dict:
+def maintenance_reset(*, clear_picks: bool = False) -> dict:
     """
     Mantenimiento: limpia published_picks y resetea flags de lock en cache_meta.
     Devuelve un dict con las acciones realizadas.

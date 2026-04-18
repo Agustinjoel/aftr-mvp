@@ -327,7 +327,21 @@ def _build_picks_from_matches(matches: list[dict], team_names: dict[int, str]) -
 
     # Filtro de valor: descartar mercados con fair_odds < 1.60
     # (búsqueda automática de alternativas: BTTS, Over 2.5, DC)
+    published = 0
+    skipped   = 0
     for p in picks:
         _apply_value_filter(p)
+        home = p.get("home") or "?"
+        away = p.get("away") or "?"
+        if p.get("best_market"):
+            logger.debug("[PICK] %s vs %s: market=%s fair=%.2f prob=%.2f",
+                         home, away, p.get("best_market"),
+                         float(p.get("best_fair") or 0), float(p.get("best_prob") or 0))
+            published += 1
+        else:
+            logger.info("[SKIP] %s vs %s: Sin mercado válido (best_fair < 1.60 para todos los candidatos)",
+                        home, away)
+            skipped += 1
 
+    logger.info("[BUILD-PICKS] total=%d publicables=%d sin_mercado=%d", len(picks), published, skipped)
     return picks

@@ -100,7 +100,20 @@ def apif_refresh_league(
             season_floor=season_floor,
         )
     except Exception as e:
-        logger.warning("apif_refresh_league %s: fetch error: %s", league_code, e)
+        logger.warning("[SKIP] %s: fetch error — %s", league_code, e)
+        return 0, 0
+
+    # Si la API no devuelve ningún fixture y ya tenemos picks guardados,
+    # preservar el estado actual en lugar de sobreescribir con vacío.
+    existing_picks_early = _read_json_list(f"daily_picks_{league_code}.json")
+    if not upcoming_raw and not finished_raw:
+        if existing_picks_early:
+            logger.info(
+                "[SKIP] %s: API devolvió 0 fixtures — preservando %d picks existentes",
+                league_code, len(existing_picks_early),
+            )
+            return 0, len(existing_picks_early)
+        logger.info("[SKIP] %s: API devolvió 0 fixtures y no hay picks en caché", league_code)
         return 0, 0
 
     # ── 2. Normalizar a formato AFTR ─────────────────────────────────────────
@@ -225,28 +238,53 @@ def apif_refresh_league(
     except Exception:
         _db_available = False
 
+    _published = 0
+    _skipped_no_market = 0
+    _skipped_no_odds = 0
+    _restored_from_cache = 0
+
     for p in picks_all:
         if (p.get("result") or "PENDING").upper() != "PENDING":
             continue
 
         mid = int(p.get("match_id") or p.get("id") or 0)
+        home = p.get("home") or "?"
+        away = p.get("away") or "?"
+        match_label = f"{home} vs {away}"
 
-        if p.get("best_market") and float(p.get("best_fair") or 0) >= 1.60:
-            # Pick válido: persistir en DB para sobrevivir reinicios
-            if _db_available:
-                try:
-                    upsert_published_pick(p, league_code)
-                except Exception:
-                    pass
+        has_market = bool(p.get("best_market"))
+        fair_ok    = float(p.get("best_fair") or 0) >= 1.60
+        has_odds   = p.get("odds_decimal") is not None  # odds reales de casas
+
+        if has_market and fair_ok:
+            if has_odds and (p.get("edge") or 0) <= 0:
+                logger.info("[SKIP] %s: edge <= 0 con odds reales — no publicar", match_label)
+                _skipped_no_odds += 1
+            else:
+                if _db_available:
+                    try:
+                        upsert_published_pick(p, league_code)
+                        _published += 1
+                    except Exception as _ue:
+                        logger.debug("upsert_published_pick %s: %s", mid, _ue)
+                if not has_odds:
+                    logger.debug("[PICK] %s: publicado sin odds de casa (modelo puro)", match_label)
             continue
 
         # Pick sin mercado válido: intentar restaurar desde JSON previo o DB
+        logger.info(
+            "[SKIP] %s: Sin mercado válido (market=%s fair=%.2f) — buscando en caché",
+            match_label, p.get("best_market"), float(p.get("best_fair") or 0),
+        )
+        _skipped_no_market += 1
+
         ex = _ex_by_id.get(mid)
         if ex and ex.get("best_market") and float(ex.get("best_fair") or 0) >= 1.60:
             for _k in ("best_market", "best_prob", "best_fair", "edge", "confidence",
                         "second_market", "second_prob"):
                 if ex.get(_k) is not None:
                     p[_k] = ex[_k]
+            _restored_from_cache += 1
         elif _db_available:
             db_pick = None
             try:
@@ -258,6 +296,12 @@ def apif_refresh_league(
                             "second_market", "second_prob"):
                     if db_pick.get(_k) is not None:
                         p[_k] = db_pick[_k]
+                _restored_from_cache += 1
+
+    logger.info(
+        "[PICKS-PUBLISH] %s: publicados=%d skip_no_market=%d skip_no_odds=%d restaurados_cache=%d",
+        league_code, _published, _skipped_no_market, _skipped_no_odds, _restored_from_cache,
+    )
 
     # ── 9. Guardar caché ─────────────────────────────────────────────────────
     keep_days = getattr(settings, "daily_keep_days", None)
