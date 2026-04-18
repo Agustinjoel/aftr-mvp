@@ -160,6 +160,29 @@ def init_db() -> None:
             updated_at     TEXT
         )
         """)
+        # current_bankroll: snapshot persistente, actualizado en cada liquidación
+        try:
+            cur.execute("ALTER TABLE bankroll_settings ADD COLUMN current_bankroll REAL")
+            conn.commit()
+        except Exception:
+            conn.rollback()
+
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS bankroll_movements (
+            id            SERIAL PRIMARY KEY,
+            user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            bet_id        INTEGER REFERENCES user_bets(id) ON DELETE SET NULL,
+            delta         NUMERIC(12,2) NOT NULL,
+            balance_after NUMERIC(12,2) NOT NULL,
+            movement_type TEXT NOT NULL,
+            note          TEXT,
+            created_at    TIMESTAMPTZ DEFAULT NOW()
+        )
+        """)
+        cur.execute(
+            "CREATE INDEX IF NOT EXISTS idx_bk_mvmt_user "
+            "ON bankroll_movements(user_id, created_at DESC)"
+        )
 
         # Indexes (IF NOT EXISTS is safe to re-run)
         # Tracker tables

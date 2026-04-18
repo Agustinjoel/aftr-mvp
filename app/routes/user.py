@@ -1174,7 +1174,11 @@ def user_available_teams(request: Request):
 
 @router.get("/bankroll")
 def user_bankroll_get(request: Request):
-    """Return bankroll settings + computed current balance. Premium only."""
+    """Return bankroll settings + current balance from DB movements. Premium only.
+
+    Query params opcionales para sugerencia de stake Kelly:
+      ?odds=2.10&aftr_prob=0.58
+    """
     uid, err = _require_user(request)
     if err:
         return err
@@ -1188,6 +1192,20 @@ def user_bankroll_get(request: Request):
         cur = conn.cursor()
         cur.execute("SELECT * FROM bankroll_settings WHERE user_id = %s", (uid,))
         settings_row = cur.fetchone()
+
+        # Movimientos reales desde tracker liquidado
+        cur.execute(
+            """SELECT delta, balance_after, movement_type,
+                      (created_at AT TIME ZONE 'UTC')::date AS day,
+                      created_at
+               FROM bankroll_movements
+               WHERE user_id = %s
+               ORDER BY created_at ASC""",
+            (uid,),
+        )
+        movements_rows = list(cur.fetchall())
+
+        # Fallback: user_picks liquidados (sistema legacy sin tracker)
         cur.execute(
             "SELECT result, edge FROM user_picks WHERE user_id = %s AND result IN ('WIN','LOSS','PUSH')",
             (uid,),
@@ -1196,30 +1214,75 @@ def user_bankroll_get(request: Request):
     finally:
         put_conn(conn)
 
-    initial = float(settings_row["initial_amount"]) if settings_row else 10000.0
-    stake   = float(settings_row["stake_per_unit"]) if settings_row else 1000.0
-    currency = settings_row["currency"] if settings_row else "ARS"
+    initial  = float(settings_row["initial_amount"])  if settings_row else 10000.0
+    stake_u  = float(settings_row["stake_per_unit"])  if settings_row else 1000.0
+    currency = settings_row["currency"]               if settings_row else "ARS"
 
-    # P&L: WIN=+1u, LOSS=-1u, PUSH=0u (multiplied by stake_per_unit)
-    pnl_units = 0.0
-    for row in resolved:
-        r = (row.get("result") or "").upper()
-        if r == "WIN":
-            pnl_units += 1.0
-        elif r == "LOSS":
-            pnl_units -= 1.0
-    pnl_money = round(pnl_units * stake, 2)
-    current = round(initial + pnl_money, 2)
+    # current_bankroll: snapshot en DB si existe; si no, calcula desde movimientos o legacy
+    if settings_row and settings_row.get("current_bankroll") is not None:
+        current = float(settings_row["current_bankroll"])
+    elif movements_rows:
+        current = float(movements_rows[-1]["balance_after"])
+    else:
+        # Legacy: +1u WIN, -1u LOSS × stake_per_unit fijo
+        pnl_units = sum(
+            1.0 if (r.get("result") or "").upper() == "WIN"
+            else -1.0 if (r.get("result") or "").upper() == "LOSS"
+            else 0.0
+            for r in resolved
+        )
+        current = round(initial + pnl_units * stake_u, 2)
+
+    total_pnl = round(current - initial, 2)
+
+    # Serializar movimientos para el gráfico Daily Profit
+    movements_data = []
+    for r in movements_rows:
+        day = r["day"]
+        day_str = str(day) if day else None
+        created = r["created_at"]
+        if hasattr(created, "isoformat"):
+            created = created.isoformat()
+        movements_data.append({
+            "date":    day_str,
+            "delta":   float(r["delta"]),
+            "balance": float(r["balance_after"]),
+            "type":    r["movement_type"],
+        })
+
+    # Sugerencia de stake Kelly (edge real desde core/odds.py)
+    suggested_stake = None
+    suggested_note  = None
+    try:
+        odds_qp      = float(request.query_params.get("odds", 0) or 0)
+        aftr_prob_qp = float(request.query_params.get("aftr_prob", 0) or 0)
+        if odds_qp > 1.0 and 0.0 < aftr_prob_qp < 1.0:
+            from core.odds import implied_probability, edge as calc_edge
+            imp = implied_probability(odds_qp)
+            e   = calc_edge(aftr_prob_qp, imp)
+            if e is not None and e > 0:
+                # Quarter-Kelly: f = (edge / (odds-1)) * 0.25
+                kelly_f = (e / (odds_qp - 1)) * 0.25
+                kelly_f = max(0.0, min(kelly_f, 0.15))  # cap 15% del bankroll
+                suggested_stake = round(current * kelly_f, 2)
+                suggested_note  = (
+                    f"Edge {e*100:.1f}% | Kelly×0.25 = {kelly_f*100:.1f}% del capital"
+                )
+    except Exception:
+        pass
 
     return JSONResponse({
-        "ok": True,
-        "initial_amount": initial,
-        "stake_per_unit": stake,
-        "currency": currency,
-        "current_bankroll": current,
-        "total_pnl": pnl_money,
+        "ok":                  True,
+        "initial_amount":      initial,
+        "stake_per_unit":      stake_u,
+        "currency":            currency,
+        "current_bankroll":    current,
+        "total_pnl":           total_pnl,
         "total_picks_settled": len(resolved),
-        "configured": settings_row is not None,
+        "configured":          settings_row is not None,
+        "movements":           movements_data,
+        "suggested_stake":     suggested_stake,
+        "suggested_note":      suggested_note,
     })
 
 
@@ -1248,16 +1311,32 @@ def user_bankroll_post(request: Request, payload: dict = Body(...)):
     conn = get_conn()
     try:
         cur = conn.cursor()
+        # Detectar si initial_amount cambió para resetear el balance snapshot
         cur.execute(
-            """INSERT INTO bankroll_settings (user_id, initial_amount, stake_per_unit, currency, created_at, updated_at)
-               VALUES (%s, %s, %s, %s, %s, %s)
-               ON CONFLICT (user_id) DO UPDATE SET
-                 initial_amount = EXCLUDED.initial_amount,
-                 stake_per_unit = EXCLUDED.stake_per_unit,
-                 currency       = EXCLUDED.currency,
-                 updated_at     = EXCLUDED.updated_at""",
-            (uid, initial, stake, currency, now_str, now_str),
+            "SELECT initial_amount FROM bankroll_settings WHERE user_id = %s", (uid,)
         )
+        existing = cur.fetchone()
+        initial_changed = (
+            existing is None or abs(float(existing["initial_amount"]) - initial) > 0.01
+        )
+
+        cur.execute(
+            """INSERT INTO bankroll_settings
+                   (user_id, initial_amount, stake_per_unit, currency, current_bankroll, created_at, updated_at)
+               VALUES (%s, %s, %s, %s, %s, %s, %s)
+               ON CONFLICT (user_id) DO UPDATE SET
+                 initial_amount  = EXCLUDED.initial_amount,
+                 stake_per_unit  = EXCLUDED.stake_per_unit,
+                 currency        = EXCLUDED.currency,
+                 current_bankroll = CASE WHEN bankroll_settings.initial_amount <> EXCLUDED.initial_amount
+                                        THEN EXCLUDED.initial_amount  -- reset al nuevo capital base
+                                        ELSE bankroll_settings.current_bankroll END,
+                 updated_at      = EXCLUDED.updated_at""",
+            (uid, initial, stake, currency, initial, now_str, now_str),
+        )
+        # Si cambió el capital base, borrar los movimientos viejos (curva comienza de nuevo)
+        if initial_changed and existing is not None:
+            cur.execute("DELETE FROM bankroll_movements WHERE user_id = %s", (uid,))
         conn.commit()
     finally:
         put_conn(conn)

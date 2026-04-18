@@ -233,6 +233,64 @@ def _recompute_odds(cur, bet_id: int) -> float:
     return round(total, 3)
 
 
+def _settle_bankroll(user_id: int, bet_id: int, bet_status: str,
+                     stake: float, payout: float) -> None:
+    """
+    Actualiza current_bankroll y registra movimiento en bankroll_movements.
+    WIN: delta = payout - stake  (ganancia neta, usando cuota real del tracker)
+    LOSS: delta = -stake
+    Solo actúa si el usuario tiene bankroll_settings configurado.
+    """
+    if bet_status == "WON":
+        delta = round(payout - stake, 2)
+        mtype = "WIN"
+    elif bet_status == "LOST":
+        delta = round(-stake, 2)
+        mtype = "LOSS"
+    else:
+        return
+
+    from app.db import get_conn, put_conn
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT initial_amount, current_bankroll FROM bankroll_settings WHERE user_id = %s",
+            (user_id,),
+        )
+        row = cur.fetchone()
+        if not row:
+            return  # usuario sin bankroll configurado
+
+        base = (
+            float(row["current_bankroll"])
+            if row["current_bankroll"] is not None
+            else float(row["initial_amount"])
+        )
+        new_balance = round(base + delta, 2)
+
+        cur.execute(
+            "UPDATE bankroll_settings SET current_bankroll = %s, updated_at = NOW() WHERE user_id = %s",
+            (new_balance, user_id),
+        )
+        cur.execute(
+            """INSERT INTO bankroll_movements
+                   (user_id, bet_id, delta, balance_after, movement_type)
+               VALUES (%s, %s, %s, %s, %s)""",
+            (user_id, bet_id, delta, new_balance, mtype),
+        )
+        conn.commit()
+        logger.info(
+            "bankroll %s uid=%s bet=%s delta=%+.2f balance=%.2f",
+            mtype, user_id, bet_id, delta, new_balance,
+        )
+    except Exception as _e:
+        conn.rollback()
+        logger.warning("bankroll settle error: %s", _e)
+    finally:
+        put_conn(conn)
+
+
 def auto_settle_tracker_legs() -> int:
     """
     Resuelve bet_legs pendientes cuyos partidos ya terminaron.
@@ -374,7 +432,22 @@ def auto_settle_tracker_legs() -> int:
     finally:
         put_conn(conn)
 
-    # Enviar pushes fuera del bloque de DB
+    # Actualizar bankroll + enviar pushes fuera del bloque de DB
+    for item in _push_queue:
+        try:
+            uid = item.get("user_id")
+            if not uid:
+                continue
+            _settle_bankroll(
+                user_id=uid,
+                bet_id=item["_bet_id"],
+                bet_status=item["new_bet_status"],
+                stake=item["stake"],
+                payout=item["payout"],
+            )
+        except Exception as _bk_err:
+            logger.warning("bankroll update error: %s", _bk_err)
+
     for item in _push_queue:
         try:
             from services.push_notifications import send_to_user
