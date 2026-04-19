@@ -260,69 +260,33 @@ def _load_all_leagues_data(
     picks_by_league:  dict[str, list[dict]] = {}
     matches_by_league: dict[str, list[dict]] = {}
 
-    # ── Fuente primaria: Postgres ─────────────────────────────────────────────
-    # Cargamos todos los picks publicados desde DB. Luego mergeamos con JSON
-    # (JSON aporta picks recién calculados que aún no están en DB, y los datos
-    # de partidos/scores que no persisten en published_picks).
-    db_picks_by_league: dict[str, dict[int, dict]] = {}  # code → {match_id → pick}
+    # ── Fuente única: Postgres published_picks (próximos 7 días) ─────────────
+    db_picks_by_league: dict[str, list[dict]] = {}
     try:
-        from app.db import get_all_published_picks as _db_get_all
-        _db_available = True
-        _db_all = _db_get_all()
-        _db_total = len(_db_all)
+        from app.db import get_upcoming_published_picks as _db_get_upcoming
+        _db_all = _db_get_upcoming(days_ahead=7)
         for _p in _db_all:
             _c = (_p.get("_league") or _p.get("league") or "").strip()
-            _mid = _safe_int(_p.get("match_id") or _p.get("id"))
-            if _c and _mid is not None:
-                db_picks_by_league.setdefault(_c, {})[_mid] = _p
-        logger.info("[DB-SYNC] Cargados %d picks desde Postgres | ligas=%s",
-                    _db_total, list(db_picks_by_league.keys()))
+            if _c:
+                db_picks_by_league.setdefault(_c, []).append(_p)
+        logger.info("[DB-SYNC] Cargados %d picks (próx. 7d) desde Postgres | ligas=%s",
+                    len(_db_all), list(db_picks_by_league.keys()))
     except Exception as _db_err:
-        _db_available = False
-        _db_total = 0
         logger.warning("[DB-SYNC] Error cargando desde Postgres: %s", _db_err)
 
     for code in codes:
+        # Partidos: solo JSON (contiene scores en vivo y datos de fixture)
         raw_matches = read_json_with_fallback(f"daily_matches_{code}.json") or []
-        raw_picks   = read_json_with_fallback(f"daily_picks_{code}.json")   or []
         if not isinstance(raw_matches, list):
             raw_matches = []
-        if not isinstance(raw_picks, list):
-            raw_picks = []
-
         matches = [m for m in raw_matches if isinstance(m, dict)]
 
-        # Merge picks: empezar con DB como base, sobreescribir/agregar con JSON
-        # (JSON es más fresco: tiene scores en vivo y picks recalculados)
-        merged_picks_by_id: dict[int, dict] = {}
+        picks = db_picks_by_league.get(code) or []
+        if not picks:
+            logger.info("load_all_leagues: %s — sin picks en Postgres (próx. 7d)", code)
 
-        # 1. Base: picks de Postgres
-        for mid, dp in (db_picks_by_league.get(code) or {}).items():
-            p = dict(dp)
-            p["_league"] = code
-            merged_picks_by_id[mid] = p
-
-        # 2. Overlay: picks del JSON (más frescos, prevalecen)
-        for jp in raw_picks:
-            if not isinstance(jp, dict):
-                continue
-            mid = _safe_int(jp.get("match_id") or jp.get("id"))
-            if mid is None:
-                continue
-            p = dict(jp)
-            p["_league"] = code
-            merged_picks_by_id[mid] = p
-
-        # Si el JSON estaba vacío y DB tampoco tenía nada, loguear
-        if not merged_picks_by_id:
-            logger.info("load_all_leagues: %s — sin picks en JSON ni en Postgres", code)
-
-        picks = list(merged_picks_by_id.values())
-
-        json_count = len([p for p in raw_picks if isinstance(p, dict)])
-        db_count   = len(db_picks_by_league.get(code) or {})
-        logger.info("load_all_leagues: %s raw_matches=%s json_picks=%s db_picks=%s merged=%s",
-                    code, len(matches), json_count, db_count, len(picks))
+        logger.info("load_all_leagues: %s raw_matches=%s db_picks=%s",
+                    code, len(matches), len(picks))
 
         for m in matches:
             mid = _safe_int(m.get("match_id") or m.get("id"))

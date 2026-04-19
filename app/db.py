@@ -285,6 +285,16 @@ def init_db() -> None:
         cur.execute(
             "CREATE INDEX IF NOT EXISTS idx_pp_league ON published_picks(league_code)"
         )
+        cur.execute(
+            "CREATE INDEX IF NOT EXISTS idx_pp_utc_date ON published_picks(utc_date)"
+        )
+
+        # Limpiar picks de test (match_id=99999999)
+        try:
+            cur.execute("DELETE FROM published_picks WHERE match_id = 99999999")
+            conn.commit()
+        except Exception:
+            conn.rollback()
 
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_user_picks_user_id ON user_picks(user_id)")
@@ -308,6 +318,7 @@ def init_db() -> None:
 # ---------------------------------------------------------------------------
 
 import json as _json_mod
+from datetime import datetime, timezone, timedelta
 
 
 def upsert_published_pick(pick: dict, league_code: str) -> None:
@@ -394,6 +405,47 @@ def get_all_published_picks() -> list[dict]:
             put_conn(conn)
     except Exception as e:
         logger.debug("get_all_published_picks: %s", e)
+    return []
+
+
+def get_upcoming_published_picks(days_ahead: int = 7) -> list[dict]:
+    """
+    Picks publicados con utc_date en los próximos days_ahead días.
+    Excluye el pick de test (match_id=99999999).
+    """
+    try:
+        now_utc = datetime.now(timezone.utc)
+        date_from = now_utc.strftime("%Y-%m-%d")
+        date_to   = (now_utc + timedelta(days=days_ahead)).strftime("%Y-%m-%d")
+        conn = get_conn()
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                """
+                SELECT league_code, pick_json FROM published_picks
+                WHERE match_id != 99999999
+                  AND utc_date >= %s
+                  AND utc_date <  %s
+                ORDER BY utc_date ASC
+                """,
+                (date_from, date_to),
+            )
+            rows = cur.fetchall()
+            out = []
+            for r in rows:
+                try:
+                    if r["pick_json"]:
+                        p = _json_mod.loads(r["pick_json"])
+                        if isinstance(p, dict):
+                            p.setdefault("_league", r["league_code"])
+                            out.append(p)
+                except Exception:
+                    pass
+            return out
+        finally:
+            put_conn(conn)
+    except Exception as e:
+        logger.debug("get_upcoming_published_picks: %s", e)
     return []
 
 
