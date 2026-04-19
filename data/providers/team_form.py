@@ -63,12 +63,28 @@ def get_team_recent_matches(
 
     try:
         from data.providers.api_football import _get
+        # API-Football v3 requires 'season'. Use y-1 for European style (active in April);
+        # fallback to y if empty (American leagues).
+        now_dt = _now_utc()
+        _y = now_dt.year
+        _season_primary = _y - 1 if now_dt.month < 7 else _y
+        _season_fallback = _y if _season_primary == _y - 1 else _y - 1
+
         items = _get("/fixtures", {
             "team": team_id,
+            "season": _season_primary,
             "from": date_from,
             "to": date_to,
             "status": "FT-AET-PEN",
         })
+        if not items:
+            items = _get("/fixtures", {
+                "team": team_id,
+                "season": _season_fallback,
+                "from": date_from,
+                "to": date_to,
+                "status": "FT-AET-PEN",
+            })
     except Exception:
         if cached_matches:
             return cached_matches[:limit]
