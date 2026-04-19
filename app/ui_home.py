@@ -765,6 +765,7 @@ def home_page(request: Request) -> str:
             <span>{odds_line_text}</span>
           </div>
           <div class="pick-actions" style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+            <a href="https://refbanners.com/I?tag=d_5458956m_91411c_&site=5458956&ad=91411" target="_blank" rel="noopener" class="btn-bet-1xbet">🎯 Apostar @ {html_lib.escape(_pick_odds_display_value(p))}</a>
             <button type="button" class="btn-favorite-pick pill"
               data-pick-id="{pick_id_attr}" data-market="{market_attr}" data-aftr-score="{score}"
               data-tier="{html_lib.escape(tier)}" data-edge="{edge_attr}"
@@ -781,6 +782,31 @@ def home_page(request: Request) -> str:
               data-league="{html_lib.escape(league_code)}"
               onclick="openShareCard(this)"
               style="padding:6px 10px; font-size:0.85rem; background:transparent; border-color:rgba(255,255,255,.15); color:rgba(255,255,255,.5);">↗ Compartir</button>
+          </div>
+        </div>""")
+
+    # Blur paywall: show picks beyond FREE_PICKS_LIMIT as blurred teasers for free users
+    if not user_premium and all_picks_pool and len(all_picks_pool) > FREE_PICKS_LIMIT:
+        blurred_pool = all_picks_pool[FREE_PICKS_LIMIT:]
+        for p_blur in blurred_pool[:3]:  # show at most 3 blurred teasers
+            _bh = html_lib.escape(str(p_blur.get("home") or "—"))
+            _ba = html_lib.escape(str(p_blur.get("away") or "—"))
+            _bm = html_lib.escape(str(p_blur.get("best_market") or "—"))
+            _bl = p_blur.get("_league") or "—"
+            _bln = html_lib.escape(settings.leagues.get(_bl, _bl))
+            top_pick_cards.append(f"""
+        <div class="pick-blur-wrapper">
+          <div class="pick-blur-inner">
+            <div class="card home-pick-card" style="border-left:4px solid #9E9E9E;">
+              <div class="home-pick-league">{_bln}</div>
+              <div class="home-pick-match" style="font-size:15px;font-weight:700;margin:6px 0;">{_bh} vs {_ba}</div>
+              <div class="home-pick-market">{_bm}</div>
+              <div class="home-pick-meta"><span>AFTR ??</span><span>Ventaja +??.?%</span></div>
+            </div>
+          </div>
+          <div class="pick-blur-overlay">
+            <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.75);">🔒 Pick bloqueado</span>
+            <button class="btn-unlock-ad" onclick="alert('Ver publicidad para desbloquear — próximamente')">Ver publicidad para desbloquear</button>
           </div>
         </div>""")
 

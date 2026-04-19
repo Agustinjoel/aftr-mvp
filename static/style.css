@@ -1804,7 +1804,7 @@ body{
   .home-picks-grid{ grid-template-columns: 1fr; }
 }
 .home-pick-card{
-  padding: 18px;
+  padding: 12px;
 }
 
 /* Home — En vivo ahora */
@@ -1884,10 +1884,16 @@ body{
   gap: 8px;
 }
 .live-grid{
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 14px;
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  gap: 12px;
+  padding-bottom: 10px;
+  scrollbar-width: none;
 }
+.live-grid::-webkit-scrollbar{ display: none; }
 /* Pulsing dot */
 .live-dot{
   display: inline-block;
@@ -1914,6 +1920,10 @@ body{
 }
 /* Card */
 .live-card{
+  min-width: 240px;
+  max-width: 270px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
   padding: 14px 16px;
   border-radius: 16px !important;
   border-color: rgba(239,68,68,.25) !important;
@@ -2063,8 +2073,8 @@ body{
   flex-wrap: wrap;
 }
 .home-pick-team-logo{
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -2157,6 +2167,65 @@ body{
   font-weight: 700;
   text-shadow: 0 0 18px rgba(34,197,94,0.5), 0 0 6px rgba(34,197,94,0.3);
 }
+
+/* 1xBet apostar button */
+.btn-bet-1xbet{
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 1px solid rgba(255,175,0,.55);
+  background: linear-gradient(135deg, rgba(255,145,0,.22), rgba(255,80,0,.18));
+  color: #fbbf24;
+  white-space: nowrap;
+  transition: background .18s, border-color .18s;
+}
+.btn-bet-1xbet:hover{
+  background: linear-gradient(135deg, rgba(255,145,0,.38), rgba(255,80,0,.3));
+  border-color: rgba(255,175,0,.85);
+  color: #fde68a;
+}
+
+/* Blur paywall */
+.pick-blur-wrapper{
+  position: relative;
+}
+.pick-blur-inner{
+  filter: blur(5px);
+  pointer-events: none;
+  user-select: none;
+}
+.pick-blur-overlay{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(10,14,26,.45);
+  border-radius: 14px;
+  z-index: 2;
+}
+.btn-unlock-ad{
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  border-radius: 10px;
+  border: 1px solid rgba(99,179,237,.5);
+  background: rgba(56,189,248,.18);
+  color: #7dd3fc;
+  cursor: pointer;
+  transition: background .18s;
+}
+.btn-unlock-ad:hover{
+  background: rgba(56,189,248,.32);
+}
+
 .home-empty{ padding: 28px; text-align: center; }
 
 /* =========================
