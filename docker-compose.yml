@@ -1,45 +1,93 @@
 services:
+
+  # ─────────────────────────────────────────────
+  # PostgreSQL 18 — base de datos principal
+  # ─────────────────────────────────────────────
   db:
-    image: postgres:16-alpine
+    image: postgres:18
     restart: unless-stopped
     environment:
-      POSTGRES_DB: aftr
-      POSTGRES_USER: aftr
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aftrdev}
+      POSTGRES_DB:       aftr
+      POSTGRES_USER:     aftr
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}   # obligatorio en .env
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data         # datos de Postgres NUNCA se borran
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"                   # solo accesible desde el VPS (no público)
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U aftr -d aftr"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 10
 
-  app:
+  # ─────────────────────────────────────────────
+  # App AFTR — FastAPI + uvicorn
+  # ─────────────────────────────────────────────
+  web:
     build: .
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql://aftr:${POSTGRES_PASSWORD:-aftrdev}@db:5432/aftr
-      AFTR_CACHE_DIR: /data/cache
-      AFTR_SECRET_KEY: ${AFTR_SECRET_KEY:-dev-secret-change-me}
-      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8000}
-      AUTO_REFRESH: ${AUTO_REFRESH:-true}
-      FOOTBALL_DATA_API_KEY: ${FOOTBALL_DATA_API_KEY:-}
-      API_SPORTS_KEY: ${API_SPORTS_KEY:-}
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
-      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
-      STRIPE_PRICE_ID: ${STRIPE_PRICE_ID:-}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
-    volumes:
-      - appdata:/data
     ports:
       - "8000:8000"
+    volumes:
+      - appdata:/data                           # JSON cache y archivos en vivo NUNCA se borran
+    environment:
+      # ── Base de datos ──────────────────────────────────────────────────────
+      DATABASE_URL:       postgresql://aftr:${POSTGRES_PASSWORD}@db:5432/aftr
 
+      # ── Cache / datos ──────────────────────────────────────────────────────
+      AFTR_CACHE_DIR:     /data/cache
+
+      # ── Seguridad ──────────────────────────────────────────────────────────
+      AFTR_SECRET_KEY:    ${AFTR_SECRET_KEY}
+      COOKIE_SECURE:      ${COOKIE_SECURE:-true}
+      APP_BASE_URL:       ${APP_BASE_URL}       # ej: https://aftrapp.online
+
+      # ── Refresh automático ─────────────────────────────────────────────────
+      AUTO_REFRESH:                      ${AUTO_REFRESH:-true}
+      AUTO_REFRESH_LEAGUES_PER_CYCLE:    ${AUTO_REFRESH_LEAGUES_PER_CYCLE:-18}
+      AUTO_REFRESH_FINISHED_DAYS:        ${AUTO_REFRESH_FINISHED_DAYS:-3}
+      REFRESH_SKIP_IF_FRESH_MIN:         ${REFRESH_SKIP_IF_FRESH_MIN:-30}
+
+      # ── API de datos (al menos una es obligatoria) ─────────────────────────
+      API_FOOTBALL_KEY:   ${API_FOOTBALL_KEY}
+      API_SPORTS_KEY:     ${API_SPORTS_KEY:-}
+
+      # ── MercadoPago ────────────────────────────────────────────────────────
+      MP_ACCESS_TOKEN:        ${MP_ACCESS_TOKEN:-}
+      MP_PLAN_ID:             ${MP_PLAN_ID:-}
+      MP_SUBSCRIPTION_AMOUNT: ${MP_SUBSCRIPTION_AMOUNT:-4999}
+      MP_WEBHOOK_SECRET:      ${MP_WEBHOOK_SECRET:-}
+
+      # ── Email (Resend vía SMTP) ────────────────────────────────────────────
+      SMTP_SERVER:   ${SMTP_SERVER:-}
+      SMTP_PORT:     ${SMTP_PORT:-587}
+      SMTP_USER:     ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM:    ${EMAIL_FROM:-}
+
+      # ── Push notifications (VAPID) ─────────────────────────────────────────
+      VAPID_PUBLIC_KEY:  ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_EMAIL:       ${VAPID_EMAIL:-}
+
+      # ── Gemini (match insights) ────────────────────────────────────────────
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+
+      # ── Stripe (legacy / desactivado) ─────────────────────────────────────
+      STRIPE_SECRET_KEY:      ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_PRICE_ID:        ${STRIPE_PRICE_ID:-}
+      STRIPE_WEBHOOK_SECRET:  ${STRIPE_WEBHOOK_SECRET:-}
+
+      # ── Logs ───────────────────────────────────────────────────────────────
+      AFTR_LOG_LEVEL: ${AFTR_LOG_LEVEL:-INFO}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Volúmenes nombrados — persisten entre reinicios y recreaciones del contenedor
+# ─────────────────────────────────────────────────────────────────────────────
 volumes:
-  pgdata:
-  appdata:
+  pgdata:    # datos PostgreSQL
+  appdata:   # /data — JSON cache de picks, partidos y odds
